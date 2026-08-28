@@ -13,12 +13,13 @@ type Doc = {
 
 const DOC_TYPES = [
   { value: "rfp_file", label: "The agency's RFP file" },
-  { value: "insurance_certificate", label: "Insurance certificate" },
-  { value: "w9", label: "W-9" },
   { value: "other", label: "Other" },
 ];
 
-export function BidDocuments({ bidId, orgId }: { bidId: string; orgId: string }) {
+// Replaces the old BidDocuments.tsx — same idea, but works against
+// submissions/submission_documents instead of the old bids/bid_documents
+// tables, which no longer exist after the schema reset.
+export function SubmissionDocuments({ submissionId }: { submissionId: string }) {
   const [docs, setDocs] = useState<Doc[]>([]);
   const [docType, setDocType] = useState("rfp_file");
   const [uploading, setUploading] = useState(false);
@@ -27,12 +28,12 @@ export function BidDocuments({ bidId, orgId }: { bidId: string; orgId: string })
 
   useEffect(() => {
     supabase
-      .from("bid_documents")
+      .from("submission_documents")
       .select("id, document_type, file_name, file_url, created_at")
-      .eq("bid_id", bidId)
+      .eq("submission_id", submissionId)
       .order("created_at", { ascending: false })
       .then(({ data }) => setDocs(data ?? []));
-  }, [bidId]);
+  }, [submissionId]);
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -40,7 +41,7 @@ export function BidDocuments({ bidId, orgId }: { bidId: string; orgId: string })
     setUploading(true);
     setError(null);
 
-    const path = `${orgId}/${bidId}/${Date.now()}-${file.name}`;
+    const path = `${submissionId}/${Date.now()}-${file.name}`;
 
     const { error: uploadError } = await supabase.storage
       .from("rfp-documents")
@@ -57,10 +58,9 @@ export function BidDocuments({ bidId, orgId }: { bidId: string; orgId: string })
     } = supabase.storage.from("rfp-documents").getPublicUrl(path);
 
     const { data: newDoc, error: insertError } = await supabase
-      .from("bid_documents")
+      .from("submission_documents")
       .insert({
-        bid_id: bidId,
-        org_id: orgId,
+        submission_id: submissionId,
         document_type: docType,
         file_name: file.name,
         file_url: publicUrl,
@@ -80,7 +80,7 @@ export function BidDocuments({ bidId, orgId }: { bidId: string; orgId: string })
   }
 
   async function handleDelete(id: string) {
-    await supabase.from("bid_documents").delete().eq("id", id);
+    await supabase.from("submission_documents").delete().eq("id", id);
     setDocs((d) => d.filter((doc) => doc.id !== id));
   }
 
@@ -115,7 +115,7 @@ export function BidDocuments({ bidId, orgId }: { bidId: string; orgId: string })
               key={doc.id}
               className="flex items-center justify-between px-3 py-2 rounded border border-outline-variant bg-surface"
             >
-              
+              <a
                 href={doc.file_url}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -123,9 +123,6 @@ export function BidDocuments({ bidId, orgId }: { bidId: string; orgId: string })
               >
                 {doc.file_name}
               </a>
-              <span className="text-label-md text-on-surface-variant">
-                {DOC_TYPES.find((t) => t.value === doc.document_type)?.label}
-              </span>
               <button
                 onClick={() => handleDelete(doc.id)}
                 className="text-error text-label-md hover:underline"
