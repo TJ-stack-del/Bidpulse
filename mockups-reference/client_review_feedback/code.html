@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BidPulse - Stage 5 Client Review</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed": "#6ffbbe",
+                        "error": "#ba1a1a",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "inverse-primary": "#bec6e0",
+                        "on-tertiary-fixed": "#002113",
+                        "surface-dim": "#cbdbf5",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "on-secondary-container": "#fefcff",
+                        "on-background": "#0b1c30",
+                        "on-primary-container": "#7c839b",
+                        "on-tertiary-container": "#009668",
+                        "surface-bright": "#f8f9ff",
+                        "surface-variant": "#d3e4fe",
+                        "on-secondary-fixed-variant": "#003ea8",
+                        "tertiary-container": "#002113",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "on-secondary": "#ffffff",
+                        "outline-variant": "#c6c6cd",
+                        "primary": "#000000",
+                        "outline": "#76777d",
+                        "surface-tint": "#565e74",
+                        "on-surface-variant": "#45464d",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface": "#f8f9ff",
+                        "on-error-container": "#93000a",
+                        "primary-container": "#131b2e",
+                        "secondary-fixed": "#dbe1ff",
+                        "on-secondary-fixed": "#00174b",
+                        "on-primary-fixed": "#131b2e",
+                        "inverse-surface": "#213145",
+                        "surface-container-low": "#eff4ff",
+                        "background": "#f8f9ff",
+                        "surface-container": "#e5eeff",
+                        "on-surface": "#0b1c30",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#dae2fd",
+                        "surface-container-high": "#dce9ff",
+                        "surface-container-highest": "#d3e4fe",
+                        "tertiary": "#000000",
+                        "on-tertiary": "#ffffff",
+                        "primary-fixed-dim": "#bec6e0",
+                        "error-container": "#ffdad6",
+                        "secondary": "#0051d5",
+                        "secondary-container": "#316bf3",
+                        "on-primary": "#ffffff",
+                        "on-error": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "gutter": "24px",
+                        "margin-desktop": "48px",
+                        "margin-mobile": "16px",
+                        "container-max": "1440px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Geist"],
+                        "body-lg": ["Inter"],
+                        "code-sm": ["Geist"],
+                        "headline-lg": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "body-md": ["Inter"],
+                        "title-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "code-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "title-lg": ["18px", { "lineHeight": "28px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen pb-24 md:pb-0 pt-16">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-margin-mobile h-16 bg-surface border-b border-outline-variant">
+<div class="flex items-center gap-4">
+<button aria-label="Go back" class="text-secondary hover:bg-surface-container-high transition-colors p-2 rounded-full active:scale-95 duration-100">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">security</span>
+<span class="font-headline-md text-headline-md font-bold text-on-surface">BidPulse</span>
+</div>
+</div>
+<div class="flex items-center">
+<img alt="User profile photo" class="w-8 h-8 rounded-full border border-outline-variant object-cover" data-alt="A professional headshot of a corporate user, clean bright lighting, facing forward, high contrast, minimalist background. Deep navy and slate color tones. Suitable for an avatar in a secure, industrial-grade enterprise application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAG7L4-wcUtgCf9G1NXf7WnuAXvm8WXH0dyKPUSNr0cZrwHcGzRVS6sqKgqrsmOTY-h-yhUKdTPzh_kzkTcEWTYe95fYyYlYhMRf8Zytf7IXecuyxRGhtLvVA0YfB8OWd6E8rR0alZSAc5Ke9iFv9vIflK5NxdmAQNjPwVm292vKMyPWwSVZHXGmKdOwU-Z3kTeaumitdGAThN27-4ryf1WzaZruvVaPV-d70bw9WJBklJ8UC5dI2EK3A"/>
+</div>
+</header>
+<main class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-6">
+<!-- Header Section -->
+<div class="mb-8">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-2">Client Review &amp; Feedback</h1>
+<p class="font-label-md text-label-md text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">folder_open</span>
+                RFP-2024-DOD-9821A • Cyber Defense Infrastructure
+            </p>
+</div>
+<!-- Progress Indicator -->
+<div class="mb-10">
+<div class="flex items-center justify-between relative">
+<div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-surface-container-high -z-10 rounded-full"></div>
+<!-- Active step indicator bar -->
+<div class="absolute left-0 top-1/2 -translate-y-1/2 w-[80%] h-1 bg-tertiary-container -z-10 rounded-full"></div>
+<!-- Steps 1-4 (Completed) -->
+<div class="w-6 h-6 rounded-full bg-tertiary-container border-2 border-surface flex items-center justify-center">
+<span class="material-symbols-outlined text-[12px] text-on-secondary" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<div class="w-6 h-6 rounded-full bg-tertiary-container border-2 border-surface flex items-center justify-center">
+<span class="material-symbols-outlined text-[12px] text-on-secondary" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<div class="w-6 h-6 rounded-full bg-tertiary-container border-2 border-surface flex items-center justify-center">
+<span class="material-symbols-outlined text-[12px] text-on-secondary" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<div class="w-6 h-6 rounded-full bg-tertiary-container border-2 border-surface flex items-center justify-center">
+<span class="material-symbols-outlined text-[12px] text-on-secondary" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<!-- Step 5 (Active) -->
+<div class="w-8 h-8 rounded-full bg-secondary border-4 border-surface shadow-[0_0_0_2px_#316bf3] flex items-center justify-center relative">
+<span class="font-label-md text-label-md text-on-secondary">5</span>
+<span class="absolute -bottom-6 whitespace-nowrap font-label-md text-label-md text-secondary">Review</span>
+</div>
+<!-- Step 6 (Future) -->
+<div class="w-6 h-6 rounded-full bg-surface-container-lowest border-2 border-outline-variant flex items-center justify-center">
+<span class="font-label-md text-[10px] text-outline">6</span>
+</div>
+</div>
+</div>
+<!-- Deliverables for Review -->
+<section class="mb-8">
+<h2 class="font-title-lg text-title-lg text-on-surface mb-4">Deliverables for Review</h2>
+<div class="flex flex-col gap-unit border border-outline-variant rounded-xl bg-surface-container-lowest p-2">
+<!-- Item 1 -->
+<div class="flex items-center justify-between p-3 bg-surface hover:bg-surface-container-low transition-colors rounded-lg border border-transparent hover:border-outline-variant">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">description</span>
+<div>
+<p class="font-body-md text-body-md text-on-surface font-semibold">Capability Statement</p>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-[10px] mt-1">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span> Awaiting Approval
+                            </span>
+</div>
+</div>
+<button class="px-3 py-1.5 rounded-lg border border-outline-variant text-secondary font-label-md text-label-md hover:bg-surface-container transition-colors">View</button>
+</div>
+<!-- Item 2 -->
+<div class="flex items-center justify-between p-3 bg-surface hover:bg-surface-container-low transition-colors rounded-lg border border-transparent hover:border-outline-variant">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">table</span>
+<div>
+<p class="font-body-md text-body-md text-on-surface font-semibold">Compliance Matrix</p>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#e6f4ea] text-[#137333] font-label-md text-[10px] mt-1">
+<span class="w-1.5 h-1.5 rounded-full bg-[#137333]"></span> Approved
+                            </span>
+</div>
+</div>
+<button class="px-3 py-1.5 rounded-lg border border-outline-variant text-secondary font-label-md text-label-md hover:bg-surface-container transition-colors">View</button>
+</div>
+<!-- Item 3 -->
+<div class="flex items-center justify-between p-3 bg-surface hover:bg-surface-container-low transition-colors rounded-lg border border-transparent hover:border-outline-variant">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">subject</span>
+<div>
+<p class="font-body-md text-body-md text-on-surface font-semibold">Technical Narrative</p>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-[10px] mt-1">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span> Awaiting Approval
+                            </span>
+</div>
+</div>
+<button class="px-3 py-1.5 rounded-lg border border-outline-variant text-secondary font-label-md text-label-md hover:bg-surface-container transition-colors">View</button>
+</div>
+</div>
+</section>
+<!-- Feedback Log -->
+<section class="mb-8">
+<h2 class="font-title-lg text-title-lg text-on-surface mb-4">Feedback Log</h2>
+<div class="border border-outline-variant rounded-xl bg-surface-container-lowest p-4">
+<!-- Existing Comment -->
+<div class="flex gap-3 mb-6 pb-6 border-b border-outline-variant">
+<div class="w-8 h-8 rounded-full bg-secondary-fixed flex items-center justify-center flex-shrink-0">
+<span class="font-label-md text-label-md text-on-secondary-fixed">JD</span>
+</div>
+<div>
+<div class="flex items-baseline gap-2 mb-1">
+<span class="font-label-md text-label-md font-semibold text-on-surface">Jane Doe</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">Today, 09:42 AM</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">The Technical Narrative needs more emphasis on our specific SOC2 compliance measures in section 4.2. Otherwise, looks solid.</p>
+</div>
+</div>
+<!-- Add New Feedback -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-2" for="feedback-input">Add New Feedback</label>
+<textarea class="w-full rounded-lg border border-outline-variant bg-surface p-3 font-body-md text-body-md text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all resize-none" id="feedback-input" placeholder="Enter your comments here..." rows="3"></textarea>
+<div class="flex justify-end mt-3">
+<button class="px-4 py-2 bg-secondary text-on-secondary rounded-lg font-label-md text-label-md hover:bg-secondary-container transition-colors active:shadow-inner border border-transparent shadow-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">send</span>
+                            Post Comment
+                        </button>
+</div>
+</div>
+</div>
+</section>
+<!-- Final Approval Section -->
+<section class="mb-8">
+<div class="bg-surface-container-low border-l-4 border-tertiary-container rounded-r-xl p-4 flex items-start gap-3">
+<div class="mt-0.5">
+<input class="w-5 h-5 rounded border-outline-variant text-secondary focus:ring-secondary bg-surface cursor-pointer" id="approval-check" onchange="document.getElementById('approve-btn').disabled = !this.checked; document.getElementById('approve-btn').classList.toggle('opacity-50'); document.getElementById('approve-btn').classList.toggle('cursor-not-allowed');" type="checkbox"/>
+</div>
+<label class="font-body-md text-body-md text-on-surface cursor-pointer" for="approval-check">
+<strong class="block mb-1">Final Approval</strong>
+                    I have reviewed all deliverables and approve the package for final submission execution.
+                </label>
+</div>
+</section>
+<!-- Primary Action -->
+<div class="mt-8 mb-6">
+<button class="w-full py-4 bg-primary-container text-on-primary rounded-xl font-label-md text-label-md text-[14px] uppercase tracking-wider hover:bg-primary transition-colors opacity-50 cursor-not-allowed border border-transparent inset-shadow-sm flex justify-center items-center gap-2" disabled="" id="approve-btn">
+                Approve &amp; Proceed to Stage 6
+                <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 flex justify-around items-center px-margin-mobile py-2 bg-surface border-t border-outline-variant">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-secondary active:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-label-md mt-1 text-[10px]">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary font-bold bg-surface-container-highest rounded-xl px-3 py-1 active:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">gavel</span>
+<span class="font-label-md text-label-md mt-1 text-[10px]">Bids</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-secondary active:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined">description</span>
+<span class="font-label-md text-label-md mt-1 text-[10px]">My RFPs</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-secondary active:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="font-label-md text-label-md mt-1 text-[10px]">Profile</span>
+</a>
+</nav>
+</body></html>

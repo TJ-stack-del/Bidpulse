@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BidPulse - Client Review Portal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Geist:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "inverse-surface": "#213145",
+                        "on-background": "#0b1c30",
+                        "secondary-container": "#316bf3",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "on-primary-container": "#7c839b",
+                        "background": "#f8f9ff",
+                        "tertiary-fixed": "#6ffbbe",
+                        "outline": "#76777d",
+                        "on-tertiary-container": "#009668",
+                        "on-primary-fixed": "#131b2e",
+                        "outline-variant": "#c6c6cd",
+                        "primary-fixed-dim": "#bec6e0",
+                        "surface": "#f8f9ff",
+                        "on-secondary-fixed": "#00174b",
+                        "on-secondary-container": "#fefcff",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "error": "#ba1a1a",
+                        "secondary": "#0051d5",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "on-secondary": "#ffffff",
+                        "primary-container": "#131b2e",
+                        "tertiary": "#000000",
+                        "surface-variant": "#d3e4fe",
+                        "surface-bright": "#f8f9ff",
+                        "surface-container-low": "#eff4ff",
+                        "tertiary-container": "#002113",
+                        "surface-dim": "#cbdbf5",
+                        "surface-container-highest": "#d3e4fe",
+                        "inverse-on-surface": "#eaf1ff",
+                        "primary": "#000000",
+                        "surface-container-high": "#dce9ff",
+                        "inverse-primary": "#bec6e0",
+                        "surface-container": "#e5eeff",
+                        "error-container": "#ffdad6",
+                        "on-error-container": "#93000a",
+                        "primary-fixed": "#dae2fd",
+                        "secondary-fixed": "#dbe1ff",
+                        "surface-tint": "#565e74",
+                        "on-surface-variant": "#45464d",
+                        "on-primary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed-variant": "#003ea8",
+                        "on-tertiary-fixed": "#002113",
+                        "on-surface": "#0b1c30"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "container-max": "1440px",
+                        "unit": "4px",
+                        "margin-desktop": "48px",
+                        "gutter": "24px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "label-md": ["Geist"],
+                        "code-sm": ["Geist"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "title-lg": ["18px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "code-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #F8FAFC; /* Light mode default */
+        }
+        /* Custom scrollbar for data density */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background antialiased flex h-screen overflow-hidden">
+<!-- Top Navigation (Shell suppressed as per intent rule for Client Portal context, but leaving structural shell for consistency in a "workspace" feel, mapping to 'Active RFPs') -->
+<div class="flex-1 flex flex-col h-full overflow-hidden">
+<!-- Workspace Header -->
+<header class="bg-surface-container-lowest border-b border-outline-variant px-margin-desktop py-6 shrink-0 z-10 flex justify-between items-center shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
+<div class="flex items-center gap-4">
+<div class="h-10 w-10 bg-primary-container text-on-primary rounded flex items-center justify-center font-headline-md font-bold">
+                    B
+                </div>
+<div>
+<h1 class="font-headline-md text-headline-md text-on-surface">BidPulse Workspace</h1>
+<div class="flex items-center gap-2 mt-1">
+<span class="font-code-sm text-code-sm text-on-surface-variant bg-surface-variant px-2 py-0.5 rounded">RFP-2024-DOD-LOG</span>
+<span class="font-label-md text-label-md text-secondary border border-secondary px-2 py-0.5 rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">pending_actions</span>
+                            Final Review Stage
+                        </span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="text-right mr-4 hidden md:block">
+<p class="font-body-sm text-on-surface font-medium">Acme Corp Logistics Div</p>
+<p class="font-label-md text-label-md text-on-surface-variant">Reviewer Mode</p>
+</div>
+<button class="h-10 w-10 rounded border border-outline-variant flex items-center justify-center text-on-surface hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined">help</span>
+</button>
+<div class="h-10 w-10 rounded-full bg-surface-variant flex items-center justify-center text-on-surface-variant border border-outline-variant overflow-hidden">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A professional headshot of a corporate reviewer in a modern, well-lit office setting. The lighting is soft and neutral, conveying trust and competence. High-resolution, professional portrait photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDh6mEqHrmCG2lJwC3yt9Wu97UwdMykn95KpDRUcx8F-ZJApGnl7qXwQEHA6TCL7zPDvNc05Kx2eT1hHNPmcC2iPnXO_YNumkumZBSotPcw3ZaNB8ZL2og7cPH8KYN0YUQeUepoq9--w06t65W3jhjRcJ8zJAeuq5_Zy-iCbT1pgPLG8zMm5cwySfkgv3n6_012AAkV4bKnbkCDQ7oD-WDpkgDfAajJZmY7NE_3IpdAQzqeYyvVtxhnmg"/>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto p-margin-desktop grid grid-cols-1 xl:grid-cols-12 gap-gutter max-w-container-max mx-auto w-full">
+<!-- Left Column: Artifacts (8 cols) -->
+<div class="xl:col-span-8 flex flex-col gap-6">
+<div class="mb-2">
+<h2 class="font-title-lg text-title-lg text-on-surface">Submission Artifacts</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Review and approve all volumes prior to final submission authorization.</p>
+</div>
+<!-- Artifact Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Card 1: Tech Volume -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-5 hover:bg-surface-container-low transition-colors group relative overflow-hidden flex flex-col">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-outline-variant transition-colors group-hover:bg-secondary"></div>
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded bg-surface-variant flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined">description</span>
+</div>
+<div>
+<h3 class="font-title-lg text-[16px] leading-tight font-semibold text-on-surface">Technical Volume</h3>
+<p class="font-label-md text-label-md text-on-surface-variant mt-0.5">Vol_I_Tech_vFinal.pdf</p>
+</div>
+</div>
+<span class="font-label-md text-label-md bg-surface-variant text-on-surface-variant px-2 py-1 rounded">Pending</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between text-sm border-b border-outline-variant py-2">
+<span class="font-body-md text-on-surface-variant">Pages</span>
+<span class="font-code-sm text-on-surface font-medium">124</span>
+</div>
+<div class="flex justify-between text-sm py-2">
+<span class="font-body-md text-on-surface-variant">Last Updated</span>
+<span class="font-code-sm text-on-surface font-medium">Today, 09:41 AM</span>
+</div>
+</div>
+<div class="flex gap-3 mt-4 pt-4 border-t border-outline-variant">
+<button class="flex-1 bg-surface border border-outline-variant hover:border-secondary hover:text-secondary text-on-surface font-label-md text-label-md py-2 rounded transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+                                View
+                            </button>
+<button class="flex-1 bg-surface border border-outline-variant hover:bg-surface-variant text-on-surface font-label-md text-label-md py-2 rounded transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">thumb_up</span>
+                                Approve
+                            </button>
+</div>
+</div>
+<!-- Card 2: Mgmt Volume -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-5 hover:bg-surface-container-low transition-colors group relative overflow-hidden flex flex-col">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-on-tertiary-container transition-colors"></div>
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded bg-surface-variant flex items-center justify-center text-on-tertiary-container">
+<span class="material-symbols-outlined">assignment</span>
+</div>
+<div>
+<h3 class="font-title-lg text-[16px] leading-tight font-semibold text-on-surface">Management Volume</h3>
+<p class="font-label-md text-label-md text-on-surface-variant mt-0.5">Vol_II_Mgmt_vFinal.pdf</p>
+</div>
+</div>
+<span class="font-label-md text-label-md bg-tertiary-fixed-dim/20 text-on-tertiary-fixed-variant px-2 py-1 rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                                Approved
+                            </span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between text-sm border-b border-outline-variant py-2">
+<span class="font-body-md text-on-surface-variant">Pages</span>
+<span class="font-code-sm text-on-surface font-medium">86</span>
+</div>
+<div class="flex justify-between text-sm py-2">
+<span class="font-body-md text-on-surface-variant">Last Updated</span>
+<span class="font-code-sm text-on-surface font-medium">Yesterday, 14:30 PM</span>
+</div>
+</div>
+<div class="flex gap-3 mt-4 pt-4 border-t border-outline-variant">
+<button class="flex-1 bg-surface border border-outline-variant hover:border-secondary hover:text-secondary text-on-surface font-label-md text-label-md py-2 rounded transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+                                View
+                            </button>
+<button class="flex-1 bg-surface-variant text-on-surface-variant cursor-not-allowed font-label-md text-label-md py-2 rounded flex items-center justify-center gap-2" disabled="">
+                                Approved
+                            </button>
+</div>
+</div>
+<!-- Card 3: Pricing -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-5 hover:bg-surface-container-low transition-colors group relative overflow-hidden flex flex-col md:col-span-2 lg:col-span-1">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-outline-variant transition-colors group-hover:bg-secondary"></div>
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded bg-surface-variant flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined">request_quote</span>
+</div>
+<div>
+<h3 class="font-title-lg text-[16px] leading-tight font-semibold text-on-surface">Pricing Schedule</h3>
+<p class="font-label-md text-label-md text-on-surface-variant mt-0.5">Vol_III_Pricing_vFinal.xlsx</p>
+</div>
+</div>
+<span class="font-label-md text-label-md bg-surface-variant text-on-surface-variant px-2 py-1 rounded">Pending</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between text-sm border-b border-outline-variant py-2">
+<span class="font-body-md text-on-surface-variant">Total Value</span>
+<span class="font-code-sm text-on-surface font-medium">$42,500,000.00</span>
+</div>
+<div class="flex justify-between text-sm py-2">
+<span class="font-body-md text-on-surface-variant">Last Updated</span>
+<span class="font-code-sm text-on-surface font-medium">Today, 10:15 AM</span>
+</div>
+</div>
+<div class="flex gap-3 mt-4 pt-4 border-t border-outline-variant">
+<button class="flex-1 bg-surface border border-outline-variant hover:border-secondary hover:text-secondary text-on-surface font-label-md text-label-md py-2 rounded transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+                                View
+                            </button>
+<button class="flex-1 bg-surface border border-outline-variant hover:bg-surface-variant text-on-surface font-label-md text-label-md py-2 rounded transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">thumb_up</span>
+                                Approve
+                            </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Feedback & Workflow (4 cols) -->
+<div class="xl:col-span-4 flex flex-col gap-6">
+<!-- Feedback Panel -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg flex flex-col h-[400px]">
+<div class="p-4 border-b border-outline-variant bg-surface flex justify-between items-center rounded-t-lg">
+<h3 class="font-title-lg text-[16px] text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant">forum</span>
+                            Reviewer Feedback
+                        </h3>
+</div>
+<div class="flex-1 overflow-y-auto p-4 flex flex-col gap-4 bg-surface-bright">
+<!-- Sample Comment -->
+<div class="flex gap-3">
+<div class="h-8 w-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-bold text-xs shrink-0">
+                                BP
+                            </div>
+<div class="bg-surface p-3 rounded-lg border border-outline-variant text-sm shadow-sm">
+<div class="flex justify-between items-baseline mb-1">
+<span class="font-label-md font-bold text-on-surface">BidPulse Team</span>
+<span class="font-code-sm text-on-surface-variant text-[10px]">10:45 AM</span>
+</div>
+<p class="font-body-md text-on-surface-variant text-[13px] leading-relaxed">Please review the updated executive summary in the Technical Volume. We've incorporated your notes from yesterday's sync.</p>
+</div>
+</div>
+</div>
+<div class="p-4 border-t border-outline-variant bg-surface rounded-b-lg">
+<textarea class="w-full bg-surface-container-lowest border border-outline-variant rounded p-3 font-body-md text-sm text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none resize-none h-24" placeholder="Log comments or request specific changes here..."></textarea>
+<div class="flex justify-end mt-2">
+<button class="bg-secondary text-on-secondary font-label-md text-label-md px-4 py-2 rounded hover:bg-on-secondary-fixed-variant transition-colors flex items-center gap-2">
+                                Post Comment
+                                <span class="material-symbols-outlined text-[16px]">send</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Final Authorization Card -->
+<div class="bg-surface-container-low border border-outline-variant rounded-lg p-6 relative overflow-hidden">
+<!-- Subtle industrial texture/pattern via CSS -->
+<div class="absolute inset-0 opacity-5" style="background-image: repeating-linear-gradient(45deg, #0b1c30 0, #0b1c30 1px, transparent 0, transparent 50%); background-size: 8px 8px;"></div>
+<div class="relative z-10 flex flex-col items-center text-center">
+<div class="h-12 w-12 rounded-full bg-surface border border-outline-variant flex items-center justify-center text-on-surface-variant mb-4">
+<span class="material-symbols-outlined text-[24px]">verified_user</span>
+</div>
+<h3 class="font-title-lg text-on-surface mb-2">Authorize Submission</h3>
+<p class="font-body-md text-on-surface-variant text-sm mb-6">All volumes must be marked as 'Approved' before you can sign off and authorize BidPulse to submit on your behalf.</p>
+<!-- Progress indicator -->
+<div class="w-full mb-6">
+<div class="flex justify-between text-xs font-code-sm mb-1 text-on-surface-variant">
+<span>Approval Status</span>
+<span>1 / 3 Approved</span>
+</div>
+<div class="w-full h-2 bg-surface-variant rounded-full overflow-hidden flex">
+<div class="bg-on-tertiary-container w-1/3 h-full"></div>
+</div>
+</div>
+<button class="w-full bg-surface-variant text-on-surface-variant font-label-md text-label-md py-3 rounded cursor-not-allowed border border-outline-variant flex items-center justify-center gap-2" disabled="">
+<span class="material-symbols-outlined">lock</span>
+                            Sign-Off &amp; Authorize
+                        </button>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

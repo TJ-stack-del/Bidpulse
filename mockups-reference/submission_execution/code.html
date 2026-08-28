@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BidPulse - Submission Execution</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-tertiary": "#ffffff",
+                        "background": "#f8f9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-fixed-variant": "#003ea8",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "primary-fixed-dim": "#bec6e0",
+                        "secondary-container": "#316bf3",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-error": "#ffffff",
+                        "inverse-primary": "#bec6e0",
+                        "on-primary-container": "#7c839b",
+                        "on-tertiary-container": "#009668",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "on-secondary-container": "#fefcff",
+                        "surface-bright": "#f8f9ff",
+                        "on-tertiary-fixed": "#002113",
+                        "inverse-surface": "#213145",
+                        "primary-container": "#131b2e",
+                        "error-container": "#ffdad6",
+                        "error": "#ba1a1a",
+                        "surface-container": "#e5eeff",
+                        "surface-dim": "#cbdbf5",
+                        "primary-fixed": "#dae2fd",
+                        "outline-variant": "#c6c6cd",
+                        "surface-tint": "#565e74",
+                        "on-primary": "#ffffff",
+                        "surface-variant": "#d3e4fe",
+                        "inverse-on-surface": "#eaf1ff",
+                        "tertiary": "#000000",
+                        "tertiary-fixed": "#6ffbbe",
+                        "outline": "#76777d",
+                        "primary": "#000000",
+                        "on-surface-variant": "#45464d",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "on-secondary-fixed": "#00174b",
+                        "secondary-fixed": "#dbe1ff",
+                        "secondary": "#0051d5",
+                        "on-primary-fixed": "#131b2e",
+                        "tertiary-container": "#002113",
+                        "on-background": "#0b1c30",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "on-secondary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "surface-container-low": "#eff4ff",
+                        "surface": "#f8f9ff",
+                        "surface-container-high": "#dce9ff",
+                        "on-surface": "#0b1c30"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    spacing: {
+                        "gutter": "24px",
+                        "margin-mobile": "16px",
+                        "container-max": "1440px",
+                        "margin-desktop": "48px",
+                        "unit": "4px"
+                    },
+                    fontFamily: {
+                        "label-md": ["Geist"],
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "code-sm": ["Geist"],
+                        "headline-lg": ["Inter"],
+                        "title-lg": ["Inter"]
+                    },
+                    fontSize: {
+                        "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.02em", fontWeight: "500" }],
+                        "headline-lg-mobile": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+                        "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+                        "display-lg": ["48px", { lineHeight: "56px", letterSpacing: "-0.02em", fontWeight: "700" }],
+                        "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+                        "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+                        "code-sm": ["12px", { lineHeight: "16px", fontWeight: "400" }],
+                        "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.01em", fontWeight: "600" }],
+                        "title-lg": ["18px", { lineHeight: "28px", fontWeight: "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Geist:wght@400;500&display=swap');
+        
+        body {
+            background-color: #F8FAFC; /* Enforcing specific background from style guidance */
+        }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            border: 1px solid #E2E8F0;
+        }
+        
+        .pulse-border {
+            animation: pulse-border 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse-border {
+            0%, 100% { border-color: rgba(49, 107, 243, 1); box-shadow: 0 0 0 0 rgba(49, 107, 243, 0.4); }
+            50% { border-color: rgba(49, 107, 243, 0.5); box-shadow: 0 0 0 4px rgba(49, 107, 243, 0); }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface antialiased font-body-md pb-24 md:pb-0 pt-16">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-margin-mobile h-16 bg-surface dark:bg-primary-container border-b border-outline-variant dark:border-on-primary-fixed-variant">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-secondary dark:text-secondary-fixed">security</span>
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface dark:text-on-primary tracking-tight">BidPulse</h1>
+</div>
+<!-- Desktop Nav -->
+<nav class="hidden md:flex gap-8">
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-high dark:hover:bg-primary-fixed-variant transition-colors px-3 py-2 rounded-lg flex items-center gap-2" href="#">
+<span class="material-symbols-outlined text-lg">dashboard</span> Dashboard
+            </a>
+<a class="font-label-md text-label-md text-secondary dark:text-secondary-fixed hover:bg-surface-container-high dark:hover:bg-primary-fixed-variant transition-colors px-3 py-2 rounded-lg flex items-center gap-2 bg-surface-container-highest dark:bg-on-primary-fixed-variant" href="#">
+<span class="material-symbols-outlined text-lg">gavel</span> Bids
+            </a>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-high dark:hover:bg-primary-fixed-variant transition-colors px-3 py-2 rounded-lg flex items-center gap-2" href="#">
+<span class="material-symbols-outlined text-lg">description</span> My RFPs
+            </a>
+</nav>
+<div class="flex items-center gap-4">
+<img class="w-8 h-8 rounded-full object-cover border border-outline-variant" data-alt="A small, professional headshot of a corporate user with a neutral background, suitable for an avatar in a clean, modern UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAb1QxtIk7P03fYYLdcS5F4v7Mn0EDBeFiJ6fB1L06eBEwox_aLpZgMOni4dCDv9Scv45xtOtYEALQBO_I2JyliMVobjACMNcOIDOMYwqteYUs1-IlI2f9EZXt-F3KS6stMlycYwvXyOB4Dg8pkgxMWIdWK0jyH-lg0A8H5W5bAQbIcWt1y5ZRDQZVhgD8xpgXI21ZNxUjhADnBNEnNijwjOs6iC4Zk84R0RYqXRvUrBMV3o9-6UQqMaQ"/>
+</div>
+</header>
+<main class="max-w-[1440px] mx-auto px-margin-mobile md:px-margin-desktop py-8 grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- Page Header & Tracker -->
+<div class="col-span-1 lg:col-span-12 mb-4">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+<div>
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary mb-2">Proposal Execution</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">RFP-2024-DOD-9821A • Cyber Defense Infrastructure</p>
+</div>
+<div class="flex items-center gap-2 bg-surface-container-lowest border border-outline-variant px-4 py-2 rounded-lg">
+<span class="w-3 h-3 rounded-full bg-on-tertiary-container"></span>
+<span class="font-label-md text-label-md text-on-tertiary-container uppercase tracking-widest">System Ready</span>
+</div>
+</div>
+<!-- Stage Tracker -->
+<div class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg p-6 mb-8 overflow-x-auto">
+<div class="min-w-[600px] flex justify-between items-center relative">
+<!-- Connecting Lines -->
+<div class="absolute top-1/2 left-[5%] right-[5%] h-[2px] bg-outline-variant -translate-y-1/2 z-0"></div>
+<div class="absolute top-1/2 left-[5%] w-[90%] h-[2px] bg-on-tertiary-container -translate-y-1/2 z-0"></div>
+<!-- Stages -->
+<div class="relative z-10 flex flex-col items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-on-tertiary-container text-white flex items-center justify-center border-4 border-surface-container-lowest">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface">Intake</span>
+</div>
+<div class="relative z-10 flex flex-col items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-on-tertiary-container text-white flex items-center justify-center border-4 border-surface-container-lowest">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface">Analysis</span>
+</div>
+<div class="relative z-10 flex flex-col items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-on-tertiary-container text-white flex items-center justify-center border-4 border-surface-container-lowest">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface">Drafting</span>
+</div>
+<div class="relative z-10 flex flex-col items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-on-tertiary-container text-white flex items-center justify-center border-4 border-surface-container-lowest">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface">Review</span>
+</div>
+<div class="relative z-10 flex flex-col items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-on-tertiary-container text-white flex items-center justify-center border-4 border-surface-container-lowest">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface">Approval</span>
+</div>
+<div class="relative z-10 flex flex-col items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-surface-container-lowest text-secondary flex items-center justify-center border-4 pulse-border border-secondary">
+<span class="material-symbols-outlined text-sm">lock</span>
+</div>
+<span class="font-label-md text-label-md text-secondary font-bold">Execution</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Left Column: Details & Evidence -->
+<div class="col-span-1 lg:col-span-8 flex flex-col gap-6">
+<!-- Seal & Finalize Area -->
+<section class="glass-panel rounded-xl p-8 border-l-4 border-l-on-tertiary-container">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-on-tertiary-container text-2xl">verified_user</span>
+<h3 class="font-title-lg text-title-lg text-primary">Cryptographic Seal &amp; Summary</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+<div class="bg-surface-container-low p-4 rounded-lg border border-outline-variant">
+<span class="font-label-md text-label-md text-on-surface-variant block mb-1 uppercase tracking-wider">Total Payload</span>
+<span class="font-body-lg text-body-lg text-on-surface font-semibold flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">folder_zip</span> 14.2 MB (3 Files)
+                        </span>
+</div>
+<div class="bg-surface-container-low p-4 rounded-lg border border-outline-variant">
+<span class="font-label-md text-label-md text-on-surface-variant block mb-1 uppercase tracking-wider">Seal Timestamp</span>
+<span class="font-body-lg text-body-lg text-on-surface font-semibold flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">schedule</span> 2024-10-24 14:32:01 UTC
+                        </span>
+</div>
+</div>
+<div class="bg-[#F1F5F9] p-4 rounded-lg border border-outline-variant font-code-sm text-code-sm text-on-surface overflow-x-auto">
+<div class="mb-2 text-on-surface-variant flex items-center justify-between">
+<span>SHA-256 Checksum (Final Package)</span>
+<button class="hover:text-secondary transition-colors"><span class="material-symbols-outlined text-sm">content_copy</span></button>
+</div>
+<div class="text-secondary break-all">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</div>
+</div>
+</section>
+<!-- Submission Evidence Input -->
+<section class="bg-surface-container-lowest rounded-xl p-8 border border-outline-variant">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-secondary text-2xl">upload_file</span>
+<h3 class="font-title-lg text-title-lg text-primary">Submission Evidence</h3>
+</div>
+<form class="flex flex-col gap-6">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Portal / Method</label>
+<select class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-colors appearance-none">
+<option>SAM.gov</option>
+<option>PIEE</option>
+<option>Direct Email</option>
+<option>Other Portal</option>
+</select>
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Confirmation ID / Tracking #</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-colors" placeholder="e.g., SAM-992-XYZ" type="text"/>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Upload Receipt / Proof</label>
+<div class="w-full border-2 border-dashed border-outline-variant rounded-lg p-8 flex flex-col items-center justify-center bg-surface-container-low hover:bg-surface-container-high transition-colors cursor-pointer group">
+<span class="material-symbols-outlined text-4xl text-on-surface-variant group-hover:text-secondary mb-3 transition-colors">cloud_upload</span>
+<span class="font-body-md text-body-md text-on-surface font-semibold">Drag &amp; Drop receipt here</span>
+<span class="font-label-md text-label-md text-on-surface-variant mt-1">or click to browse (PDF, PNG, JPG)</span>
+</div>
+</div>
+</form>
+</section>
+</div>
+<!-- Right Column: Action & Legal -->
+<div class="col-span-1 lg:col-span-4 flex flex-col gap-6">
+<section class="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant shadow-sm sticky top-24">
+<h3 class="font-title-lg text-title-lg text-primary mb-4 border-b border-outline-variant pb-4">Final Authorization</h3>
+<div class="bg-error-container/20 border border-error-container rounded-lg p-4 mb-6">
+<p class="font-label-md text-label-md text-on-surface-variant leading-relaxed">
+                        By proceeding, you authorize the formal submission of this proposal. This action will lock the package and record an immutable audit trail.
+                    </p>
+</div>
+<label class="flex items-start gap-3 p-4 border border-outline-variant rounded-lg bg-surface hover:bg-surface-container-high transition-colors cursor-pointer mb-6">
+<input class="mt-1 w-4 h-4 text-secondary border-outline-variant rounded focus:ring-secondary cursor-pointer" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface leading-tight">
+                        I confirm this submission is final, accurate, and complies fully with all solicitation instructions and legal requirements.
+                    </span>
+</label>
+<button class="w-full bg-primary-container text-on-primary py-4 px-6 rounded-lg font-title-lg text-title-lg flex items-center justify-center gap-3 hover:bg-inverse-surface transition-colors active:scale-[0.98] shadow-sm inset-ring-1 inset-ring-black/10">
+<span class="material-symbols-outlined">lock_person</span>
+                    Execute Submission
+                </button>
+</section>
+<!-- Optional Archive Preview -->
+<section class="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant">
+<h4 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-4">Post-Execution Readiness</h4>
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between p-3 bg-surface rounded border border-outline-variant/50">
+<span class="font-body-md text-body-md text-on-surface flex items-center gap-2"><span class="material-symbols-outlined text-sm text-outline">history</span> Audit Log Ready</span>
+<span class="font-label-md text-label-md text-on-surface-variant">Pending</span>
+</div>
+<div class="flex items-center justify-between p-3 bg-surface rounded border border-outline-variant/50">
+<span class="font-body-md text-body-md text-on-surface flex items-center gap-2"><span class="material-symbols-outlined text-sm text-outline">inventory_2</span> Archive Generation</span>
+<span class="font-label-md text-label-md text-on-surface-variant">Pending</span>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 flex justify-around items-center px-margin-mobile py-2 bg-surface dark:bg-primary-container border-t border-outline-variant dark:border-on-primary-fixed-variant">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-primary-container hover:text-secondary dark:hover:text-secondary-fixed active:opacity-80 transition-opacity w-16" href="#">
+<span class="material-symbols-outlined mb-1">dashboard</span>
+<span class="font-label-md text-label-md text-[10px]">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed font-bold bg-surface-container-highest dark:bg-on-primary-fixed-variant rounded-xl px-3 py-1 active:opacity-80 transition-opacity w-16" href="#">
+<span class="material-symbols-outlined mb-1">gavel</span>
+<span class="font-label-md text-label-md text-[10px]">Bids</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-primary-container hover:text-secondary dark:hover:text-secondary-fixed active:opacity-80 transition-opacity w-16" href="#">
+<span class="material-symbols-outlined mb-1">description</span>
+<span class="font-label-md text-label-md text-[10px]">My RFPs</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-primary-container hover:text-secondary dark:hover:text-secondary-fixed active:opacity-80 transition-opacity w-16" href="#">
+<span class="material-symbols-outlined mb-1">account_circle</span>
+<span class="font-label-md text-label-md text-[10px]">Profile</span>
+</a>
+</nav>
+</body></html>

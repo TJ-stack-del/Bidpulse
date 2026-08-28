@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BidPulse - Analytics &amp; Insights</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Geist:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed": "#dae2fd",
+                        "surface-container-low": "#eff4ff",
+                        "inverse-surface": "#213145",
+                        "error-container": "#ffdad6",
+                        "surface": "#f8f9ff",
+                        "outline-variant": "#c6c6cd",
+                        "on-surface-variant": "#45464d",
+                        "on-secondary-fixed": "#00174b",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "surface-variant": "#d3e4fe",
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#002113",
+                        "on-secondary": "#ffffff",
+                        "primary": "#000000",
+                        "on-surface": "#0b1c30",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "on-secondary-container": "#fefcff",
+                        "error": "#ba1a1a",
+                        "surface-bright": "#f8f9ff",
+                        "on-error-container": "#93000a",
+                        "secondary": "#0051d5",
+                        "inverse-primary": "#bec6e0",
+                        "outline": "#76777d",
+                        "secondary-container": "#316bf3",
+                        "secondary-fixed": "#dbe1ff",
+                        "on-secondary-fixed-variant": "#003ea8",
+                        "on-tertiary-fixed": "#002113",
+                        "on-primary-fixed": "#131b2e",
+                        "primary-container": "#131b2e",
+                        "on-background": "#0b1c30",
+                        "on-primary-container": "#7c839b",
+                        "surface-container": "#e5eeff",
+                        "surface-container-highest": "#d3e4fe",
+                        "tertiary-fixed": "#6ffbbe",
+                        "surface-dim": "#cbdbf5",
+                        "background": "#f8f9ff",
+                        "surface-tint": "#565e74",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-container": "#009668",
+                        "primary-fixed-dim": "#bec6e0",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-high": "#dce9ff",
+                        "tertiary": "#000000",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-on-surface": "#eaf1ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-desktop": "48px",
+                        "gutter": "24px",
+                        "container-max": "1440px",
+                        "unit": "4px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "code-sm": ["Geist"],
+                        "body-md": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "label-md": ["Geist"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "title-lg": ["18px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "code-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md antialiased pb-20 md:pb-0 pt-16 md:pt-20">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-margin-mobile h-16 bg-surface dark:bg-primary-container border-b border-outline-variant dark:border-on-primary-fixed-variant md:px-margin-desktop shadow-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary dark:text-secondary-fixed text-2xl" style="font-variation-settings: 'FILL' 1;">security</span>
+<span class="font-headline-md text-headline-md font-bold text-on-surface dark:text-on-primary">BidPulse</span>
+</div>
+<div class="flex items-center">
+<img alt="User profile photo" class="w-8 h-8 rounded-full border border-outline-variant" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDHS03pROZdlcMrYIdIufyRUb-UpCWos67CUSXwMUGnsLgu9yoABrBTtFU57U6hvyZG0n8zr5xqv28L01TAspfNRVjKh5FddzNVu1Fc01Zfk9MI9WX0MDnNEVzJWIwVk7ZJ-p_raYHhP_ddtdKkES9WnSTzqQ8E5BpYGUqL9WlJCJf5pgy4c_yupdP2QT46Hh56W-mdVszagO6XC0C3qy_U3ek5GLmgEZiVks3r6qVYcq8Rev_nmbd4g"/>
+</div>
+</header>
+<main class="w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-6 flex flex-col gap-6">
+<!-- Page Title -->
+<section>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface mb-2">Analytics &amp; Insights</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Overview of current procurement performance.</p>
+</section>
+<!-- Actionable Insights (AI) -->
+<section class="bg-surface-container-low rounded-xl p-4 border border-outline-variant">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">tips_and_updates</span>
+<h2 class="font-title-lg text-title-lg text-on-surface">Actionable Insights</h2>
+</div>
+<ul class="flex flex-col gap-3">
+<li class="flex gap-3 items-start bg-surface rounded-lg p-3 border-l-4 border-error">
+<span class="material-symbols-outlined text-error mt-0.5">warning</span>
+<div>
+<p class="font-body-md text-body-md text-on-surface font-semibold">Compliance risk detected in Project Sentinel</p>
+<p class="font-code-sm text-code-sm text-on-surface-variant mt-1">Missing sub-contractor certification document.</p>
+</div>
+</li>
+<li class="flex gap-3 items-start bg-surface rounded-lg p-3 border-l-4 border-[#009668]"> <!-- Success Green manual override based on prompt constraints -->
+<span class="material-symbols-outlined text-[#009668] mt-0.5">trending_up</span>
+<div>
+<p class="font-body-md text-body-md text-on-surface font-semibold">Win probability increased for Operation Shield</p>
+<p class="font-code-sm text-code-sm text-on-surface-variant mt-1">Competitor X disqualified during initial review.</p>
+</div>
+</li>
+</ul>
+</section>
+<!-- KPI Scroll -->
+<section class="flex flex-col gap-4">
+<h2 class="font-title-lg text-title-lg text-on-surface">Key Metrics</h2>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+<!-- KPI 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-4 border border-outline-variant shadow-sm flex flex-col justify-between">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Win Rate</span>
+<span class="material-symbols-outlined text-secondary">analytics</span>
+</div>
+<div>
+<div class="font-display-lg text-display-lg text-on-surface">42%</div>
+<div class="flex items-center gap-1 mt-1 text-[#009668]">
+<span class="material-symbols-outlined text-sm">arrow_upward</span>
+<span class="font-code-sm text-code-sm">5% vs last QTR</span>
+</div>
+</div>
+</div>
+<!-- KPI 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-4 border border-outline-variant shadow-sm flex flex-col justify-between">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Pipeline Value</span>
+<span class="material-symbols-outlined text-secondary">monetization_on</span>
+</div>
+<div>
+<div class="font-display-lg text-display-lg text-on-surface">$1.2B</div>
+<div class="flex items-center gap-1 mt-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">horizontal_rule</span>
+<span class="font-code-sm text-code-sm">Steady</span>
+</div>
+</div>
+</div>
+<!-- KPI 3 -->
+<div class="bg-surface-container-lowest rounded-xl p-4 border-l-4 border-[#009668] border-y border-r border-y-outline-variant border-r-outline-variant shadow-sm flex flex-col justify-between">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Compliance Health</span>
+<span class="material-symbols-outlined text-[#009668]" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<div>
+<div class="font-display-lg text-display-lg text-on-surface">98%</div>
+<div class="flex items-center gap-1 mt-1 text-on-surface-variant">
+<span class="font-code-sm text-code-sm">2 minor flags pending</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Active Pipeline Summary -->
+<section class="bg-surface-container-lowest rounded-xl p-4 border border-outline-variant shadow-sm">
+<div class="flex justify-between items-center mb-4">
+<h2 class="font-title-lg text-title-lg text-on-surface">Active Pipeline (6-Stage)</h2>
+<span class="font-label-md text-label-md bg-surface-container text-on-surface px-2 py-1 rounded-full">14 Active</span>
+</div>
+<div class="flex flex-col gap-4 mt-2">
+<!-- Stage 1 -->
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-[#009668] flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-primary text-sm">check</span>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between mb-1">
+<span class="font-label-md text-label-md text-on-surface">1. Identification</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">0 RFPs</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-[#009668] h-full w-full"></div>
+</div>
+</div>
+</div>
+<!-- Stage 2 -->
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full border-2 border-secondary flex items-center justify-center shrink-0 bg-surface">
+<span class="font-label-md text-label-md text-secondary">2</span>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between mb-1">
+<span class="font-label-md text-label-md text-on-surface font-semibold">2. Qualification</span>
+<span class="font-code-sm text-code-sm text-secondary font-bold">5 RFPs</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-secondary h-full w-[35%] animate-pulse"></div>
+</div>
+</div>
+</div>
+<!-- Stage 3 -->
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full border border-outline-variant flex items-center justify-center shrink-0 text-on-surface-variant bg-surface">
+<span class="font-label-md text-label-md">3</span>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between mb-1">
+<span class="font-label-md text-label-md text-on-surface-variant">3. Proposal Prep</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">4 RFPs</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-outline-variant h-full w-[28%]"></div>
+</div>
+</div>
+</div>
+<!-- Stage 4-6 Simplified for vertical space -->
+<div class="flex items-center gap-3 opacity-60">
+<div class="w-8 h-8 rounded-full border border-outline-variant flex items-center justify-center shrink-0 text-on-surface-variant bg-surface">
+<span class="material-symbols-outlined text-sm">more_horiz</span>
+</div>
+<div class="flex-grow">
+<span class="font-label-md text-label-md text-on-surface-variant">Stages 4-6 (Review, Submit, Award)</span>
+<div class="font-code-sm text-code-sm text-on-surface-variant">5 RFPs in advanced stages</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Recent Win/Loss Notifications -->
+<section class="mb-8">
+<h2 class="font-title-lg text-title-lg text-on-surface mb-4">Recent Outcomes</h2>
+<div class="flex flex-col gap-3">
+<!-- Win -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-3 flex gap-3 items-center">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[#009668]">emoji_events</span>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-start">
+<h3 class="font-body-md text-body-md font-semibold text-on-surface">Project Vanguard</h3>
+<span class="font-label-md text-label-md bg-[#009668]/10 text-[#009668] px-2 py-0.5 rounded-full">WON</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface-variant mt-1">$450M • DoD Logistics</p>
+</div>
+</div>
+<!-- Loss -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-3 flex gap-3 items-center">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-surface-variant">cancel</span>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-start">
+<h3 class="font-body-md text-body-md font-semibold text-on-surface">Operation Titan</h3>
+<span class="font-label-md text-label-md bg-error/10 text-error px-2 py-0.5 rounded-full">LOST</span>
+</div>
+<p class="font-code-sm text-code-sm text-on-surface-variant mt-1">$120M • Price too high</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 flex justify-around items-center px-margin-mobile py-2 bg-surface dark:bg-primary-container border-t border-outline-variant dark:border-on-primary-fixed-variant">
+<!-- Active: Dashboard -->
+<a class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed font-bold bg-surface-container-highest dark:bg-on-primary-fixed-variant rounded-xl px-3 py-1 w-16" href="#">
+<span class="material-symbols-outlined text-xl mb-1" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-label-md text-[10px]">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-primary-container hover:text-secondary dark:hover:text-secondary-fixed w-16" href="#">
+<span class="material-symbols-outlined text-xl mb-1">gavel</span>
+<span class="font-label-md text-[10px]">Bids</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-primary-container hover:text-secondary dark:hover:text-secondary-fixed w-16" href="#">
+<span class="material-symbols-outlined text-xl mb-1">description</span>
+<span class="font-label-md text-[10px]">My RFPs</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-primary-container hover:text-secondary dark:hover:text-secondary-fixed w-16" href="#">
+<span class="material-symbols-outlined text-xl mb-1">account_circle</span>
+<span class="font-label-md text-[10px]">Profile</span>
+</a>
+</nav>
+</body></html>

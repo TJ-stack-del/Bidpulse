@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BidPulse - Submission Receipt</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;family=Geist:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#131b2e",
+                        "primary": "#000000",
+                        "on-tertiary-fixed": "#002113",
+                        "secondary-fixed": "#dbe1ff",
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#002113",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed": "#6ffbbe",
+                        "surface-container": "#e5eeff",
+                        "surface": "#f8f9ff",
+                        "secondary-container": "#316bf3",
+                        "tertiary": "#000000",
+                        "surface-bright": "#f8f9ff",
+                        "outline": "#76777d",
+                        "on-primary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-primary": "#bec6e0",
+                        "on-primary-fixed": "#131b2e",
+                        "primary-fixed-dim": "#bec6e0",
+                        "on-surface-variant": "#45464d",
+                        "on-background": "#0b1c30",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "outline-variant": "#c6c6cd",
+                        "on-tertiary-container": "#009668",
+                        "error": "#ba1a1a",
+                        "on-secondary": "#ffffff",
+                        "surface-container-highest": "#d3e4fe",
+                        "surface-container-low": "#eff4ff",
+                        "secondary": "#0051d5",
+                        "surface-variant": "#d3e4fe",
+                        "error-container": "#ffdad6",
+                        "background": "#f8f9ff",
+                        "surface-container-high": "#dce9ff",
+                        "primary-fixed": "#dae2fd",
+                        "on-secondary-fixed-variant": "#003ea8",
+                        "inverse-surface": "#213145",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "on-secondary-fixed": "#00174b",
+                        "surface-dim": "#cbdbf5",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface-tint": "#565e74",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "on-primary-container": "#7c839b",
+                        "on-secondary-container": "#fefcff",
+                        "on-surface": "#0b1c30",
+                        "on-error-container": "#93000a",
+                        "success": "#16a34a",
+                        "on-success": "#ffffff",
+                        "success-container": "#dcfce7",
+                        "on-success-container": "#166534"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "margin-mobile": "16px",
+                        "unit": "4px",
+                        "container-max": "1440px",
+                        "margin-desktop": "48px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "code-sm": ["Geist"],
+                        "label-md": ["Geist"],
+                        "headline-lg-mobile": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "title-lg": ["18px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "code-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-body-md antialiased selection:bg-secondary selection:text-on-secondary">
+<!-- TopNavBar (Suppressed due to Transactional Nature of Screen, keeping only simple brand header) -->
+<header class="bg-surface border-b border-outline-variant flex justify-between items-center px-margin-desktop w-full h-16 max-w-container-max mx-auto md:px-margin-desktop px-margin-mobile">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary" data-icon="security" style="font-variation-settings: 'FILL' 1;">security</span>
+<span class="font-headline-md text-headline-md font-bold text-primary">BidPulse</span>
+</div>
+</header>
+<main class="flex-grow flex flex-col items-center py-12 px-margin-mobile md:px-margin-desktop max-w-[900px] mx-auto w-full">
+<!-- Success Header Banner -->
+<div class="w-full bg-success-container border-l-[4px] border-success p-6 mb-8 flex items-start gap-4 shadow-sm relative overflow-hidden">
+<!-- decorative background element -->
+<div class="absolute right-0 top-0 opacity-10 pointer-events-none transform translate-x-1/4 -translate-y-1/4">
+<span class="material-symbols-outlined text-[160px] text-success" data-icon="verified_user">verified_user</span>
+</div>
+<div class="flex-shrink-0 mt-1 z-10">
+<span class="material-symbols-outlined text-success text-[32px]" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="flex-grow z-10">
+<h1 class="font-headline-md text-headline-md text-on-success-container mb-1">Submission Successfully Executed</h1>
+<p class="font-body-md text-body-md text-on-success-container/80">Your proposal has been securely transmitted and verified by the receiving agency.</p>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+<!-- Left Column: Details & Artifacts -->
+<div class="md:col-span-2 flex flex-col gap-6">
+<!-- Submission Details Card -->
+<section class="bg-surface-container-lowest border border-outline-variant p-6 shadow-sm">
+<h2 class="font-title-lg text-title-lg text-primary mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="description">description</span>
+                        Submission Details
+                    </h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant mb-1 uppercase tracking-wider">Project Name</p>
+<p class="font-body-lg text-body-lg font-medium text-on-surface">Project Sentinel</p>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant mb-1 uppercase tracking-wider">RFP ID</p>
+<p class="font-body-lg text-body-lg font-medium text-on-surface">2024-DEF-9981</p>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant mb-1 uppercase tracking-wider">Agency</p>
+<p class="font-body-lg text-body-lg font-medium text-on-surface">DOD - Logistics Modernization</p>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant mb-1 uppercase tracking-wider">Timestamp</p>
+<p class="font-code-sm text-code-sm text-on-surface flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="schedule">schedule</span>
+                                Oct 25, 2024, 14:30:05 UTC
+                            </p>
+</div>
+</div>
+<!-- Cryptographic Proof -->
+<div class="mt-6 pt-6 border-t border-surface-variant">
+<p class="font-label-md text-label-md text-on-surface-variant mb-2 uppercase tracking-wider flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="enhanced_encryption">enhanced_encryption</span>
+                            Cryptographic Proof (SHA-256)
+                        </p>
+<div class="bg-surface-container-low p-3 border border-outline-variant flex items-center justify-between group">
+<code class="font-code-sm text-code-sm text-on-surface break-all">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</code>
+<button class="ml-2 text-secondary hover:text-primary transition-colors flex-shrink-0" title="Copy Hash">
+<span class="material-symbols-outlined" data-icon="content_copy">content_copy</span>
+</button>
+</div>
+<p class="font-label-md text-label-md text-on-surface-variant mt-2 opacity-70">Store this hash for legal non-repudiation.</p>
+</div>
+</section>
+<!-- Artifact Summary -->
+<section class="bg-surface-container-lowest border border-outline-variant p-6 shadow-sm">
+<h2 class="font-title-lg text-title-lg text-primary mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="inventory_2">inventory_2</span>
+                        Transmitted Artifacts
+                    </h2>
+<div class="flex flex-col gap-2">
+<!-- Artifact Item -->
+<div class="flex items-center justify-between p-3 bg-surface border border-outline-variant hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary" data-icon="picture_as_pdf">picture_as_pdf</span>
+<div>
+<p class="font-body-md text-body-md font-medium">Technical Volume v4.2</p>
+<p class="font-code-sm text-code-sm text-on-surface-variant">24.5 MB</p>
+</div>
+</div>
+<div class="bg-success-container text-on-success-container font-label-md text-label-md px-2 py-1 rounded border border-success/30 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="lock">lock</span>
+                                Sealed
+                            </div>
+</div>
+<!-- Artifact Item -->
+<div class="flex items-center justify-between p-3 bg-surface border border-outline-variant hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary" data-icon="picture_as_pdf">picture_as_pdf</span>
+<div>
+<p class="font-body-md text-body-md font-medium">Management Volume v3.1</p>
+<p class="font-code-sm text-code-sm text-on-surface-variant">12.1 MB</p>
+</div>
+</div>
+<div class="bg-success-container text-on-success-container font-label-md text-label-md px-2 py-1 rounded border border-success/30 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="lock">lock</span>
+                                Sealed
+                            </div>
+</div>
+<!-- Artifact Item -->
+<div class="flex items-center justify-between p-3 bg-surface border border-outline-variant hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary" data-icon="table">table</span>
+<div>
+<p class="font-body-md text-body-md font-medium">Pricing Structure v2.0</p>
+<p class="font-code-sm text-code-sm text-on-surface-variant">3.8 MB</p>
+</div>
+</div>
+<div class="bg-success-container text-on-success-container font-label-md text-label-md px-2 py-1 rounded border border-success/30 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="lock">lock</span>
+                                Sealed
+                            </div>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column: Actions & Log -->
+<div class="flex flex-col gap-6">
+<!-- Post-Submission Actions -->
+<section class="bg-surface-container-lowest border border-outline-variant p-6 shadow-sm">
+<h2 class="font-title-lg text-title-lg text-primary mb-4">Next Steps</h2>
+<div class="flex flex-col gap-3">
+<button class="w-full bg-primary-container text-on-primary-container font-label-md text-label-md py-3 px-4 flex items-center justify-center gap-2 hover:bg-surface-tint hover:text-white transition-colors border border-transparent hover:border-outline inset-shadow-sm active:scale-[0.98]">
+<span class="material-symbols-outlined" data-icon="download">download</span>
+                            Download Full Audit Log
+                        </button>
+<button class="w-full bg-surface-container-highest text-on-surface font-label-md text-label-md py-3 px-4 flex items-center justify-center gap-2 hover:bg-surface-variant transition-colors border border-outline-variant active:scale-[0.98]">
+<span class="material-symbols-outlined" data-icon="archive">archive</span>
+                            View Archive
+                        </button>
+<button class="w-full mt-4 bg-transparent text-secondary font-label-md text-label-md py-3 px-4 flex items-center justify-center gap-2 hover:bg-surface-container-low transition-colors border border-secondary active:scale-[0.98]">
+                            Go to Dashboard
+                            <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</section>
+<!-- Audit Log Timeline -->
+<section class="bg-surface-container-lowest border border-outline-variant p-6 shadow-sm flex-grow">
+<h2 class="font-title-lg text-title-lg text-primary mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="history">history</span>
+                        Transmission Log
+                    </h2>
+<div class="relative pl-4 border-l-2 border-surface-variant space-y-6 pb-2">
+<!-- Log Item 1 -->
+<div class="relative">
+<div class="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-success ring-4 ring-surface-container-lowest"></div>
+<p class="font-label-md text-label-md text-on-surface font-medium">Receipt Acknowledged</p>
+<p class="font-code-sm text-code-sm text-on-surface-variant">DOD Gateway</p>
+<p class="font-code-sm text-code-sm text-on-surface-variant opacity-70">14:30:05 UTC</p>
+</div>
+<!-- Log Item 2 -->
+<div class="relative">
+<div class="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-surface-tint ring-4 ring-surface-container-lowest"></div>
+<p class="font-label-md text-label-md text-on-surface font-medium">Encryption Verified</p>
+<p class="font-code-sm text-code-sm text-on-surface-variant">System Automated</p>
+<p class="font-code-sm text-code-sm text-on-surface-variant opacity-70">14:30:02 UTC</p>
+</div>
+<!-- Log Item 3 -->
+<div class="relative">
+<div class="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-surface-tint ring-4 ring-surface-container-lowest"></div>
+<p class="font-label-md text-label-md text-on-surface font-medium">Final Executive Sign-off</p>
+<p class="font-code-sm text-code-sm text-on-surface-variant">Sarah Jenkins (VP)</p>
+<p class="font-code-sm text-code-sm text-on-surface-variant opacity-70">14:28:45 UTC</p>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-highest dark:bg-primary border-t border-outline-variant w-full py-4 flex flex-col md:flex-row justify-between items-center px-margin-desktop mt-auto">
+<div class="font-title-lg text-title-lg text-primary mb-2 md:mb-0">
+            BidPulse
+        </div>
+<div class="font-code-sm text-code-sm text-on-surface-variant dark:text-on-primary-container text-center md:text-left mb-2 md:mb-0">
+            © 2024 BidPulse Global. All Rights Reserved. SOC2 Type II Certified.
+        </div>
+<div class="flex gap-4">
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:text-primary dark:hover:text-secondary-fixed transition-colors opacity-100 hover:opacity-80" href="#">Legal</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:text-primary dark:hover:text-secondary-fixed transition-colors opacity-100 hover:opacity-80" href="#">Privacy Policy</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:text-primary dark:hover:text-secondary-fixed transition-colors opacity-100 hover:opacity-80" href="#">Security Compliance</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:text-primary dark:hover:text-secondary-fixed transition-colors opacity-100 hover:opacity-80" href="#">Contact Support</a>
+</div>
+</footer>
+</body></html>

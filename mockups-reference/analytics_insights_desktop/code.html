@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Analytics &amp; Insights - BidPulse</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Geist:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed": "#dae2fd",
+                    "surface-container-low": "#eff4ff",
+                    "inverse-surface": "#213145",
+                    "error-container": "#ffdad6",
+                    "surface": "#f8f9ff",
+                    "outline-variant": "#c6c6cd",
+                    "on-surface-variant": "#45464d",
+                    "on-secondary-fixed": "#00174b",
+                    "on-primary-fixed-variant": "#3f465c",
+                    "on-tertiary-fixed-variant": "#005236",
+                    "surface-variant": "#d3e4fe",
+                    "on-error": "#ffffff",
+                    "tertiary-container": "#002113",
+                    "on-secondary": "#ffffff",
+                    "primary": "#000000",
+                    "on-surface": "#0b1c30",
+                    "secondary-fixed-dim": "#b4c5ff",
+                    "on-secondary-container": "#fefcff",
+                    "error": "#ba1a1a",
+                    "surface-bright": "#f8f9ff",
+                    "on-error-container": "#93000a",
+                    "secondary": "#0051d5",
+                    "inverse-primary": "#bec6e0",
+                    "outline": "#76777d",
+                    "secondary-container": "#316bf3",
+                    "secondary-fixed": "#dbe1ff",
+                    "on-secondary-fixed-variant": "#003ea8",
+                    "on-tertiary-fixed": "#002113",
+                    "on-primary-fixed": "#131b2e",
+                    "primary-container": "#131b2e",
+                    "on-background": "#0b1c30",
+                    "on-primary-container": "#7c839b",
+                    "surface-container": "#e5eeff",
+                    "surface-container-highest": "#d3e4fe",
+                    "tertiary-fixed": "#6ffbbe",
+                    "surface-dim": "#cbdbf5",
+                    "background": "#f8f9ff",
+                    "surface-tint": "#565e74",
+                    "tertiary-fixed-dim": "#4edea3",
+                    "on-primary": "#ffffff",
+                    "on-tertiary-container": "#009668",
+                    "primary-fixed-dim": "#bec6e0",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-high": "#dce9ff",
+                    "tertiary": "#000000",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-on-surface": "#eaf1ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "margin-desktop": "48px",
+                    "gutter": "24px",
+                    "container-max": "1440px",
+                    "unit": "4px",
+                    "margin-mobile": "16px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Inter"],
+                    "title-lg": ["Inter"],
+                    "code-sm": ["Geist"],
+                    "body-md": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "label-md": ["Geist"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "title-lg": ["18px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "code-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { background-color: #F8FAFC; }
+    </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col md:flex-row">
+<!-- TopNavBar (Mobile Only / Overriding to TopAppBar behavior for this structural context) -->
+<header class="md:hidden bg-surface-container-lowest dark:bg-inverse-surface border-b border-outline-variant dark:border-outline w-full sticky top-0 z-50">
+<div class="flex justify-between items-center px-margin-mobile h-16 w-full">
+<div class="font-headline-md text-headline-md font-bold text-on-surface dark:text-inverse-on-surface">BidPulse</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-secondary dark:text-secondary-fixed">notifications</span>
+<span class="material-symbols-outlined text-secondary dark:text-secondary-fixed">settings</span>
+<img class="w-8 h-8 rounded-full object-cover" data-alt="A small circular user profile photo showing a professional individual in a corporate setting. High-key light-mode aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzereiwx1yNQZlW-O9Q6seJNKa_thi8RlicJ3tHOOV-ySIDGpxjbdYJxWzjZn8pdVfY8ZgxzHIBYkH_ouFodHyvoibgc6tv6BDhhLrzr9dESEBYQr3tyKfIEkNyJXBtV7thn3y2yEG8rCvJXjpK484bvQxA1igBzIJ0do68pxf_tUP5NzP7XDF4mpsDSPsvPd1KwLx-eoIkEBdDROJEhSSL8jdLyrUspU1z10Iwoyb58wIbP1PF_NZWA"/>
+</div>
+</div>
+</header>
+<!-- SideNavBar (Desktop Only) -->
+<nav class="hidden md:flex flex-col bg-surface-container-low dark:bg-primary-container h-screen py-gutter px-4 sticky top-0 w-64 border-r border-outline-variant shrink-0">
+<div class="flex items-center gap-3 mb-8 px-2">
+<img class="w-10 h-10 rounded" data-alt="A minimalist, geometric organization logo in navy blue and slate gray, suitable for a corporate government procurement intelligence firm." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCiHkoYRb0zseFsQ88BwL9L5C4KxtsQxvfoePvqw5nfaYNceQ0LlTjBhpc3MSke23kAtI8ZPrQxfoCcK5FP9JShAuS5upPmhjmsrQcawkycCfOPI7RDyUAiQohYSng5hLjSvU9kGtYRFzyLyPlqFm8PjlvJlBKhm7Jl6_sme-Ov2VSq3dPYQTMsxKWpVfeXg9HMJmxOzB1xe7Whbz4CsHa5XfgKbC0Fx2atczX5j0iY9HKPuMmRx_6c8w"/>
+<div>
+<h1 class="font-title-lg text-title-lg text-on-primary-fixed leading-tight">Procurement Intelligence</h1>
+<p class="font-label-md text-label-md text-on-surface-variant">FY24 Q3 Cycle</p>
+</div>
+</div>
+<ul class="flex-1 space-y-2">
+<li>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-highest dark:hover:bg-on-primary-fixed-variant transition-all font-label-md text-label-md cursor-pointer active:opacity-80 rounded-xl" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">analytics</span>
+                    Pipeline
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-highest dark:hover:bg-on-primary-fixed-variant transition-all font-label-md text-label-md cursor-pointer active:opacity-80 rounded-xl" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">query_stats</span>
+                    Win/Loss
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-highest dark:hover:bg-on-primary-fixed-variant transition-all font-label-md text-label-md cursor-pointer active:opacity-80 rounded-xl" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+                    Compliance Health
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 bg-secondary-container text-on-secondary-container dark:bg-secondary dark:text-on-secondary rounded-xl font-label-md text-label-md cursor-pointer active:opacity-80" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">monitoring</span>
+                    Bid Analytics
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-highest dark:hover:bg-on-primary-fixed-variant transition-all font-label-md text-label-md cursor-pointer active:opacity-80 rounded-xl" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+                    Archived
+                </a>
+</li>
+</ul>
+<div class="mt-auto mb-4">
+<button class="w-full bg-primary-container text-on-primary flex items-center justify-center gap-2 py-2 rounded-xl font-label-md text-label-md hover:opacity-90 transition-opacity">
+                Generate Report
+            </button>
+</div>
+<ul class="border-t border-outline-variant pt-4 space-y-2">
+<li>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-highest dark:hover:bg-on-primary-fixed-variant transition-all font-label-md text-label-md cursor-pointer active:opacity-80 rounded-xl" href="#">
+<span class="material-symbols-outlined">help</span>
+                    Support
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-highest dark:hover:bg-on-primary-fixed-variant transition-all font-label-md text-label-md cursor-pointer active:opacity-80 rounded-xl" href="#">
+<span class="material-symbols-outlined">code</span>
+                    API Docs
+                </a>
+</li>
+</ul>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 p-margin-mobile md:p-margin-desktop max-w-container-max mx-auto w-full overflow-y-auto">
+<!-- Header & Top Nav Links (Desktop) -->
+<div class="hidden md:flex justify-between items-center mb-8 bg-surface-container-lowest p-4 rounded-xl border border-outline-variant">
+<div class="flex items-center gap-8">
+<div class="font-headline-md text-headline-md font-bold text-on-surface">BidPulse</div>
+<nav class="flex gap-6">
+<a class="text-on-surface-variant font-body-md text-body-md hover:bg-surface-container-low transition-colors py-1 px-2 rounded" href="#">Dashboard</a>
+<a class="text-on-surface-variant font-body-md text-body-md hover:bg-surface-container-low transition-colors py-1 px-2 rounded" href="#">Compliance</a>
+<a class="text-secondary border-b-2 border-secondary font-bold pb-1 font-body-md text-body-md" href="#">Reports</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-secondary cursor-pointer hover:bg-surface-container-low p-2 rounded-full transition-colors">notifications</span>
+<span class="material-symbols-outlined text-secondary cursor-pointer hover:bg-surface-container-low p-2 rounded-full transition-colors">settings</span>
+<button class="bg-primary-container text-on-primary px-4 py-2 rounded-xl font-label-md text-label-md hover:opacity-90">New Proposal</button>
+</div>
+</div>
+<div class="mb-8">
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-2">Analytics &amp; Insights</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Real-time performance metrics and pipeline health for Q3 FY24.</p>
+</div>
+<!-- Executive Summary KPIs (Bento Grid Style) -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+<div class="bg-surface-container-lowest border border-outline-variant p-6 rounded-xl hover:bg-surface-container-low transition-colors flex flex-col justify-between">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Total Pipeline Value</span>
+<span class="material-symbols-outlined text-secondary-container">account_balance_wallet</span>
+</div>
+<div>
+<span class="font-display-lg text-display-lg text-on-surface">$1.24B</span>
+<div class="flex items-center gap-1 mt-2 text-tertiary-container font-label-md text-label-md bg-tertiary-fixed-dim bg-opacity-20 w-fit px-2 py-1 rounded">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+                        +12.4% vs Q2
+                    </div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-6 rounded-xl hover:bg-surface-container-low transition-colors flex flex-col justify-between">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Win Rate %</span>
+<span class="material-symbols-outlined text-secondary-container">emoji_events</span>
+</div>
+<div>
+<span class="font-display-lg text-display-lg text-on-surface">42.8%</span>
+<div class="flex items-center gap-1 mt-2 text-on-surface-variant font-label-md text-label-md bg-surface-variant w-fit px-2 py-1 rounded">
+<span class="material-symbols-outlined text-[16px]">horizontal_rule</span>
+                        Stable vs Q2
+                    </div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-6 rounded-xl hover:bg-surface-container-low transition-colors flex flex-col justify-between">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Active RFPs</span>
+<span class="material-symbols-outlined text-secondary-container">assignment</span>
+</div>
+<div>
+<span class="font-display-lg text-display-lg text-on-surface">84</span>
+<div class="flex items-center gap-1 mt-2 text-error font-label-md text-label-md bg-error-container w-fit px-2 py-1 rounded">
+<span class="material-symbols-outlined text-[16px]">trending_down</span>
+                        -3 vs Q2
+                    </div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant border-l-4 border-l-tertiary-container p-6 rounded-xl hover:bg-surface-container-low transition-colors flex flex-col justify-between">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Compliance Score</span>
+<span class="material-symbols-outlined text-tertiary-container">security</span>
+</div>
+<div>
+<span class="font-display-lg text-display-lg text-on-surface">98.5</span>
+<div class="flex items-center gap-1 mt-2 text-tertiary-container font-label-md text-label-md bg-tertiary-fixed-dim bg-opacity-20 w-fit px-2 py-1 rounded">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+                        Audit Ready
+                    </div>
+</div>
+</div>
+</div>
+<!-- Main Dashboard Grids -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+<!-- Win/Loss Analysis -->
+<div class="lg:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-title-lg text-title-lg text-on-surface">Win/Loss Analysis (FY24)</h3>
+<select class="bg-surface border border-outline-variant rounded px-3 py-1 font-body-md text-body-md text-on-surface-variant focus:border-secondary focus:ring-1 focus:ring-secondary outline-none">
+<option>Cumulative Value</option>
+<option>Volume</option>
+</select>
+</div>
+<div class="h-64 w-full bg-surface-variant rounded-lg flex items-center justify-center border border-outline-variant relative overflow-hidden">
+<!-- Placeholder for Chart -->
+<div class="absolute inset-0 flex items-end justify-around px-4 pb-4 pt-12 gap-2">
+<!-- Mock Bars -->
+<div class="w-full flex flex-col justify-end gap-1"><div class="bg-secondary-container h-[40%] rounded-t-sm w-full"></div><div class="bg-outline-variant h-[20%] rounded-b-sm w-full"></div></div>
+<div class="w-full flex flex-col justify-end gap-1"><div class="bg-secondary-container h-[55%] rounded-t-sm w-full"></div><div class="bg-outline-variant h-[15%] rounded-b-sm w-full"></div></div>
+<div class="w-full flex flex-col justify-end gap-1"><div class="bg-secondary-container h-[30%] rounded-t-sm w-full"></div><div class="bg-outline-variant h-[35%] rounded-b-sm w-full"></div></div>
+<div class="w-full flex flex-col justify-end gap-1"><div class="bg-secondary-container h-[65%] rounded-t-sm w-full"></div><div class="bg-outline-variant h-[10%] rounded-b-sm w-full"></div></div>
+<div class="w-full flex flex-col justify-end gap-1"><div class="bg-secondary-container h-[45%] rounded-t-sm w-full"></div><div class="bg-outline-variant h-[25%] rounded-b-sm w-full"></div></div>
+</div>
+<div class="absolute top-4 left-4 flex gap-4">
+<div class="flex items-center gap-2 font-label-md text-label-md"><span class="w-3 h-3 bg-secondary-container rounded-sm"></span> Wins</div>
+<div class="flex items-center gap-2 font-label-md text-label-md"><span class="w-3 h-3 bg-outline-variant rounded-sm"></span> Losses</div>
+</div>
+</div>
+</div>
+<!-- Pipeline Distribution -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
+<h3 class="font-title-lg text-title-lg text-on-surface mb-6">Pipeline Distribution</h3>
+<div class="space-y-4">
+<div class="flex items-center gap-4">
+<div class="w-24 font-label-md text-label-md text-on-surface-variant text-right">Discovery</div>
+<div class="flex-1 h-3 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-secondary-fixed-dim" style="width: 85%"></div>
+</div>
+<div class="w-8 font-code-sm text-code-sm text-on-surface text-right">32</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-24 font-label-md text-label-md text-on-surface-variant text-right">Compliance</div>
+<div class="flex-1 h-3 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-secondary-container" style="width: 65%"></div>
+</div>
+<div class="w-8 font-code-sm text-code-sm text-on-surface text-right">24</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-24 font-label-md text-label-md text-on-surface-variant text-right">Assembly</div>
+<div class="flex-1 h-3 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary-fixed-dim" style="width: 45%"></div>
+</div>
+<div class="w-8 font-code-sm text-code-sm text-on-surface text-right">16</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-24 font-label-md text-label-md text-on-surface-variant text-right">Audit</div>
+<div class="flex-1 h-3 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-tertiary-fixed-dim" style="width: 25%"></div>
+</div>
+<div class="w-8 font-code-sm text-code-sm text-on-surface text-right">8</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-24 font-label-md text-label-md text-on-surface-variant text-right">Review</div>
+<div class="flex-1 h-3 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-outline-variant" style="width: 10%"></div>
+</div>
+<div class="w-8 font-code-sm text-code-sm text-on-surface text-right">3</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-24 font-label-md text-label-md text-on-surface-variant text-right">Submission</div>
+<div class="flex-1 h-3 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-tertiary-container" style="width: 5%"></div>
+</div>
+<div class="w-8 font-code-sm text-code-sm text-on-surface text-right">1</div>
+</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<!-- Compliance Health Heatmap -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-title-lg text-title-lg text-on-surface">Compliance Health</h3>
+<span class="material-symbols-outlined text-on-surface-variant">more_horiz</span>
+</div>
+<div class="grid grid-cols-4 gap-2 mb-2 font-label-md text-label-md text-on-surface-variant text-center border-b border-outline-variant pb-2">
+<div class="text-left">Agency</div>
+<div>FAR 52</div>
+<div>Cyber (CMMC)</div>
+<div>Past Perf.</div>
+</div>
+<div class="space-y-2">
+<div class="grid grid-cols-4 gap-2 items-center font-body-md text-body-md py-2 border-b border-outline-variant border-opacity-50">
+<div class="font-medium text-on-surface">DoD</div>
+<div class="bg-tertiary-fixed bg-opacity-20 text-tertiary-container rounded px-2 py-1 text-center text-[12px]">99%</div>
+<div class="bg-tertiary-fixed bg-opacity-20 text-tertiary-container rounded px-2 py-1 text-center text-[12px]">100%</div>
+<div class="bg-surface-variant text-on-surface-variant rounded px-2 py-1 text-center text-[12px]">85%</div>
+</div>
+<div class="grid grid-cols-4 gap-2 items-center font-body-md text-body-md py-2 border-b border-outline-variant border-opacity-50">
+<div class="font-medium text-on-surface">DHS</div>
+<div class="bg-tertiary-fixed bg-opacity-20 text-tertiary-container rounded px-2 py-1 text-center text-[12px]">95%</div>
+<div class="bg-error-container text-error rounded px-2 py-1 text-center text-[12px]">60%</div>
+<div class="bg-tertiary-fixed bg-opacity-20 text-tertiary-container rounded px-2 py-1 text-center text-[12px]">92%</div>
+</div>
+<div class="grid grid-cols-4 gap-2 items-center font-body-md text-body-md py-2 border-b border-outline-variant border-opacity-50">
+<div class="font-medium text-on-surface">NASA</div>
+<div class="bg-surface-variant text-on-surface-variant rounded px-2 py-1 text-center text-[12px]">88%</div>
+<div class="bg-surface-variant text-on-surface-variant rounded px-2 py-1 text-center text-[12px]">80%</div>
+<div class="bg-tertiary-fixed bg-opacity-20 text-tertiary-container rounded px-2 py-1 text-center text-[12px]">98%</div>
+</div>
+<div class="grid grid-cols-4 gap-2 items-center font-body-md text-body-md py-2">
+<div class="font-medium text-on-surface">GSA</div>
+<div class="bg-tertiary-fixed bg-opacity-20 text-tertiary-container rounded px-2 py-1 text-center text-[12px]">97%</div>
+<div class="bg-tertiary-fixed bg-opacity-20 text-tertiary-container rounded px-2 py-1 text-center text-[12px]">95%</div>
+<div class="bg-surface-variant text-on-surface-variant rounded px-2 py-1 text-center text-[12px]">89%</div>
+</div>
+</div>
+</div>
+<!-- Top Matched Opportunities -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 flex flex-col">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-title-lg text-title-lg text-on-surface">Top Matched Opportunities</h3>
+<button class="text-secondary font-label-md text-label-md hover:underline">View All</button>
+</div>
+<div class="flex-1 overflow-y-auto space-y-4">
+<div class="border border-outline-variant rounded-lg p-4 hover:bg-surface-container-low transition-colors group cursor-pointer relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-tertiary-container"></div>
+<div class="flex justify-between items-start mb-2">
+<h4 class="font-title-lg text-title-lg text-on-surface text-[16px] leading-tight group-hover:text-secondary transition-colors">Project JEDI Cloud Migration</h4>
+<span class="bg-tertiary-fixed-dim bg-opacity-20 text-tertiary-container font-label-md text-label-md px-2 py-1 rounded">98% Fit</span>
+</div>
+<div class="flex items-center gap-4 font-code-sm text-code-sm text-on-surface-variant mb-3">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">account_balance</span> DoD</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">calendar_today</span> Due: Oct 15</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-body-md text-body-md font-semibold text-on-surface">$250M Est.</span>
+<button class="text-secondary font-label-md text-label-md opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">Analyze <span class="material-symbols-outlined text-[14px]">arrow_forward</span></button>
+</div>
+</div>
+<div class="border border-outline-variant rounded-lg p-4 hover:bg-surface-container-low transition-colors group cursor-pointer relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-secondary-container"></div>
+<div class="flex justify-between items-start mb-2">
+<h4 class="font-title-lg text-title-lg text-on-surface text-[16px] leading-tight group-hover:text-secondary transition-colors">Federal Logistics Management Sys</h4>
+<span class="bg-surface-variant text-on-surface-variant font-label-md text-label-md px-2 py-1 rounded">92% Fit</span>
+</div>
+<div class="flex items-center gap-4 font-code-sm text-code-sm text-on-surface-variant mb-3">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">account_balance</span> GSA</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">calendar_today</span> Due: Nov 02</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-body-md text-body-md font-semibold text-on-surface">$85M Est.</span>
+<button class="text-secondary font-label-md text-label-md opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">Analyze <span class="material-symbols-outlined text-[14px]">arrow_forward</span></button>
+</div>
+</div>
+<div class="border border-outline-variant rounded-lg p-4 hover:bg-surface-container-low transition-colors group cursor-pointer relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-outline-variant"></div>
+<div class="flex justify-between items-start mb-2">
+<h4 class="font-title-lg text-title-lg text-on-surface text-[16px] leading-tight group-hover:text-secondary transition-colors">Cybersecurity Assessment Svcs</h4>
+<span class="bg-surface-variant text-on-surface-variant font-label-md text-label-md px-2 py-1 rounded">88% Fit</span>
+</div>
+<div class="flex items-center gap-4 font-code-sm text-code-sm text-on-surface-variant mb-3">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">account_balance</span> DHS</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">calendar_today</span> Due: Sep 30</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-body-md text-body-md font-semibold text-on-surface">$40M Est.</span>
+<button class="text-secondary font-label-md text-label-md opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">Analyze <span class="material-symbols-outlined text-[14px]">arrow_forward</span></button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

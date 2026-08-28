@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BidPulse - Assembly &amp; Drafting</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Geist:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline-variant": "#c6c6cd",
+                        "on-tertiary-fixed": "#002113",
+                        "outline": "#76777d",
+                        "surface-dim": "#cbdbf5",
+                        "on-secondary-fixed-variant": "#003ea8",
+                        "tertiary-fixed": "#6ffbbe",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-tertiary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "secondary-fixed": "#dbe1ff",
+                        "surface-tint": "#565e74",
+                        "on-background": "#0b1c30",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "on-primary-container": "#7c839b",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface-variant": "#45464d",
+                        "on-primary-fixed": "#131b2e",
+                        "surface-container": "#e5eeff",
+                        "background": "#f8f9ff",
+                        "surface": "#f8f9ff",
+                        "tertiary": "#000000",
+                        "surface-container-low": "#eff4ff",
+                        "on-error": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "primary-fixed-dim": "#bec6e0",
+                        "on-surface": "#0b1c30",
+                        "surface-variant": "#d3e4fe",
+                        "on-secondary-fixed": "#00174b",
+                        "primary-fixed": "#dae2fd",
+                        "on-error-container": "#93000a",
+                        "on-secondary-container": "#fefcff",
+                        "inverse-primary": "#bec6e0",
+                        "on-tertiary-container": "#009668",
+                        "secondary": "#0051d5",
+                        "error": "#ba1a1a",
+                        "tertiary-container": "#002113",
+                        "secondary-container": "#316bf3",
+                        "surface-bright": "#f8f9ff",
+                        "primary": "#000000",
+                        "inverse-surface": "#213145",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface-container-high": "#dce9ff",
+                        "primary-container": "#131b2e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-desktop": "48px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "container-max": "1440px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "label-md": ["Geist"],
+                        "display-lg": ["Inter"],
+                        "code-sm": ["Geist"],
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "title-lg": ["18px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "code-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface flex h-screen overflow-hidden font-body-md">
+<!-- SideNavBar -->
+<nav class="hidden md:flex flex-col h-full py-6 px-4 gap-2 bg-surface-container-low dark:bg-surface-container-lowest text-primary dark:text-primary-fixed border-r border-outline-variant dark:border-outline fixed left-0 top-0 h-screen w-64 z-20">
+<div class="mb-8">
+<h1 class="font-headline-sm text-headline-sm text-on-surface dark:text-on-surface-variant">ProcureIntel</h1>
+<p class="font-label-md text-label-md text-on-surface-variant">Intelligence Suite</p>
+</div>
+<button class="bg-secondary text-on-secondary font-label-md text-label-md py-2 px-4 rounded-lg mb-4 flex items-center justify-center gap-2 hover:bg-secondary-container transition-colors">
+<span class="material-symbols-outlined text-[18px]">add</span> New Assembly
+        </button>
+<ul class="flex flex-col gap-1 flex-grow">
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg font-label-md text-label-md text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-surface-container transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="home" data-weight="fill" style="font-variation-settings: 'FILL' 1;">home</span>
+                    Home
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg font-label-md text-label-md bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary font-bold active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="description" data-weight="fill" style="font-variation-settings: 'FILL' 1;">description</span>
+                    Library
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg font-label-md text-label-md text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-surface-container transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="analytics" data-weight="fill" style="font-variation-settings: 'FILL' 1;">analytics</span>
+                    Analytics
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg font-label-md text-label-md text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-surface-container transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="verified_user" data-weight="fill" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+                    Compliance
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg font-label-md text-label-md text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-surface-container transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="settings" data-weight="fill" style="font-variation-settings: 'FILL' 1;">settings</span>
+                    Settings
+                </a>
+</li>
+</ul>
+<div class="mt-auto border-t border-outline-variant pt-4">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg font-label-md text-label-md text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-surface-container transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="contact_support">contact_support</span>
+                Support
+            </a>
+</div>
+</nav>
+<!-- Main Content Wrapper -->
+<div class="flex flex-col flex-grow md:ml-64 relative">
+<!-- TopNavBar -->
+<header class="bg-surface dark:bg-surface-container-low text-primary dark:text-primary-fixed font-title-lg text-title-lg docked full-width top-0 border-b border-outline-variant dark:border-outline flat no shadows flex justify-between items-center w-full px-margin-desktop h-16 z-10 shrink-0">
+<div class="flex items-center gap-8">
+<div class="md:hidden font-headline-md text-headline-md text-primary dark:text-primary-fixed font-bold">ProcureIntel</div>
+<div class="hidden md:flex gap-6">
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-outline-variant hover:text-secondary dark:hover:text-secondary-fixed transition-colors active:opacity-80 transition-opacity" href="#">Dashboard</a>
+<a class="font-label-md text-label-md text-secondary dark:text-secondary-fixed border-b-2 border-secondary dark:border-secondary-fixed pb-1 hover:text-secondary dark:hover:text-secondary-fixed transition-colors active:opacity-80 transition-opacity" href="#">Projects</a>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-outline-variant hover:text-secondary dark:hover:text-secondary-fixed transition-colors active:opacity-80 transition-opacity" href="#">Templates</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="font-label-md text-label-md bg-primary text-on-primary px-4 py-2 rounded hover:bg-inverse-surface transition-colors">Create Draft</button>
+<button class="text-on-surface-variant hover:text-secondary transition-colors"><span class="material-symbols-outlined" data-icon="notifications">notifications</span></button>
+<button class="text-on-surface-variant hover:text-secondary transition-colors"><span class="material-symbols-outlined" data-icon="help_outline">help_outline</span></button>
+<div class="w-8 h-8 rounded-full bg-surface-variant overflow-hidden border border-outline-variant ml-2">
+<img alt="User profile" class="w-full h-full object-cover" data-alt="A professional headshot of a corporate user in a modern office environment. High-key lighting, bright minimal aesthetic, navy and slate tones. The image implies expert status and trust." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7waviczliDC5n1xFnpR-mifNqWpeszZoJvncKH39XuHCQME1U9xxbICBBrrjsnV0RcJcvK4z9c7CHUYEsvmjc-1C2dwThKy-3W181nS8IDHHMjgkbdZcDZlAekJUC87zlJduSXRD0_rZFvRLRJ1bhRBiXX-uLNHDrUy7o_Wwp8_UOYNgYWOXbYcmQkkc2X_W6rkzXAf-Y2w0abyqfxC-GhUWLL9Id6HO6eRiEVuGs1bavT2HA5wpXVA"/>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-grow flex overflow-hidden">
+<!-- Editor Workspace -->
+<div class="flex-grow flex flex-col p-6 overflow-y-auto bg-background">
+<!-- Progress Tracker -->
+<div class="mb-6 flex items-center justify-between">
+<h2 class="font-headline-md text-headline-md text-on-surface">RFP-2024-DOD-Logistics</h2>
+<div class="flex items-center gap-2">
+<div class="flex items-center gap-1"><div class="w-4 h-4 rounded-full bg-[#16a34a]"></div><span class="font-label-md text-label-md text-outline">Intake</span></div>
+<div class="w-8 h-px bg-outline-variant"></div>
+<div class="flex items-center gap-1"><div class="w-4 h-4 rounded-full bg-[#16a34a]"></div><span class="font-label-md text-label-md text-outline">Shredding</span></div>
+<div class="w-8 h-px bg-outline-variant"></div>
+<div class="flex items-center gap-1"><div class="w-4 h-4 rounded-full bg-secondary ring-2 ring-secondary ring-offset-2"></div><span class="font-label-md text-label-md text-primary font-bold">Assembly</span></div>
+<div class="w-8 h-px bg-outline-variant"></div>
+<div class="flex items-center gap-1"><div class="w-4 h-4 rounded-full bg-surface-variant border border-outline-variant"></div><span class="font-label-md text-label-md text-outline">Review</span></div>
+</div>
+</div>
+<!-- Toolbar -->
+<div class="bg-surface border border-outline-variant rounded-lg p-2 mb-4 flex gap-2 items-center shadow-sm">
+<button class="flex items-center gap-2 px-3 py-1.5 rounded hover:bg-surface-container-low transition-colors font-label-md text-label-md text-on-surface-variant"><span class="material-symbols-outlined text-[18px]">add_circle</span> Insert Requirement</button>
+<div class="w-px h-6 bg-outline-variant"></div>
+<button class="flex items-center gap-2 px-3 py-1.5 rounded hover:bg-surface-container-low transition-colors font-label-md text-label-md text-on-surface-variant"><span class="material-symbols-outlined text-[18px]">history_edu</span> Cite Precedent</button>
+<div class="w-px h-6 bg-outline-variant"></div>
+<button class="flex items-center gap-2 px-3 py-1.5 rounded hover:bg-surface-container-low transition-colors font-label-md text-label-md text-on-surface-variant"><span class="material-symbols-outlined text-[18px]">fact_check</span> Check Compliance</button>
+<div class="flex-grow"></div>
+<span class="font-label-md text-label-md text-outline">Auto-saved 2m ago</span>
+</div>
+<!-- Document Sections -->
+<div class="flex flex-col gap-6">
+<!-- Section 1 -->
+<div class="bg-surface rounded-xl border border-outline-variant p-6 hover:bg-surface-container-low transition-colors group cursor-text relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-[#16a34a]"></div>
+<div class="flex justify-between items-start mb-4">
+<h3 class="font-title-lg text-title-lg text-primary">1.0 Executive Summary</h3>
+<span class="bg-[#dcfce7] text-[#166534] font-label-md text-label-md px-2 py-1 rounded-full border border-[#bbf7d0]">Under Review</span>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface-variant leading-relaxed">
+                            Our proposed solution for the DoD Logistics Modernization initiative leverages ten years of proven experience in global supply chain optimization. By integrating advanced predictive analytics with resilient physical infrastructure, we guarantee a 15% reduction in latency for mission-critical deliveries while maintaining 100% compliance with CMMC Level 3 standards.
+                        </p>
+</div>
+<!-- Section 2 -->
+<div class="bg-surface rounded-xl border border-secondary p-6 shadow-[0_0_0_1px_#0051d5] relative">
+<div class="flex justify-between items-start mb-4">
+<h3 class="font-title-lg text-title-lg text-primary">2.0 Technical Approach</h3>
+<span class="bg-surface-container-highest text-secondary font-label-md text-label-md px-2 py-1 rounded-full flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">smart_toy</span> AI Generated</span>
+</div>
+<div class="font-body-lg text-body-lg text-on-surface-variant leading-relaxed min-h-[150px] outline-none" contenteditable="true">
+                            The core technical architecture centers on a hybrid-cloud environment utilizing FedRAMP High authorized endpoints. Data synchronization across distributed nodes is handled via a proprietary mesh network protocol...
+                        </div>
+</div>
+</div>
+</div>
+<!-- AI Drafting Panel (Sidebar) -->
+<div class="w-80 bg-surface-container-lowest border-l border-outline-variant flex flex-col z-10 shrink-0">
+<div class="p-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+<h3 class="font-title-lg text-title-lg text-primary flex items-center gap-2"><span class="material-symbols-outlined text-secondary">smart_toy</span> AI Assistant</h3>
+<button class="text-outline hover:text-on-surface transition-colors"><span class="material-symbols-outlined">close</span></button>
+</div>
+<div class="flex-grow p-4 overflow-y-auto flex flex-col gap-4">
+<div class="bg-surface-container-high rounded-lg p-3 border border-outline-variant">
+<p class="font-label-md text-label-md text-on-surface-variant mb-2">Requirement C.4.2</p>
+<p class="font-body-md text-body-md text-primary">"The contractor shall describe their methodology for ensuring data integrity during offline operations."</p>
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-primary">Context Sources</label>
+<div class="flex gap-2 flex-wrap">
+<span class="bg-surface px-2 py-1 rounded text-[10px] font-label-md border border-outline-variant text-on-surface-variant flex items-center gap-1">Past Perf: NAVSEA 2022 <span class="material-symbols-outlined text-[12px] cursor-pointer">close</span></span>
+<span class="bg-surface px-2 py-1 rounded text-[10px] font-label-md border border-outline-variant text-on-surface-variant flex items-center gap-1">Corp: Data Policy v4 <span class="material-symbols-outlined text-[12px] cursor-pointer">close</span></span>
+<button class="bg-surface-container px-2 py-1 rounded text-[10px] font-label-md text-secondary border border-secondary-fixed hover:bg-secondary-fixed transition-colors">+ Add Source</button>
+</div>
+</div>
+<div class="mt-auto">
+<label class="font-label-md text-label-md text-primary block mb-2">Prompt Instructions</label>
+<textarea class="w-full bg-surface border border-outline-variant rounded-lg p-2 font-body-md text-body-md text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-shadow resize-none h-24 mb-2" placeholder="e.g., Draft a response focusing on our encrypted local caching mechanism..."></textarea>
+<button class="w-full bg-secondary text-on-secondary font-label-md text-label-md py-2 rounded-lg hover:bg-secondary-container transition-colors flex justify-center items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">edit_document</span> Generate Draft
+                        </button>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

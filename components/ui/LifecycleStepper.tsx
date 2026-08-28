@@ -1,0 +1,39 @@
+const STAGES = ["Intake", "Review", "Pricing", "Drafting", "Approvals", "Submission"];
+
+// currentStage is 1-indexed to match the mockups (stage 1 = Intake)
+export function LifecycleStepper({ currentStage }: { currentStage: number }) {
+  return (
+    <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 mt-4">
+      <div className="flex items-center justify-between relative">
+        <div className="absolute top-1/2 left-0 w-full h-[2px] bg-outline-variant -translate-y-1/2 z-0" />
+        {STAGES.map((label, i) => {
+          const stageNum = i + 1;
+          const isDone = stageNum < currentStage;
+          const isActive = stageNum === currentStage;
+          return (
+            <div key={label} className="relative z-10 flex flex-col items-center gap-2">
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-label-md font-bold border-4 border-surface-container-lowest ${
+                  isDone
+                    ? "bg-tertiary-fixed text-on-tertiary-fixed"
+                    : isActive
+                    ? "bg-secondary text-on-secondary shadow-[0_0_0_2px_#0051d5]"
+                    : "bg-surface text-outline border-2 border-outline-variant"
+                }`}
+              >
+                {stageNum}
+              </div>
+              <span
+                className={`text-label-md ${
+                  isActive ? "text-secondary font-bold" : "text-on-surface-variant"
+                }`}
+              >
+                {label}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

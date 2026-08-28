@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BidPulse - Fit Analysis</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Geist:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#bec6e0",
+                        "primary-container": "#131b2e",
+                        "on-error": "#ffffff",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "on-secondary-fixed-variant": "#003ea8",
+                        "primary-fixed": "#dae2fd",
+                        "surface-bright": "#f8f9ff",
+                        "on-secondary-container": "#fefcff",
+                        "on-surface-variant": "#45464d",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "surface-container-low": "#eff4ff",
+                        "surface-container-highest": "#d3e4fe",
+                        "secondary-fixed": "#dbe1ff",
+                        "tertiary": "#000000",
+                        "outline-variant": "#c6c6cd",
+                        "tertiary-container": "#002113",
+                        "on-secondary-fixed": "#00174b",
+                        "surface-dim": "#cbdbf5",
+                        "on-primary-container": "#7c839b",
+                        "background": "#f8f9ff",
+                        "surface-variant": "#d3e4fe",
+                        "inverse-on-surface": "#eaf1ff",
+                        "error": "#ba1a1a",
+                        "surface-container": "#e5eeff",
+                        "surface-container-high": "#dce9ff",
+                        "on-secondary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed": "#131b2e",
+                        "on-tertiary": "#ffffff",
+                        "surface": "#f8f9ff",
+                        "primary": "#000000",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "on-tertiary-container": "#009668",
+                        "tertiary-fixed": "#6ffbbe",
+                        "error-container": "#ffdad6",
+                        "surface-tint": "#565e74",
+                        "on-error-container": "#93000a",
+                        "on-surface": "#0b1c30",
+                        "inverse-surface": "#213145",
+                        "on-tertiary-fixed": "#002113",
+                        "on-background": "#0b1c30",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "secondary": "#0051d5",
+                        "outline": "#76777d",
+                        "secondary-container": "#316bf3",
+                        "primary-fixed-dim": "#bec6e0",
+                        "on-primary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "container-max": "1440px",
+                        "gutter": "24px",
+                        "margin-mobile": "16px",
+                        "unit": "4px",
+                        "margin-desktop": "48px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-md": ["Geist"],
+                        "body-md": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "code-sm": ["Geist"],
+                        "display-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "title-lg": ["18px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "code-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .circular-chart { display: block; margin: 0 auto; max-width: 80%; max-height: 250px; }
+        .circle-bg { fill: none; stroke: #e2e8f0; stroke-width: 2; }
+        .circle { fill: none; stroke-width: 2; stroke-linecap: round; animation: progress 1s ease-out forwards; }
+        @keyframes progress { 0% { stroke-dasharray: 0 100; } }
+        
+        /* Modal Background Blur */
+        .modal-backdrop {
+            background-color: rgba(19, 27, 46, 0.4); /* primary-container with opacity */
+            backdrop-filter: blur(4px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex items-center justify-center p-4">
+<!-- Modal Backdrop -->
+<div class="fixed inset-0 modal-backdrop z-40 flex items-end sm:items-center justify-center p-4 sm:p-0">
+<!-- Modal Container -->
+<div class="bg-surface w-full max-w-2xl rounded-xl shadow-2xl flex flex-col max-h-[795px] overflow-hidden z-50 animate-[slideUp_0.3s_ease-out]">
+<!-- Header -->
+<div class="px-6 py-5 border-b border-outline-variant flex justify-between items-center bg-surface-bright sticky top-0 z-10">
+<div>
+<h2 class="font-title-lg text-title-lg text-on-surface">Fit Analysis</h2>
+<p class="font-code-sm text-code-sm text-on-surface-variant mt-1">SOL-2024-DOD-001</p>
+</div>
+<button class="p-2 hover:bg-surface-container rounded-full transition-colors group">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-on-surface" data-icon="close">close</span>
+</button>
+</div>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto p-6 space-y-8">
+<!-- Top Section: Score & Verdict -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+<!-- Circular Progress -->
+<div class="flex flex-col items-center justify-center relative">
+<svg class="circular-chart w-48 h-48 drop-shadow-sm" viewbox="0 0 36 36">
+<path class="circle-bg" d="M18 2.0845
+                                a 15.9155 15.9155 0 0 1 0 31.831
+                                a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+<path class="circle stroke-on-tertiary-container" d="M18 2.0845
+                                a 15.9155 15.9155 0 0 1 0 31.831
+                                a 15.9155 15.9155 0 0 1 0 -31.831" stroke-dasharray="92, 100"></path>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="font-headline-lg text-headline-lg text-on-surface">92%</span>
+<span class="font-label-md text-label-md text-on-surface-variant mt-1 uppercase tracking-widest">Match</span>
+</div>
+</div>
+<!-- Verdict -->
+<div class="bg-surface-container-low border-l-4 border-on-tertiary-container p-5 rounded-r-lg">
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase mb-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]" data-icon="verified">verified</span>
+                            The BidPulse Verdict
+                        </h3>
+<p class="font-body-md text-body-md text-on-surface">
+                            This opportunity represents an exceptionally high strategic fit. The requirements align directly with your recent DOD performance history and current technical certifications. Immediate pursuit is recommended.
+                        </p>
+</div>
+</div>
+<!-- Breakdown Section -->
+<div>
+<h3 class="font-title-lg text-title-lg text-on-surface mb-4">Score Breakdown</h3>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<!-- NAICS -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 hover:bg-surface-container-low transition-colors">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-md text-label-md text-on-surface font-semibold">NAICS Alignment</span>
+<span class="font-code-sm text-code-sm font-bold text-on-tertiary-container">100%</span>
+</div>
+<div class="w-full bg-surface-variant rounded-full h-1.5 mb-2">
+<div class="bg-on-tertiary-container h-1.5 rounded-full" style="width: 100%"></div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">Direct match for 541511 and 541512.</p>
+</div>
+<!-- Past Performance -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 hover:bg-surface-container-low transition-colors">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Past Performance</span>
+<span class="font-code-sm text-code-sm font-bold text-secondary-container">85%</span>
+</div>
+<div class="w-full bg-surface-variant rounded-full h-1.5 mb-2">
+<div class="bg-secondary-container h-1.5 rounded-full" style="width: 85%"></div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">Strong synergy with your recent GSA and DOD contracts.</p>
+</div>
+<!-- Capability -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 hover:bg-surface-container-low transition-colors">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Capability Overlap</span>
+<span class="font-code-sm text-code-sm font-bold text-on-tertiary-container">90%</span>
+</div>
+<div class="w-full bg-surface-variant rounded-full h-1.5 mb-2">
+<div class="bg-on-tertiary-container h-1.5 rounded-full" style="width: 90%"></div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">Matches 9/10 required technical certifications.</p>
+</div>
+<!-- Resource -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 hover:bg-surface-container-low transition-colors">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Resource Availability</span>
+<span class="font-code-sm text-code-sm font-bold text-[#b8860b]">75%</span>
+</div>
+<div class="w-full bg-surface-variant rounded-full h-1.5 mb-2">
+<div class="bg-[#b8860b] h-1.5 rounded-full" style="width: 75%"></div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">High team capacity for the requested period.</p>
+</div>
+</div>
+</div>
+<!-- Strengths & Risks -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Strengths -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-5">
+<h4 class="font-label-md text-label-md text-on-surface mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-on-tertiary-container" data-icon="thumb_up">thumb_up</span>
+                            Key Strengths
+                        </h4>
+<ul class="space-y-3">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-on-tertiary-container text-[18px] mt-0.5" data-icon="check_circle">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Established DOD relationship</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-on-tertiary-container text-[18px] mt-0.5" data-icon="check_circle">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Niche expertise in Zero Trust architecture</span>
+</li>
+</ul>
+</div>
+<!-- Risks -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-5">
+<h4 class="font-label-md text-label-md text-on-surface mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-error" data-icon="warning">warning</span>
+                            Potential Risks
+                        </h4>
+<ul class="space-y-3">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-error text-[18px] mt-0.5" data-icon="error">error</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Tight deadline (5 days remaining)</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-[#b8860b] text-[18px] mt-0.5" data-icon="lock">lock</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Requires TS/SCI clearance for 2 key personnel</span>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<!-- Footer Actions -->
+<div class="px-6 py-4 border-t border-outline-variant bg-surface-bright flex flex-col-reverse sm:flex-row justify-end gap-3 z-10">
+<button class="px-6 py-2.5 rounded border border-outline-variant text-on-surface font-label-md text-label-md hover:bg-surface-container transition-colors inset-border-subtle">
+                    Shortlist for Later
+                </button>
+<button class="px-6 py-2.5 rounded bg-primary-container text-on-primary font-label-md text-label-md hover:bg-inverse-surface transition-colors flex items-center justify-center gap-2 shadow-sm inset-border-subtle">
+<span class="material-symbols-outlined text-[18px]" data-icon="play_arrow">play_arrow</span>
+                    Accept &amp; Start Intake
+                </button>
+</div>
+</div>
+</div>
+<style>
+        .inset-border-subtle {
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
+        }
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</body></html>

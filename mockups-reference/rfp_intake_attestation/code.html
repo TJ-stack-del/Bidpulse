@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RFP Intake Screen - BidPulse</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Geist:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed": "#002113",
+                        "on-tertiary-container": "#009668",
+                        "surface-container": "#e5eeff",
+                        "surface-container-high": "#dce9ff",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "surface-bright": "#f8f9ff",
+                        "on-primary": "#ffffff",
+                        "on-surface-variant": "#45464d",
+                        "surface": "#f8f9ff",
+                        "error-container": "#ffdad6",
+                        "outline-variant": "#c6c6cd",
+                        "on-secondary-fixed": "#00174b",
+                        "secondary-container": "#316bf3",
+                        "tertiary-fixed": "#6ffbbe",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed": "#131b2e",
+                        "primary": "#000000",
+                        "on-primary-container": "#7c839b",
+                        "primary-fixed-dim": "#bec6e0",
+                        "surface-tint": "#565e74",
+                        "inverse-surface": "#213145",
+                        "inverse-primary": "#bec6e0",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#dae2fd",
+                        "on-background": "#0b1c30",
+                        "secondary-fixed": "#dbe1ff",
+                        "on-surface": "#0b1c30",
+                        "tertiary-container": "#002113",
+                        "surface-dim": "#cbdbf5",
+                        "tertiary": "#000000",
+                        "on-secondary-container": "#fefcff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-secondary-fixed-variant": "#003ea8",
+                        "surface-variant": "#d3e4fe",
+                        "on-error": "#ffffff",
+                        "primary-container": "#131b2e",
+                        "surface-container-highest": "#d3e4fe",
+                        "outline": "#76777d",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "surface-container-low": "#eff4ff",
+                        "secondary": "#0051d5",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "on-tertiary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "on-secondary": "#ffffff",
+                        "background": "#f8f9ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "container-max": "1440px",
+                        "margin-mobile": "16px",
+                        "margin-desktop": "48px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "code-sm": ["Geist"],
+                        "label-md": ["Geist"],
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "display-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "title-lg": ["18px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "code-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen font-body-lg flex flex-col">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-margin-desktop md:px-margin-desktop px-margin-mobile h-16 bg-surface border-b border-outline-variant flat no shadows">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">security</span>
+<span class="font-headline-md text-headline-md font-bold text-on-surface">BidPulse</span>
+</div>
+<!-- Desktop Nav -->
+<nav class="hidden md:flex gap-6">
+<a class="text-on-surface-variant hover:bg-surface-container-high transition-colors px-3 py-2 rounded-lg font-label-md text-label-md" href="#">Dashboard</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high transition-colors px-3 py-2 rounded-lg font-label-md text-label-md" href="#">Bids</a>
+<a class="text-secondary hover:bg-surface-container-high transition-colors px-3 py-2 rounded-lg font-label-md text-label-md font-bold bg-surface-container-highest" href="#">My RFPs</a>
+</nav>
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-container flex items-center justify-center shrink-0 border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a person looking at the camera, neutral lighting, corporate environment, high resolution." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvI3yLNJ-FOnqUXem-r3ZslCSgfcTC-K2nDHRHCCiuXxhiXZ1rotmrzGS2uTLPtnI2YoaXgVlQWMV0e3GLyXtMV6aZOYFRkw8tSVv26Ce7XRXWN5ShSKBgf0dCbvsRoPVkRPL_q6U4AMcg_0qfClqVFqnYI_Rox6CiI1HaMIka-G7x8zpqdliybf-4uL3RlWf3U_ny4_HhF3B2t57ZY9lpCLJCVZiM7EUlJxLyEniTIEbYMojZswBqKQ"/>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow pt-[80px] pb-[80px] md:pb-8 px-margin-mobile md:px-margin-desktop max-w-[1440px] mx-auto w-full flex flex-col gap-6">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mt-6">
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-1">RFP Intake Screen</p>
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Department of Defense Logistics Modernization</h1>
+</div>
+<div class="flex gap-2">
+<button class="px-4 py-2 bg-surface border border-outline-variant rounded hover:bg-surface-container-high transition-colors font-label-md text-label-md text-on-surface">Save Draft</button>
+</div>
+</div>
+<!-- 6-Stage Progress Stepper -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 mt-4">
+<div class="flex items-center justify-between relative">
+<!-- Connecting Line -->
+<div class="absolute top-1/2 left-0 w-full h-[2px] bg-outline-variant -translate-y-1/2 z-0"></div>
+<!-- Stages -->
+<div class="relative z-10 flex flex-col items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-secondary text-on-secondary flex items-center justify-center border-4 border-surface-container-lowest shadow-[0_0_0_2px_#0051d5] font-label-md text-label-md font-bold">1</div>
+<span class="font-label-md text-label-md text-secondary font-bold">Intake</span>
+</div>
+<div class="relative z-10 flex flex-col items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-surface text-outline border-2 border-outline-variant flex items-center justify-center font-label-md text-label-md">2</div>
+<span class="font-label-md text-label-md text-on-surface-variant">Review</span>
+</div>
+<div class="relative z-10 flex flex-col items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-surface text-outline border-2 border-outline-variant flex items-center justify-center font-label-md text-label-md">3</div>
+<span class="font-label-md text-label-md text-on-surface-variant">Pricing</span>
+</div>
+<div class="relative z-10 flex flex-col items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-surface text-outline border-2 border-outline-variant flex items-center justify-center font-label-md text-label-md">4</div>
+<span class="font-label-md text-label-md text-on-surface-variant">Drafting</span>
+</div>
+<div class="relative z-10 flex flex-col items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-surface text-outline border-2 border-outline-variant flex items-center justify-center font-label-md text-label-md">5</div>
+<span class="font-label-md text-label-md text-on-surface-variant">Approvals</span>
+</div>
+<div class="relative z-10 flex flex-col items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-surface text-outline border-2 border-outline-variant flex items-center justify-center font-label-md text-label-md">6</div>
+<span class="font-label-md text-label-md text-on-surface-variant">Submission</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
+<!-- Left Column: Details -->
+<div class="lg:col-span-2 flex flex-col gap-6">
+<!-- Core Details Card -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
+<h2 class="font-title-lg text-title-lg text-on-surface mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant">info</span>
+                        Solicitation Details
+                    </h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
+<div>
+<label class="font-label-md text-label-md text-on-surface-variant block mb-1">Agency Name</label>
+<div class="font-body-md text-body-md text-on-surface bg-surface-container-low px-3 py-2 rounded border border-outline-variant/50">Defense Logistics Agency (DLA)</div>
+</div>
+<div>
+<label class="font-label-md text-label-md text-on-surface-variant block mb-1">Solicitation Number</label>
+<div class="font-code-sm text-code-sm text-on-surface bg-surface-container-low px-3 py-2 rounded border border-outline-variant/50 flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]">tag</span>
+                                SP4709-23-R-0014
+                            </div>
+</div>
+<div>
+<label class="font-label-md text-label-md text-on-surface-variant block mb-1">Bid Due Date</label>
+<div class="font-body-md text-body-md text-on-surface bg-surface-container-low px-3 py-2 rounded border border-outline-variant/50 flex items-center gap-2 text-error">
+<span class="material-symbols-outlined text-[16px]">calendar_today</span>
+                                Oct 24, 2024 - 14:00 EST
+                            </div>
+</div>
+<div>
+<label class="font-label-md text-label-md text-on-surface-variant block mb-1">Estimated Value</label>
+<div class="font-body-md text-body-md text-on-surface bg-surface-container-low px-3 py-2 rounded border border-outline-variant/50">$45,000,000 - $60,000,000</div>
+</div>
+<div class="md:col-span-2">
+<label class="font-label-md text-label-md text-on-surface-variant block mb-1">Summary Description</label>
+<p class="font-body-md text-body-md text-on-surface bg-surface-container-low px-3 py-2 rounded border border-outline-variant/50 min-h-[80px]">
+                                 Seeking proposals for a comprehensive logistics modernization platform to streamline supply chain operations, enhance predictive maintenance scheduling, and integrate with existing legacy defense systems.
+                             </p>
+</div>
+</div>
+</div>
+<!-- Procurement Integrity Act Attestation -->
+<div class="bg-surface-container-lowest border-l-4 border-l-secondary border border-outline-variant rounded-r-xl p-6 shadow-sm">
+<h2 class="font-title-lg text-title-lg text-on-surface mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">gavel</span>
+                        Procurement Integrity Act Attestation
+                    </h2>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6 bg-surface p-4 rounded border border-outline-variant/30">
+                        By submitting this intake form, you acknowledge and certify compliance with the Procurement Integrity Act (41 U.S.C. §§ 2101-2107). You attest that no prohibited activities, including unauthorized disclosure or obtaining of contractor bid or proposal information or source selection information, have occurred or will occur in connection with this procurement.
+                    </p>
+<label class="flex items-start gap-3 cursor-pointer group">
+<div class="relative flex items-center justify-center pt-1">
+<input class="peer appearance-none w-5 h-5 border border-outline-variant rounded bg-surface checked:bg-secondary checked:border-secondary transition-colors cursor-pointer" required="" type="checkbox"/>
+<span class="material-symbols-outlined absolute text-on-primary text-[16px] opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity">check</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface group-hover:text-primary transition-colors">
+                            I have read, understand, and agree to the Procurement Integrity Act requirements for this solicitation. <span class="text-error">*</span>
+</span>
+</label>
+</div>
+</div>
+<!-- Right Column: Actions -->
+<div class="flex flex-col gap-6">
+<!-- Action Card -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 sticky top-[88px]">
+<h3 class="font-title-lg text-title-lg text-on-surface mb-4">Intake Actions</h3>
+<div class="flex flex-col gap-3">
+<button class="w-full py-3 px-4 bg-primary text-on-primary rounded font-label-md text-label-md hover:bg-on-background transition-colors flex items-center justify-center gap-2 shadow-sm border border-transparent active:scale-95 duration-100">
+<span class="material-symbols-outlined text-[18px]">send</span>
+                            Submit Intake
+                        </button>
+<button class="w-full py-3 px-4 bg-surface text-secondary border border-secondary rounded font-label-md text-label-md hover:bg-surface-container-low transition-colors flex items-center justify-center gap-2 active:scale-95 duration-100">
+<span class="material-symbols-outlined text-[18px]">group_add</span>
+                            Assign Reviewers
+                        </button>
+</div>
+<hr class="my-6 border-outline-variant"/>
+<div class="font-label-md text-label-md text-on-surface-variant mb-2">Team Members</div>
+<div class="flex items-center gap-[-8px]">
+<div class="w-8 h-8 rounded-full overflow-hidden border-2 border-surface-container-lowest z-30">
+<img class="w-full h-full object-cover" data-alt="Corporate headshot of a team member in a well lit modern office environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjZLjmNAPRRUw9RJMU7qKW8V2HfQGS5ORHSv9u73CI86hRE1C1EUC0NceIKVWyl6t1wfSBvwTXbMuFF7W_fTMPoNnuAATpbtOWqR0f66M2Xj9FdWrkvcl5aBXMKLH_VXP1iugxiAAEziIXxE4u3M317vWyzCF8vEetgHKTTxHbTrY1ibjIbxAJJdn6XziBx-ledYybCbC_qZSnib0wWWURRICTfz0rJtedpS9_YDpoY6XG8HXmzPwKzQ"/>
+</div>
+<div class="w-8 h-8 rounded-full overflow-hidden border-2 border-surface-container-lowest z-20 -ml-2">
+<img class="w-full h-full object-cover" data-alt="Corporate headshot of a diverse team member in a well lit modern office environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjCqkAzHeCAUU5ZHGTGBNP8SDl_8fGNBwfVdsDcUnBz7iYaEDfXtGP5xNOxmyAou2xieM-4ewKxdKUX-60b2guf49lwx9wDeyI2JWhq6feuVcNoTGug1UQwLebnbH7xucftW6bkSs_JujuJ8RULDWyGvQuXAi84cRlv3HwRDfJ53fdGUZ45QALZ6v0FYVd4c41O30oG1Kt6A88hNwoiQx-qTSHzRWmjEt3Mc-uMv_NL3e-S4beatYWfQ"/>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-container-high border-2 border-surface-container-lowest z-10 -ml-2 flex items-center justify-center text-code-sm text-on-surface">
+                            +2
+                         </div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 flex justify-around items-center px-margin-mobile py-2 bg-surface dark:bg-primary-container border-t border-outline-variant dark:border-on-primary-fixed-variant flat no shadows">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-primary-container hover:text-secondary dark:hover:text-secondary-fixed active:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-label-md-mobile mt-1">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-primary-container hover:text-secondary dark:hover:text-secondary-fixed active:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined">gavel</span>
+<span class="font-label-md text-label-md-mobile mt-1">Bids</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed font-bold bg-surface-container-highest dark:bg-on-primary-fixed-variant rounded-xl px-3 py-1 hover:text-secondary dark:hover:text-secondary-fixed active:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">description</span>
+<span class="font-label-md text-label-md-mobile mt-1">My RFPs</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-primary-container hover:text-secondary dark:hover:text-secondary-fixed active:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="font-label-md text-label-md-mobile mt-1">Profile</span>
+</a>
+</nav>
+</body></html>

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BidPulse Pro - Client Review &amp; Feedback</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#4edea3",
+                        "secondary-fixed": "#dbe1ff",
+                        "error-container": "#ffdad6",
+                        "inverse-surface": "#213145",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed": "#131b2e",
+                        "on-error-container": "#93000a",
+                        "surface-container-high": "#dce9ff",
+                        "surface-variant": "#d3e4fe",
+                        "surface-bright": "#f8f9ff",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-highest": "#d3e4fe",
+                        "tertiary": "#000000",
+                        "surface-tint": "#565e74",
+                        "surface-container-low": "#eff4ff",
+                        "tertiary-container": "#002113",
+                        "on-surface": "#0b1c30",
+                        "on-secondary-container": "#fefcff",
+                        "primary-container": "#131b2e",
+                        "surface-container": "#e5eeff",
+                        "on-tertiary-container": "#009668",
+                        "on-background": "#0b1c30",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "surface-dim": "#cbdbf5",
+                        "inverse-on-surface": "#eaf1ff",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed": "#00174b",
+                        "tertiary-fixed": "#6ffbbe",
+                        "outline": "#76777d",
+                        "primary-fixed": "#dae2fd",
+                        "on-tertiary-fixed": "#002113",
+                        "secondary": "#0051d5",
+                        "surface": "#f8f9ff",
+                        "on-surface-variant": "#45464d",
+                        "on-secondary-fixed-variant": "#003ea8",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "inverse-primary": "#bec6e0",
+                        "on-primary-container": "#7c839b",
+                        "primary-fixed-dim": "#bec6e0",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-container": "#316bf3",
+                        "outline-variant": "#c6c6cd",
+                        "background": "#f8f9ff",
+                        "on-primary": "#ffffff",
+                        "primary": "#000000",
+                        "on-error": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "unit": "4px",
+                        "margin-desktop": "48px",
+                        "gutter": "24px",
+                        "container-max": "1440px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Geist"],
+                        "code-sm": ["Geist"],
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "title-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "code-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "title-lg": ["18px", { "lineHeight": "28px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .stage-pulse { box-shadow: 0 0 0 0 rgba(49, 107, 243, 0.4); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(49, 107, 243, 0.4); } 70% { box-shadow: 0 0 0 6px rgba(49, 107, 243, 0); } 100% { box-shadow: 0 0 0 0 rgba(49, 107, 243, 0); } }
+        /* Scrollbar styling for fixed height containers */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-background text-on-background h-full flex overflow-hidden">
+<!-- SideNavBar (Shared Component) -->
+<nav class="bg-surface text-primary font-label-md text-label-md h-full w-64 flex flex-col border-r border-outline-variant fixed left-0 top-0 bottom-0 z-40 hidden md:flex">
+<!-- Header -->
+<div class="p-gutter border-b border-outline-variant flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-primary-container flex items-center justify-center shrink-0">
+<img alt="Organization Logo" class="w-6 h-6 object-contain" data-alt="A minimal, corporate logo featuring a stylized geometric shape in deep navy blue, representing an enterprise procurement platform. The design is clean, sharp, and highly professional, set against a pristine white background. It conveys trust and efficiency." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC76q8w59Nm9y13qfjiEzr478FSJHjHvqJmYlvAnwazYyIl51qqPJXzuv6nD5Zm1CFnLMfRVZ3garGQ8qe_p7G8bfcW-GO5kpm6YkxfIQXAF8co4jzDDwwN_TkngWpsvOxN68GcoL2KI6_wi0YR7mc3dBUsV623lnxdijr2Ykfm_y4ZqmS7dYOKvQylCit1NnJKM_MBzaKjz0bOTFJ7eNj4wMHy1m1uFv4nxURJw4rsSRpuZqFCb2g5fg"/>
+</div>
+<div>
+<h1 class="font-title-lg text-title-lg font-bold text-primary">BidPulse Pro</h1>
+<p class="text-on-surface-variant font-code-sm text-code-sm">Enterprise Tier</p>
+</div>
+</div>
+<!-- Navigation Tabs -->
+<div class="flex-1 overflow-y-auto py-unit mt-4">
+<ul class="flex flex-col gap-1">
+<li>
+<a class="flex items-center gap-3 px-gutter py-3 text-on-surface-variant hover:bg-surface-container-low transition-all cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+                        Dashboard
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-gutter py-3 text-on-surface-variant hover:bg-surface-container-low transition-all cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">insights</span>
+                        Market Intelligence
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-gutter py-3 text-secondary border-r-4 border-secondary bg-surface-container-high transition-all cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">description</span>
+                        My RFPs
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-gutter py-3 text-on-surface-variant hover:bg-surface-container-low transition-all cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">admin_panel_settings</span>
+                        Admin Portal
+                    </a>
+</li>
+</ul>
+</div>
+<!-- Footer Tabs -->
+<div class="border-t border-outline-variant p-4">
+<ul class="flex flex-col gap-1">
+<li>
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-container-low transition-all cursor-pointer active:scale-95 rounded" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">help</span>
+                        Support
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-container-low transition-all cursor-pointer active:scale-95 rounded" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">logout</span>
+                        Sign Out
+                    </a>
+</li>
+</ul>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col md:ml-64 h-full relative">
+<!-- TopNavBar (Shared Component) -->
+<header class="bg-surface-container-lowest text-primary font-body-md text-body-md w-full h-16 border-b border-outline-variant flex justify-between items-center px-gutter shrink-0">
+<!-- Left Side (Brand/Search Context) -->
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md font-bold text-primary md:hidden">BidPulse</span>
+<!-- Breadcrumbs/Context for Desktop -->
+<div class="hidden md:flex items-center gap-2 text-on-surface-variant">
+<span>My RFPs</span>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span class="font-medium text-primary">RFP-2023-094: City Infrastructure Overhaul</span>
+<span class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-code-sm text-code-sm ml-2">Review Phase</span>
+</div>
+</div>
+<!-- Right Side (Actions) -->
+<div class="flex items-center gap-4">
+<button aria-label="Notifications" class="text-on-surface-variant hover:bg-surface-container transition-colors p-2 rounded-full cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button aria-label="Settings" class="text-on-surface-variant hover:bg-surface-container transition-colors p-2 rounded-full cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant shrink-0 cursor-pointer">
+<img alt="User profile avatar" class="w-full h-full object-cover" data-alt="A professional headshot of an enterprise user, sharp focus, natural lighting, conveying competence and reliability, suitable for a corporate SaaS avatar." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMOUyC7Q2cfAE58WiZPqwiPARpYJK8GfrfrYArB5sPJgX2EydDy6Zw4MCFVqU7_5hPHHy_-CezZhpHdIH3tlnuOJzRaKWz7dMFSRXIXBoX0-WlgOV8wy0rcDfyPmR4vIqJohdL4cb29jBjgEwtrLroH6CuXL7S4Jzw-5ze8UVrgOqe4qS3BJMUlIUbNJ8fNVaTarpvEQchwVb9AMbo2jz3Q9AMzN7tAFasEBE2fPKf-Rk-oCTAHVS44A"/>
+</div>
+</div>
+</header>
+<!-- Canvas -->
+<main class="flex-1 overflow-y-auto bg-surface-bright p-gutter flex flex-col gap-6 custom-scrollbar">
+<div class="max-w-[1440px] mx-auto w-full flex flex-col h-full gap-6">
+<!-- Stage Indicator (Lifecycle) -->
+<div class="w-full bg-surface-container-lowest border border-outline-variant rounded p-4 shrink-0 flex flex-col gap-3">
+<div class="flex justify-between items-center mb-1">
+<h2 class="font-title-lg text-title-lg text-primary">RFP Progress Tracking</h2>
+<span class="font-label-md text-label-md text-secondary">Stage 4 of 6</span>
+</div>
+<div class="flex items-center justify-between relative">
+<!-- Connecting Line -->
+<div class="absolute left-[5%] right-[5%] top-1/2 -translate-y-1/2 h-[2px] bg-outline-variant -z-10"></div>
+<div class="absolute left-[5%] right-[38%] top-1/2 -translate-y-1/2 h-[2px] bg-tertiary-fixed-dim -z-10"></div>
+<!-- Stage 1 -->
+<div class="flex flex-col items-center gap-2 z-10 w-[16%]">
+<div class="w-6 h-6 rounded-full bg-tertiary-fixed-dim flex items-center justify-center border-2 border-surface-container-lowest">
+<span class="material-symbols-outlined text-[14px] text-tertiary-container" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface text-center">Drafting</span>
+</div>
+<!-- Stage 2 -->
+<div class="flex flex-col items-center gap-2 z-10 w-[16%]">
+<div class="w-6 h-6 rounded-full bg-tertiary-fixed-dim flex items-center justify-center border-2 border-surface-container-lowest">
+<span class="material-symbols-outlined text-[14px] text-tertiary-container" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface text-center">Internal Review</span>
+</div>
+<!-- Stage 3 -->
+<div class="flex flex-col items-center gap-2 z-10 w-[16%]">
+<div class="w-6 h-6 rounded-full bg-tertiary-fixed-dim flex items-center justify-center border-2 border-surface-container-lowest">
+<span class="material-symbols-outlined text-[14px] text-tertiary-container" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface text-center">Vendor Q&amp;A</span>
+</div>
+<!-- Stage 4 (Active) -->
+<div class="flex flex-col items-center gap-2 z-10 w-[16%]">
+<div class="w-6 h-6 rounded-full bg-secondary-container stage-pulse flex items-center justify-center border-2 border-surface-container-lowest">
+<div class="w-2 h-2 rounded-full bg-on-secondary"></div>
+</div>
+<span class="font-label-md text-label-md text-primary font-bold text-center">Client Review</span>
+</div>
+<!-- Stage 5 -->
+<div class="flex flex-col items-center gap-2 z-10 w-[16%]">
+<div class="w-6 h-6 rounded-full bg-surface-container-lowest border-2 border-outline-variant flex items-center justify-center">
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant text-center">Final Approval</span>
+</div>
+<!-- Stage 6 -->
+<div class="flex flex-col items-center gap-2 z-10 w-[16%]">
+<div class="w-6 h-6 rounded-full bg-surface-container-lowest border-2 border-outline-variant flex items-center justify-center">
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant text-center">Publish</span>
+</div>
+</div>
+</div>
+<!-- Split Pane Layout -->
+<div class="flex-1 flex flex-col lg:flex-row gap-6 min-h-0">
+<!-- Left Pane: Deliverables for Review -->
+<div class="w-full lg:w-1/2 flex flex-col gap-4 min-h-0">
+<div class="flex justify-between items-center shrink-0">
+<h3 class="font-headline-md text-headline-md text-primary">Deliverables for Review</h3>
+<button class="flex items-center gap-2 text-secondary font-label-md text-label-md hover:bg-surface-container px-3 py-1.5 rounded transition-colors">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                                Download All
+                            </button>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar pr-2 flex flex-col gap-3">
+<!-- Deliverable Card 1 (Approved) -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded p-4 flex flex-col gap-3 border-l-[4px] border-l-tertiary-fixed-dim hover:bg-surface-container-low transition-colors">
+<div class="flex justify-between items-start">
+<div class="flex gap-3">
+<div class="p-2 bg-surface-container rounded text-on-surface-variant">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">description</span>
+</div>
+<div>
+<h4 class="font-title-lg text-title-lg text-primary leading-tight">Executive Summary.pdf</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Version 2.1 • Uploaded Oct 12, 09:41 AM</p>
+</div>
+</div>
+<span class="px-2 py-1 bg-[#e6f4ea] text-[#1e8e3e] font-label-md text-label-md rounded-full flex items-center gap-1 border border-[#1e8e3e]/20">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                        Approved
+                                    </span>
+</div>
+<div class="flex justify-end gap-2 mt-2">
+<button class="px-4 py-2 border border-outline-variant rounded text-on-surface font-label-md text-label-md hover:bg-surface-container transition-colors">View</button>
+</div>
+</div>
+<!-- Deliverable Card 2 (Pending Review) -->
+<div class="bg-surface-container-lowest border border-secondary-container rounded p-4 flex flex-col gap-3 shadow-sm relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-secondary-container"></div>
+<div class="flex justify-between items-start pl-2">
+<div class="flex gap-3">
+<div class="p-2 bg-secondary-container/10 rounded text-secondary-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">table</span>
+</div>
+<div>
+<h4 class="font-title-lg text-title-lg text-primary leading-tight">Pricing_Matrix_V3.xlsx</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Version 3.0 • Uploaded Oct 14, 14:22 PM</p>
+</div>
+</div>
+<span class="px-2 py-1 bg-surface-container text-secondary font-label-md text-label-md rounded-full flex items-center gap-1 border border-secondary/20">
+<span class="material-symbols-outlined text-[14px]">pending</span>
+                                        Requires Review
+                                    </span>
+</div>
+<div class="flex justify-end gap-2 mt-2">
+<button class="px-4 py-2 border border-outline-variant rounded text-on-surface font-label-md text-label-md hover:bg-surface-container transition-colors">View Document</button>
+</div>
+</div>
+<!-- Deliverable Card 3 (Changes Requested) -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded p-4 flex flex-col gap-3 hover:bg-surface-container-low transition-colors">
+<div class="flex justify-between items-start">
+<div class="flex gap-3">
+<div class="p-2 bg-surface-container rounded text-on-surface-variant">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">article</span>
+</div>
+<div>
+<h4 class="font-title-lg text-title-lg text-primary leading-tight">Technical_Requirements.docx</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Version 1.4 • Uploaded Oct 10, 11:05 AM</p>
+</div>
+</div>
+<span class="px-2 py-1 bg-[#fff8e1] text-[#f57f17] font-label-md text-label-md rounded-full flex items-center gap-1 border border-[#f57f17]/20">
+<span class="material-symbols-outlined text-[14px]">change_circle</span>
+                                        Changes Req.
+                                    </span>
+</div>
+<div class="flex justify-end gap-2 mt-2">
+<button class="px-4 py-2 border border-outline-variant rounded text-on-surface font-label-md text-label-md hover:bg-surface-container transition-colors">View</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Pane: Feedback Log & Form -->
+<div class="w-full lg:w-1/2 bg-surface-container-lowest border border-outline-variant rounded flex flex-col min-h-0">
+<div class="p-4 border-b border-outline-variant flex justify-between items-center shrink-0 bg-surface-bright">
+<h3 class="font-title-lg text-title-lg text-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">forum</span>
+                                Feedback Log (Pricing_Matrix_V3.xlsx)
+                            </h3>
+<div class="flex gap-2">
+<button class="p-1.5 text-on-surface-variant hover:bg-surface-container rounded transition-colors"><span class="material-symbols-outlined text-[20px]">filter_list</span></button>
+</div>
+</div>
+<!-- Threaded Comments -->
+<div class="flex-1 p-4 overflow-y-auto custom-scrollbar flex flex-col gap-6">
+<!-- Comment Thread 1 -->
+<div class="flex flex-col gap-3">
+<div class="flex gap-3">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-label-md text-label-md shrink-0">JD</div>
+<div class="flex-1">
+<div class="flex justify-between items-baseline">
+<span class="font-label-md text-label-md font-bold text-primary">Jane Doe (Client)</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">2 hours ago</span>
+</div>
+<div class="bg-surface-container p-3 rounded rounded-tl-none mt-1 text-body-md text-on-surface border border-outline-variant/50">
+                                            Cell G45 seems to have a calculation error. The total doesn't reflect the sum of the sub-components listed above it. Can we please verify the formula?
+                                        </div>
+</div>
+</div>
+<!-- Reply -->
+<div class="flex gap-3 ml-11">
+<div class="w-6 h-6 rounded-full bg-secondary-container text-on-secondary flex items-center justify-center font-label-md text-[10px] shrink-0">SA</div>
+<div class="flex-1">
+<div class="flex justify-between items-baseline">
+<span class="font-label-md text-label-md font-bold text-primary">System Admin</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">1 hour ago</span>
+</div>
+<div class="bg-surface-container-low p-3 rounded rounded-tl-none mt-1 text-body-md text-on-surface border border-outline-variant/30">
+                                            Thanks for catching that, Jane. I've flagged this for the pricing team. They are updating the master sheet now and will upload v3.1 shortly.
+                                        </div>
+</div>
+</div>
+</div>
+<!-- Comment Thread 2 -->
+<div class="flex flex-col gap-3">
+<div class="flex gap-3">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-label-md text-label-md shrink-0">JD</div>
+<div class="flex-1">
+<div class="flex justify-between items-baseline">
+<span class="font-label-md text-label-md font-bold text-primary">Jane Doe (Client)</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">Oct 14, 15:30</span>
+</div>
+<div class="bg-surface-container p-3 rounded rounded-tl-none mt-1 text-body-md text-on-surface border border-outline-variant/50">
+                                            Are the environmental compliance costs factored into row 12? It's not explicitly labeled.
+                                        </div>
+</div>
+</div>
+</div>
+</div>
+<!-- Add Feedback Form -->
+<div class="p-4 border-t border-outline-variant bg-surface-bright shrink-0">
+<form class="flex flex-col gap-3">
+<label class="sr-only" for="feedback-input">Add feedback</label>
+<textarea class="w-full border border-outline-variant rounded p-3 text-body-md text-on-surface focus:border-secondary-container focus:ring-1 focus:ring-secondary-container custom-scrollbar resize-none bg-surface-container-lowest" id="feedback-input" placeholder="Add feedback or request changes for Pricing_Matrix_V3.xlsx..." rows="3"></textarea>
+<div class="flex justify-between items-center">
+<button class="text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[20px]">attach_file</span>
+<span class="font-label-md text-label-md">Attach File</span>
+</button>
+<button class="bg-secondary-container text-on-secondary px-4 py-2 rounded font-label-md text-label-md hover:bg-on-secondary-fixed-variant transition-colors shadow-sm flex items-center gap-2" type="button">
+                                        Post Feedback
+                                        <span class="material-symbols-outlined text-[18px]">send</span>
+</button>
+</div>
+</form>
+</div>
+</div>
+</div>
+<!-- Bottom Anchor: Final Approval Gate -->
+<div class="mt-auto border-t border-outline-variant pt-6 pb-2 flex justify-between items-center shrink-0 bg-surface-bright">
+<div>
+<h4 class="font-title-lg text-title-lg text-primary">Ready to Complete Review?</h4>
+<p class="text-body-md font-body-md text-on-surface-variant">Ensure all feedback is logged before proceeding to Final Approval.</p>
+</div>
+<div class="flex gap-4 items-center">
+<button class="px-6 py-2.5 border border-outline-variant rounded text-primary font-label-md text-label-md hover:bg-surface-container transition-colors shadow-sm bg-surface-container-lowest">
+                            Save Draft
+                        </button>
+<button class="px-6 py-2.5 bg-primary text-on-primary rounded font-label-md text-label-md hover:bg-on-primary-fixed-variant transition-colors shadow-sm flex items-center gap-2 border-b-2 border-r-2 border-black/20">
+                            Complete Review Phase
+                            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

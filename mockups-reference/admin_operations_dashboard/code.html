@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BidPulse Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Geist:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary": "#ffffff",
+                        "primary": "#000000",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "surface-container": "#e5eeff",
+                        "secondary": "#0051d5",
+                        "on-secondary-fixed-variant": "#003ea8",
+                        "on-secondary-container": "#fefcff",
+                        "on-background": "#0b1c30",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "on-surface": "#0b1c30",
+                        "surface-dim": "#cbdbf5",
+                        "secondary-container": "#316bf3",
+                        "inverse-primary": "#bec6e0",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed": "#6ffbbe",
+                        "on-secondary-fixed": "#00174b",
+                        "surface-variant": "#d3e4fe",
+                        "on-error-container": "#93000a",
+                        "surface-container-low": "#eff4ff",
+                        "surface-container-high": "#dce9ff",
+                        "on-tertiary-fixed": "#002113",
+                        "inverse-surface": "#213145",
+                        "tertiary-container": "#002113",
+                        "primary-fixed": "#dae2fd",
+                        "on-primary": "#ffffff",
+                        "primary-container": "#131b2e",
+                        "on-primary-fixed": "#131b2e",
+                        "on-surface-variant": "#45464d",
+                        "outline": "#76777d",
+                        "error-container": "#ffdad6",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-container": "#009668",
+                        "on-error": "#ffffff",
+                        "surface-bright": "#f8f9ff",
+                        "tertiary": "#000000",
+                        "surface": "#f8f9ff",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "background": "#f8f9ff",
+                        "on-primary-container": "#7c839b",
+                        "error": "#ba1a1a",
+                        "outline-variant": "#c6c6cd",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "secondary-fixed": "#dbe1ff",
+                        "surface-container-highest": "#d3e4fe",
+                        "surface-tint": "#565e74",
+                        "primary-fixed-dim": "#bec6e0"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-desktop": "48px",
+                        "container-max": "1440px",
+                        "margin-mobile": "16px",
+                        "unit": "4px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "code-sm": ["Geist"],
+                        "body-lg": ["Inter"],
+                        "label-md": ["Geist"],
+                        "display-lg": ["Inter"],
+                        "title-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "code-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "title-lg": ["18px", { "lineHeight": "28px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #F8FAFC; color: #0b1c30; }
+        .data-table-row:nth-child(even) { background-color: #F8FAFC; }
+        .data-table-row:nth-child(odd) { background-color: #ffffff; }
+        .success-border { border-left: 4px solid #009668; }
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid #E2E8F0; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-body-md antialiased pb-24 md:pb-0 md:pt-16">
+<!-- TopAppBar (Web & Mobile Anchor) -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-margin-mobile h-16 bg-surface dark:bg-primary-container border-b border-outline-variant dark:border-on-primary-fixed-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary dark:text-secondary-fixed">security</span>
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface dark:text-on-primary">BidPulse</h1>
+</div>
+<div class="flex items-center">
+<img class="w-8 h-8 rounded-full object-cover" data-alt="A small, professional corporate headshot of a female executive in a minimalist studio setting. The lighting is soft and flat, emphasizing clarity and approachability. The background is a stark, clean white to match a high-contrast UI design." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCyE1Utdqbohr4WKSOidwNwV6lRqsrtWtT0mMkyT3pg7mcXgYANRTvlKl61oDNlY-oiZHgCrwaSOrYHmux61zeGUbk8-Y6A1NKXnCD0Bkn9oqdnb842M_jBfF_RR7a0JY3Rq8pxn73Ui-qdLRqQlnlNJaQUQVp-4zIWlEnPhQ9aYB7K8A5NADA8t142r_LXdACPDsHd9sQpLEuDATzqgrIGJR5FeWNJpD72zcj4eHLrWFE8P3FfE42MpA"/>
+</div>
+</header>
+<main class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-gutter grid grid-cols-1 md:grid-cols-12 gap-gutter mt-16 md:mt-0">
+<!-- Header Section -->
+<div class="col-span-1 md:col-span-12 mb-4">
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">Fulfillment Pipeline Overview</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-2">Executive summary of active audits, queue health, and team capacity.</p>
+</div>
+<!-- Metrics Grid (Bento Style) -->
+<div class="col-span-1 md:col-span-12 grid grid-cols-1 md:grid-cols-4 gap-4">
+<div class="glass-card rounded-lg p-4 flex flex-col justify-between h-32 hover:bg-[#F1F5F9] transition-colors cursor-pointer">
+<div class="flex justify-between items-start">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase">Active Audits</span>
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">analytics</span>
+</div>
+<div class="font-display-lg text-display-lg text-on-surface">14</div>
+</div>
+<div class="glass-card rounded-lg p-4 flex flex-col justify-between h-32 hover:bg-[#F1F5F9] transition-colors cursor-pointer">
+<div class="flex justify-between items-start">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase">Pending Review</span>
+<span class="material-symbols-outlined text-tertiary-fixed-dim">pending_actions</span>
+</div>
+<div class="font-display-lg text-display-lg text-on-surface">27</div>
+</div>
+<div class="glass-card rounded-lg p-4 flex flex-col justify-between h-32 hover:bg-[#F1F5F9] transition-colors cursor-pointer">
+<div class="flex justify-between items-start">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase">Revenue at Risk</span>
+<span class="material-symbols-outlined text-error">warning</span>
+</div>
+<div class="font-display-lg text-display-lg text-on-surface">$4.2M</div>
+</div>
+<div class="glass-card rounded-lg p-4 flex flex-col justify-between h-32 hover:bg-[#F1F5F9] transition-colors cursor-pointer">
+<div class="flex justify-between items-start">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase">Avg Completion</span>
+<span class="material-symbols-outlined text-on-surface-variant">timer</span>
+</div>
+<div class="font-display-lg text-display-lg text-on-surface">18d</div>
+</div>
+</div>
+<!-- Main Content Area -->
+<div class="col-span-1 md:col-span-8 flex flex-col gap-gutter">
+<!-- Priority Audit Queue -->
+<section class="glass-card rounded-lg p-6">
+<div class="flex justify-between items-center mb-4">
+<h3 class="font-title-lg text-title-lg text-on-surface">Priority Audit Queue (Stage 4)</h3>
+<button class="font-label-md text-label-md text-secondary hover:underline">View All</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-outline-variant">
+<th class="font-label-md text-label-md text-on-surface-variant py-2 px-3">Agency</th>
+<th class="font-label-md text-label-md text-on-surface-variant py-2 px-3">Solicitation #</th>
+<th class="font-label-md text-label-md text-on-surface-variant py-2 px-3">Value</th>
+<th class="font-label-md text-label-md text-on-surface-variant py-2 px-3 text-right">Time in Stage</th>
+</tr>
+</thead>
+<tbody>
+<tr class="data-table-row border-b border-outline-variant border-opacity-50">
+<td class="py-3 px-3 font-body-md text-on-surface font-semibold">Dept of Defense</td>
+<td class="py-3 px-3 font-code-sm text-code-sm text-on-surface-variant">W9128F-23-R-0012</td>
+<td class="py-3 px-3 font-code-sm text-code-sm text-on-surface-variant">$1.5M</td>
+<td class="py-3 px-3 text-right">
+<span class="inline-block px-2 py-1 rounded-full bg-error-container text-on-error-container font-label-md text-label-md">Overdue</span>
+</td>
+</tr>
+<tr class="data-table-row border-b border-outline-variant border-opacity-50">
+<td class="py-3 px-3 font-body-md text-on-surface font-semibold">Veterans Affairs</td>
+<td class="py-3 px-3 font-code-sm text-code-sm text-on-surface-variant">VA248-23-Q-1145</td>
+<td class="py-3 px-3 font-code-sm text-code-sm text-on-surface-variant">$850K</td>
+<td class="py-3 px-3 text-right">
+<span class="inline-block px-2 py-1 rounded-full bg-surface-variant text-on-surface-variant font-label-md text-label-md">4h remaining</span>
+</td>
+</tr>
+<tr class="data-table-row border-b border-outline-variant border-opacity-50">
+<td class="py-3 px-3 font-body-md text-on-surface font-semibold">NASA</td>
+<td class="py-3 px-3 font-code-sm text-code-sm text-on-surface-variant">80JSC022R0003</td>
+<td class="py-3 px-3 font-code-sm text-code-sm text-on-surface-variant">$2.1M</td>
+<td class="py-3 px-3 text-right">
+<span class="inline-block px-2 py-1 rounded-full bg-surface-variant text-on-surface-variant font-label-md text-label-md">12h remaining</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Stage Distribution Chart (Placeholder for visual) -->
+<section class="glass-card rounded-lg p-6">
+<h3 class="font-title-lg text-title-lg text-on-surface mb-4">Stage Distribution</h3>
+<div class="h-48 bg-surface-container-low rounded flex items-end justify-around p-4">
+<!-- CSS Bar Chart Representation -->
+<div class="w-8 bg-outline-variant rounded-t" style="height: 20%;" title="Stage 1"></div>
+<div class="w-8 bg-outline-variant rounded-t" style="height: 40%;" title="Stage 2"></div>
+<div class="w-8 bg-outline-variant rounded-t" style="height: 60%;" title="Stage 3"></div>
+<div class="w-8 bg-secondary rounded-t relative" style="height: 80%;" title="Stage 4">
+<div class="absolute -top-6 left-1/2 transform -translate-x-1/2 font-label-md text-label-md text-on-surface">14</div>
+</div>
+<div class="w-8 bg-outline-variant rounded-t" style="height: 30%;" title="Stage 5"></div>
+<div class="w-8 bg-outline-variant rounded-t" style="height: 10%;" title="Stage 6"></div>
+</div>
+<div class="flex justify-around mt-2 font-label-md text-label-md text-on-surface-variant">
+<span>S1</span><span>S2</span><span>S3</span><span class="font-bold text-secondary">S4</span><span>S5</span><span>S6</span>
+</div>
+</section>
+</div>
+<!-- Sidebar Area -->
+<div class="col-span-1 md:col-span-4 flex flex-col gap-gutter">
+<!-- System Health Alerts -->
+<section class="glass-card rounded-lg p-6 border-l-4 border-l-error">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-error">warning</span>
+<h3 class="font-title-lg text-title-lg text-on-surface">System Alerts</h3>
+</div>
+<ul class="flex flex-col gap-3">
+<li class="p-3 bg-error-container rounded flex flex-col gap-1">
+<span class="font-label-md text-label-md text-on-error-container font-bold">3 Threshold Violations</span>
+<span class="font-body-md text-body-md text-on-surface-variant text-sm">Pricing margin below minimum on DoD bid.</span>
+</li>
+<li class="p-3 bg-surface-container-high rounded flex flex-col gap-1">
+<span class="font-label-md text-label-md text-on-surface font-bold">New High-Value RFP</span>
+<span class="font-body-md text-body-md text-on-surface-variant text-sm">HHS released $10M+ solicitation.</span>
+</li>
+</ul>
+</section>
+<!-- Team Capacity -->
+<section class="glass-card rounded-lg p-6">
+<h3 class="font-title-lg text-title-lg text-on-surface mb-4">Team Capacity</h3>
+<ul class="flex flex-col gap-3">
+<li class="flex justify-between items-center py-2 border-b border-outline-variant border-opacity-50">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-label-md">AM</div>
+<span class="font-body-md text-body-md text-on-surface">A. Mercer</span>
+</div>
+<span class="font-code-sm text-code-sm text-on-surface-variant">4 Active</span>
+</li>
+<li class="flex justify-between items-center py-2 border-b border-outline-variant border-opacity-50">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-surface-variant text-on-surface-variant flex items-center justify-center font-label-md">JR</div>
+<span class="font-body-md text-body-md text-on-surface">J. Reynolds</span>
+</div>
+<span class="font-code-sm text-code-sm text-on-surface-variant">2 Active</span>
+</li>
+<li class="flex justify-between items-center py-2">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-surface-variant text-on-surface-variant flex items-center justify-center font-label-md">SL</div>
+<span class="font-body-md text-body-md text-on-surface">S. Lee</span>
+</div>
+<span class="font-code-sm text-code-sm text-on-surface-variant">5 Active (Max)</span>
+</li>
+</ul>
+<button class="w-full mt-4 py-2 border border-outline-variant rounded font-label-md text-label-md text-on-surface hover:bg-surface-container-high transition-colors">Manage Workloads</button>
+</section>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 flex justify-around items-center px-margin-mobile py-2 bg-surface dark:bg-primary-container border-t border-outline-variant dark:border-on-primary-fixed-variant">
+<a class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed font-bold bg-surface-container-highest dark:bg-on-primary-fixed-variant rounded-xl px-3 py-1" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-label-md text-label-md-mobile mt-1">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-primary-container hover:text-secondary dark:hover:text-secondary-fixed active:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined">gavel</span>
+<span class="font-label-md text-label-md-mobile mt-1">Bids</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-primary-container hover:text-secondary dark:hover:text-secondary-fixed active:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined">description</span>
+<span class="font-label-md text-label-md-mobile mt-1">My RFPs</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-primary-container hover:text-secondary dark:hover:text-secondary-fixed active:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="font-label-md text-label-md-mobile mt-1">Profile</span>
+</a>
+</nav>
+</body></html>

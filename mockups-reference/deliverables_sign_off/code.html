@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BidPulse - Proposal Assembly &amp; Deliverables</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Geist:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed": "#002113",
+                        "on-tertiary-container": "#009668",
+                        "surface-container": "#e5eeff",
+                        "surface-container-high": "#dce9ff",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "surface-bright": "#f8f9ff",
+                        "on-primary": "#ffffff",
+                        "on-surface-variant": "#45464d",
+                        "surface": "#f8f9ff",
+                        "error-container": "#ffdad6",
+                        "outline-variant": "#c6c6cd",
+                        "on-secondary-fixed": "#00174b",
+                        "secondary-container": "#316bf3",
+                        "tertiary-fixed": "#6ffbbe",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed": "#131b2e",
+                        "primary": "#000000",
+                        "on-primary-container": "#7c839b",
+                        "primary-fixed-dim": "#bec6e0",
+                        "surface-tint": "#565e74",
+                        "inverse-surface": "#213145",
+                        "inverse-primary": "#bec6e0",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#dae2fd",
+                        "on-background": "#0b1c30",
+                        "secondary-fixed": "#dbe1ff",
+                        "on-surface": "#0b1c30",
+                        "tertiary-container": "#002113",
+                        "surface-dim": "#cbdbf5",
+                        "tertiary": "#000000",
+                        "on-secondary-container": "#fefcff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-secondary-fixed-variant": "#003ea8",
+                        "surface-variant": "#d3e4fe",
+                        "on-error": "#ffffff",
+                        "primary-container": "#131b2e",
+                        "surface-container-highest": "#d3e4fe",
+                        "outline": "#76777d",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "surface-container-low": "#eff4ff",
+                        "secondary": "#0051d5",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "on-tertiary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "on-secondary": "#ffffff",
+                        "background": "#f8f9ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "container-max": "1440px",
+                        "margin-mobile": "16px",
+                        "margin-desktop": "48px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "code-sm": ["Geist"],
+                        "label-md": ["Geist"],
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "display-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "title-lg": ["18px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "code-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                },
+            }
+        }
+    </script>
+<style>
+        body { background-color: #F8FAFC; color: #0b1c30; }
+        .data-table-row:nth-child(even) { background-color: #F8FAFC; }
+        .pulse-border { animation: pulseBorder 2s infinite; }
+        @keyframes pulseBorder {
+            0% { box-shadow: 0 0 0 0 rgba(49, 107, 243, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(49, 107, 243, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(49, 107, 243, 0); }
+        }
+        .compliance-border { border-left: 4px solid #009668; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="antialiased pb-24 md:pb-0 pt-16 font-body-md text-body-md">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-margin-mobile md:px-margin-desktop h-16 bg-surface dark:bg-primary-container border-b border-outline-variant dark:border-on-primary-fixed-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary dark:text-secondary-fixed" style="font-variation-settings: 'FILL' 1;">security</span>
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface dark:text-on-primary">BidPulse</h1>
+</div>
+<div class="hidden md:flex gap-6 items-center">
+<a class="text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-high dark:hover:bg-primary-fixed-variant transition-colors px-3 py-2 rounded-lg font-label-md text-label-md flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[18px]">dashboard</span> Dashboard
+             </a>
+<a class="text-secondary dark:text-secondary-fixed font-bold flex items-center gap-1 px-3 py-2" href="#">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">gavel</span> Bids
+             </a>
+<a class="text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-high dark:hover:bg-primary-fixed-variant transition-colors px-3 py-2 rounded-lg font-label-md text-label-md flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[18px]">description</span> My RFPs
+             </a>
+</div>
+<div>
+<img alt="User profile photo" class="w-8 h-8 rounded-full object-cover" data-alt="A small, professional headshot of a user profile photo, high quality corporate aesthetic, bright lighting, modern office background, clean light-mode UI context." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCVPoqyHFrF-5k4y9C-VQhSpTrKzmHvCj1ul1YuIS6T-6A9bX70NaX-2S8hDiUcFO5rMtz8p-EW5B1yCvYK4t7TFo760cTPjmb6M0tJFFc-X-ZuO8IN65mEDnecSfft_KeLzx2qP9USeLgd-4NMNrTrT3EybB8GTsEDBqW-avjZyDsGEc1Y9qcYBNWnBRXjK_HvagykmbPKbbAyRDzHDmAsSZJzkquYWarWIGMMlcNdZLhBckPIrDSwg"/>
+</div>
+</header>
+<main class="max-w-[1440px] mx-auto px-margin-mobile md:px-margin-desktop py-8 md:py-12">
+<div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+<div>
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-background mb-2">Proposal Assembly</h2>
+<p class="text-on-surface-variant font-body-md text-body-md">RFP-2023-XYZ: NextGen Cloud Infrastructure</p>
+</div>
+<div class="flex gap-3">
+<button class="px-4 py-2 border border-outline-variant rounded bg-surface hover:bg-surface-container-high transition-colors font-label-md text-label-md text-on-surface">Export Draft</button>
+</div>
+</div>
+<!-- Stage Indicator -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-6 mb-8 shadow-sm">
+<div class="flex justify-between items-center relative">
+<div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-0.5 bg-outline-variant -z-10"></div>
+<div class="flex flex-col items-center bg-surface-container-lowest px-2">
+<div class="w-8 h-8 rounded-full bg-on-tertiary-container text-on-tertiary flex items-center justify-center mb-2">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">1. Intake</span>
+</div>
+<div class="flex flex-col items-center bg-surface-container-lowest px-2">
+<div class="w-8 h-8 rounded-full bg-on-tertiary-container text-on-tertiary flex items-center justify-center mb-2">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">2. Strategy</span>
+</div>
+<div class="flex flex-col items-center bg-surface-container-lowest px-2">
+<div class="w-8 h-8 rounded-full bg-on-tertiary-container text-on-tertiary flex items-center justify-center mb-2">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">3. Draft</span>
+</div>
+<div class="flex flex-col items-center bg-surface-container-lowest px-2">
+<div class="w-8 h-8 rounded-full bg-on-tertiary-container text-on-tertiary flex items-center justify-center mb-2">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">4. Review</span>
+</div>
+<div class="flex flex-col items-center bg-surface-container-lowest px-2">
+<div class="w-8 h-8 rounded-full border-2 border-secondary-container bg-surface-container-lowest pulse-border text-secondary flex items-center justify-center mb-2">
+<span class="font-label-md text-label-md font-bold">5</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface font-bold">5. Assembly</span>
+</div>
+<div class="flex flex-col items-center bg-surface-container-lowest px-2">
+<div class="w-8 h-8 rounded-full border-2 border-outline-variant bg-surface-container-lowest text-outline flex items-center justify-center mb-2">
+<span class="font-label-md text-label-md">6</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">6. Submit</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Left Column: Artifacts -->
+<div class="lg:col-span-2 flex flex-col gap-6">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden shadow-sm">
+<div class="px-6 py-4 border-b border-outline-variant bg-surface">
+<h3 class="font-title-lg text-title-lg text-on-surface">Generated Artifacts</h3>
+</div>
+<div class="w-full">
+<div class="grid grid-cols-12 gap-4 px-6 py-3 border-b border-outline-variant bg-surface-bright font-label-md text-label-md text-on-surface-variant">
+<div class="col-span-5">Document Name</div>
+<div class="col-span-3">Status</div>
+<div class="col-span-2">Last Updated</div>
+<div class="col-span-2 text-right">Action</div>
+</div>
+<div class="grid grid-cols-12 gap-4 px-6 py-3 border-b border-outline-variant items-center data-table-row compliance-border">
+<div class="col-span-5 flex items-center gap-3">
+<span class="material-symbols-outlined text-outline">description</span>
+<span class="font-body-md text-body-md font-medium">Capability Statement</span>
+</div>
+<div class="col-span-3">
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-surface-container text-on-surface-variant font-code-sm text-code-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-on-tertiary-container mr-1.5"></span> Verified
+                                </span>
+</div>
+<div class="col-span-2 font-code-sm text-code-sm text-on-surface-variant">Today, 10:24 AM</div>
+<div class="col-span-2 flex justify-end">
+<button class="text-secondary hover:bg-surface-container-low p-1.5 rounded transition-colors flex items-center gap-1 font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px]">visibility</span> Review
+                                </button>
+</div>
+</div>
+<div class="grid grid-cols-12 gap-4 px-6 py-3 border-b border-outline-variant items-center data-table-row compliance-border">
+<div class="col-span-5 flex items-center gap-3">
+<span class="material-symbols-outlined text-outline">fact_check</span>
+<span class="font-body-md text-body-md font-medium">Compliance Matrix</span>
+</div>
+<div class="col-span-3">
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-surface-container text-on-surface-variant font-code-sm text-code-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-on-tertiary-container mr-1.5"></span> Verified
+                                </span>
+</div>
+<div class="col-span-2 font-code-sm text-code-sm text-on-surface-variant">Today, 09:15 AM</div>
+<div class="col-span-2 flex justify-end">
+<button class="text-secondary hover:bg-surface-container-low p-1.5 rounded transition-colors flex items-center gap-1 font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px]">visibility</span> Review
+                                </button>
+</div>
+</div>
+<div class="grid grid-cols-12 gap-4 px-6 py-3 border-b border-outline-variant items-center data-table-row">
+<div class="col-span-5 flex items-center gap-3">
+<span class="material-symbols-outlined text-outline">subject</span>
+<span class="font-body-md text-body-md font-medium">Technical Narrative</span>
+</div>
+<div class="col-span-3">
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-surface-container-high text-on-surface-variant font-code-sm text-code-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary mr-1.5"></span> In Review
+                                </span>
+</div>
+<div class="col-span-2 font-code-sm text-code-sm text-on-surface-variant">Yesterday</div>
+<div class="col-span-2 flex justify-end">
+<button class="text-secondary hover:bg-surface-container-low p-1.5 rounded transition-colors flex items-center gap-1 font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px]">edit_document</span> Preview
+                                </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Sign-off -->
+<div class="flex flex-col gap-6">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-6 shadow-sm">
+<h3 class="font-title-lg text-title-lg text-on-surface mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant">signature</span> Client Sign-Off
+                    </h3>
+<div class="space-y-4 mb-6">
+<label class="flex items-start gap-3">
+<input checked="" class="mt-1 rounded border-outline-variant text-secondary focus:ring-secondary" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface">Legal review completed and terms accepted.</span>
+</label>
+<label class="flex items-start gap-3">
+<input class="mt-1 rounded border-outline-variant text-secondary focus:ring-secondary" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface">Technical specifications verified by lead engineer.</span>
+</label>
+<label class="flex items-start gap-3">
+<input class="mt-1 rounded border-outline-variant text-secondary focus:ring-secondary" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface">Pricing model approved by finance.</span>
+</label>
+</div>
+<div class="border-t border-outline-variant pt-6">
+<button class="w-full bg-primary hover:bg-inverse-surface text-on-primary font-label-md text-label-md py-3 rounded transition-colors shadow-sm active:scale-[0.98] flex justify-center items-center gap-2 opacity-75 cursor-not-allowed">
+<span class="material-symbols-outlined text-[18px]">task_alt</span> Approve Package
+                        </button>
+<p class="text-center font-code-sm text-code-sm text-on-surface-variant mt-3">All checkboxes must be checked to approve.</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 flex justify-around items-center px-margin-mobile py-2 bg-surface dark:bg-primary-container border-t border-outline-variant dark:border-on-primary-fixed-variant">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-primary-container hover:text-secondary dark:hover:text-secondary-fixed active:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-label-md-mobile">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed font-bold bg-surface-container-highest dark:bg-on-primary-fixed-variant rounded-xl px-3 py-1 active:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">gavel</span>
+<span class="font-label-md text-label-md-mobile">Bids</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-primary-container hover:text-secondary dark:hover:text-secondary-fixed active:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined">description</span>
+<span class="font-label-md text-label-md-mobile">My RFPs</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-primary-container hover:text-secondary dark:hover:text-secondary-fixed active:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="font-label-md text-label-md-mobile">Profile</span>
+</a>
+</nav>
+</body></html>

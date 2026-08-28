@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Security Settings - BidPulse</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Geist:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error-container": "#ffdad6",
+                        "secondary-fixed": "#dbe1ff",
+                        "surface-tint": "#565e74",
+                        "tertiary-container": "#002113",
+                        "inverse-on-surface": "#eaf1ff",
+                        "tertiary-fixed": "#6ffbbe",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "primary-fixed-dim": "#bec6e0",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-low": "#eff4ff",
+                        "secondary": "#0051d5",
+                        "on-background": "#0b1c30",
+                        "surface-container": "#e5eeff",
+                        "surface-container-highest": "#d3e4fe",
+                        "surface-variant": "#d3e4fe",
+                        "outline-variant": "#c6c6cd",
+                        "surface-container-high": "#dce9ff",
+                        "on-surface": "#0b1c30",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-fixed-variant": "#003ea8",
+                        "surface-dim": "#cbdbf5",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "on-primary-container": "#7c839b",
+                        "surface-bright": "#f8f9ff",
+                        "background": "#f8f9ff",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "on-error": "#ffffff",
+                        "error": "#ba1a1a",
+                        "surface": "#f8f9ff",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "inverse-surface": "#213145",
+                        "on-error-container": "#93000a",
+                        "on-primary": "#ffffff",
+                        "primary-container": "#131b2e",
+                        "secondary-container": "#316bf3",
+                        "on-primary-fixed": "#131b2e",
+                        "primary-fixed": "#dae2fd",
+                        "inverse-primary": "#bec6e0",
+                        "on-tertiary-fixed": "#002113",
+                        "on-tertiary-container": "#009668",
+                        "primary": "#000000",
+                        "outline": "#76777d",
+                        "on-secondary-container": "#fefcff",
+                        "on-secondary-fixed": "#00174b",
+                        "on-secondary": "#ffffff",
+                        "on-surface-variant": "#45464d",
+                        "tertiary": "#000000"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "container-max": "1440px",
+                        "margin-mobile": "16px",
+                        "unit": "4px",
+                        "margin-desktop": "48px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "code-sm": ["Geist"],
+                        "label-md": ["Geist"],
+                        "headline-lg-mobile": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "title-lg": ["18px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "code-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Base styles to support design system specifics */
+        body {
+            background-color: #F8FAFC; /* Fallback off-white */
+        }
+        /* Hide scrollbar for clean UI but keep functionality */
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col pb-24 relative overflow-x-hidden md:hidden">
+<!-- TopAppBar Semantic Shell -->
+<header class="bg-surface dark:bg-primary-container text-primary dark:text-on-primary-container w-full top-0 sticky border-b border-outline-variant dark:border-outline flat no shadows flex justify-between items-center px-margin-mobile h-16 w-full z-50">
+<div class="flex items-center gap-4">
+<button aria-label="Menu" class="hover:bg-surface-container-low dark:hover:bg-primary-container transition-colors active:opacity-80 transition-opacity p-2 -ml-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">menu</span>
+</button>
+<span class="font-headline-md text-headline-md-mobile font-bold text-primary dark:text-on-primary-container">BidPulse</span>
+</div>
+<div class="flex items-center">
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant">
+<img alt="User profile avatar" class="object-cover w-full h-full" data-alt="A professional headshot of an individual in a modern office environment. High-key lighting, bright, light-mode aesthetic. Corporate and reliable mood. The style is sharp, clean, and minimalist." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDyDd-5ZdilGatLiqVoYAeq4iED654lGfR8WC9DmL15WCa4ve3xKC9OhU3f89spYWofNkv4cSj5d9-F3s_KDGs3ngoS2i9qJKz5hd9k7cmj_ZbmsOr9FbgRykzYtFQnRJ3YvqCpzPJFz4kH1IZaVkqkOlhVRXz5Sa2oz1jhz47d-ZgikGSzxokOkIIwdv4FTXsodkZe6Kb2_5XG1DRC5JSDZX1UWK-uljBfcfG0DrkxK0o7Qk7S2CW-iA"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 w-full max-w-container-max mx-auto px-margin-mobile pt-6 flex flex-col gap-6">
+<!-- Screen Title -->
+<div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Security Settings</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Manage your account security, authentication methods, and active sessions.</p>
+</div>
+<!-- 1. Login & Password -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant" style="font-variation-settings: 'FILL' 0;">lock</span>
+<h2 class="font-title-lg text-title-lg text-on-surface">Login &amp; Password</h2>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Ensure your account is using a strong, unique password.</p>
+<div class="pt-2">
+<button class="bg-primary-container text-on-primary border border-transparent hover:bg-surface-container-low hover:text-primary transition-colors py-2 px-4 rounded w-full flex items-center justify-center gap-2 font-label-md text-label-md">
+                    Change Password
+                    <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 0;">arrow_forward</span>
+</button>
+</div>
+</section>
+<!-- 2. Two-Factor Authentication -->
+<section class="bg-surface-container-lowest border-l-4 border-tertiary-container border-y border-r border-outline-variant rounded-lg p-4 flex flex-col gap-4 relative overflow-hidden">
+<!-- Compliance signal background tint -->
+<div class="absolute inset-0 bg-tertiary-container/5 pointer-events-none"></div>
+<div class="flex items-center justify-between relative z-10">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-tertiary-container" style="font-variation-settings: 'FILL' 1;">security</span>
+<h2 class="font-title-lg text-title-lg text-on-surface">Two-Factor Authentication</h2>
+</div>
+<!-- Toggle Switch (ON) -->
+<button aria-label="Toggle 2FA" class="relative inline-flex h-6 w-11 items-center rounded-full bg-secondary transition-colors focus:outline-none">
+<span class="translate-x-6 inline-block h-4 w-4 transform rounded-full bg-white transition-transform"></span>
+</button>
+</div>
+<div class="relative z-10 flex flex-col gap-3">
+<div class="flex items-center gap-2 bg-surface-container-low border border-outline-variant rounded p-2">
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]" style="font-variation-settings: 'FILL' 0;">smartphone</span>
+<div class="flex-1">
+<p class="font-label-md text-label-md text-on-surface">Authenticator App</p>
+<p class="font-code-sm text-code-sm text-on-surface-variant">Configured</p>
+</div>
+<span class="material-symbols-outlined text-tertiary-container text-[16px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<button class="text-secondary font-label-md text-label-md flex items-center gap-1 self-start hover:underline mt-1">
+                    Manage methods
+                    <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 0;">arrow_forward</span>
+</button>
+</div>
+</section>
+<!-- 3. API Access -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant" style="font-variation-settings: 'FILL' 0;">api</span>
+<h2 class="font-title-lg text-title-lg text-on-surface">API Access</h2>
+</div>
+<button class="text-secondary font-label-md text-label-md flex items-center gap-1 hover:underline">
+                    Generate
+                    <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 0;">add</span>
+</button>
+</div>
+<div class="flex flex-col gap-2">
+<!-- Key 1 -->
+<div class="flex items-center justify-between bg-surface-bright border border-outline-variant rounded p-3">
+<div>
+<p class="font-label-md text-label-md text-on-surface">Production Integrations</p>
+<p class="font-code-sm text-code-sm text-on-surface-variant mt-1">Created: Oct 12, 2023</p>
+</div>
+<button aria-label="Revoke Key" class="text-error hover:bg-error-container p-1 rounded transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">delete</span>
+</button>
+</div>
+<!-- Key 2 -->
+<div class="flex items-center justify-between bg-surface-bright border border-outline-variant rounded p-3">
+<div>
+<p class="font-label-md text-label-md text-on-surface">Staging Environment</p>
+<p class="font-code-sm text-code-sm text-on-surface-variant mt-1">Created: Nov 05, 2023</p>
+</div>
+<button aria-label="Revoke Key" class="text-error hover:bg-error-container p-1 rounded transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">delete</span>
+</button>
+</div>
+</div>
+</section>
+<!-- 4. Active Sessions -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant" style="font-variation-settings: 'FILL' 0;">devices</span>
+<h2 class="font-title-lg text-title-lg text-on-surface">Active Sessions</h2>
+</div>
+<div class="flex flex-col gap-0 border border-outline-variant rounded overflow-hidden">
+<!-- Current Device -->
+<div class="flex items-start justify-between bg-surface-container-low p-3 border-b border-outline-variant">
+<div class="flex gap-3">
+<span class="material-symbols-outlined text-secondary mt-1" style="font-variation-settings: 'FILL' 0;">phone_iphone</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface flex items-center gap-2">
+                                iPhone 14 Pro 
+                                <span class="bg-secondary-container text-on-secondary-container font-code-sm text-[10px] px-1.5 py-0.5 rounded-full">Current</span>
+</p>
+<p class="font-body-md text-body-md text-on-surface-variant text-[12px] mt-0.5">Washington, D.C. • 10.0.0.52</p>
+<p class="font-body-md text-body-md text-on-surface-variant text-[12px]">Active now</p>
+</div>
+</div>
+</div>
+<!-- Other Session -->
+<div class="flex items-start justify-between bg-surface-bright p-3">
+<div class="flex gap-3">
+<span class="material-symbols-outlined text-on-surface-variant mt-1" style="font-variation-settings: 'FILL' 0;">laptop_mac</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface">MacBook Pro (macOS)</p>
+<p class="font-body-md text-body-md text-on-surface-variant text-[12px] mt-0.5">Arlington, VA • 192.168.1.14</p>
+<p class="font-body-md text-body-md text-on-surface-variant text-[12px]">Last active: 2 hours ago</p>
+</div>
+</div>
+<button class="font-label-md text-label-md text-secondary border border-secondary rounded px-2 py-1 hover:bg-secondary hover:text-on-secondary transition-colors text-[10px]">
+                        End Session
+                    </button>
+</div>
+</div>
+</section>
+<!-- 5. Security Logs -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 flex items-center justify-between mb-8 cursor-pointer hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant" style="font-variation-settings: 'FILL' 0;">history</span>
+<div>
+<h2 class="font-title-lg text-title-lg text-on-surface text-[16px]">Security Logs</h2>
+<p class="font-body-md text-body-md text-on-surface-variant text-[12px]">Review recent login attempts</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant" style="font-variation-settings: 'FILL' 0;">chevron_right</span>
+</section>
+</main>
+<!-- BottomNavBar Semantic Shell -->
+<nav class="bg-surface dark:bg-primary-container text-primary dark:text-on-primary-container fixed bottom-0 w-full z-50 border-t border-outline-variant dark:border-outline flat no shadows flex justify-around items-center w-full h-20 px-2 pb-safe">
+<!-- Dashboard (Inactive) -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-secondary dark:hover:text-secondary-fixed-dim transition-colors active:scale-95 transition-transform duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+<span class="font-label-md text-label-md mt-1 text-[10px]">Dashboard</span>
+</button>
+<!-- Bids (Inactive) -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-secondary dark:hover:text-secondary-fixed-dim transition-colors active:scale-95 transition-transform duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">gavel</span>
+<span class="font-label-md text-label-md mt-1 text-[10px]">Bids</span>
+</button>
+<!-- My RFPs (Inactive) -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-secondary dark:hover:text-secondary-fixed-dim transition-colors active:scale-95 transition-transform duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">description</span>
+<span class="font-label-md text-label-md mt-1 text-[10px]">My RFPs</span>
+</button>
+<!-- Profile (Active Semantic Match for Security Settings) -->
+<button class="flex flex-col items-center justify-center bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary rounded-full px-4 py-1 active:scale-95 transition-transform duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-label-md text-label-md mt-1 text-[10px]">Profile</span>
+</button>
+</nav>
+</body></html>

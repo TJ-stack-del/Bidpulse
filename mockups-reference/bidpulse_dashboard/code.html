@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BidPulse Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-tertiary-fixed": "#002113",
+                      "on-tertiary-container": "#009668",
+                      "surface-container": "#e5eeff",
+                      "surface-container-high": "#dce9ff",
+                      "on-primary-fixed-variant": "#3f465c",
+                      "surface-bright": "#f8f9ff",
+                      "on-primary": "#ffffff",
+                      "on-surface-variant": "#45464d",
+                      "surface": "#f8f9ff",
+                      "error-container": "#ffdad6",
+                      "outline-variant": "#c6c6cd",
+                      "on-secondary-fixed": "#00174b",
+                      "secondary-container": "#316bf3",
+                      "tertiary-fixed": "#6ffbbe",
+                      "error": "#ba1a1a",
+                      "on-primary-fixed": "#131b2e",
+                      "primary": "#000000",
+                      "on-primary-container": "#7c839b",
+                      "primary-fixed-dim": "#bec6e0",
+                      "surface-tint": "#565e74",
+                      "inverse-surface": "#213145",
+                      "inverse-primary": "#bec6e0",
+                      "surface-container-lowest": "#ffffff",
+                      "primary-fixed": "#dae2fd",
+                      "on-background": "#0b1c30",
+                      "secondary-fixed": "#dbe1ff",
+                      "on-surface": "#0b1c30",
+                      "tertiary-container": "#002113",
+                      "surface-dim": "#cbdbf5",
+                      "tertiary": "#000000",
+                      "on-secondary-container": "#fefcff",
+                      "inverse-on-surface": "#eaf1ff",
+                      "on-secondary-fixed-variant": "#003ea8",
+                      "surface-variant": "#d3e4fe",
+                      "on-error": "#ffffff",
+                      "primary-container": "#131b2e",
+                      "surface-container-highest": "#d3e4fe",
+                      "outline": "#76777d",
+                      "on-tertiary-fixed-variant": "#005236",
+                      "tertiary-fixed-dim": "#4edea3",
+                      "surface-container-low": "#eff4ff",
+                      "secondary": "#0051d5",
+                      "secondary-fixed-dim": "#b4c5ff",
+                      "on-tertiary": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "on-secondary": "#ffffff",
+                      "background": "#f8f9ff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "unit": "4px",
+                      "container-max": "1440px",
+                      "margin-mobile": "16px",
+                      "margin-desktop": "48px",
+                      "gutter": "24px"
+              },
+              "fontFamily": {
+                      "headline-lg-mobile": [
+                              "Inter"
+                      ],
+                      "title-lg": [
+                              "Inter"
+                      ],
+                      "code-sm": [
+                              "Geist"
+                      ],
+                      "label-md": [
+                              "Geist"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "display-lg": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "title-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "code-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-md": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.02em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        body {
+            background-color: #F8FAFC;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen pt-16 pb-20 md:pb-0">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-margin-mobile md:px-margin-desktop h-16 bg-surface dark:bg-primary-container border-b border-outline-variant dark:border-on-primary-fixed-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary dark:text-secondary-fixed">security</span>
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface dark:text-on-primary">BidPulse</h1>
+</div>
+<!-- Desktop Nav -->
+<nav class="hidden md:flex gap-6">
+<a class="text-secondary dark:text-secondary-fixed font-bold flex flex-col items-center justify-center bg-surface-container-highest dark:bg-on-primary-fixed-variant rounded-xl px-3 py-1" href="#">Dashboard</a>
+<a class="text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-high dark:hover:bg-primary-fixed-variant transition-colors rounded-xl px-3 py-1" href="#">Bids</a>
+<a class="text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-high dark:hover:bg-primary-fixed-variant transition-colors rounded-xl px-3 py-1" href="#">My RFPs</a>
+<a class="text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-high dark:hover:bg-primary-fixed-variant transition-colors rounded-xl px-3 py-1" href="#">Profile</a>
+</nav>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a corporate user in a modern office setting. Crisp focus, neutral lighting. The overall color palette is cool and professional, reflecting an industrial-grade security theme." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxIX4CN01tDfSeGmMmnDygzZIroreXucTNr4Ltm1ZUiKPZ1d0qW_poam6GSAiiS7yBnfsfemjysQOqAI78IW9CXDH4cDrPYznLsDy35559RZc8hvYBTmoqLCw0bvQtZ2QvM2bfkHUPHb5dhcSClu0SYGZTfTwDTKjLvY9XqMH-64SKPn-5z5CC2o0g2kk2UXz6KE1sDex19DNazC1gjZH2x1-96Nl5lsKwIIQjwanLBtsYRwmyRia7bA"/>
+</div>
+</header>
+<!-- Main Content -->
+<main class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-8 space-y-gutter">
+<div class="flex justify-between items-end mb-8">
+<div>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">Overview</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Welcome back. Here is your procurement status.</p>
+</div>
+<button class="bg-primary-container text-on-primary hover:bg-inverse-surface transition-colors px-4 py-2 rounded font-label-md text-label-md flex items-center gap-2 shadow-sm border border-outline-variant inset-border">
+<span class="material-symbols-outlined text-sm">add</span> New Bid
+            </button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Matched Opportunities -->
+<section class="md:col-span-2 bg-surface-container-lowest rounded-xl border border-outline-variant p-6 shadow-sm">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-secondary">target</span>
+<h3 class="font-title-lg text-title-lg text-on-surface">Matched Opportunities</h3>
+</div>
+<div class="space-y-4">
+<!-- Opp 1 -->
+<div class="flex items-center justify-between p-4 bg-surface rounded-lg border border-surface-container hover:bg-surface-container-low transition-colors">
+<div class="flex-1">
+<h4 class="font-label-md text-label-md font-bold text-on-surface">Cybersecurity Infrastructure Upgrade</h4>
+<p class="font-code-sm text-code-sm text-on-surface-variant mt-1">Department of Defense • Due: Oct 15</p>
+</div>
+<div class="flex flex-col items-end">
+<span class="bg-[#dcfce7] text-[#166534] px-2 py-1 rounded-full font-code-sm text-code-sm font-bold flex items-center gap-1">
+                                92% Match
+                            </span>
+</div>
+</div>
+<!-- Opp 2 -->
+<div class="flex items-center justify-between p-4 bg-surface rounded-lg border border-surface-container hover:bg-surface-container-low transition-colors">
+<div class="flex-1">
+<h4 class="font-label-md text-label-md font-bold text-on-surface">Cloud Migration Services</h4>
+<p class="font-code-sm text-code-sm text-on-surface-variant mt-1">Veterans Affairs • Due: Nov 01</p>
+</div>
+<div class="flex flex-col items-end">
+<span class="bg-[#dcfce7] text-[#166534] px-2 py-1 rounded-full font-code-sm text-code-sm font-bold flex items-center gap-1">
+                                88% Match
+                            </span>
+</div>
+</div>
+<!-- Opp 3 -->
+<div class="flex items-center justify-between p-4 bg-surface rounded-lg border border-surface-container hover:bg-surface-container-low transition-colors">
+<div class="flex-1">
+<h4 class="font-label-md text-label-md font-bold text-on-surface">Secure Data Analytics Platform</h4>
+<p class="font-code-sm text-code-sm text-on-surface-variant mt-1">Department of Energy • Due: Nov 20</p>
+</div>
+<div class="flex flex-col items-end">
+<span class="bg-[#fef9c3] text-[#854d0e] px-2 py-1 rounded-full font-code-sm text-code-sm font-bold flex items-center gap-1">
+                                75% Match
+                            </span>
+</div>
+</div>
+</div>
+</section>
+<!-- Active Bids -->
+<section class="bg-surface-container-lowest rounded-xl border border-outline-variant p-6 shadow-sm">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-secondary">cycle</span>
+<h3 class="font-title-lg text-title-lg text-on-surface">Active Bids</h3>
+</div>
+<div class="space-y-6">
+<!-- Bid 1 -->
+<div>
+<div class="flex justify-between items-baseline mb-2">
+<h4 class="font-label-md text-label-md font-bold text-on-surface">Project Alpha</h4>
+<span class="font-code-sm text-code-sm text-secondary">Stage 3: Drafting</span>
+</div>
+<!-- Stepper -->
+<div class="flex justify-between items-center relative">
+<div class="absolute left-0 top-1/2 w-full h-0.5 bg-outline-variant -z-10 -translate-y-1/2"></div>
+<div class="w-3 h-3 rounded-full bg-[#16a34a]"></div> <!-- 1 -->
+<div class="w-3 h-3 rounded-full bg-[#16a34a]"></div> <!-- 2 -->
+<div class="w-3 h-3 rounded-full bg-secondary border-2 border-surface animate-pulse"></div> <!-- 3 Active -->
+<div class="w-3 h-3 rounded-full bg-outline-variant"></div> <!-- 4 -->
+<div class="w-3 h-3 rounded-full bg-outline-variant"></div> <!-- 5 -->
+<div class="w-3 h-3 rounded-full bg-outline-variant"></div> <!-- 6 -->
+</div>
+</div>
+<!-- Bid 2 -->
+<div>
+<div class="flex justify-between items-baseline mb-2">
+<h4 class="font-label-md text-label-md font-bold text-on-surface">Project Beta</h4>
+<span class="font-code-sm text-code-sm text-on-surface-variant">Stage 1: Review</span>
+</div>
+<!-- Stepper -->
+<div class="flex justify-between items-center relative">
+<div class="absolute left-0 top-1/2 w-full h-0.5 bg-outline-variant -z-10 -translate-y-1/2"></div>
+<div class="w-3 h-3 rounded-full bg-secondary border-2 border-surface animate-pulse"></div> <!-- 1 Active -->
+<div class="w-3 h-3 rounded-full bg-outline-variant"></div> <!-- 2 -->
+<div class="w-3 h-3 rounded-full bg-outline-variant"></div> <!-- 3 -->
+<div class="w-3 h-3 rounded-full bg-outline-variant"></div> <!-- 4 -->
+<div class="w-3 h-3 rounded-full bg-outline-variant"></div> <!-- 5 -->
+<div class="w-3 h-3 rounded-full bg-outline-variant"></div> <!-- 6 -->
+</div>
+</div>
+</div>
+<div class="mt-8 pt-6 border-t border-surface-container">
+<div class="border-l-4 border-[#16a34a] pl-4">
+<p class="font-label-md text-label-md font-bold text-on-surface">Compliance Check Passed</p>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">All active bids meet preliminary SAM.gov requirements.</p>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- BottomNavBar (Mobile) -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 flex justify-around items-center px-margin-mobile py-2 bg-surface dark:bg-primary-container border-t border-outline-variant dark:border-on-primary-fixed-variant">
+<a class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed font-bold bg-surface-container-highest dark:bg-on-primary-fixed-variant rounded-xl px-3 py-1 active:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-label-md text-label-md-mobile">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-primary-container hover:text-secondary dark:hover:text-secondary-fixed active:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined">gavel</span>
+<span class="font-label-md text-label-md-mobile">Bids</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-primary-container hover:text-secondary dark:hover:text-secondary-fixed active:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined">description</span>
+<span class="font-label-md text-label-md-mobile">My RFPs</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-primary-container hover:text-secondary dark:hover:text-secondary-fixed active:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="font-label-md text-label-md-mobile">Profile</span>
+</a>
+</nav>
+</body></html>
