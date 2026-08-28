@@ -4,17 +4,6 @@ import { LifecycleStepper } from "@/components/ui/LifecycleStepper";
 import { IntakeActions } from "./IntakeActions";
 import { BidDocuments } from "@/components/ui/BidDocuments";
 
-// Converted from mockups-reference/rfp_intake_attestation/code.html
-// Pattern to repeat for the other 42 screens:
-//   1. Open the mockup's code.html next to this file.
-//   2. Copy the <main> section's structure, swap Tailwind CDN classes
-//      1:1 (they already match tailwind.config.ts's tokens).
-//   3. Replace hardcoded copy with data fetched from Supabase below.
-//   4. Pull any repeated chrome (header/nav/stepper) from components/ui
-//      instead of re-pasting it.
-//   5. Move interactive bits (buttons, checkboxes, forms) into a small
-//      "use client" component — see IntakeActions.tsx.
-
 export default async function IntakePage({
   searchParams,
 }: {
