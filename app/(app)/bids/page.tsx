@@ -4,8 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { AppShell } from "@/components/ui/AppShell";
 
 // No mockup for this one — AppShell's nav has always linked here, but the
-// route never existed. List view only (filtering via Link searchParams,
-// same server-rendered pattern as /compliance/matrix's status chips), so
+// route never existed. List view only (filtering via Link searchParams), so
 // no client component is needed — nothing on this page mutates data.
 
 const STAGES = [
