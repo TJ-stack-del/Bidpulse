@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { AppShell } from "@/components/ui/AppShell";
@@ -76,9 +75,6 @@ export default async function SecuritySettingsPage() {
                   Integration keys for external services.
                 </p>
               </div>
-              <Link href="/docs/api" className="text-secondary text-label-md hover:underline shrink-0">
-                API Docs
-              </Link>
             </div>
             {permissions?.can_manage_team ? (
               <ApiKeysPanel apiKeys={apiKeys ?? []} orgId={member.org_id} />

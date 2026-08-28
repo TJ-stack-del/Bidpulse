@@ -49,12 +49,6 @@ export default async function DashboardPage() {
     );
   }
 
-  const { data: permissions } = await supabase
-    .from("role_permissions")
-    .select("can_view_admin")
-    .eq("role", member.role)
-    .single();
-
   const [{ data: bids }, { data: opportunities }, { data: complianceItems }] = await Promise.all([
     supabase
       .from("bids")
@@ -105,22 +99,6 @@ export default async function DashboardPage() {
           </p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
-          {permissions?.can_view_admin && (
-            <Link
-              href="/admin"
-              className="px-4 py-2 border border-outline-variant rounded text-label-md text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-2"
-            >
-              <span className="material-symbols-outlined text-[18px]">admin_panel_settings</span>
-              Admin Portal
-            </Link>
-          )}
-          <Link
-            href="/analytics"
-            className="px-4 py-2 border border-outline-variant rounded text-label-md text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-2"
-          >
-            <span className="material-symbols-outlined text-[18px]">insights</span>
-            Analytics
-          </Link>
           <Link
             href="/intake"
             className="bg-primary text-on-primary px-4 py-2 rounded text-label-md hover:bg-on-background transition-colors flex items-center gap-2"
@@ -204,14 +182,6 @@ export default async function DashboardPage() {
                             className="text-code-sm text-secondary hover:underline mt-1 inline-block"
                           >
                             Fit: {Math.round(bid.fit_score)}%
-                          </Link>
-                        )}
-                        {bid.stage === "client_review" && (
-                          <Link
-                            href={`/review/portal?bid=${bid.id}`}
-                            className="text-code-sm text-secondary hover:underline mt-1 inline-block"
-                          >
-                            Client Review
                           </Link>
                         )}
                         {bid.stage === "submission" && (

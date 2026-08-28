@@ -60,13 +60,13 @@ export default async function ComplianceItemPage({
     <AppShell activePath="/compliance">
       <div className="flex items-center gap-2 text-on-surface-variant text-body-md mt-6 mb-2">
         <Link href={`/compliance?bid=${item.bid_id}`} className="hover:text-primary transition-colors">
-          Compliance
+          Rules
         </Link>
         <span className="material-symbols-outlined text-sm">chevron_right</span>
         <span className="text-on-surface font-bold">{item.clause_reference}</span>
       </div>
 
-      <h1 className="text-headline-lg text-on-surface mb-1">Compliance Check: {item.clause_reference}</h1>
+      <h1 className="text-headline-lg text-on-surface mb-1">Rule: {item.clause_reference}</h1>
       {bid && (
         <p className="text-body-md text-on-surface-variant mb-4">
           {bid.solicitation_number ?? bid.agency}: {bid.title}
@@ -76,28 +76,28 @@ export default async function ComplianceItemPage({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-2">
         <div className="lg:col-span-2 flex flex-col gap-6">
           <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
-            <h2 className="text-title-lg text-on-surface mb-4">Requirement</h2>
+            <h2 className="text-title-lg text-on-surface mb-4">What You Need To Do</h2>
             <p className="text-body-md text-on-surface-variant bg-surface p-4 rounded border border-outline-variant/30">
               {item.requirement}
             </p>
           </div>
 
           <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
-            <h2 className="text-title-lg text-on-surface mb-4">Review History</h2>
+            <h2 className="text-title-lg text-on-surface mb-4">What's Happened So Far</h2>
             {item.reviewed_at ? (
               <p className="text-body-md text-on-surface-variant">
-                Last reviewed by <span className="text-on-surface">{reviewer?.full_name ?? "a team member"}</span> on{" "}
+                Last checked by <span className="text-on-surface">{reviewer?.full_name ?? "a team member"}</span> on{" "}
                 {new Date(item.reviewed_at).toLocaleString()}.
               </p>
             ) : (
-              <p className="text-body-md text-on-surface-variant">Not reviewed yet.</p>
+              <p className="text-body-md text-on-surface-variant">Nobody's checked this yet.</p>
             )}
           </div>
         </div>
 
         <div className="flex flex-col gap-6">
           <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 sticky top-[88px]">
-            <h3 className="text-title-lg text-on-surface mb-4">Record Decision</h3>
+            <h3 className="text-title-lg text-on-surface mb-4">Mark This Rule</h3>
             <ComplianceItemActions
               itemId={item.id}
               bidId={item.bid_id}

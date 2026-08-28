@@ -51,8 +51,8 @@ export default async function CompliancePage({
 
     return (
       <AppShell activePath="/compliance">
-        <h1 className="text-headline-lg text-on-surface mt-6 mb-1">Compliance Checklist</h1>
-        <p className="text-body-md text-on-surface-variant mb-4">Pick a bid to review.</p>
+        <h1 className="text-headline-lg text-on-surface mt-6 mb-1">Rules Checklist</h1>
+        <p className="text-body-md text-on-surface-variant mb-4">Pick a job to check.</p>
         <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">
           {bids && bids.length > 0 ? (
             bids.map((bid) => (
@@ -105,7 +105,7 @@ export default async function CompliancePage({
     <AppShell activePath="/compliance">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mt-6">
         <div>
-          <h1 className="text-headline-lg text-on-surface mb-1">Compliance Checklist</h1>
+          <h1 className="text-headline-lg text-on-surface mb-1">Rules Checklist</h1>
           <p className="text-body-md text-on-surface-variant">
             {bid.solicitation_number ?? bid.agency}: {bid.title}
           </p>
@@ -113,7 +113,7 @@ export default async function CompliancePage({
         <div className="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 flex items-center gap-6 w-full md:w-auto">
           <div>
             <div className="text-label-md text-on-surface-variant mb-1 uppercase tracking-wider">
-              Compliance Score
+              Rules Met
             </div>
             <span className="text-display-lg text-on-tertiary-container">{score}%</span>
           </div>
@@ -129,13 +129,7 @@ export default async function CompliancePage({
         <div className="lg:col-span-2 flex flex-col gap-6">
           <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">
             <div className="px-6 py-4 border-b border-outline-variant bg-surface-container-low flex justify-between items-center">
-              <h2 className="text-title-lg text-on-surface">Requirements</h2>
-              <Link
-                href={`/compliance/matrix?bid=${bidId}`}
-                className="text-secondary text-label-md hover:underline"
-              >
-                View Full Matrix
-              </Link>
+              <h2 className="text-title-lg text-on-surface">What's Required</h2>
             </div>
             {allItems.length > 0 ? (
               <ComplianceChecklist
@@ -146,7 +140,7 @@ export default async function CompliancePage({
               />
             ) : (
               <p className="text-body-md text-on-surface-variant px-6 py-6">
-                No compliance items logged for this bid yet.
+                No rules logged for this job yet.
               </p>
             )}
           </div>
@@ -167,16 +161,16 @@ function StatusBreakdown({ items }: { items: { status: string }[] }) {
   }, {});
 
   const rows: { label: string; key: string; tone: "pass" | "fail" | "neutral" }[] = [
-    { label: "Passed", key: "passed", tone: "pass" },
-    { label: "In Progress", key: "in_progress", tone: "neutral" },
+    { label: "Done", key: "passed", tone: "pass" },
+    { label: "Working On It", key: "in_progress", tone: "neutral" },
     { label: "Not Started", key: "not_started", tone: "neutral" },
-    { label: "Waived", key: "waived", tone: "neutral" },
-    { label: "Failed", key: "failed", tone: "fail" },
+    { label: "Not Needed", key: "waived", tone: "neutral" },
+    { label: "Problem", key: "failed", tone: "fail" },
   ];
 
   return (
     <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
-      <h3 className="text-title-lg text-on-surface mb-4">Status Breakdown</h3>
+      <h3 className="text-title-lg text-on-surface mb-4">Where Things Stand</h3>
       <div className="flex flex-col">
         {rows.map((row, i) => (
           <div

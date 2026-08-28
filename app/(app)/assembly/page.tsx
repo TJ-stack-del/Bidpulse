@@ -124,16 +124,11 @@ export default async function AssemblyPage({
             {bid.solicitation_number ?? bid.agency}
           </p>
         </div>
-        <div className="flex flex-col items-end gap-2 shrink-0">
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 text-right">
-            <p className="text-label-md text-on-surface-variant uppercase tracking-wider">Signed Off</p>
-            <p className="text-title-lg text-on-surface">
-              {signedOffCount} / {items.length}
-            </p>
-          </div>
-          <Link href={`/deliverables/sign-off?bid=${bid.id}`} className="text-secondary text-label-md hover:underline">
-            Review &amp; Sign Off Package
-          </Link>
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 text-right shrink-0">
+          <p className="text-label-md text-on-surface-variant uppercase tracking-wider">Signed Off</p>
+          <p className="text-title-lg text-on-surface">
+            {signedOffCount} / {items.length}
+          </p>
         </div>
       </div>
 

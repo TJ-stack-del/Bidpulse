@@ -8,6 +8,14 @@ import { recordComplianceStatusChange } from "@/lib/compliance/record-status-cha
 
 const STATUS_OPTIONS = ["not_started", "in_progress", "passed", "failed", "waived"];
 
+const STATUS_LABEL: Record<string, string> = {
+  not_started: "Not Started",
+  in_progress: "Working On It",
+  passed: "Done",
+  failed: "Problem",
+  waived: "Not Needed",
+};
+
 const STATUS_STYLE: Record<string, string> = {
   passed: "bg-[#E6F4EA] text-on-tertiary-container border-on-tertiary-container/20",
   in_progress: "bg-surface-container text-secondary border-secondary/20",
@@ -61,10 +69,10 @@ export function ComplianceChecklist({
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="bg-surface-container-low border-b border-outline-variant text-label-md text-on-surface-variant uppercase tracking-wider">
-            <th className="px-6 py-3 font-medium">Clause</th>
-            <th className="px-6 py-3 font-medium">Requirement</th>
+            <th className="px-6 py-3 font-medium">Rule</th>
+            <th className="px-6 py-3 font-medium">What's Required</th>
             <th className="px-6 py-3 font-medium">Status</th>
-            <th className="px-6 py-3 font-medium text-right">Review</th>
+            <th className="px-6 py-3 font-medium text-right">Check</th>
           </tr>
         </thead>
         <tbody className="text-body-md">
@@ -85,7 +93,7 @@ export function ComplianceChecklist({
                 >
                   {STATUS_OPTIONS.map((s) => (
                     <option key={s} value={s}>
-                      {s.replace("_", " ")}
+                      {STATUS_LABEL[s]}
                     </option>
                   ))}
                 </select>
@@ -95,7 +103,7 @@ export function ComplianceChecklist({
                   href={`/compliance/${item.id}?bid=${bidId}`}
                   className="text-secondary text-label-md hover:underline"
                 >
-                  Review
+                  Check
                 </Link>
               </td>
             </tr>

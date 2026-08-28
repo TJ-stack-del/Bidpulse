@@ -9,7 +9,7 @@ const DESKTOP_LINKS = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/bids", label: "Bids" },
   { href: "/intake", label: "My RFPs" },
-  { href: "/market-intelligence", label: "Market Intelligence" },
+  { href: "/opportunities", label: "Opportunities" },
 ];
 
 const MOBILE_LINKS = [
