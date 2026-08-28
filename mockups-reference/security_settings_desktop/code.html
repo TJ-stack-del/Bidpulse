@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Security Settings - ProcureGuard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error-container": "#ffdad6",
+                        "secondary-fixed": "#dbe1ff",
+                        "surface-tint": "#565e74",
+                        "tertiary-container": "#002113",
+                        "inverse-on-surface": "#eaf1ff",
+                        "tertiary-fixed": "#6ffbbe",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "primary-fixed-dim": "#bec6e0",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-low": "#eff4ff",
+                        "secondary": "#0051d5",
+                        "on-background": "#0b1c30",
+                        "surface-container": "#e5eeff",
+                        "surface-container-highest": "#d3e4fe",
+                        "surface-variant": "#d3e4fe",
+                        "outline-variant": "#c6c6cd",
+                        "surface-container-high": "#dce9ff",
+                        "on-surface": "#0b1c30",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-fixed-variant": "#003ea8",
+                        "surface-dim": "#cbdbf5",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "on-primary-container": "#7c839b",
+                        "surface-bright": "#f8f9ff",
+                        "background": "#f8f9ff",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "on-error": "#ffffff",
+                        "error": "#ba1a1a",
+                        "surface": "#f8f9ff",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "inverse-surface": "#213145",
+                        "on-error-container": "#93000a",
+                        "on-primary": "#ffffff",
+                        "primary-container": "#131b2e",
+                        "secondary-container": "#316bf3",
+                        "on-primary-fixed": "#131b2e",
+                        "primary-fixed": "#dae2fd",
+                        "inverse-primary": "#bec6e0",
+                        "on-tertiary-fixed": "#002113",
+                        "on-tertiary-container": "#009668",
+                        "primary": "#000000",
+                        "outline": "#76777d",
+                        "on-secondary-container": "#fefcff",
+                        "on-secondary-fixed": "#00174b",
+                        "on-secondary": "#ffffff",
+                        "on-surface-variant": "#45464d",
+                        "tertiary": "#000000"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "container-max": "1440px",
+                        "margin-mobile": "16px",
+                        "unit": "4px",
+                        "margin-desktop": "48px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "code-sm": ["Geist"],
+                        "label-md": ["Geist"],
+                        "headline-lg-mobile": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "title-lg": ["18px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "code-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #F8FAFC; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid #E2E8F0;
+        }
+        .zebra-row:nth-child(even) {
+            background-color: #F8FAFC;
+        }
+        .inset-border-btn {
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased overflow-x-hidden">
+<!-- TopNavBar -->
+<nav class="bg-surface-container-lowest dark:bg-surface-container-lowest docked full-width top-0 border-b border-outline-variant dark:border-outline-variant flat no shadows fixed z-50 w-full h-16 flex justify-between items-center px-margin-desktop max-w-container-max mx-auto left-0 right-0">
+<div class="flex items-center gap-gutter">
+<div class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">
+                ProcureGuard
+            </div>
+<!-- Search bar omitted for brevity, assuming standard left placement per JSON intent -->
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors rounded-full active:bg-surface-container-high duration-200">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors rounded-full active:bg-surface-container-high duration-200">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+<button class="p-2 text-secondary dark:text-secondary-fixed border-b-2 border-secondary dark:border-secondary-fixed pb-1 hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors rounded-full active:bg-surface-container-high duration-200">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<img alt="Administrator Profile" class="w-8 h-8 rounded-full border border-outline-variant object-cover ml-2" data-alt="Administrator Profile avatar in high-key lighting, minimalist corporate aesthetic, sharp focus." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_5kzWVpiAX97_QMs5C2wS6H2pz1j9MUiH6kV2eOneAND_pGm6g9jLJ6dMqg4jB1RCHaTlyONi7I2fVKjuGibjwENjdMkndl6KHC08DOV7Q8Q_cdZCRvep6TMgaZreRA1sVotZc2j68Z2RdaRPoqDl3BSFeudZI7lH6G9qnwwuo-ytt2krvnVMnyeiXeCEQhz2ExL2KMiW479Q6kSIS5pvUQXSJ0x62WvyN3T304nropKdh2OESN1pUw"/>
+</div>
+</nav>
+<!-- SideNavBar & Main Content Wrapper -->
+<div class="flex pt-16 h-screen w-full max-w-container-max mx-auto">
+<!-- SideNavBar -->
+<aside class="hidden md:flex bg-surface-container-low dark:bg-surface-container-low docked left-0 h-full w-64 border-r border-outline-variant dark:border-outline-variant flat no shadows flex-col fixed left-0 top-0 pt-16 z-40">
+<div class="p-6 border-b border-outline-variant">
+<img alt="System Security" class="w-12 h-12 rounded-lg object-cover mb-3" data-alt="System Security abstract avatar, geometric shapes, deep navy and stark white palette, clean modern lines." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTiB2eb-GqPZrEgUF8LfVQ42_DQbqLmuOIFwDM20q4Tr_ksr3Op1wB32CvCm9WgDPTryvMHHEDQ1B8-FjiTYQmKOGBqL80AoRpfOWkBX-KeoeGWoVNk6ox3rQUHGJbcrqhyT3lLnWJcI9U0zmmz3RVoMh6mPgIE2fUs9KUHiBDHvqekS7wJEV-3A6BSVIlFLBuU-mvOyPS761E5P_uTOPCG-s2N4adVHpD6EKjgZrHPiWmvfy1YtzQ7Q"/>
+<div class="font-title-lg text-title-lg text-primary">Security Core</div>
+<div class="font-label-md text-label-md text-on-surface-variant mt-1">Level 4 Clearance</div>
+</div>
+<div class="flex-1 overflow-y-auto py-4 flex flex-col gap-1">
+<a class="flex items-center px-6 py-3 text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-all active:scale-[0.98] duration-150 gap-3" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="security">security</span>
+<span class="font-label-md text-label-md">Security Overview</span>
+</a>
+<!-- Active State Match: MFA Settings (Closest to general Security Settings intent based on instructions, though we cover multiple sections) -->
+<!-- Choosing MFA Settings as the primary active tab for this view -->
+<a class="flex items-center px-6 py-3 text-secondary dark:text-on-secondary-fixed-variant font-bold border-l-4 border-secondary dark:border-secondary-fixed bg-surface-container hover:bg-surface-container-high transition-all active:scale-[0.98] duration-150 gap-3" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="vibration">vibration</span>
+<span class="font-label-md text-label-md">MFA Settings</span>
+</a>
+<a class="flex items-center px-6 py-3 text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-all active:scale-[0.98] duration-150 gap-3" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="key">key</span>
+<span class="font-label-md text-label-md">API Management</span>
+</a>
+<a class="flex items-center px-6 py-3 text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-all active:scale-[0.98] duration-150 gap-3" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="devices">devices</span>
+<span class="font-label-md text-label-md">Session Control</span>
+</a>
+<a class="flex items-center px-6 py-3 text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-all active:scale-[0.98] duration-150 gap-3" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="history">history</span>
+<span class="font-label-md text-label-md">Audit Logs</span>
+</a>
+</div>
+<div class="p-6 border-t border-outline-variant">
+<button class="w-full py-2 bg-error text-on-error rounded font-label-md text-label-md mb-4 flex items-center justify-center gap-2 hover:bg-on-error-container transition-colors inset-border-btn">
+<span class="material-symbols-outlined text-sm">lock</span>
+                    Lock Account
+                </button>
+<div class="flex flex-col gap-2">
+<a class="flex items-center text-on-surface-variant hover:text-primary transition-colors gap-2 font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="contact_support">contact_support</span> Support
+                    </a>
+<a class="flex items-center text-on-surface-variant hover:text-primary transition-colors gap-2 font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="verified_user">verified_user</span> Compliance
+                    </a>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 md:ml-64 p-margin-mobile md:p-margin-desktop overflow-y-auto">
+<header class="mb-8">
+<h1 class="font-headline-lg text-headline-lg text-primary mb-2">Security Settings</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Manage your account security, API access, and session preferences.</p>
+</header>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- MFA Section (Left Column / Full on Mobile) -->
+<div class="lg:col-span-4 flex flex-col gap-6">
+<section class="glass-card rounded-lg p-6 border-l-4 border-l-[#009668]"> <!-- Success Green border per compliance rules -->
+<div class="flex justify-between items-start mb-6">
+<div>
+<h2 class="font-title-lg text-title-lg text-primary mb-1">Multi-Factor Authentication (MFA)</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Protect your account with an extra layer of security.</p>
+</div>
+<span class="px-3 py-1 bg-[#d1fae5] text-[#009668] rounded-full font-label-md text-label-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> Enabled
+                            </span>
+</div>
+<div class="space-y-4 mb-6">
+<div class="flex justify-between items-center p-3 border border-outline-variant rounded bg-surface hover:bg-[#F1F5F9] transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary">smartphone</span>
+<div>
+<div class="font-label-md text-label-md text-primary">Authenticator App</div>
+<div class="font-body-md text-body-md text-on-surface-variant text-[12px]">Primary</div>
+</div>
+</div>
+<button class="text-on-surface-variant hover:text-secondary"><span class="material-symbols-outlined text-sm">more_vert</span></button>
+</div>
+<div class="flex justify-between items-center p-3 border border-outline-variant rounded bg-surface hover:bg-[#F1F5F9] transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary">sms</span>
+<div>
+<div class="font-label-md text-label-md text-primary">SMS Authentication</div>
+<div class="font-body-md text-body-md text-on-surface-variant text-[12px]">Backup (***-***-1234)</div>
+</div>
+</div>
+<button class="text-on-surface-variant hover:text-secondary"><span class="material-symbols-outlined text-sm">more_vert</span></button>
+</div>
+</div>
+<button class="w-full py-2 bg-transparent border border-outline-variant text-primary rounded font-label-md text-label-md hover:bg-surface-container transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">add</span>
+                            Add Recovery Method
+                        </button>
+</section>
+<!-- Session Control -->
+<section class="glass-card rounded-lg p-6">
+<div class="mb-6">
+<h2 class="font-title-lg text-title-lg text-primary mb-1">Session Control</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Manage your active sessions and auto-logout rules.</p>
+</div>
+<div class="space-y-4 mb-6">
+<div class="flex justify-between items-start pb-4 border-b border-outline-variant">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary mt-1">laptop_mac</span>
+<div>
+<div class="font-label-md text-label-md text-primary flex items-center gap-2">
+                                            MacBook Pro / Chrome 
+                                            <span class="px-2 py-0.5 bg-secondary-fixed text-on-secondary-fixed-variant rounded-full text-[10px]">Current</span>
+</div>
+<div class="font-code-sm text-code-sm text-on-surface-variant mt-1">192.168.1.105</div>
+<div class="font-body-md text-body-md text-on-surface-variant text-[12px]">Washington D.C, USA</div>
+</div>
+</div>
+</div>
+<div class="flex justify-between items-start pb-4 border-b border-outline-variant">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-outline mt-1">phone_iphone</span>
+<div>
+<div class="font-label-md text-label-md text-primary">iPhone 13 / Safari</div>
+<div class="font-code-sm text-code-sm text-on-surface-variant mt-1">10.0.0.42</div>
+<div class="font-body-md text-body-md text-on-surface-variant text-[12px]">New York, USA • Last active 2h ago</div>
+</div>
+</div>
+<button class="text-error hover:text-on-error-container text-[12px] font-label-md text-label-md">End</button>
+</div>
+</div>
+<div class="flex items-center justify-between mb-6 p-3 bg-surface-bright rounded border border-outline-variant">
+<div class="font-label-md text-label-md text-primary">Auto-logout after 15m inactivity</div>
+<!-- Simple custom toggle switch -->
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-9 h-5 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-secondary"></div>
+</label>
+</div>
+<button class="w-full py-2 bg-transparent border border-error text-error rounded font-label-md text-label-md hover:bg-error-container transition-colors">
+                            Sign out of all other sessions
+                        </button>
+</section>
+</div>
+<!-- API Management Section (Right Column / Bento Grid Style) -->
+<div class="lg:col-span-8">
+<section class="glass-card rounded-lg p-6 h-full flex flex-col">
+<div class="flex justify-between items-center mb-6">
+<div>
+<h2 class="font-title-lg text-title-lg text-primary mb-1">API Management</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Manage integration keys for external services.</p>
+</div>
+<button class="px-4 py-2 bg-primary-container text-on-primary rounded font-label-md text-label-md flex items-center gap-2 hover:bg-inverse-surface transition-colors inset-border-btn">
+<span class="material-symbols-outlined text-sm">rotate_left</span>
+                                Generate New Key
+                            </button>
+</div>
+<!-- Data Table -->
+<div class="border border-outline-variant rounded overflow-hidden flex-1">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-low font-label-md text-label-md text-on-surface-variant border-b border-outline-variant">
+<tr>
+<th class="py-3 px-3 font-medium">Key Name</th>
+<th class="py-3 px-3 font-medium">Created</th>
+<th class="py-3 px-3 font-medium">Last Used</th>
+<th class="py-3 px-3 font-medium w-24">Usage (24h)</th>
+<th class="py-3 px-3 font-medium text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="font-body-md text-body-md text-primary">
+<tr class="zebra-row border-b border-outline-variant h-[40px] hover:bg-[#F1F5F9]">
+<td class="py-2 px-3 font-label-md text-label-md flex items-center gap-2">
+                                            Prod_Billing_Sync
+                                            <span class="w-2 h-2 rounded-full bg-[#009668]"></span>
+</td>
+<td class="py-2 px-3 text-[13px] text-on-surface-variant">Oct 12, 2023</td>
+<td class="py-2 px-3 text-[13px] text-on-surface-variant">2 mins ago</td>
+<td class="py-2 px-3">
+<!-- Simple CSS sparkline representation -->
+<div class="flex items-end h-4 gap-0.5">
+<div class="w-1 bg-secondary opacity-40 h-[40%]"></div>
+<div class="w-1 bg-secondary opacity-60 h-[70%]"></div>
+<div class="w-1 bg-secondary opacity-50 h-[60%]"></div>
+<div class="w-1 bg-secondary opacity-80 h-[90%]"></div>
+<div class="w-1 bg-secondary opacity-100 h-[100%]"></div>
+<div class="w-1 bg-secondary opacity-70 h-[80%]"></div>
+</div>
+</td>
+<td class="py-2 px-3 text-right">
+<button class="text-error font-label-md text-label-md text-[12px] hover:underline">Revoke</button>
+</td>
+</tr>
+<tr class="zebra-row border-b border-outline-variant h-[40px] hover:bg-[#F1F5F9]">
+<td class="py-2 px-3 font-label-md text-label-md flex items-center gap-2">
+                                            Staging_Metrics_Read
+                                            <span class="w-2 h-2 rounded-full bg-[#009668]"></span>
+</td>
+<td class="py-2 px-3 text-[13px] text-on-surface-variant">Nov 04, 2023</td>
+<td class="py-2 px-3 text-[13px] text-on-surface-variant">1 hour ago</td>
+<td class="py-2 px-3">
+<div class="flex items-end h-4 gap-0.5">
+<div class="w-1 bg-secondary opacity-20 h-[20%]"></div>
+<div class="w-1 bg-secondary opacity-30 h-[30%]"></div>
+<div class="w-1 bg-secondary opacity-20 h-[20%]"></div>
+<div class="w-1 bg-secondary opacity-40 h-[40%]"></div>
+<div class="w-1 bg-secondary opacity-20 h-[20%]"></div>
+<div class="w-1 bg-secondary opacity-30 h-[30%]"></div>
+</div>
+</td>
+<td class="py-2 px-3 text-right">
+<button class="text-error font-label-md text-label-md text-[12px] hover:underline">Revoke</button>
+</td>
+</tr>
+<tr class="zebra-row h-[40px] hover:bg-[#F1F5F9] opacity-60">
+<td class="py-2 px-3 font-label-md text-label-md flex items-center gap-2">
+                                            Legacy_Export_Tool
+                                            <span class="w-2 h-2 rounded-full bg-outline-variant"></span>
+</td>
+<td class="py-2 px-3 text-[13px] text-on-surface-variant">Jan 15, 2022</td>
+<td class="py-2 px-3 text-[13px] text-on-surface-variant">Never</td>
+<td class="py-2 px-3">
+<div class="flex items-end h-4 gap-0.5">
+<div class="w-1 bg-outline-variant h-[5%]"></div>
+<div class="w-1 bg-outline-variant h-[5%]"></div>
+<div class="w-1 bg-outline-variant h-[5%]"></div>
+<div class="w-1 bg-outline-variant h-[5%]"></div>
+<div class="w-1 bg-outline-variant h-[5%]"></div>
+</div>
+</td>
+<td class="py-2 px-3 text-right">
+<button class="text-error font-label-md text-label-md text-[12px] hover:underline">Revoke</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="mt-4 p-4 bg-surface-container-low rounded border border-outline-variant flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary text-lg mt-0.5">info</span>
+<p class="font-body-md text-body-md text-[13px] text-on-surface-variant">
+                                API keys grant programmatic access to your ProcureGuard environment. Treat them as securely as your password. Keys unused for 90 days are automatically disabled per security policy.
+                            </p>
+</div>
+</section>
+</div>
+</div>
+</main>
+</div>
+</body></html>

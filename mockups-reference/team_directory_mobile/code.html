@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Team Management - BidPulse</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Geist:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-low": "#eff4ff",
+                        "on-secondary-container": "#fefcff",
+                        "on-secondary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "outline": "#76777d",
+                        "primary-fixed": "#dae2fd",
+                        "on-tertiary": "#ffffff",
+                        "surface": "#f8f9ff",
+                        "on-primary-fixed": "#131b2e",
+                        "inverse-primary": "#bec6e0",
+                        "tertiary-fixed": "#6ffbbe",
+                        "on-primary-container": "#7c839b",
+                        "surface-container-highest": "#d3e4fe",
+                        "surface-variant": "#d3e4fe",
+                        "outline-variant": "#c6c6cd",
+                        "surface-container": "#e5eeff",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "on-primary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "on-secondary-fixed": "#00174b",
+                        "surface-tint": "#565e74",
+                        "primary": "#000000",
+                        "on-background": "#0b1c30",
+                        "secondary": "#0051d5",
+                        "tertiary-container": "#002113",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "primary-fixed-dim": "#bec6e0",
+                        "secondary-container": "#316bf3",
+                        "inverse-surface": "#213145",
+                        "inverse-on-surface": "#eaf1ff",
+                        "background": "#f8f9ff",
+                        "surface-dim": "#cbdbf5",
+                        "on-tertiary-container": "#009668",
+                        "tertiary": "#000000",
+                        "on-error": "#ffffff",
+                        "primary-container": "#131b2e",
+                        "surface-container-high": "#dce9ff",
+                        "on-surface": "#0b1c30",
+                        "secondary-fixed": "#dbe1ff",
+                        "on-surface-variant": "#45464d",
+                        "error": "#ba1a1a",
+                        "surface-bright": "#f8f9ff",
+                        "on-tertiary-fixed": "#002113",
+                        "on-secondary-fixed-variant": "#003ea8"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "margin-mobile": "16px",
+                        "container-max": "1440px",
+                        "margin-desktop": "48px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "code-sm": ["Geist"],
+                        "headline-lg-mobile": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-md": ["Geist"],
+                        "headline-lg": ["Inter"],
+                        "display-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "code-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "title-lg": ["18px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen flex flex-col md:hidden">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-primary-container text-primary dark:text-on-primary-container font-headline-md text-headline-md-mobile w-full top-0 sticky border-b border-outline-variant dark:border-outline flat no shadows flex justify-between items-center px-margin-mobile h-16 w-full z-50">
+<button class="text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-low dark:hover:bg-primary-container transition-colors active:opacity-80 transition-opacity p-2 -ml-2 rounded-full">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<h1 class="font-headline-md text-headline-md-mobile font-bold text-primary dark:text-on-primary-container">Team Management</h1>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant">
+<img class="object-cover w-full h-full" data-alt="A small, professional headshot of a corporate user, facing forward, in a light mode setting with soft, professional lighting. The style is modern, realistic, and highly detailed, reflecting a secure, industrial-grade software environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcN8BiS1TUFWp9p-fQtIgOybmYdtfmgwd4lpnYzpZo-oFcz9wfz_Xn1oxHcFjaU_x2XEoL8NdMmgxDk6p46wFdPFEhpRbb48cIdokIEQmrwphWCrJZgXiZCqU_g0pZek5stsrB38dmFRLlAxeI5BdK5yq44oaHyr7CuCPFYYeu2Laol4aXSSb49p2mn95w6WBmrClUn6PHaUREbxxjusjC9rqG4q0_dfcnBIUuVT4ZV41UED4MDxO2Cg"/>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto px-margin-mobile py-unit pb-32">
+<!-- Search Bar -->
+<div class="relative mt-4 mb-6">
+<span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-outline">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-DEFAULT focus:border-secondary focus:ring-1 focus:ring-secondary transition-colors font-body-md text-on-surface placeholder-on-surface-variant" placeholder="Search team members..." type="text"/>
+</div>
+<!-- Team List -->
+<div class="flex flex-col gap-unit">
+<!-- Member 1 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-DEFAULT p-3 flex items-center justify-between hover:bg-surface-container-low transition-colors active:bg-surface-container-high cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden')">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant shrink-0">
+<img class="object-cover w-full h-full" data-alt="A small, professional headshot of a female executive, facing forward, in a light mode setting with soft, professional lighting. The style is modern, realistic, and highly detailed, reflecting a secure, industrial-grade software environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwbTiiIOFxb6TPShT25-henAoUZ-oMeKuxCdT7BQjcMFIXWdb0U8OzPvUneedcBwI6AizAXC0tceAYutLV-nR_wG2ixPIQbF_boDWdzu85UT_DHkeSZ77cKa20L9R0bSCuVhZmv0f2xrNJKRgcaSFNW909UzAzSGSgbXRvCSN_-h0iYJMpy2shNW2voE1eDoMDsKVK0PQnM9E4wZJh5fEYDxJIjQZRHzyYlofH8xYBben-TLnokwQVMg"/>
+</div>
+<div>
+<div class="font-title-lg text-title-lg text-on-surface">Sarah Jenkins</div>
+<div class="flex gap-2 items-center mt-1">
+<span class="bg-surface-container text-on-surface-variant font-label-md text-label-md px-2 py-0.5 rounded-full border border-outline-variant">Admin</span>
+</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</div>
+<!-- Access Summary Expandable -->
+<div class="hidden bg-surface-container-low border-x border-b border-outline-variant rounded-b-DEFAULT p-3 -mt-[5px] pt-4 px-14 text-on-surface-variant font-body-md">
+<div class="grid grid-cols-2 gap-2 text-sm">
+<div><span class="font-bold text-on-surface">Bids:</span> Full Access</div>
+<div><span class="font-bold text-on-surface">RFPs:</span> Full Access</div>
+<div><span class="font-bold text-on-surface">Billing:</span> Manage</div>
+</div>
+</div>
+<!-- Member 2 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-DEFAULT p-3 flex items-center justify-between hover:bg-surface-container-low transition-colors active:bg-surface-container-high cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden')">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-title-lg text-title-lg shrink-0">
+                        MR
+                    </div>
+<div>
+<div class="font-title-lg text-title-lg text-on-surface">Marcus Reed</div>
+<div class="flex gap-2 items-center mt-1">
+<span class="bg-surface-dim text-on-surface font-label-md text-label-md px-2 py-0.5 rounded-full border border-outline-variant">Editor</span>
+</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</div>
+<!-- Access Summary Expandable -->
+<div class="hidden bg-surface-container-low border-x border-b border-outline-variant rounded-b-DEFAULT p-3 -mt-[5px] pt-4 px-14 text-on-surface-variant font-body-md">
+<div class="grid grid-cols-2 gap-2 text-sm">
+<div><span class="font-bold text-on-surface">Bids:</span> Edit</div>
+<div><span class="font-bold text-on-surface">RFPs:</span> View Only</div>
+<div><span class="font-bold text-on-surface">Billing:</span> None</div>
+</div>
+</div>
+<!-- Member 3 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-DEFAULT p-3 flex items-center justify-between hover:bg-surface-container-low transition-colors active:bg-surface-container-high cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant shrink-0">
+<img class="object-cover w-full h-full" data-alt="A small, professional headshot of a male analyst, facing forward, in a light mode setting with soft, professional lighting. The style is modern, realistic, and highly detailed, reflecting a secure, industrial-grade software environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAfRRCv1FKV8nS06oBT1WsTzHQx-YPkCUXOc-3VcPkXedgp_Fw6Maqs7ulyOSw4qqKXliUQpHBdwkPPgRD4VBEequq75qqrozigKKKl7TINFg_pgqx7i5TUyiTfKLrpkY08vFnq4jWBnrf1ZAl0TVHZW67drlUpGtt970sqEzINccZxNTscCfjUeRwRzHsq3KBV2FhUcECQgSskgmcAwhE8fr0NUp4AfcGOhvTbuJHyT4yndyFxSUktQ"/>
+</div>
+<div>
+<div class="font-title-lg text-title-lg text-on-surface">David Chen</div>
+<div class="flex gap-2 items-center mt-1">
+<span class="bg-surface-dim text-on-surface font-label-md text-label-md px-2 py-0.5 rounded-full border border-outline-variant">Viewer</span>
+</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</div>
+</div>
+</main>
+<!-- FAB (Suppressed on Profile/Settings as per mandate, but user requested 'Invite Member' FAB for this specific page) -->
+<!-- Assuming this is a list view where adding is a primary action -->
+<button class="fixed right-margin-mobile bottom-28 w-14 h-14 bg-secondary text-on-secondary rounded-full flex items-center justify-center shadow-[0_4px_12px_rgba(0,81,213,0.3)] hover:bg-secondary-container active:scale-95 transition-all z-40 border border-inset border-white/20">
+<span class="material-symbols-outlined text-2xl">person_add</span>
+</button>
+<!-- BottomNavBar -->
+<nav class="bg-surface dark:bg-primary-container text-primary dark:text-on-primary-container font-label-md text-label-md font-headline-md text-headline-md-mobile font-bold text-primary dark:text-on-primary-container fixed bottom-0 w-full z-50 border-t border-outline-variant dark:border-outline flat no shadows flex justify-around items-center w-full h-20 px-2 pb-safe">
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-secondary dark:hover:text-secondary-fixed-dim transition-colors active:scale-95 transition-transform duration-200">
+<span class="material-symbols-outlined mb-1">dashboard</span>
+<span>Dashboard</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-secondary dark:hover:text-secondary-fixed-dim transition-colors active:scale-95 transition-transform duration-200">
+<span class="material-symbols-outlined mb-1">gavel</span>
+<span>Bids</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-secondary dark:hover:text-secondary-fixed-dim transition-colors active:scale-95 transition-transform duration-200">
+<span class="material-symbols-outlined mb-1">description</span>
+<span>My RFPs</span>
+</div>
+<!-- Active Profile Tab (maps to Team Directory/Settings context) -->
+<div class="flex flex-col items-center justify-center bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary rounded-full px-4 py-1 hover:text-secondary dark:hover:text-secondary-fixed-dim transition-colors active:scale-95 transition-transform duration-200">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">person</span>
+<span>Profile</span>
+</div>
+</nav>
+</body></html>

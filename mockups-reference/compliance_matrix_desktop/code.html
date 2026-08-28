@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BidPulse - Compliance Matrix</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary-fixed-variant": "#3f465c",
+                      "surface": "#f8f9ff",
+                      "outline": "#76777d",
+                      "on-tertiary": "#ffffff",
+                      "inverse-surface": "#213145",
+                      "on-tertiary-container": "#009668",
+                      "on-background": "#0b1c30",
+                      "error-container": "#ffdad6",
+                      "background": "#f8f9ff",
+                      "inverse-on-surface": "#eaf1ff",
+                      "primary-container": "#131b2e",
+                      "surface-container-highest": "#d3e4fe",
+                      "surface-variant": "#d3e4fe",
+                      "primary-fixed": "#dae2fd",
+                      "surface-container": "#e5eeff",
+                      "outline-variant": "#c6c6cd",
+                      "on-tertiary-fixed-variant": "#005236",
+                      "tertiary-container": "#002113",
+                      "on-surface-variant": "#45464d",
+                      "on-tertiary-fixed": "#002113",
+                      "surface-container-low": "#eff4ff",
+                      "on-secondary-fixed": "#00174b",
+                      "primary": "#000000",
+                      "on-secondary": "#ffffff",
+                      "on-primary": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "secondary-fixed": "#dbe1ff",
+                      "surface-dim": "#cbdbf5",
+                      "secondary-container": "#316bf3",
+                      "on-secondary-container": "#fefcff",
+                      "primary-fixed-dim": "#bec6e0",
+                      "tertiary": "#000000",
+                      "tertiary-fixed": "#6ffbbe",
+                      "on-error": "#ffffff",
+                      "inverse-primary": "#bec6e0",
+                      "secondary-fixed-dim": "#b4c5ff",
+                      "surface-tint": "#565e74",
+                      "tertiary-fixed-dim": "#4edea3",
+                      "on-secondary-fixed-variant": "#003ea8",
+                      "surface-container-high": "#dce9ff",
+                      "surface-bright": "#f8f9ff",
+                      "on-surface": "#0b1c30",
+                      "secondary": "#0051d5",
+                      "on-primary-fixed": "#131b2e",
+                      "surface-container-lowest": "#ffffff",
+                      "error": "#ba1a1a",
+                      "on-primary-container": "#7c839b"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "margin-desktop": "48px",
+                      "container-max": "1440px",
+                      "unit": "4px",
+                      "margin-mobile": "16px",
+                      "gutter": "24px"
+              },
+              "fontFamily": {
+                      "code-sm": [
+                              "Geist"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "title-lg": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Geist"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "display-lg": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "headline-lg-mobile": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "code-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "title-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-md": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.02em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #F8FAFC; 
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #CBD5E1; 
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8; 
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md h-screen overflow-hidden flex selection:bg-secondary-container selection:text-on-secondary-container">
+<!-- SideNavBar -->
+<nav class="bg-primary-container dark:bg-primary-container h-screen w-64 fixed left-0 top-0 border-r border-outline-variant dark:border-outline-variant flex flex-col py-6 z-20">
+<div class="px-6 mb-8 flex items-center space-x-3">
+<div class="w-8 h-8 rounded-DEFAULT bg-primary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-container font-medium" data-icon="rocket_launch">rocket_launch</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-on-primary-container leading-tight">BidPulse</h1>
+<p class="font-label-md text-label-md text-on-primary-container/70 mt-0.5">Procurement Intel</p>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto px-2 space-y-1">
+<a class="flex items-center px-4 py-3 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container mx-2 my-1 transition-colors duration-200 cursor-pointer active:scale-95 group" href="#">
+<span class="material-symbols-outlined mr-3 text-on-surface-variant group-hover:text-on-surface transition-colors" data-icon="dashboard">dashboard</span>
+<span class="font-body-md text-body-md">Dashboard</span>
+</a>
+<a class="flex items-center px-4 py-3 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container mx-2 my-1 transition-colors duration-200 cursor-pointer active:scale-95 group" href="#">
+<span class="material-symbols-outlined mr-3 text-on-surface-variant group-hover:text-on-surface transition-colors" data-icon="analytics">analytics</span>
+<span class="font-body-md text-body-md">Market Intelligence</span>
+</a>
+<a class="flex items-center px-4 py-3 rounded-lg bg-secondary-container text-on-secondary-container font-semibold mx-2 my-1 cursor-pointer active:scale-95 group" href="#">
+<span class="material-symbols-outlined mr-3 text-on-secondary-container" data-icon="assignment" data-weight="fill" style="font-variation-settings: 'FILL' 1;">assignment</span>
+<span class="font-body-md text-body-md">My RFPs</span>
+</a>
+<a class="flex items-center px-4 py-3 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container mx-2 my-1 transition-colors duration-200 cursor-pointer active:scale-95 group" href="#">
+<span class="material-symbols-outlined mr-3 text-on-surface-variant group-hover:text-on-surface transition-colors" data-icon="admin_panel_settings">admin_panel_settings</span>
+<span class="font-body-md text-body-md">Admin Portal</span>
+</a>
+</div>
+<div class="mt-auto px-4">
+<div class="p-4 bg-surface-container-low rounded-lg border border-outline-variant/30 flex items-start space-x-3">
+<span class="material-symbols-outlined text-secondary" data-icon="help_center">help_center</span>
+<div>
+<p class="font-label-md text-label-md font-semibold text-on-surface mb-1">Need Assistance?</p>
+<p class="font-code-sm text-code-sm text-on-surface-variant">Contact FAR Support Team</p>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content Wrapper -->
+<div class="flex-1 ml-64 flex flex-col h-screen relative">
+<!-- TopNavBar -->
+<header class="bg-surface dark:bg-surface border-b border-outline-variant dark:border-outline-variant fixed top-0 right-0 w-[calc(100%-16rem)] h-16 flex justify-between items-center px-gutter z-10">
+<div class="flex items-center space-x-2">
+<div class="flex items-center text-on-surface-variant font-body-md text-body-md space-x-2">
+<a class="hover:text-primary transition-colors cursor-pointer" href="#">My RFPs</a>
+<span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span>
+<a class="hover:text-primary transition-colors cursor-pointer" href="#">RFP-2024-DOD-012</a>
+<span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span>
+<span class="text-primary font-semibold">Compliance Matrix</span>
+</div>
+</div>
+<div class="flex items-center space-x-4">
+<div class="relative hidden lg:block w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm" data-icon="search">search</span>
+<input class="w-full pl-9 pr-4 py-1.5 bg-surface-container-low border border-outline-variant rounded-DEFAULT font-label-md text-label-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" placeholder="Search matrix..." type="text"/>
+</div>
+<button class="w-8 h-8 flex items-center justify-center rounded-DEFAULT text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full border border-surface"></span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-DEFAULT text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-primary-fixed-dim border border-outline-variant overflow-hidden cursor-pointer">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a corporate user, wearing a dark suit against a neutral light grey background, representing an active session." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1_LauN0cqrmiq8K7h-KvmBe3dBQtAW3uv6BekxS-VhomMqYBtdEUqmO5ybIZ2EbOrWRRDMBuds1tZMsOqPgiwxbXIcAeBHt8EtbUCZxADqY4m_jkyAGvTvhv3lcImEcPj0b2VQoVj73GaIk5DNAHB-jMq6De4k40pQpMGcKR8PMDnNfgEsVkpUmiT7_aFoxgpi1jpg_L2Ti3Qs6tz3bN6c0fesaGt5fd3xXdw5h5eG30xZxyssvCvKw"/>
+</div>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-1 mt-16 overflow-y-auto p-gutter custom-scrollbar flex flex-col space-y-6">
+<!-- Page Header Section -->
+<div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-2">Compliance Matrix &amp; FAR Analysis</h2>
+<div class="flex items-center space-x-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-secondary" data-icon="description">description</span>
+<span class="font-title-lg text-title-lg font-medium text-on-surface">Cybersecurity Infrastructure Upgrade</span>
+<span class="text-outline-variant">|</span>
+<span class="font-code-sm text-code-sm uppercase tracking-wider text-on-surface-variant">RFP-2024-DOD-012</span>
+</div>
+</div>
+<div class="flex items-center space-x-3 self-start">
+<div class="flex items-center bg-surface-container px-3 py-1.5 rounded-DEFAULT border border-outline-variant/50">
+<span class="material-symbols-outlined text-secondary text-sm mr-2" data-icon="clock_loader_40">clock_loader_40</span>
+<span class="font-label-md text-label-md text-on-surface">In Progress - 45% Complete</span>
+</div>
+<button class="px-4 py-2 bg-primary text-on-primary font-label-md text-label-md rounded-DEFAULT hover:bg-primary/90 transition-colors shadow-sm active:scale-95 flex items-center border border-transparent shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
+<span class="material-symbols-outlined text-sm mr-2" data-icon="download">download</span>
+                        Export Report
+                    </button>
+</div>
+</div>
+<!-- Dashboard / Stats Summary Row -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+<!-- Stat Card 1 -->
+<div class="bg-surface-container-lowest p-4 border border-outline-variant/60 rounded-lg flex items-center justify-between hover:bg-surface-container-low transition-colors group">
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant mb-1">Total Clauses</p>
+<p class="font-headline-md text-headline-md text-on-surface group-hover:text-secondary transition-colors">42</p>
+</div>
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant group-hover:bg-secondary-fixed group-hover:text-secondary-container transition-colors">
+<span class="material-symbols-outlined" data-icon="gavel">gavel</span>
+</div>
+</div>
+<!-- Stat Card 2 -->
+<div class="bg-surface-container-lowest p-4 border-l-4 border-l-tertiary-fixed-dim border-y border-r border-outline-variant/60 rounded-r-lg flex items-center justify-between hover:bg-surface-container-low transition-colors group">
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant mb-1">Compliant</p>
+<p class="font-headline-md text-headline-md text-on-surface">18</p>
+</div>
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-tertiary-fixed-dim" data-icon="check_circle">check_circle</span>
+</div>
+</div>
+<!-- Stat Card 3 -->
+<div class="bg-surface-container-lowest p-4 border border-outline-variant/60 rounded-lg flex items-center justify-between hover:bg-surface-container-low transition-colors group">
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant mb-1">Non-Compliant</p>
+<p class="font-headline-md text-headline-md text-error">4</p>
+</div>
+<div class="w-10 h-10 rounded-full bg-error-container/30 flex items-center justify-center text-error">
+<span class="material-symbols-outlined" data-icon="cancel">cancel</span>
+</div>
+</div>
+<!-- Stat Card 4 -->
+<div class="bg-surface-container-lowest p-4 border border-outline-variant/60 rounded-lg flex items-center justify-between hover:bg-surface-container-low transition-colors group cursor-pointer border-secondary/30 bg-secondary/5">
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant mb-1">Flagged for Review</p>
+<p class="font-headline-md text-headline-md text-secondary">20</p>
+</div>
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined" data-icon="flag">flag</span>
+</div>
+</div>
+</div>
+<!-- Layout Grid for Content & Sidebar -->
+<div class="flex-1 grid grid-cols-1 xl:grid-cols-4 gap-6 min-h-0">
+<!-- Main Data Table Container (Spans 3 cols) -->
+<div class="xl:col-span-3 flex flex-col bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden shadow-sm shadow-on-surface/5">
+<!-- Toolbar / Filters -->
+<div class="p-4 border-b border-outline-variant bg-surface flex flex-wrap gap-4 items-center justify-between">
+<div class="flex space-x-2">
+<select class="form-select text-body-md font-body-md py-1.5 pl-3 pr-8 rounded-DEFAULT border-outline-variant focus:border-secondary focus:ring-1 focus:ring-secondary text-on-surface bg-surface-container-lowest">
+<option>All Agencies</option>
+<option>DoD</option>
+<option>DHS</option>
+</select>
+<select class="form-select text-body-md font-body-md py-1.5 pl-3 pr-8 rounded-DEFAULT border-outline-variant focus:border-secondary focus:ring-1 focus:ring-secondary text-on-surface bg-surface-container-lowest">
+<option>All Clause Types</option>
+<option>FAR</option>
+<option>DFARS</option>
+<option>Technical</option>
+</select>
+<select class="form-select text-body-md font-body-md py-1.5 pl-3 pr-8 rounded-DEFAULT border-outline-variant focus:border-secondary focus:ring-1 focus:ring-secondary text-on-surface bg-surface-container-lowest">
+<option>Status: All</option>
+<option>Compliant</option>
+<option>Action Required</option>
+</select>
+</div>
+<div class="flex space-x-2">
+<button class="p-1.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-DEFAULT transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="filter_list">filter_list</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-DEFAULT transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="view_column">view_column</span>
+</button>
+</div>
+</div>
+<!-- Table -->
+<div class="flex-1 overflow-auto custom-scrollbar bg-surface-container-lowest">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface sticky top-0 z-10 border-b border-outline-variant shadow-sm">
+<tr>
+<th class="py-3 px-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider w-[12%]">Clause ID</th>
+<th class="py-3 px-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider w-[35%]">Requirement Description</th>
+<th class="py-3 px-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider w-[10%]">Priority</th>
+<th class="py-3 px-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider w-[15%]">Status</th>
+<th class="py-3 px-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider w-[13%]">Owner</th>
+<th class="py-3 px-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-right w-[15%]">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/40">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-3 px-4 align-top">
+<span class="font-code-sm text-code-sm font-medium text-on-surface whitespace-nowrap">FAR 52.204-21</span>
+</td>
+<td class="py-3 px-4 align-top">
+<p class="font-body-md text-body-md text-on-surface line-clamp-2" title="Basic Safeguarding of Covered Contractor Information Systems. Requires application of basic security controls to protect information systems.">Basic Safeguarding of Covered Contractor Information Systems. Requires application of basic security controls...</p>
+</td>
+<td class="py-3 px-4 align-top">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-error-container/20 text-error font-code-sm text-code-sm font-medium border border-error/20">High</span>
+</td>
+<td class="py-3 px-4 align-top">
+<div class="flex items-center space-x-1.5 text-secondary">
+<span class="material-symbols-outlined text-sm" data-icon="schedule">schedule</span>
+<span class="font-label-md text-label-md">Action Required</span>
+</div>
+</td>
+<td class="py-3 px-4 align-top">
+<div class="flex items-center space-x-2">
+<img class="w-6 h-6 rounded-full object-cover bg-surface-variant" data-alt="Small circular avatar of a professional woman with glasses, neutral expression, corporate setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLp3SRuuJYa52UE7Yd9Hk_0pWUo70kNBz5q9MtZxSbGwrUR50i6vpg9poAnwVWiEPDMG0CqtJ7R9O9YBe1KBkPluT7ctW1mCXuxvdDnnEKO-PSShIx-UZBN1mSrQ4Q_aH3Ujk_Yi5hgQwRPbESQBgKZpe4r7YF7FpWXE7k4LQdePe5GqCSjMeV8GpQsrJ5ZNl0J9PXNXk7qlTo6UjzJWQw5Uv08-L20Ose4MGq_eMeou1NtAGDqG11VA"/>
+<span class="font-body-md text-body-md text-on-surface">J. Smith</span>
+</div>
+</td>
+<td class="py-3 px-4 align-top text-right">
+<div class="flex items-center justify-end space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1 text-on-surface-variant hover:text-secondary rounded" title="Add Note"><span class="material-symbols-outlined text-sm" data-icon="add_comment">add_comment</span></button>
+<button class="p-1 text-on-surface-variant hover:text-secondary rounded" title="Upload Evidence"><span class="material-symbols-outlined text-sm" data-icon="upload_file">upload_file</span></button>
+<button class="p-1 text-on-surface-variant hover:text-error rounded" title="Override Status"><span class="material-symbols-outlined text-sm" data-icon="edit">edit</span></button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low transition-colors bg-surface-container-lowest group">
+<td class="py-3 px-4 align-top border-l-4 border-l-tertiary-fixed-dim">
+<span class="font-code-sm text-code-sm font-medium text-on-surface whitespace-nowrap">DFARS 252.204-7012</span>
+</td>
+<td class="py-3 px-4 align-top">
+<p class="font-body-md text-body-md text-on-surface line-clamp-2">Safeguarding Covered Defense Information and Cyber Incident Reporting. NIST SP 800-171 compliance.</p>
+</td>
+<td class="py-3 px-4 align-top">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-error-container/20 text-error font-code-sm text-code-sm font-medium border border-error/20">High</span>
+</td>
+<td class="py-3 px-4 align-top">
+<div class="flex items-center space-x-1.5 text-tertiary-fixed-dim">
+<span class="material-symbols-outlined text-sm" data-icon="check_circle">check_circle</span>
+<span class="font-label-md text-label-md text-on-surface">Compliant</span>
+</div>
+</td>
+<td class="py-3 px-4 align-top">
+<div class="flex items-center space-x-2">
+<div class="w-6 h-6 rounded-full bg-surface-variant flex items-center justify-center font-code-sm text-code-sm font-medium text-on-surface-variant">MJ</div>
+<span class="font-body-md text-body-md text-on-surface">M. Jones</span>
+</div>
+</td>
+<td class="py-3 px-4 align-top text-right">
+<div class="flex items-center justify-end space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1 text-on-surface-variant hover:text-secondary rounded" title="Add Note"><span class="material-symbols-outlined text-sm" data-icon="add_comment">add_comment</span></button>
+<button class="p-1 text-on-surface-variant hover:text-secondary rounded" title="View Evidence"><span class="material-symbols-outlined text-sm" data-icon="find_in_page">find_in_page</span></button>
+</div>
+</td>
+</tr>
+<!-- Add more rows for density -->
+<tr class="hover:bg-surface-container-low transition-colors bg-surface-bright group">
+<td class="py-3 px-4 align-top">
+<span class="font-code-sm text-code-sm font-medium text-on-surface whitespace-nowrap">FAR 52.222-26</span>
+</td>
+<td class="py-3 px-4 align-top">
+<p class="font-body-md text-body-md text-on-surface line-clamp-2">Equal Opportunity. Requires affirmative action to ensure equal employment opportunity.</p>
+</td>
+<td class="py-3 px-4 align-top">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-variant text-on-surface-variant font-code-sm text-code-sm font-medium border border-outline-variant/30">Med</span>
+</td>
+<td class="py-3 px-4 align-top">
+<div class="flex items-center space-x-1.5 text-on-surface-variant">
+<span class="material-symbols-outlined text-sm" data-icon="remove_circle_outline">remove_circle_outline</span>
+<span class="font-label-md text-label-md">Not Applicable</span>
+</div>
+</td>
+<td class="py-3 px-4 align-top">
+<span class="font-body-md text-body-md text-on-surface-variant italic">Unassigned</span>
+</td>
+<td class="py-3 px-4 align-top text-right">
+<div class="flex items-center justify-end space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1 text-on-surface-variant hover:text-secondary rounded" title="Edit"><span class="material-symbols-outlined text-sm" data-icon="edit">edit</span></button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Pagination/Footer -->
+<div class="p-3 border-t border-outline-variant bg-surface flex items-center justify-between">
+<p class="font-code-sm text-code-sm text-on-surface-variant">Showing 1-15 of 42 clauses</p>
+<div class="flex items-center space-x-1">
+<button class="p-1 text-on-surface-variant hover:text-on-surface disabled:opacity-50" disabled=""><span class="material-symbols-outlined text-sm" data-icon="chevron_left">chevron_left</span></button>
+<button class="w-6 h-6 rounded bg-secondary text-on-secondary font-code-sm text-code-sm flex items-center justify-center">1</button>
+<button class="w-6 h-6 rounded hover:bg-surface-container text-on-surface font-code-sm text-code-sm flex items-center justify-center">2</button>
+<button class="w-6 h-6 rounded hover:bg-surface-container text-on-surface font-code-sm text-code-sm flex items-center justify-center">3</button>
+<button class="p-1 text-on-surface hover:text-on-surface"><span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span></button>
+</div>
+</div>
+</div>
+<!-- Compliance Intelligence Sidebar (Spans 1 col) -->
+<div class="xl:col-span-1 bg-surface-container-lowest border border-outline-variant rounded-lg flex flex-col shadow-sm">
+<div class="p-4 border-b border-outline-variant bg-surface flex items-center space-x-2">
+<span class="material-symbols-outlined text-secondary" data-icon="neurology">neurology</span>
+<h3 class="font-title-lg text-title-lg text-on-surface">Compliance Intelligence</h3>
+</div>
+<div class="p-4 flex-1 overflow-y-auto custom-scrollbar space-y-5">
+<!-- AI Insight Card -->
+<div class="p-3 bg-secondary/5 border border-secondary/20 rounded-DEFAULT relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-secondary"></div>
+<div class="flex items-start space-x-2 mb-2">
+<span class="material-symbols-outlined text-secondary text-sm mt-0.5" data-icon="warning">warning</span>
+<h4 class="font-label-md text-label-md font-semibold text-on-surface">High Risk Alert</h4>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">FAR 52.204-21 requires immediate attention. 60% of similar recent DoD bids failed initial screening on this clause due to insufficient NIST evidence.</p>
+<button class="mt-2 text-secondary font-label-md text-label-md hover:underline flex items-center text-xs">
+                                Review NIST Mappings <span class="material-symbols-outlined text-[14px] ml-1" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<!-- Secondary Insight -->
+<div class="p-3 border border-outline-variant/60 rounded-DEFAULT">
+<div class="flex items-start space-x-2 mb-2">
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-sm mt-0.5" data-icon="insights">insights</span>
+<h4 class="font-label-md text-label-md font-semibold text-on-surface">Historical Precedent</h4>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">Your organization has successfully complied with DFARS 252.204-7012 in 3 previous contracts. Boilerplate evidence is available.</p>
+<button class="mt-2 text-on-surface-variant hover:text-on-surface font-label-md text-label-md hover:underline flex items-center text-xs border border-outline-variant/50 px-2 py-1 rounded bg-surface-container-low">
+                                Auto-fill Evidence
+                            </button>
+</div>
+<!-- Mini Chart/Visual Placeholder -->
+<div class="pt-2">
+<h4 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-3">Risk Distribution by Type</h4>
+<div class="w-full h-32 rounded bg-surface-container-low border border-outline-variant/30 flex items-center justify-center flex-col relative overflow-hidden">
+<!-- Simulated Chart Graphic -->
+<div class="flex items-end space-x-2 h-16 w-full px-4 mb-2">
+<div class="w-1/3 bg-secondary rounded-t opacity-80" style="height: 80%"></div>
+<div class="w-1/3 bg-error/70 rounded-t" style="height: 40%"></div>
+<div class="w-1/3 bg-tertiary-fixed-dim rounded-t opacity-60" style="height: 20%"></div>
+</div>
+<div class="flex justify-between w-full px-6 font-code-sm text-[10px] text-on-surface-variant mt-1">
+<span>Technical</span>
+<span>FAR</span>
+<span>DFARS</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

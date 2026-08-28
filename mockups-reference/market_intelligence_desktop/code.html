@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Market Intelligence - BidPulse Pro</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#4edea3",
+                        "secondary-fixed": "#dbe1ff",
+                        "error-container": "#ffdad6",
+                        "inverse-surface": "#213145",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed": "#131b2e",
+                        "on-error-container": "#93000a",
+                        "surface-container-high": "#dce9ff",
+                        "surface-variant": "#d3e4fe",
+                        "surface-bright": "#f8f9ff",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-highest": "#d3e4fe",
+                        "tertiary": "#000000",
+                        "surface-tint": "#565e74",
+                        "surface-container-low": "#eff4ff",
+                        "tertiary-container": "#002113",
+                        "on-surface": "#0b1c30",
+                        "on-secondary-container": "#fefcff",
+                        "primary-container": "#131b2e",
+                        "surface-container": "#e5eeff",
+                        "on-tertiary-container": "#009668",
+                        "on-background": "#0b1c30",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "surface-dim": "#cbdbf5",
+                        "inverse-on-surface": "#eaf1ff",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed": "#00174b",
+                        "tertiary-fixed": "#6ffbbe",
+                        "outline": "#76777d",
+                        "primary-fixed": "#dae2fd",
+                        "on-tertiary-fixed": "#002113",
+                        "secondary": "#0051d5",
+                        "surface": "#f8f9ff",
+                        "on-surface-variant": "#45464d",
+                        "on-secondary-fixed-variant": "#003ea8",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "inverse-primary": "#bec6e0",
+                        "on-primary-container": "#7c839b",
+                        "primary-fixed-dim": "#bec6e0",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-container": "#316bf3",
+                        "outline-variant": "#c6c6cd",
+                        "background": "#f8f9ff",
+                        "on-primary": "#ffffff",
+                        "primary": "#000000",
+                        "on-error": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "unit": "4px",
+                        "margin-desktop": "48px",
+                        "gutter": "24px",
+                        "container-max": "1440px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Geist"],
+                        "code-sm": ["Geist"],
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "title-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "code-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "title-lg": ["18px", { "lineHeight": "28px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { background-color: #f8f9ff; }
+        
+        /* Custom scrollbar for robust filter sidebar */
+        .sidebar-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .sidebar-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+            background-color: #c6c6cd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex">
+<!-- SideNavBar -->
+<nav class="bg-surface border-r border-outline-variant h-full w-64 flex flex-col fixed left-0 top-0 bottom-0 z-40">
+<!-- Header -->
+<div class="p-gutter border-b border-outline-variant flex items-center gap-3">
+<img alt="Organization Logo" class="w-10 h-10 rounded object-cover" data-alt="A clean, minimalist abstract logo for a government procurement platform, featuring geometric shapes in dark navy and white, flat design, high-end corporate aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2sWtQkxZTBR-7RQK39I_qCp0BDZ2oL3hsrMGbmuPbzwGkSDcemS3cfcW2F8Zdkx5t6XKj7gKewmz6ujVum3hYDoxBUg23VzCC-37B9HWEG-dyZam-cvH2Wslya7-he3OcQA2ABVG7XFvuaRK1Dhlhaj2dZtPVC7BPRRhfzteEMGiHpaOKHc4HJXqQAfNf92VCdBpNuG1JBI0vQCKiQ4o8aafJeaC6X-9lPgRiEPZUfrq_8e49d58Isw"/>
+<div>
+<h1 class="font-title-lg text-title-lg font-bold text-primary">BidPulse Pro</h1>
+<p class="font-label-md text-label-md text-on-surface-variant">Enterprise Tier</p>
+</div>
+</div>
+<!-- Navigation Tabs -->
+<div class="flex-1 py-4 overflow-y-auto">
+<ul class="flex flex-col">
+<li class="px-4 py-3 mx-2 rounded-DEFAULT cursor-pointer hover:bg-surface-container-low transition-all flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</li>
+<!-- Active Tab -->
+<li class="px-4 py-3 mx-2 rounded-DEFAULT cursor-pointer active:scale-95 flex items-center gap-3 text-secondary border-r-4 border-secondary bg-surface-container-high transition-all">
+<span class="material-symbols-outlined fill" data-icon="insights" data-weight="fill">insights</span>
+<span class="font-label-md text-label-md">Market Intelligence</span>
+</li>
+<li class="px-4 py-3 mx-2 rounded-DEFAULT cursor-pointer hover:bg-surface-container-low transition-all flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span class="font-label-md text-label-md">My RFPs</span>
+</li>
+<li class="px-4 py-3 mx-2 rounded-DEFAULT cursor-pointer hover:bg-surface-container-low transition-all flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="admin_panel_settings">admin_panel_settings</span>
+<span class="font-label-md text-label-md">Admin Portal</span>
+</li>
+</ul>
+</div>
+<!-- Footer -->
+<div class="p-4 border-t border-outline-variant">
+<ul class="flex flex-col">
+<li class="px-4 py-2 mx-2 rounded-DEFAULT cursor-pointer hover:bg-surface-container-low transition-all flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="font-label-md text-label-md">Support</span>
+</li>
+<li class="px-4 py-2 mx-2 rounded-DEFAULT cursor-pointer hover:bg-surface-container-low transition-all flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="font-label-md text-label-md">Sign Out</span>
+</li>
+</ul>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="ml-64 flex-1 flex flex-col min-h-screen">
+<!-- TopNavBar -->
+<header class="bg-surface-container-lowest w-full h-16 border-b border-outline-variant flex justify-between items-center px-gutter sticky top-0 z-30">
+<div class="flex items-center gap-4 w-1/3">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full bg-surface pl-10 pr-4 py-2 border border-outline-variant rounded focus:border-secondary focus:ring-1 focus:ring-secondary focus:outline-none font-body-md text-body-md transition-colors placeholder:text-on-surface-variant" placeholder="Search solicitations, agencies, keywords..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-on-surface-variant hover:bg-surface-container rounded-full p-2 transition-colors cursor-pointer active:opacity-80 relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-1.5 right-2 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<button class="text-on-surface-variant hover:bg-surface-container rounded-full p-2 transition-colors cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="h-8 w-px bg-outline-variant mx-2"></div>
+<img alt="User profile avatar" class="w-8 h-8 rounded-full border border-outline-variant object-cover cursor-pointer" data-alt="A professional headshot of a corporate user, neutral lighting, white background, conveying trust and expertise." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4TQBewycE915ESG7Idx7LT6RfsojBB3z887HAa46tAWo_4_DX-f-YjC1i5SfEFY7IsFK22AYDbtpOo_0kZVeUX0T9R70zp8YD31WpuMjHOw9WUKIRM8Nx3TTomPo_tH-lcuAhtmUIk1NXhWtJvrr8zRa8uitRjI__rU0I35SnxcsNt_b_EIsZofbADDqY-4ujNjG2eMmyXYbvYrJTPfTMHqFtacYJnfRQzQJOHPwqmDiW0p9ySmlXrA"/>
+</div>
+</header>
+<!-- Content Layout: Sidebar Filter + Main Grid -->
+<div class="flex flex-1 overflow-hidden">
+<!-- Filter Sidebar (Robust) -->
+<aside class="w-72 bg-surface-container-lowest border-r border-outline-variant flex flex-col h-[calc(100vh-64px)] sidebar-scroll overflow-y-auto z-20">
+<div class="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-bright sticky top-0">
+<h2 class="font-title-lg text-title-lg text-on-surface">Filters</h2>
+<button class="font-label-md text-label-md text-secondary hover:underline">Reset All</button>
+</div>
+<div class="p-6 flex flex-col gap-8">
+<!-- Agency Filter -->
+<div>
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase mb-3 tracking-wide">Agency</h3>
+<div class="space-y-2">
+<label class="flex items-center gap-2 cursor-pointer group">
+<input checked="" class="rounded border-outline-variant text-secondary focus:ring-secondary w-4 h-4" type="checkbox"/>
+<span class="font-body-md text-body-md group-hover:text-primary transition-colors">Dept. of Defense (DoD)</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer group">
+<input class="rounded border-outline-variant text-secondary focus:ring-secondary w-4 h-4" type="checkbox"/>
+<span class="font-body-md text-body-md group-hover:text-primary transition-colors">Dept. of Energy (DoE)</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer group">
+<input checked="" class="rounded border-outline-variant text-secondary focus:ring-secondary w-4 h-4" type="checkbox"/>
+<span class="font-body-md text-body-md group-hover:text-primary transition-colors">NASA</span>
+</label>
+<button class="font-label-md text-label-md text-secondary mt-1 hover:underline text-left">+ Show 14 more</button>
+</div>
+</div>
+<!-- Value Range -->
+<div>
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase mb-3 tracking-wide">Estimated Value</h3>
+<div class="flex flex-col gap-3">
+<div class="flex items-center gap-2">
+<input class="w-full bg-surface border border-outline-variant rounded px-2 py-1.5 focus:border-secondary focus:ring-1 focus:ring-secondary font-code-sm text-code-sm" placeholder="Min $" type="text"/>
+<span class="text-on-surface-variant">-</span>
+<input class="w-full bg-surface border border-outline-variant rounded px-2 py-1.5 focus:border-secondary focus:ring-1 focus:ring-secondary font-code-sm text-code-sm" placeholder="Max $" type="text"/>
+</div>
+<div class="space-y-2 mt-2">
+<label class="flex items-center gap-2 cursor-pointer group">
+<input class="border-outline-variant text-secondary focus:ring-secondary w-4 h-4" name="value" type="radio"/>
+<span class="font-body-md text-body-md group-hover:text-primary transition-colors">&lt; $1M</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer group">
+<input checked="" class="border-outline-variant text-secondary focus:ring-secondary w-4 h-4" name="value" type="radio"/>
+<span class="font-body-md text-body-md group-hover:text-primary transition-colors">$1M - $10M</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer group">
+<input class="border-outline-variant text-secondary focus:ring-secondary w-4 h-4" name="value" type="radio"/>
+<span class="font-body-md text-body-md group-hover:text-primary transition-colors">&gt; $10M</span>
+</label>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Data Area -->
+<div class="flex-1 flex flex-col h-[calc(100vh-64px)] overflow-y-auto bg-background p-margin-desktop">
+<!-- Toolbar -->
+<div class="flex justify-between items-center mb-8">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-background mb-1">Market Intelligence</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Showing 42 matched solicitations based on your profile.</p>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 border border-outline-variant rounded bg-surface-container-lowest px-3 py-1.5">
+<span class="font-label-md text-label-md text-on-surface-variant">Sort by:</span>
+<select class="bg-transparent border-none p-0 focus:ring-0 font-body-md text-body-md text-on-surface cursor-pointer">
+<option>Match % (High to Low)</option>
+<option>Deadline (Earliest)</option>
+<option>Value (High to Low)</option>
+</select>
+</div>
+<div class="flex bg-surface-container-lowest border border-outline-variant rounded overflow-hidden">
+<button class="p-1.5 bg-surface-container-high text-secondary"><span class="material-symbols-outlined block text-sm">grid_view</span></button>
+<button class="p-1.5 text-on-surface-variant hover:bg-surface-container-low transition-colors"><span class="material-symbols-outlined block text-sm">view_list</span></button>
+</div>
+</div>
+</div>
+<!-- Bento Grid of Solicitations -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Card 1 (High Match) -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-6 flex flex-col hover:bg-surface-bright transition-colors cursor-pointer group relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-tertiary-fixed-dim"></div> <!-- Compliance/High Match indicator -->
+<div class="flex justify-between items-start mb-4 pl-2">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-surface-container border border-outline-variant flex items-center justify-center p-1">
+<img alt="DoD Logo" class="w-full h-full object-contain" data-alt="Official seal of the Department of Defense, detailed vector style, blue and gold colors on white background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAv6WEmDBz5E1s-iFhfdQadru4ohVdQouZYt2qK7JGPV-6_-6QjZ7qFsAwZ9WaQ6Ru1aCv9bMVUPJ5LO-3E1DzOCxF3aknGzyxCGAI4Y5ggzbRctDkfbhZ3GJDE1aIoI_pc8Mr2agkXoJ2j3e0n3xRp4OvoJtnMal5Lj3g1zIb84Uuiu7Z9FsRx-tayg2gQqs6IQI_rGmZOw5KTc7WKuSynZEBKD1VQGkYEZd1offmMpF-WRghOWn4yNg"/>
+</div>
+<div>
+<span class="font-label-md text-label-md text-on-surface-variant block">DoD - Defense Logistics</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant block">SOL-DLA-2023-094</span>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-title-lg text-title-lg text-tertiary-fixed-dim font-bold">94%</span>
+<span class="font-label-md text-label-md text-on-surface-variant">AI Fit Score</span>
+</div>
+</div>
+<h3 class="font-title-lg text-title-lg text-on-surface mb-3 line-clamp-2 group-hover:text-secondary transition-colors pl-2">Advanced Cloud Infrastructure Modernization Phase II</h3>
+<div class="flex flex-wrap gap-2 mb-4 pl-2">
+<span class="inline-flex items-center px-2 py-1 rounded bg-surface-container-high text-on-surface font-label-md text-label-md border border-outline-variant">IT Services</span>
+<span class="inline-flex items-center px-2 py-1 rounded bg-surface-container-high text-on-surface font-label-md text-label-md border border-outline-variant">NAICS 541512</span>
+<span class="inline-flex items-center px-2 py-1 rounded bg-inverse-primary text-on-primary-container font-label-md text-label-md border border-outline-variant">Small Business Set-Aside</span>
+</div>
+<div class="mt-auto pl-2 border-t border-outline-variant pt-4 flex justify-between items-center">
+<div>
+<span class="font-label-md text-label-md text-on-surface-variant block mb-1">Est. Value</span>
+<span class="font-body-md text-body-md font-medium text-on-surface">$4.5M - $5.2M</span>
+</div>
+<div class="text-right">
+<span class="font-label-md text-label-md text-on-surface-variant block mb-1">Deadline</span>
+<span class="font-body-md text-body-md font-medium text-error flex items-center gap-1 justify-end">
+<span class="material-symbols-outlined text-[16px]">schedule</span> 14 Days
+                                </span>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-6 flex flex-col hover:bg-surface-bright transition-colors cursor-pointer group relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-secondary-fixed"></div>
+<div class="flex justify-between items-start mb-4 pl-2">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-surface-container border border-outline-variant flex items-center justify-center p-1">
+<img alt="NASA Logo" class="w-full h-full object-contain" data-alt="Official logo of NASA, classic blue sphere with stars and red chevron, vector style, white background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOldT8pd0OUSg8dyRaUYCLfKtEXsqd6Xyp4UIRHw3sLk_eBax1syKMau4xlo86Q5A1od8vxl9IgpeBTMo562cfb6sMpLEj2RfBlg0CVdgEN5hoRTZ69G-XV1rtFQhmYaQeICOpwFmZl7YdlkEh-lzQgjLs2nVUAwFqSNpe3iqnPwctNRgNvXxjyv-QjBJl9PIaZ8YOLi7bvW4_Y_yHFDO_AhZh8FS48mslKTfDuJOKYpJblwfjTqBceA"/>
+</div>
+<div>
+<span class="font-label-md text-label-md text-on-surface-variant block">NASA - Ames Research</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant block">NNX15AL12A</span>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-title-lg text-title-lg text-secondary font-bold">88%</span>
+<span class="font-label-md text-label-md text-on-surface-variant">AI Fit Score</span>
+</div>
+</div>
+<h3 class="font-title-lg text-title-lg text-on-surface mb-3 line-clamp-2 group-hover:text-secondary transition-colors pl-2">Data Analytics Platform for Flight Operations</h3>
+<div class="flex flex-wrap gap-2 mb-4 pl-2">
+<span class="inline-flex items-center px-2 py-1 rounded bg-surface-container-high text-on-surface font-label-md text-label-md border border-outline-variant">Software Dev</span>
+<span class="inline-flex items-center px-2 py-1 rounded bg-surface-container-high text-on-surface font-label-md text-label-md border border-outline-variant">NAICS 541511</span>
+</div>
+<div class="mt-auto pl-2 border-t border-outline-variant pt-4 flex justify-between items-center">
+<div>
+<span class="font-label-md text-label-md text-on-surface-variant block mb-1">Est. Value</span>
+<span class="font-body-md text-body-md font-medium text-on-surface">$1.2M - $2.0M</span>
+</div>
+<div class="text-right">
+<span class="font-label-md text-label-md text-on-surface-variant block mb-1">Deadline</span>
+<span class="font-body-md text-body-md font-medium text-on-surface flex items-center gap-1 justify-end">
+<span class="material-symbols-outlined text-[16px]">schedule</span> 32 Days
+                                </span>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-6 flex flex-col hover:bg-surface-bright transition-colors cursor-pointer group relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-outline-variant"></div>
+<div class="flex justify-between items-start mb-4 pl-2">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-surface-container border border-outline-variant flex items-center justify-center p-1">
+<img alt="DoE Logo" class="w-full h-full object-contain" data-alt="Seal of the Department of Energy, green and gold elements, clean vector graphic on white background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDcft1ZtTJd3sJ4SKpPbOhlmYOt1EAcfZcft7NmsFTsecwQAS6ne1anspB26u0ZekL-WnnPzu_BD2dV2UJwe1_nyER4xy4Qyo68Au4YDo2Hr9r7vJu84tC-nuzUky1rf3jaMKsH21VeOyQgJ3VXsG8YxwDvEI6ciImkXHZ4r8hSMAvH6PXNFsymzGz8KBj2qEaUNtcB8G-bSPQE8uzG8CsTcStshVqfWDy9u6Kts2ue_bY1u24XciTlZg"/>
+</div>
+<div>
+<span class="font-label-md text-label-md text-on-surface-variant block">DoE - Oak Ridge</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant block">DE-SOL-00129</span>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-title-lg text-title-lg text-on-surface-variant font-bold">72%</span>
+<span class="font-label-md text-label-md text-on-surface-variant">AI Fit Score</span>
+</div>
+</div>
+<h3 class="font-title-lg text-title-lg text-on-surface mb-3 line-clamp-2 group-hover:text-secondary transition-colors pl-2">Cybersecurity Audit and Remediation Services</h3>
+<div class="flex flex-wrap gap-2 mb-4 pl-2">
+<span class="inline-flex items-center px-2 py-1 rounded bg-surface-container-high text-on-surface font-label-md text-label-md border border-outline-variant">Cybersecurity</span>
+<span class="inline-flex items-center px-2 py-1 rounded bg-surface-container-high text-on-surface font-label-md text-label-md border border-outline-variant">NAICS 541690</span>
+</div>
+<div class="mt-auto pl-2 border-t border-outline-variant pt-4 flex justify-between items-center">
+<div>
+<span class="font-label-md text-label-md text-on-surface-variant block mb-1">Est. Value</span>
+<span class="font-body-md text-body-md font-medium text-on-surface">TBD</span>
+</div>
+<div class="text-right">
+<span class="font-label-md text-label-md text-on-surface-variant block mb-1">Deadline</span>
+<span class="font-body-md text-body-md font-medium text-on-surface flex items-center gap-1 justify-end">
+<span class="material-symbols-outlined text-[16px]">schedule</span> 45 Days
+                                </span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

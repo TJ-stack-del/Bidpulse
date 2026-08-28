@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BidPulse - Assembly &amp; Drafting</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline-variant": "#c6c6cd",
+                        "on-tertiary-fixed": "#002113",
+                        "outline": "#76777d",
+                        "surface-dim": "#cbdbf5",
+                        "on-secondary-fixed-variant": "#003ea8",
+                        "tertiary-fixed": "#6ffbbe",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-tertiary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "secondary-fixed": "#dbe1ff",
+                        "surface-tint": "#565e74",
+                        "on-background": "#0b1c30",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "on-primary-container": "#7c839b",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface-variant": "#45464d",
+                        "on-primary-fixed": "#131b2e",
+                        "surface-container": "#e5eeff",
+                        "background": "#f8f9ff",
+                        "surface": "#f8f9ff",
+                        "tertiary": "#000000",
+                        "surface-container-low": "#eff4ff",
+                        "on-error": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "primary-fixed-dim": "#bec6e0",
+                        "on-surface": "#0b1c30",
+                        "surface-variant": "#d3e4fe",
+                        "on-secondary-fixed": "#00174b",
+                        "primary-fixed": "#dae2fd",
+                        "on-error-container": "#93000a",
+                        "on-secondary-container": "#fefcff",
+                        "inverse-primary": "#bec6e0",
+                        "on-tertiary-container": "#009668",
+                        "secondary": "#0051d5",
+                        "error": "#ba1a1a",
+                        "tertiary-container": "#002113",
+                        "secondary-container": "#316bf3",
+                        "surface-bright": "#f8f9ff",
+                        "primary": "#000000",
+                        "inverse-surface": "#213145",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface-container-high": "#dce9ff",
+                        "primary-container": "#131b2e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-desktop": "48px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "container-max": "1440px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "label-md": ["Geist"],
+                        "display-lg": ["Inter"],
+                        "code-sm": ["Geist"],
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "title-lg": ["18px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "code-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* Pulse Animation for Active Stage */
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 0 0 rgba(49, 107, 243, 0.4); }
+            70% { box-shadow: 0 0 0 4px rgba(49, 107, 243, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(49, 107, 243, 0); }
+        }
+        .active-stage {
+            animation: pulse-border 2s infinite;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col pb-24 relative overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface-dim text-primary dark:text-primary-fixed font-title-lg text-title-lg w-full top-0 sticky border-b border-outline-variant dark:border-outline flex justify-between items-center px-margin-mobile h-14 z-40">
+<div class="flex items-center gap-4">
+<button aria-label="Menu" class="hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors active:opacity-80 transition-opacity p-2 rounded-full -ml-2">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<span class="font-headline-md text-headline-md font-bold text-on-surface dark:text-on-surface">Artifact Tracker</span>
+</div>
+<div class="flex items-center">
+<button aria-label="Profile" class="hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors active:opacity-80 transition-opacity rounded-full overflow-hidden w-8 h-8 flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined text-outline">apps_outage</span>
+<!-- Replaced generic user_profile_avatar with person for better material icon rendering if avatar image fails -->
+<img alt="User Avatar" class="object-cover w-full h-full" data-alt="A professional headshot of a corporate executive in a modern light-filled office. The lighting is bright and clean, reflecting a professional and reliable tone suitable for a government procurement platform. The palette is neutral with soft off-whites and subtle blue accents. The style is modern, sharp, and corporate." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKVGgobiIj7TH3eMcppnad51GOAUVCGAAa1fcSLrire0EhG86VgnDl9MNTeRx3Rw-34HV0Oiu89kNiPl6pCfRndmsCU15uA6bmViPDSePY-B68OOyt5cxZ3TUp70p_MqzDVL_dcvTFe7D2ptjLUJE1b1VhzV6qx3pIcVHChP5MS8bKuusCkC3N50KpNaTJ0BMEcW8krdjPwE8YHevi2zaHKe_pcHfUA3mWneGIP-jJVR4wW_p5KdaJ2g"/>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow px-margin-mobile py-6 flex flex-col gap-6 w-full max-w-container-max mx-auto">
+<!-- Header Section: RFP ID & Stage Indicator -->
+<section class="flex flex-col gap-4">
+<div>
+<div class="flex justify-between items-start mb-1">
+<p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">RFP ID: 2024-DEF-9981</p>
+<span class="bg-surface-container-high text-on-surface px-2 py-0.5 rounded font-label-md text-label-md">Due: 14 Days</span>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-2">Project Sentinel</h1>
+</div>
+<!-- 6-Stage Indicator (Mobile Optimized) -->
+<div class="flex items-center w-full justify-between mt-2">
+<!-- Stage 1: Complete -->
+<div class="flex flex-col items-center gap-1">
+<div class="w-6 h-6 rounded-full bg-tertiary-fixed text-on-tertiary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-[14px]">check</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant text-[10px]">Capture</span>
+</div>
+<div class="h-px bg-tertiary-fixed flex-grow mx-1"></div>
+<!-- Stage 2: Complete -->
+<div class="flex flex-col items-center gap-1">
+<div class="w-6 h-6 rounded-full bg-tertiary-fixed text-on-tertiary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-[14px]">check</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant text-[10px]">Shred</span>
+</div>
+<div class="h-px bg-tertiary-fixed flex-grow mx-1"></div>
+<!-- Stage 3: Active (Assembly) -->
+<div class="flex flex-col items-center gap-1">
+<div class="w-6 h-6 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center active-stage border-2 border-secondary-container">
+<span class="font-label-md text-label-md">3</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface text-[10px] font-bold">Assembly</span>
+</div>
+<div class="h-px bg-outline-variant flex-grow mx-1"></div>
+<!-- Stage 4: Future -->
+<div class="flex flex-col items-center gap-1 opacity-50">
+<div class="w-6 h-6 rounded-full border border-outline-variant text-outline flex items-center justify-center">
+<span class="font-label-md text-label-md">4</span>
+</div>
+<span class="font-label-md text-label-md text-outline text-[10px]">Review</span>
+</div>
+</div>
+</section>
+<!-- Generate AI Draft Action -->
+<section>
+<button class="w-full bg-primary-container text-on-primary-container py-3 rounded-lg flex items-center justify-center gap-2 font-title-lg text-title-lg hover:bg-inverse-surface hover:text-on-tertiary transition-colors border border-transparent active:border-outline-variant shadow-sm relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+                Generate AI Drafts
+            </button>
+<p class="font-label-md text-label-md text-on-surface-variant text-center mt-2">Analyzes shred data to populate initial volume drafts.</p>
+</section>
+<!-- Artifacts List (Bento-style layout for mobile) -->
+<section class="flex flex-col gap-4">
+<h2 class="font-title-lg text-title-lg text-on-surface border-b border-outline-variant pb-2">Proposal Artifacts</h2>
+<div class="grid grid-cols-1 gap-4">
+<!-- Artifact Card 1: Technical Volume -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 hover:bg-surface-container-low transition-colors group cursor-pointer relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-secondary-container"></div>
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary-container">description</span>
+<h3 class="font-title-lg text-title-lg text-on-surface">Technical Volume</h3>
+</div>
+<span class="bg-surface-container text-on-surface-variant px-2 py-1 rounded font-code-sm text-code-sm">DOCX</span>
+</div>
+<div class="mb-4">
+<div class="flex justify-between items-center mb-1">
+<span class="font-label-md text-label-md text-on-surface-variant">Drafting Progress</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">65%</span>
+</div>
+<div class="w-full bg-surface-container-high rounded-full h-1.5">
+<div class="bg-secondary-container h-1.5 rounded-full" style="width: 65%"></div>
+</div>
+</div>
+<div class="flex justify-between items-center border-t border-outline-variant pt-3">
+<div class="flex -space-x-2">
+<img alt="Editor" class="w-6 h-6 rounded-full border border-surface-container-lowest object-cover" data-alt="A small circular avatar showing a diverse professional working in an office environment. The style is clean, corporate, and minimalist, fitting a modern SaaS platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjlknwltXZ_I6ViVWJsPnPI9hkM2GJWqRafGd3VKWFQIrkCMukGflLRlz1THGTMGJIbhpTqZcRa5EFqtiFDikM5By2R9EjQTn7paTkEM4il38mDS2_MNhTooOGy4aS1cTzEBemAP3Rj5_4mz_ZwZFu5vP-nqTLGVErcsgmCqzmrBb4FZgHG_aG5PIB49MXE141sGwzL1ji08TID5j51pWWfXFi83zPYxcWxQSDEOFo3Dvmpr2mOGRVrg"/>
+<div class="w-6 h-6 rounded-full border border-surface-container-lowest bg-surface-variant flex items-center justify-center text-[10px] font-label-md text-on-surface">+2</div>
+</div>
+<button class="text-secondary-container font-label-md text-label-md flex items-center gap-1 hover:underline">
+                            Open Editor <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Artifact Card 2: Management Volume -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 hover:bg-surface-container-low transition-colors group cursor-pointer relative overflow-hidden">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline">folder</span>
+<h3 class="font-title-lg text-title-lg text-on-surface">Management Volume</h3>
+</div>
+<span class="bg-surface-container text-on-surface-variant px-2 py-1 rounded font-code-sm text-code-sm">DOCX</span>
+</div>
+<div class="mb-4">
+<div class="flex justify-between items-center mb-1">
+<span class="font-label-md text-label-md text-on-surface-variant">Drafting Progress</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">20%</span>
+</div>
+<div class="w-full bg-surface-container-high rounded-full h-1.5">
+<div class="bg-outline h-1.5 rounded-full" style="width: 20%"></div>
+</div>
+</div>
+<div class="flex justify-end items-center border-t border-outline-variant pt-3">
+<button class="text-secondary-container font-label-md text-label-md flex items-center gap-1 hover:underline">
+                            Open Editor <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Quick Review Section (Glassmorphism-lite) -->
+<section class="mt-4">
+<div class="bg-surface-container/50 backdrop-blur-sm border border-outline-variant rounded-xl p-4">
+<div class="flex items-center justify-between mb-4">
+<h2 class="font-title-lg text-title-lg text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary-container">preview</span>
+                        Quick Review
+                    </h2>
+<span class="bg-error-container text-on-error-container text-[10px] font-label-md px-2 py-0.5 rounded-full">3 Pending</span>
+</div>
+<div class="flex flex-col gap-3">
+<!-- Review Item 1 -->
+<div class="bg-surface-container-lowest p-3 rounded border border-outline-variant flex flex-col gap-2">
+<div class="flex justify-between items-start">
+<span class="font-label-md text-label-md text-on-surface-variant">Tech Vol &gt; Sec 1.2</span>
+<span class="font-code-sm text-code-sm text-outline">2m ago</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface line-clamp-2">"The proposed architecture leverages a distributed microservices framework to ensure high availability and..."</p>
+<div class="flex justify-end gap-2 mt-1">
+<button class="px-3 py-1 border border-outline-variant rounded font-label-md text-label-md hover:bg-surface-variant transition-colors">Reject</button>
+<button class="px-3 py-1 bg-secondary-container text-on-secondary-container rounded font-label-md text-label-md hover:bg-secondary transition-colors">Approve</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Floating AI Assistant Button (Contextual for Drafting Stage) -->
+<button aria-label="Ask BidPulse AI" class="fixed bottom-24 right-4 w-12 h-12 bg-primary-container text-on-primary-container rounded-full shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-transform z-40 border border-outline-variant">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+</button>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center h-20 px-2 bg-surface dark:bg-surface-dim border-t border-outline-variant dark:border-outline z-50">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-4 py-1 hover:bg-surface-container-low dark:hover:bg-surface-container-high transition-all scale-95 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-secondary-container dark:bg-secondary-container text-on-secondary-container dark:text-on-secondary-container rounded-full px-4 py-1 hover:bg-surface-container-low dark:hover:bg-surface-container-high transition-all scale-95 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">description</span>
+<span class="font-label-md text-label-md">Artifacts</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-4 py-1 hover:bg-surface-container-low dark:hover:bg-surface-container-high transition-all scale-95 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1">auto_awesome</span>
+<span class="font-label-md text-label-md">AI Review</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-4 py-1 hover:bg-surface-container-low dark:hover:bg-surface-container-high transition-all scale-95 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</nav>
+</body></html>

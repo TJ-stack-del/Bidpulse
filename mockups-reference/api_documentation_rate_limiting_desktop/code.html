@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BidPulse API Documentation</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Geist:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary": "#ffffff",
+                        "primary": "#000000",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "tertiary-container": "#002113",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "on-secondary-container": "#fefcff",
+                        "on-tertiary-fixed": "#002113",
+                        "secondary": "#0051d5",
+                        "primary-fixed": "#dae2fd",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface": "#f8f9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-container": "#131b2e",
+                        "surface-container-highest": "#d3e4fe",
+                        "inverse-primary": "#bec6e0",
+                        "tertiary": "#000000",
+                        "on-background": "#0b1c30",
+                        "on-secondary-fixed-variant": "#003ea8",
+                        "surface-tint": "#565e74",
+                        "surface-bright": "#f8f9ff",
+                        "background": "#f8f9ff",
+                        "outline-variant": "#c6c6cd",
+                        "on-surface": "#0b1c30",
+                        "on-primary-fixed": "#131b2e",
+                        "error-container": "#ffdad6",
+                        "secondary-container": "#316bf3",
+                        "surface-container-high": "#dce9ff",
+                        "outline": "#76777d",
+                        "secondary-fixed": "#dbe1ff",
+                        "on-error": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "on-tertiary-container": "#009668",
+                        "on-secondary-fixed": "#00174b",
+                        "on-primary-container": "#7c839b",
+                        "surface-variant": "#d3e4fe",
+                        "on-primary": "#ffffff",
+                        "on-surface-variant": "#45464d",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "surface-container-low": "#eff4ff",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "surface-dim": "#cbdbf5",
+                        "primary-fixed-dim": "#bec6e0",
+                        "inverse-surface": "#213145",
+                        "tertiary-fixed": "#6ffbbe",
+                        "surface-container": "#e5eeff",
+                        "on-error-container": "#93000a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "container-max": "1440px",
+                        "unit": "4px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "margin-desktop": "48px"
+                    },
+                    "fontFamily": {
+                        "title-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "label-md": ["Geist"],
+                        "body-lg": ["Inter"],
+                        "code-sm": ["Geist"]
+                    },
+                    "fontSize": {
+                        "title-lg": ["18px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "code-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-md antialiased min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<nav class="bg-surface dark:bg-background text-primary dark:text-primary-fixed font-body-md text-body-md fixed top-0 w-full z-50 h-16 border-b border-outline-variant dark:border-outline">
+<div class="flex items-center justify-between px-margin-desktop w-full max-w-container-max mx-auto h-full">
+<div class="flex items-center gap-gutter">
+<span class="font-title-lg text-title-lg font-bold text-primary dark:text-primary-fixed">BidPulse Developers</span>
+<div class="hidden md:flex items-center gap-6">
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-secondary dark:hover:text-secondary-fixed transition-colors cursor-pointer active:opacity-70" href="#">Console</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-secondary dark:hover:text-secondary-fixed transition-colors cursor-pointer active:opacity-70" href="#">Support</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-secondary dark:hover:text-secondary-fixed transition-colors cursor-pointer active:opacity-70" href="#">Community</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-sm text-on-surface-variant">v2.4 (Latest)</span>
+<button class="material-symbols-outlined hover:text-secondary transition-colors">dark_mode</button>
+<button class="material-symbols-outlined hover:text-secondary transition-colors">account_circle</button>
+</div>
+</div>
+</nav>
+<div class="flex flex-1 pt-16 max-w-container-max mx-auto w-full">
+<!-- SideNavBar -->
+<aside class="hidden md:flex flex-col p-4 gap-2 bg-surface-container-low dark:bg-primary-container text-primary dark:text-primary-fixed font-label-md text-label-md fixed left-0 top-16 h-[calc(100vh-64px)] w-64 border-r border-outline-variant dark:border-outline z-40 overflow-y-auto">
+<div class="mb-6 px-2">
+<h2 class="font-title-lg text-title-lg font-bold text-primary">Documentation</h2>
+<p class="text-on-surface-variant mt-1">v2.4.0-stable</p>
+</div>
+<nav class="flex-1 flex flex-col gap-1">
+<a class="flex items-center gap-3 p-2 bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary font-semibold rounded-lg duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">info</span>
+                    Introduction
+                </a>
+<a class="flex items-center gap-3 p-2 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-inverse-surface rounded-lg transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">rocket_launch</span>
+                    Quickstart
+                </a>
+<a class="flex items-center gap-3 p-2 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-inverse-surface rounded-lg transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">api</span>
+                    API Reference
+                </a><a class="flex items-center gap-3 p-2 pl-10 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-inverse-surface rounded-lg transition-all duration-200 ease-in-out" href="#rate-limiting">
+                    Rate Limiting
+                </a>
+<a class="flex items-center gap-3 p-2 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-inverse-surface rounded-lg transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">terminal</span>
+                    SDKs
+                </a>
+<a class="flex items-center gap-3 p-2 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-inverse-surface rounded-lg transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">webhook</span>
+                    Webhooks
+                </a>
+<a class="flex items-center gap-3 p-2 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-inverse-surface rounded-lg transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">verified_user</span>
+                    Security
+                </a>
+</nav>
+<div class="mt-auto flex flex-col gap-2 pt-4 border-t border-outline-variant">
+<button class="w-full bg-primary-container text-on-primary text-center py-2 rounded-lg font-label-md hover:bg-inverse-surface transition-colors">API Keys</button>
+<div class="flex flex-col gap-1 mt-2">
+<a class="flex items-center gap-3 p-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">history</span> Change Log
+                    </a>
+<a class="flex items-center gap-3 p-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">check_circle</span> Status
+                    </a>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 md:ml-64 p-margin-mobile md:p-margin-desktop lg:pr-[280px] min-h-screen">
+<div class="max-w-3xl">
+<header class="mb-12">
+<div class="flex items-center gap-2 mb-4 text-on-surface-variant font-label-md text-label-md">
+<span>BidPulse API</span>
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+<span class="text-primary">Introduction</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-primary mb-4">Introduction to BidPulse API</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-6">
+                        The BidPulse API provides a RESTful interface to programmatically interact with our secure government procurement platform. Automate RFP lifecycle management, vendor communications, and compliance checks with industrial-grade reliability.
+                    </p>
+<div class="flex items-center gap-4 text-sm text-outline">
+<span>Version 2.4.0</span>
+<span>•</span>
+<span>Last Updated: October 24, 2024</span>
+</div>
+</header>
+<section class="mb-16 scroll-mt-24" id="authentication">
+<h2 class="font-headline-md text-headline-md text-primary mb-4 pb-2 border-b border-outline-variant">Authentication</h2>
+<p class="mb-4">
+                        All API requests must be authenticated using a Bearer token. You can generate API keys from your <a class="text-secondary hover:underline" href="#">Developer Console</a>.
+                    </p>
+<div class="bg-primary-container rounded-lg p-4 border border-outline-variant/30 mb-6 font-code-sm text-code-sm text-on-primary">
+<div class="flex justify-between items-center mb-2 border-b border-outline-variant/20 pb-2">
+<span class="text-surface-variant">HTTP Header</span>
+<button class="material-symbols-outlined text-sm hover:text-white transition-colors">content_copy</button>
+</div>
+<pre><code>Authorization: Bearer bp_live_xxxxxxxxxxxxxxxxxxxx</code></pre>
+</div>
+<div class="bg-surface-container-low border-l-4 border-tertiary-fixed-dim p-4 rounded-r-lg">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-tertiary-container mt-0.5">security</span>
+<div>
+<h4 class="font-title-lg text-sm text-tertiary-container mb-1">Security Notice</h4>
+<p class="text-sm text-on-surface-variant">Never expose your API keys in client-side code or public repositories. Use environment variables to manage your credentials securely.</p>
+</div>
+</div>
+</div>
+</section>
+<section class="mb-16 scroll-mt-24" id="core-concepts">
+<h2 class="font-headline-md text-headline-md text-primary mb-4 pb-2 border-b border-outline-variant">Core Concepts: RFP Lifecycle</h2>
+<p class="mb-6">
+                        Understanding the Request for Proposal (RFP) lifecycle is crucial for integrating with BidPulse. The API models this flow strictly to ensure compliance at every stage.
+                    </p>
+<!-- Diagram Placeholder -->
+<div class="w-full h-64 bg-surface-container border border-outline-variant rounded-xl flex items-center justify-center mb-8 relative overflow-hidden" data-alt="A clean, minimalist vector diagram showing the 6 stages of a government procurement RFP lifecycle. The stages are interconnected nodes: Draft, Review, Published, Bidding, Evaluation, Awarded. The color palette uses deep navy, slate gray, and subtle accents of secure blue. The style is highly technical, precise, and corporate, with geometric precision and plenty of whitespace on a light background.">
+<img alt="RFP Lifecycle Diagram" class="absolute inset-0 w-full h-full object-cover opacity-50 mix-blend-multiply" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCk-zKcFtpuv7iKIhl3u6PF0w26ZJWXwneG6t65dXSyin8Q9VNnXG2jgt0025j8gYmZ24Y4r_gh-kII6vDxySLeybZXuio5evc_3F8KuRYNr0kx-IZ0I1BrYf1efwMv7LTrpIow98NocEvVOI_5USMbqEOCFZBMBkiDxpkaWXoyTwxdwNCuDVtEnSX6iYymt_KPRKYuGp3yiWzanxeUsnxbyOqQXcpHpKTicf9xQyqu0FsWRwCH2WWhtQ"/>
+<div class="relative z-10 flex flex-col items-center">
+<span class="material-symbols-outlined text-4xl text-outline mb-2">schema</span>
+<span class="font-label-md text-outline">Interactive Architecture Diagram Placeholder</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="border border-outline-variant rounded-lg p-4 hover:bg-surface-container-low transition-colors cursor-default">
+<h3 class="font-bold text-primary mb-2 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-secondary-container"></span> Opportunities</h3>
+<p class="text-sm text-on-surface-variant">Represents an active or upcoming RFP. Contains detailed requirements, deadlines, and compliance mandates.</p>
+</div>
+<div class="border border-outline-variant rounded-lg p-4 hover:bg-surface-container-low transition-colors cursor-default">
+<h3 class="font-bold text-primary mb-2 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim"></span> Submissions</h3>
+<p class="text-sm text-on-surface-variant">Vendor responses to an Opportunity. Includes attached documentation and pricing structures.</p>
+</div>
+</div>
+</section>
+<section class="mb-16 scroll-mt-24" id="rate-limiting">
+<h2 class="font-headline-md text-headline-md text-primary mb-4 pb-2 border-b border-outline-variant">Rate Limiting</h2>
+<p class="mb-6">
+    To ensure platform stability and fair usage, BidPulse applies rate limits to all API requests. Limits are tiered based on your organization's subscription level.
+</p>
+<div class="mb-8 overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-outline-variant">
+<th class="py-2 font-bold text-primary">Tier</th>
+<th class="py-2 font-bold text-primary">Requests per Minute (RPM)</th>
+<th class="py-2 font-bold text-primary">Daily Quota</th>
+</tr>
+</thead>
+<tbody class="text-sm text-on-surface-variant">
+<tr class="border-b border-outline-variant/30">
+<td class="py-3">Free / Sandbox</td>
+<td class="py-3">60</td>
+<td class="py-3">1,000</td>
+</tr>
+<tr class="border-b border-outline-variant/30">
+<td class="py-3">Professional</td>
+<td class="py-3">600</td>
+<td class="py-3">50,000</td>
+</tr>
+<tr class="border-b border-outline-variant/30">
+<td class="py-3">Enterprise</td>
+<td class="py-3">Custom</td>
+<td class="py-3">Unlimited</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="mb-8">
+<h3 class="font-title-lg text-title-lg text-primary mb-3">Headers</h3>
+<p class="mb-4 text-sm text-on-surface-variant">Every API response includes standard rate limit headers to help you track your usage programmatically:</p>
+<div class="bg-surface-container-low p-4 rounded-lg border border-outline-variant/30">
+<ul class="flex flex-col gap-2 font-code-sm text-code-sm">
+<li class="flex justify-between"><span class="text-primary font-semibold">x-ratelimit-limit</span> <span class="text-outline">The maximum number of requests allowed in the current window.</span></li>
+<li class="flex justify-between"><span class="text-primary font-semibold">x-ratelimit-remaining</span> <span class="text-outline">The number of requests remaining in the current window.</span></li>
+<li class="flex justify-between"><span class="text-primary font-semibold">x-ratelimit-reset</span> <span class="text-outline">The time at which the current rate limit window resets in UTC epoch seconds.</span></li>
+</ul>
+</div>
+</div>
+<div class="bg-surface-container-highest p-6 rounded-xl border border-outline-variant/50">
+<div class="flex items-center justify-between mb-4">
+<h4 class="font-bold text-primary">Current Usage Status</h4>
+<span class="text-xs font-label-md bg-secondary-container text-on-secondary-container px-2 py-1 rounded-full">Professional Tier</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2 mb-2">
+<div class="bg-secondary h-2 rounded-full" style="width: 75%"></div>
+</div>
+<div class="flex justify-between text-xs text-on-surface-variant">
+<span>37,500 / 50,000 requests</span>
+<span class="font-bold text-secondary">75% of Daily Quota used</span>
+</div>
+</div>
+</section><section class="mb-16 scroll-mt-24" id="quick-example">
+<h2 class="font-headline-md text-headline-md text-primary mb-4 pb-2 border-b border-outline-variant">Quick Example</h2>
+<p class="mb-4">Fetch a list of active opportunities matching specific compliance frameworks.</p>
+<!-- Code Snippet -->
+<div class="rounded-xl overflow-hidden shadow-sm border border-outline-variant/50">
+<div class="bg-surface-container-highest px-4 py-2 border-b border-outline-variant/50 flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span class="w-2 h-2 rounded-full bg-secondary-container"></span>
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim"></span>
+<span class="ml-2 font-label-md text-on-surface-variant text-xs">cURL</span>
+</div>
+<div class="bg-primary-container p-4 font-code-sm text-code-sm text-inverse-surface overflow-x-auto">
+<pre><code class="text-primary-fixed-dim">curl -X GET \
+  https://api.bidpulse.gov/v1/opportunities?status=active&amp;framework=fedramp \
+  -H 'Authorization: Bearer bp_live_xxxxxx' \
+  -H 'Accept: application/json'</code></pre>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Right Page Outline (TOC) -->
+<aside class="hidden lg:block w-[240px] fixed right-0 top-16 h-[calc(100vh-64px)] p-6 overflow-y-auto border-l border-outline-variant/30">
+<h4 class="font-label-md text-label-md font-bold text-primary mb-4 uppercase tracking-wider">On this page</h4>
+<nav class="flex flex-col gap-3 font-body-md text-sm border-l-2 border-outline-variant/20 pl-4">
+<a class="text-secondary -ml-[18px] pl-4 border-l-2 border-secondary font-medium" href="#introduction">Introduction</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors" href="#authentication">Authentication</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors" href="#core-concepts">Core Concepts</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors" href="#rate-limiting">Rate Limiting</a><a class="text-on-surface-variant hover:text-primary transition-colors" href="#quick-example">Quick Example</a>
+</nav>
+</aside>
+</div>
+<!-- Footer -->
+<footer class="bg-surface dark:bg-background text-on-surface-variant dark:text-surface-variant font-body-md text-body-md w-full py-8 border-t border-outline-variant dark:border-outline mt-auto z-10 relative">
+<div class="flex flex-col md:flex-row justify-between items-center px-margin-desktop max-w-container-max mx-auto gap-4">
+<span class="font-title-lg text-title-lg text-primary">BidPulse Developers</span>
+<span>© 2024 BidPulse Secure Procurement. All rights reserved.</span>
+<div class="flex gap-6">
+<a class="hover:text-primary dark:hover:text-primary-fixed transition-all" href="#">Privacy Policy</a>
+<a class="hover:text-primary dark:hover:text-primary-fixed transition-all" href="#">Terms of Service</a>
+<a class="hover:text-primary dark:hover:text-primary-fixed transition-all" href="#">Security Compliance</a>
+</div>
+</div>
+</footer>
+</body></html>

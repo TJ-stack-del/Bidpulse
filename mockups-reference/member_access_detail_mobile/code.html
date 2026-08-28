@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BidPulse - Member Access Detail</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Geist:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-low": "#eff4ff",
+                        "on-secondary-container": "#fefcff",
+                        "on-secondary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "outline": "#76777d",
+                        "primary-fixed": "#dae2fd",
+                        "on-tertiary": "#ffffff",
+                        "surface": "#f8f9ff",
+                        "on-primary-fixed": "#131b2e",
+                        "inverse-primary": "#bec6e0",
+                        "tertiary-fixed": "#6ffbbe",
+                        "on-primary-container": "#7c839b",
+                        "surface-container-highest": "#d3e4fe",
+                        "surface-variant": "#d3e4fe",
+                        "outline-variant": "#c6c6cd",
+                        "surface-container": "#e5eeff",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "on-primary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "on-secondary-fixed": "#00174b",
+                        "surface-tint": "#565e74",
+                        "primary": "#000000",
+                        "on-background": "#0b1c30",
+                        "secondary": "#0051d5",
+                        "tertiary-container": "#002113",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "primary-fixed-dim": "#bec6e0",
+                        "secondary-container": "#316bf3",
+                        "inverse-surface": "#213145",
+                        "inverse-on-surface": "#eaf1ff",
+                        "background": "#f8f9ff",
+                        "surface-dim": "#cbdbf5",
+                        "on-tertiary-container": "#009668",
+                        "tertiary": "#000000",
+                        "on-error": "#ffffff",
+                        "primary-container": "#131b2e",
+                        "surface-container-high": "#dce9ff",
+                        "on-surface": "#0b1c30",
+                        "secondary-fixed": "#dbe1ff",
+                        "on-surface-variant": "#45464d",
+                        "error": "#ba1a1a",
+                        "surface-bright": "#f8f9ff",
+                        "on-tertiary-fixed": "#002113",
+                        "on-secondary-fixed-variant": "#003ea8"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "margin-mobile": "16px",
+                        "container-max": "1440px",
+                        "margin-desktop": "48px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "code-sm": ["Geist"],
+                        "headline-lg-mobile": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-md": ["Geist"],
+                        "headline-lg": ["Inter"],
+                        "display-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "code-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "title-lg": ["18px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .material-symbols-outlined {
+                font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface antialiased flex flex-col h-screen overflow-hidden">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-primary-container w-full top-0 sticky border-b border-outline-variant dark:border-outline flat no shadows flex justify-between items-center px-margin-mobile h-16 w-full z-50">
+<button class="p-2 -ml-2 text-primary dark:text-on-primary-container hover:bg-surface-container-low dark:hover:bg-primary-container transition-colors active:opacity-80 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-headline-md text-headline-md-mobile font-bold text-primary dark:text-on-primary-container">Member Access Detail</h1>
+<div class="w-10 h-10 rounded-full bg-surface-variant overflow-hidden flex items-center justify-center border border-outline-variant">
+<img class="object-cover w-full h-full" data-alt="A close-up, professional headshot of a corporate woman with short brown hair, wearing a dark navy blazer over a crisp white shirt, standing in a well-lit modern office space with subtle glass partitions in the background. The lighting is bright and clear, emphasizing a serious, competent demeanor consistent with an industrial-grade enterprise environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8VMOemNRolxW84hMVGPqFFjdjhM9eWZ8M7Gyz_uAuFDjHdlhdBNJFJQeaxn1RaMa-HFXixtvDr7KeUYitLNDqXddKZwXGc4ySFvuw-vL4DAzk0w6hhY6iFr8QrRuwOnZD32s3YuCbjlBmKEySzRZSZDGS8SC7qLay2l4j-uTRqebXTPA4ji9YfXeP1NcB8wsii_IL1_-F-HF23xaoKPDVe4pcn9VGxIJWj-OydZ1DFpTbiEc7UV68uA"/>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-1 overflow-y-auto px-margin-mobile py-6 flex flex-col gap-6">
+<!-- User Context Header -->
+<section class="flex flex-col items-center text-center gap-2 mb-2">
+<div class="w-20 h-20 rounded-full bg-surface-variant overflow-hidden border-2 border-secondary mb-2 relative">
+<img class="object-cover w-full h-full" data-alt="A close-up, professional headshot of a corporate woman with short brown hair, wearing a dark navy blazer over a crisp white shirt, standing in a well-lit modern office space with subtle glass partitions in the background. The lighting is bright and clear, emphasizing a serious, competent demeanor consistent with an industrial-grade enterprise environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCngfOOhL4rPAFoXWyRnssZd9fEhDaa_eFSZZP5zxFCHsAzdJy-encGCZYJvGgIT_E3CalMgANWfOojQtUaCGuWui4aV06lUd1jstwJNku_IRno_wR63cCD0GNfzzuUyq822wRnGrKmZHg_LNn-ip3PQA_BsiUvnNz89kia6GBICY4gmHSnN5KfxsYMKJ8vVSNr6lkd15DRPWaf363WDrbF1W5YiW44apgbuYJJXrXQ3eXY0KxiUb0R_Q"/>
+<div class="absolute bottom-0 right-0 bg-tertiary-fixed-dim text-on-tertiary-fixed-variant w-6 h-6 rounded-full flex items-center justify-center border-2 border-surface">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+<h2 class="font-title-lg text-title-lg text-on-surface">Sarah Jenkins</h2>
+<p class="font-body-md text-body-md text-on-surface-variant bg-surface-container-low px-3 py-1 rounded-full border border-outline-variant">Proposal Lead</p>
+</section>
+<!-- Permission Groups List -->
+<section class="flex flex-col gap-4">
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Access Controls</h3>
+<!-- Group 1 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 flex flex-col gap-3">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined">description</span>
+</div>
+<div>
+<h4 class="font-body-lg text-body-lg font-semibold text-on-surface">RFP Access</h4>
+<p class="font-code-sm text-code-sm text-on-surface-variant">View and edit proposal drafts</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-outline-variant after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
+</label>
+</div>
+</div>
+<!-- Group 2 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 flex flex-col gap-3">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined">verified_user</span>
+</div>
+<div>
+<h4 class="font-body-lg text-body-lg font-semibold text-on-surface">Compliance Audit</h4>
+<p class="font-code-sm text-code-sm text-on-surface-variant">Review regulatory checklists</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-outline-variant after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
+</label>
+</div>
+</div>
+<!-- Group 3 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 flex flex-col gap-3 border-l-4 border-l-outline-variant">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-error-container flex items-center justify-center text-on-error-container">
+<span class="material-symbols-outlined">publish</span>
+</div>
+<div>
+<h4 class="font-body-lg text-body-lg font-semibold text-on-surface">Final Submission</h4>
+<p class="font-code-sm text-code-sm text-on-surface-variant">Authorize final bid transmission</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-outline-variant after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
+</label>
+</div>
+</div>
+<div class="bg-surface-container-low p-4 rounded-lg flex items-start gap-3 mt-2 border border-outline-variant border-dashed">
+<span class="material-symbols-outlined text-on-surface-variant mt-0.5">info</span>
+<p class="font-code-sm text-code-sm text-on-surface-variant">Changes to permissions are logged in the audit trail for compliance tracking.</p>
+</div>
+</section>
+</main>
+<!-- Bottom Action Area -->
+<div class="p-margin-mobile border-t border-outline-variant bg-surface w-full pb-safe flex-shrink-0 z-40">
+<button class="w-full h-12 bg-primary text-on-primary font-title-lg text-title-lg rounded flex items-center justify-center gap-2 active:bg-surface-tint transition-colors inset-border">
+<span class="material-symbols-outlined">save</span>
+            Update Access
+        </button>
+</div>
+<!-- Navigation Suppressed as per Task/Logic (Transactional/Focused Sub-page) -->
+<style>
+        .inset-border {
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);
+        }
+        .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom, 20px);
+        }
+    </style>
+</body></html>

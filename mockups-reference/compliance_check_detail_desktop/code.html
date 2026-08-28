@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-surface" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Compliance Check Detail - BidPulse</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Geist:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-low": "#eff4ff",
+                        "surface-dim": "#cbdbf5",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "secondary": "#0051d5",
+                        "primary-fixed-dim": "#bec6e0",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "surface-container-high": "#dce9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-error": "#ffffff",
+                        "outline": "#76777d",
+                        "secondary-fixed": "#dbe1ff",
+                        "on-secondary": "#ffffff",
+                        "surface": "#f8f9ff",
+                        "tertiary": "#000000",
+                        "inverse-surface": "#213145",
+                        "on-secondary-fixed-variant": "#003ea8",
+                        "on-background": "#0b1c30",
+                        "on-surface-variant": "#45464d",
+                        "tertiary-container": "#002113",
+                        "secondary-container": "#316bf3",
+                        "on-secondary-fixed": "#00174b",
+                        "on-tertiary-container": "#009668",
+                        "tertiary-fixed": "#6ffbbe",
+                        "on-secondary-container": "#fefcff",
+                        "on-error-container": "#93000a",
+                        "error-container": "#ffdad6",
+                        "surface-container-highest": "#d3e4fe",
+                        "primary": "#000000",
+                        "surface-bright": "#f8f9ff",
+                        "on-surface": "#0b1c30",
+                        "outline-variant": "#c6c6cd",
+                        "on-tertiary": "#ffffff",
+                        "surface-variant": "#d3e4fe",
+                        "primary-fixed": "#dae2fd",
+                        "primary-container": "#131b2e",
+                        "inverse-primary": "#bec6e0",
+                        "surface-container": "#e5eeff",
+                        "error": "#ba1a1a",
+                        "surface-tint": "#565e74",
+                        "background": "#f8f9ff",
+                        "on-primary-fixed": "#131b2e",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "on-tertiary-fixed": "#002113",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#7c839b"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "container-max": "1440px",
+                        "margin-desktop": "48px",
+                        "gutter": "24px",
+                        "unit": "4px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "code-sm": ["Geist"],
+                        "display-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "label-md": ["Geist"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "code-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "title-lg": ["18px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .highlight-high { background-color: rgba(186, 26, 26, 0.15); border-bottom: 2px solid #ba1a1a; cursor: pointer; transition: background-color 0.2s; }
+        .highlight-high:hover { background-color: rgba(186, 26, 26, 0.25); }
+        .highlight-medium { background-color: rgba(234, 137, 35, 0.15); border-bottom: 2px solid #ea8923; cursor: pointer; transition: background-color 0.2s; }
+        .highlight-medium:hover { background-color: rgba(234, 137, 35, 0.25); }
+        
+        /* Custom scrollbar for doc viewer */
+        .doc-scroll::-webkit-scrollbar { width: 8px; }
+        .doc-scroll::-webkit-scrollbar-track { background: transparent; }
+        .doc-scroll::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="h-full flex text-on-surface bg-surface font-body-md text-body-md overflow-hidden">
+<!-- SideNavBar -->
+<nav class="bg-surface-container-low dark:bg-surface-container-low h-screen w-64 fixed left-0 top-0 border-r border-outline-variant dark:border-outline flex flex-col h-full py-6 gap-2 z-20 hidden md:flex">
+<div class="px-6 mb-8 flex items-center gap-3">
+<div class="w-8 h-8 bg-primary rounded-DEFAULT flex items-center justify-center text-white font-bold">B</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed tracking-tight">BidPulse</h1>
+<p class="font-label-md text-label-md text-on-surface-variant">Enterprise Procurement</p>
+</div>
+</div>
+<div class="flex-1 px-4 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-DEFAULT text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors cursor-pointer transition-all duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-DEFAULT text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors cursor-pointer transition-all duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">analytics</span>
+<span class="font-label-md text-label-md">Market Intelligence</span>
+</a>
+<!-- Active State -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-DEFAULT text-secondary dark:text-secondary-fixed bg-surface-container-high font-semibold cursor-pointer transition-all duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">description</span>
+<span class="font-label-md text-label-md font-semibold">My RFPs</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-DEFAULT text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors cursor-pointer transition-all duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">admin_panel_settings</span>
+<span class="font-label-md text-label-md">Admin Portal</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col md:ml-64 min-h-screen h-screen">
+<!-- TopNavBar -->
+<header class="bg-surface-container-lowest dark:bg-surface-container-lowest w-full h-16 border-b border-outline-variant dark:border-outline flex justify-between items-center px-margin-desktop w-full mx-auto z-10 shrink-0">
+<div class="flex items-center md:hidden gap-3">
+<div class="w-8 h-8 bg-primary rounded-DEFAULT flex items-center justify-center text-white font-bold">B</div>
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">BidPulse</span>
+</div>
+<div class="flex-1 md:flex-none"></div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-low transition-colors rounded-DEFAULT cursor-pointer active:opacity-80 transition-opacity">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-low transition-colors rounded-DEFAULT cursor-pointer active:opacity-80 transition-opacity">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="w-8 h-8 bg-surface-variant rounded-full border border-outline-variant overflow-hidden ml-2 cursor-pointer">
+<img alt="User Profile Avatar" class="w-full h-full object-cover" data-alt="A professional headshot of a corporate procurement specialist in a modern, well-lit office setting. Light, clean aesthetic with a focus on business integrity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1AmLDC5zIrrhHauOQM36hyIoSc-PuD0qG7N0HZmeTUB00CR2Cbo1WioDizU81GwosulgANvk7HAcWBZkl3NXQGZYieRZI71sWs2IF9F2RCAxvKcDRVbzQ08oWC832XOLiSAyXRQndoO--26gRlK4seR79nUv0snhObRpwCzWcJPATn0zX52navU_njL2aZ8LpN0YxQYDyDDiT4MBrH4D4t3S0Rre0gp_dQ8HBxCDN0Q54HACGABGwPA"/>
+</div>
+</div>
+</header>
+<!-- Canvas Header -->
+<div class="bg-surface-container-lowest border-b border-outline-variant shrink-0 px-gutter md:px-margin-desktop py-6">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="font-label-md text-label-md text-secondary">RFP-2024-DEF-990</span>
+<span class="text-outline-variant">•</span>
+<span class="font-label-md text-label-md text-on-surface-variant">Section 2.0 Technical Approach</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary">Compliance Check: Technical Volume</h2>
+</div>
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-2 px-3 py-1.5 bg-error-container rounded-full border border-[rgba(186,26,26,0.2)]">
+<span class="material-symbols-outlined text-[16px] text-error" style="font-variation-settings: 'FILL' 1;">error</span>
+<span class="font-label-md text-label-md text-error">4 Issues Found</span>
+</div>
+<button class="px-4 py-2 bg-primary-container text-white font-label-md text-label-md rounded-DEFAULT hover:bg-opacity-90 transition-opacity flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">bolt</span>
+                        Auto-Fix All
+                    </button>
+</div>
+</div>
+</div>
+<!-- Split Pane Layout -->
+<main class="flex-1 flex flex-col lg:flex-row overflow-hidden bg-surface">
+<!-- Document Viewer (Left) -->
+<section class="flex-[3] flex flex-col h-full border-b lg:border-b-0 lg:border-r border-outline-variant bg-surface-container-lowest overflow-hidden">
+<div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-bright shrink-0">
+<span class="font-label-md text-label-md text-on-surface-variant">Original Draft.docx</span>
+<div class="flex gap-2">
+<button class="p-1.5 text-on-surface-variant hover:bg-surface-container-low rounded-DEFAULT"><span class="material-symbols-outlined text-[18px]">zoom_out</span></button>
+<button class="p-1.5 text-on-surface-variant hover:bg-surface-container-low rounded-DEFAULT"><span class="material-symbols-outlined text-[18px]">zoom_in</span></button>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto doc-scroll p-8 md:p-12">
+<div class="max-w-[800px] mx-auto bg-white p-12 border border-outline-variant shadow-sm rounded-DEFAULT">
+<h3 class="font-title-lg text-title-lg mb-6">2.0 Technical Approach and Methodology</h3>
+<p class="font-body-lg text-body-lg text-on-background mb-4 leading-relaxed">
+                            Our team brings extensive experience in deploying scalable infrastructure solutions. We will utilize a hybrid-cloud architecture to ensure maximum uptime and data redundancy across all operational nodes. The primary data center will be located CONUS, with failover systems distributed geographically.
+                        </p>
+<p class="font-body-lg text-body-lg text-on-background mb-4 leading-relaxed">
+                            To protect sensitive information, we will employ industry-standard encryption for data at rest and in transit. <span class="highlight-high" data-finding="1">Facility access will be restricted using standard electronic keycards, and visitors will be logged at the front desk by a security guard.</span> Network perimeters will be defended using next-generation firewalls and intrusion detection systems.
+                        </p>
+<p class="font-body-lg text-body-lg text-on-background mb-4 leading-relaxed">
+                            Our software development lifecycle (SDLC) adheres to Agile principles, allowing for iterative delivery and continuous integration. We conduct automated testing on all code commits. <span class="highlight-medium" data-finding="2">Software updates are deployed bi-weekly, utilizing our proprietary CI/CD pipeline to ensure rapid feature delivery to the production environment.</span>
+</p>
+<p class="font-body-lg text-body-lg text-on-background mb-4 leading-relaxed">
+                            Key personnel assigned to this contract hold active Top Secret clearances. All team members will undergo annual cyber awareness training. <span class="highlight-medium" data-finding="3">Supply chain risk management is handled by reviewing our tier-1 vendors annually for compliance with domestic sourcing requirements.</span>
+</p>
+</div>
+</div>
+</section>
+<!-- AI Findings (Right) -->
+<section class="flex-[2] flex flex-col h-full bg-surface-bright overflow-hidden">
+<div class="px-6 py-4 border-b border-outline-variant shrink-0 bg-surface-container-lowest">
+<h3 class="font-title-lg text-title-lg text-primary">Compliance Findings</h3>
+</div>
+<div class="flex-1 overflow-y-auto p-6 space-y-6">
+<!-- Finding 1: High Risk -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-DEFAULT p-5 shadow-sm relative overflow-hidden transition-all hover:bg-surface-container-low cursor-default">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-error"></div>
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 bg-error-container text-error font-label-md text-label-md rounded-sm border border-[rgba(186,26,26,0.2)]">High Risk</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant bg-surface px-2 py-0.5 rounded-sm border border-outline-variant">FAR 52.204-21</span>
+</div>
+</div>
+<h4 class="font-body-md text-body-md font-bold mb-2">Insufficient Physical Security Controls</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mb-4">
+                            Draft fails to mention specific NIST physical security protocols required for this solicitation. Standard keycards are insufficient for the facility security level mandated.
+                        </p>
+<div class="bg-inverse-on-surface border border-secondary-fixed p-3 rounded-sm mb-4">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-[16px] text-secondary" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="font-label-md text-label-md text-secondary">AI Recommendation</span>
+</div>
+<p class="font-body-md text-[13px] leading-5 text-on-background">
+                                "Facility access will be secured via biometric authentication and multi-factor access controls, compliant with NIST SP 800-53 Physical and Environmental Protection (PE) family of controls. Visitors require pre-authorization and physical escort."
+                            </p>
+</div>
+<div class="flex gap-2 justify-end">
+<button class="px-3 py-1.5 border border-outline-variant text-on-surface font-label-md text-label-md rounded-DEFAULT hover:bg-surface-container-low transition-colors">Ignore</button>
+<button class="px-3 py-1.5 border border-secondary text-secondary font-label-md text-label-md rounded-DEFAULT hover:bg-secondary-fixed transition-colors">Edit Manually</button>
+<button class="px-3 py-1.5 bg-secondary text-white font-label-md text-label-md rounded-DEFAULT hover:bg-opacity-90 transition-opacity">Apply Suggestion</button>
+</div>
+</div>
+<!-- Finding 2: Medium Risk -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-DEFAULT p-5 shadow-sm relative overflow-hidden transition-all hover:bg-surface-container-low cursor-default">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-[#ea8923]"></div>
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 bg-[#fef3c7] text-[#92400e] font-label-md text-label-md rounded-sm border border-[#fde68a]">Medium Risk</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant bg-surface px-2 py-0.5 rounded-sm border border-outline-variant">Sec. L.4.2.1</span>
+</div>
+</div>
+<h4 class="font-body-md text-body-md font-bold mb-2">Non-Compliant Deployment Schedule</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mb-4">
+                            Bi-weekly updates violate the solicitation's requirement for a stringent Change Control Board (CCB) review prior to any production deployment in a high-security environment.
+                        </p>
+<div class="bg-inverse-on-surface border border-secondary-fixed p-3 rounded-sm mb-4">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-[16px] text-secondary" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="font-label-md text-label-md text-secondary">AI Recommendation</span>
+</div>
+<p class="font-body-md text-[13px] leading-5 text-on-background">
+                                "Software updates are staged in a mirrored pre-production environment and subject to formal Change Control Board (CCB) approval before scheduled deployment, ensuring zero disruption to mission-critical operations."
+                            </p>
+</div>
+<div class="flex gap-2 justify-end">
+<button class="px-3 py-1.5 border border-outline-variant text-on-surface font-label-md text-label-md rounded-DEFAULT hover:bg-surface-container-low transition-colors">Ignore</button>
+<button class="px-3 py-1.5 border border-secondary text-secondary font-label-md text-label-md rounded-DEFAULT hover:bg-secondary-fixed transition-colors">Edit Manually</button>
+<button class="px-3 py-1.5 bg-secondary text-white font-label-md text-label-md rounded-DEFAULT hover:bg-opacity-90 transition-opacity">Apply Suggestion</button>
+</div>
+</div>
+<!-- Finding 3: Medium Risk -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-DEFAULT p-5 shadow-sm relative overflow-hidden transition-all hover:bg-surface-container-low cursor-default opacity-75">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-[#ea8923]"></div>
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 bg-[#fef3c7] text-[#92400e] font-label-md text-label-md rounded-sm border border-[#fde68a]">Medium Risk</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant bg-surface px-2 py-0.5 rounded-sm border border-outline-variant">NIST SP 800-161</span>
+</div>
+</div>
+<h4 class="font-body-md text-body-md font-bold mb-2">Incomplete Supply Chain Risk Mgmt</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mb-4">
+                            Annual review of tier-1 vendors is insufficient. The RFP mandates continuous monitoring of the entire ICT supply chain.
+                        </p>
+<div class="flex gap-2 justify-end mt-4">
+<button class="px-3 py-1.5 border border-outline-variant text-on-surface font-label-md text-label-md rounded-DEFAULT hover:bg-surface-container-low transition-colors">View Details</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+</body></html>

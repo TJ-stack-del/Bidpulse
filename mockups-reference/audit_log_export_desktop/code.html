@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Audit Log Export - BidPulse</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-container": "#002113",
+                      "outline-variant": "#c6c6cd",
+                      "surface-container-high": "#dce9ff",
+                      "secondary-container": "#316bf3",
+                      "on-tertiary": "#ffffff",
+                      "on-background": "#0b1c30",
+                      "on-primary": "#ffffff",
+                      "on-tertiary-container": "#009668",
+                      "surface-tint": "#565e74",
+                      "on-surface": "#0b1c30",
+                      "on-secondary": "#ffffff",
+                      "surface-variant": "#d3e4fe",
+                      "on-surface-variant": "#45464d",
+                      "inverse-on-surface": "#eaf1ff",
+                      "tertiary-fixed-dim": "#4edea3",
+                      "surface-container-highest": "#d3e4fe",
+                      "background": "#f8f9ff",
+                      "on-primary-container": "#7c839b",
+                      "inverse-primary": "#bec6e0",
+                      "on-tertiary-fixed": "#002113",
+                      "surface": "#f8f9ff",
+                      "on-primary-fixed": "#131b2e",
+                      "primary": "#000000",
+                      "outline": "#76777d",
+                      "surface-container-lowest": "#ffffff",
+                      "error": "#ba1a1a",
+                      "on-secondary-fixed-variant": "#003ea8",
+                      "error-container": "#ffdad6",
+                      "surface-container-low": "#eff4ff",
+                      "primary-fixed-dim": "#bec6e0",
+                      "on-primary-fixed-variant": "#3f465c",
+                      "tertiary-fixed": "#6ffbbe",
+                      "on-secondary-fixed": "#00174b",
+                      "inverse-surface": "#213145",
+                      "primary-fixed": "#dae2fd",
+                      "on-error-container": "#93000a",
+                      "tertiary": "#000000",
+                      "on-tertiary-fixed-variant": "#005236",
+                      "surface-container": "#e5eeff",
+                      "on-secondary-container": "#fefcff",
+                      "primary-container": "#131b2e",
+                      "secondary": "#0051d5",
+                      "surface-bright": "#f8f9ff",
+                      "on-error": "#ffffff",
+                      "secondary-fixed": "#dbe1ff",
+                      "surface-dim": "#cbdbf5",
+                      "secondary-fixed-dim": "#b4c5ff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "unit": "4px",
+                      "margin-mobile": "16px",
+                      "container-max": "1440px",
+                      "gutter": "24px",
+                      "margin-desktop": "48px"
+              },
+              "fontFamily": {
+                      "headline-lg-mobile": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "label-md": ["Geist"],
+                      "body-md": ["Inter"],
+                      "title-lg": ["Inter"],
+                      "headline-md": ["Inter"],
+                      "display-lg": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "code-sm": ["Geist"]
+              },
+              "fontSize": {
+                      "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "title-lg": ["18px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "code-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        body { background-color: theme('colors.background'); color: theme('colors.on-background'); }
+        .focus-ring:focus-within { border-color: theme('colors.secondary'); outline: none; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: theme('colors.surface-container-lowest'); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: theme('colors.outline-variant'); border-radius: 4px; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden antialiased">
+<!-- SideNavBar -->
+<nav class="hidden md:flex flex-col h-full border-r border-outline-variant bg-surface-container-low dark:bg-surface-container-lowest text-on-surface dark:text-inverse-on-surface font-label-md text-label-md w-64 z-40 relative flex-shrink-0">
+<!-- Header -->
+<div class="p-gutter border-b border-outline-variant flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-primary-fixed flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-primary-fixed" style="font-variation-settings: 'FILL' 1;">domain</span>
+</div>
+<div>
+<h2 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim leading-tight">BidPulse</h2>
+<div class="text-on-surface-variant font-label-md text-label-md opacity-80 mt-1">Verified Enterprise</div>
+</div>
+</div>
+<!-- CTA -->
+<div class="px-6 py-4">
+<button class="w-full bg-primary text-on-primary font-label-md text-label-md py-2 px-4 rounded shadow-sm hover:bg-surface-tint transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                 Create RFP
+             </button>
+</div>
+<!-- Main Nav -->
+<div class="flex-1 overflow-y-auto py-4">
+<ul class="space-y-1 px-4">
+<li>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded text-on-surface-variant hover:bg-surface-container transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Dashboard</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded text-on-surface-variant hover:bg-surface-container transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="insights">insights</span>
+<span>Market Intelligence</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded text-on-surface-variant hover:bg-surface-container transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="assignment">assignment</span>
+<span>My RFPs</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded bg-secondary-container text-on-secondary-container font-bold transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined text-secondary" data-icon="admin_panel_settings" style="font-variation-settings: 'FILL' 1;">admin_panel_settings</span>
+<span>Admin Portal</span>
+</a>
+</li>
+</ul>
+</div>
+<!-- Footer Nav -->
+<div class="p-4 border-t border-outline-variant">
+<ul class="space-y-1">
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant hover:bg-surface-container transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span>Support</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant hover:bg-surface-container transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+</li>
+</ul>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col h-full overflow-hidden w-full relative">
+<!-- TopNavBar -->
+<header class="bg-surface-container-lowest flex justify-between items-center px-margin-mobile md:px-margin-desktop h-16 w-full z-30 border-b border-outline-variant shrink-0">
+<!-- Mobile Brand/Menu -->
+<div class="flex items-center gap-4 md:hidden">
+<button class="text-on-surface-variant">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<span class="font-headline-md text-headline-md font-bold text-on-surface">BidPulse</span>
+</div>
+<!-- Search (Left on Desktop) -->
+<div class="hidden md:flex flex-1 items-center max-w-md">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant pointer-events-none text-[20px]">search</span>
+<input class="w-full bg-surface text-on-surface font-body-md text-body-md pl-10 pr-4 py-2 rounded border border-outline-variant focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-shadow placeholder:text-outline-variant" placeholder="Search logs, RFPs, or entities..." type="text"/>
+</div>
+</div>
+<!-- Trailing Actions -->
+<div class="flex items-center gap-2 md:gap-4 ml-auto">
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors active:opacity-80 relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border border-surface-container-lowest"></span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors active:opacity-80 hidden md:block">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="h-8 w-px bg-outline-variant mx-2 hidden md:block"></div>
+<button class="w-8 h-8 rounded-full bg-primary-fixed overflow-hidden border border-outline-variant flex items-center justify-center shrink-0">
+<img alt="User profile" class="w-full h-full object-cover" data-alt="Professional corporate headshot of a female executive in a modern office, sharp lighting, neutral background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCDrgPu9AeyBcKE_NmOmlggxrLZWGxhFFkUBUMUOxqSPkoxFhby826m25CulnpbXT0j3PL7sftdIK_PKrQQ5pOXFnaSEwAVGMpMdLol0zE3dG5F6IeIV5Vl1F-IGKGCJSqp9DmxejSZdoqM4_t7ZgOWz0ysux6rzU7MfKw4hKTBD08zCdZ-PKC8mGypoeIpoL6oXo3DyG-n0B-jhm7g_KKkFwByG6J5nQrr0InOv7WvOkA219mmppjKeQ"/>
+</button>
+</div>
+</header>
+<!-- Canvas -->
+<main class="flex-1 overflow-y-auto p-margin-mobile md:p-gutter bg-background custom-scrollbar">
+<div class="max-w-container-max mx-auto space-y-6">
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+<div>
+<div class="flex items-center gap-2 text-outline mb-2">
+<span class="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">Admin Portal</span>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span class="font-label-md text-label-md text-secondary">Compliance Controls</span>
+</div>
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-background">Audit Log Export</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2 max-w-2xl">Configure and generate a legally defensible, cryptographically signed export of system activity for compliance and forensic review.</p>
+</div>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+<!-- Configuration Panel (Left/Top) -->
+<div class="xl:col-span-4 flex flex-col gap-6">
+<!-- Block 1: Scope -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-lg p-6 shadow-sm">
+<h2 class="font-title-lg text-title-lg text-on-surface mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[20px]">tune</span>
+                                Export Scope
+                            </h2>
+<div class="space-y-5">
+<!-- Date Range -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-1.5 uppercase tracking-wide">Temporal Boundary</label>
+<div class="grid grid-cols-2 gap-3">
+<div class="focus-ring border border-outline-variant rounded bg-surface flex items-center px-3 py-2 transition-colors">
+<span class="material-symbols-outlined text-outline-variant mr-2 text-[18px]">calendar_today</span>
+<input class="bg-transparent w-full text-on-surface font-body-md text-body-md outline-none" placeholder="Start Date" type="text" value="2023-10-01"/>
+</div>
+<div class="focus-ring border border-outline-variant rounded bg-surface flex items-center px-3 py-2 transition-colors">
+<span class="material-symbols-outlined text-outline-variant mr-2 text-[18px]">calendar_today</span>
+<input class="bg-transparent w-full text-on-surface font-body-md text-body-md outline-none" placeholder="End Date" type="text" value="2023-12-15"/>
+</div>
+</div>
+</div>
+<!-- Granularity -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-1.5 uppercase tracking-wide">Granularity Level</label>
+<div class="flex rounded border border-outline-variant overflow-hidden bg-surface">
+<button class="flex-1 py-2 px-3 bg-secondary text-on-secondary font-label-md text-label-md text-center border-r border-outline-variant transition-colors">Summary (Level 1)</button>
+<button class="flex-1 py-2 px-3 text-on-surface font-label-md text-label-md text-center hover:bg-surface-container-low transition-colors">Full Detail (Level 3)</button>
+</div>
+<p class="text-on-surface-variant text-[11px] mt-1.5 leading-tight">Full detail includes micro-transactions and system-level API calls.</p>
+</div>
+</div>
+</section>
+<!-- Block 2: Artifacts & Format -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-lg p-6 shadow-sm">
+<h2 class="font-title-lg text-title-lg text-on-surface mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[20px]">category</span>
+                                Artifact Selection
+                            </h2>
+<div class="space-y-4 mb-6">
+<label class="flex items-start gap-3 cursor-pointer group">
+<div class="relative flex items-center justify-center mt-0.5">
+<input checked="" class="peer appearance-none w-4 h-4 border border-outline-variant rounded-sm checked:bg-secondary checked:border-secondary transition-colors" type="checkbox"/>
+<span class="material-symbols-outlined absolute text-on-secondary text-[14px] pointer-events-none opacity-0 peer-checked:opacity-100 font-bold">check</span>
+</div>
+<div>
+<div class="font-body-md text-body-md font-medium text-on-surface group-hover:text-secondary transition-colors">Technical Volume Changes</div>
+<div class="text-on-surface-variant text-[12px]">Version history and schema edits.</div>
+</div>
+</label>
+<label class="flex items-start gap-3 cursor-pointer group">
+<div class="relative flex items-center justify-center mt-0.5">
+<input checked="" class="peer appearance-none w-4 h-4 border border-outline-variant rounded-sm checked:bg-secondary checked:border-secondary transition-colors" type="checkbox"/>
+<span class="material-symbols-outlined absolute text-on-secondary text-[14px] pointer-events-none opacity-0 peer-checked:opacity-100 font-bold">check</span>
+</div>
+<div>
+<div class="font-body-md text-body-md font-medium text-on-surface group-hover:text-secondary transition-colors">Pricing Data Access</div>
+<div class="text-on-surface-variant text-[12px]">Views and modifications to pricing matrices.</div>
+</div>
+</label>
+<label class="flex items-start gap-3 cursor-pointer group">
+<div class="relative flex items-center justify-center mt-0.5">
+<input class="peer appearance-none w-4 h-4 border border-outline-variant rounded-sm checked:bg-secondary checked:border-secondary transition-colors" type="checkbox"/>
+<span class="material-symbols-outlined absolute text-on-secondary text-[14px] pointer-events-none opacity-0 peer-checked:opacity-100 font-bold">check</span>
+</div>
+<div>
+<div class="font-body-md text-body-md font-medium text-on-surface group-hover:text-secondary transition-colors">External Communications</div>
+<div class="text-on-surface-variant text-[12px]">Vendor Q&amp;A and direct messaging logs.</div>
+</div>
+</label>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface-variant mb-3 uppercase tracking-wide border-t border-outline-variant pt-4">Output Format</h3>
+<div class="grid grid-cols-3 gap-2">
+<label class="cursor-pointer">
+<input checked="" class="peer sr-only" name="format" type="radio"/>
+<div class="border border-outline-variant rounded p-2 text-center peer-checked:border-secondary peer-checked:bg-secondary-container peer-checked:text-on-secondary-container transition-all">
+<span class="material-symbols-outlined block mx-auto mb-1 text-[20px]">picture_as_pdf</span>
+<span class="font-label-md text-[11px] block">PDF</span>
+</div>
+</label>
+<label class="cursor-pointer">
+<input class="peer sr-only" name="format" type="radio"/>
+<div class="border border-outline-variant rounded p-2 text-center hover:bg-surface-container peer-checked:border-secondary peer-checked:bg-secondary-container peer-checked:text-on-secondary-container transition-all text-on-surface-variant">
+<span class="material-symbols-outlined block mx-auto mb-1 text-[20px]">csv</span>
+<span class="font-label-md text-[11px] block">CSV</span>
+</div>
+</label>
+<label class="cursor-pointer">
+<input class="peer sr-only" name="format" type="radio"/>
+<div class="border border-outline-variant rounded p-2 text-center hover:bg-surface-container peer-checked:border-secondary peer-checked:bg-secondary-container peer-checked:text-on-secondary-container transition-all text-on-surface-variant">
+<span class="material-symbols-outlined block mx-auto mb-1 text-[20px]">data_object</span>
+<span class="font-label-md text-[11px] block">JSON</span>
+</div>
+</label>
+</div>
+<div class="mt-3 flex items-start gap-2 bg-surface p-2 rounded border border-outline-variant">
+<span class="material-symbols-outlined text-tertiary-container text-[16px] mt-0.5" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="text-[11px] text-on-surface-variant leading-tight">All exports include a cryptographic SHA-256 manifest file ensuring non-repudiation.</span>
+</div>
+</section>
+</div>
+<!-- Preview Panel (Right/Bottom) -->
+<div class="xl:col-span-8 flex flex-col h-full bg-surface-container-lowest border border-outline-variant rounded-lg shadow-sm overflow-hidden">
+<!-- Preview Header -->
+<div class="px-6 py-4 border-b border-outline-variant bg-surface flex justify-between items-center">
+<h2 class="font-title-lg text-title-lg text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-[20px]">visibility</span>
+                                Terminal Preview
+                            </h2>
+<div class="flex gap-2">
+<span class="px-2 py-0.5 rounded-full bg-surface-variant text-on-surface-variant font-label-md text-[11px] border border-outline-variant">EST (UTC-5)</span>
+<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-md text-[11px] border border-outline-variant">Est. ~14,200 events</span>
+</div>
+</div>
+<!-- Code-like Terminal Area -->
+<div class="flex-1 bg-primary text-outline-variant font-code-sm text-code-sm p-4 overflow-x-auto min-h-[400px] border-l-[4px] border-l-tertiary-fixed">
+<pre class="leading-relaxed"><code class="whitespace-pre">
+[2023-11-28 09:14:22 UTC] <span class="text-tertiary-fixed">INFO</span>   [AUTH] Session initiated by <b>sj.jenkins@govprocure.int</b> (IP: 192.168.1.104)
+[2023-11-28 09:15:01 UTC] <span class="text-secondary-fixed">EVENT</span>  [RFP-9402] Artifact downloaded: 'Technical_Volume_V2.pdf' 
+[2023-11-28 09:18:45 UTC] <span class="text-secondary-fixed">EVENT</span>  [RFP-9402] Status changed: 'IN_REVIEW' -&gt; 'PENDING_SIG' by <b>sj.jenkins@govprocure.int</b>
+[2023-11-28 09:22:10 UTC] <span class="text-error-container">WARN</span>   [ACCESS] Unauthorized attempt to view Pricing_Matrix_Final (Resource locked)
+[2023-11-28 09:45:00 UTC] <span class="text-tertiary-fixed">INFO</span>   [COMPLIANCE] Document Signed-Off by Sarah Jenkins (Role: Principal Contracting Officer)
+[2023-11-28 09:45:01 UTC] <span class="text-surface-variant">SYSTEM</span> [CRYPTO] SHA-256 Hash Generated for Submission ID: SUB-8991a
+                          <span class="text-outline">Hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</span>
+[2023-11-28 10:01:12 UTC] <span class="text-tertiary-fixed">INFO</span>   [AUTH] Session terminated manually.
+
+... (preview truncated. Full export contains 14,193 additional lines matching scope criteria)
+                            </code></pre>
+</div>
+<!-- Action Footer -->
+<div class="p-6 border-t border-outline-variant bg-surface flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-outline-variant text-[24px]">lock</span>
+<div>
+<div class="font-label-md text-label-md text-on-surface">Data is encrypted at rest</div>
+<div class="text-[12px] text-on-surface-variant">Export requires re-authentication</div>
+</div>
+</div>
+<button class="bg-primary text-on-primary hover:bg-surface-tint font-label-md text-label-md py-3 px-6 rounded shadow-sm transition-colors flex items-center gap-2 border border-transparent active:border-outline-variant shadow-inner">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                                Generate &amp; Download Secure Export
+                            </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

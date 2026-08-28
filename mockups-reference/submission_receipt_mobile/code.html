@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BidPulse - Submission Receipt</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#131b2e",
+                        "primary": "#000000",
+                        "on-tertiary-fixed": "#002113",
+                        "secondary-fixed": "#dbe1ff",
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#002113",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed": "#6ffbbe",
+                        "surface-container": "#e5eeff",
+                        "surface": "#f8f9ff",
+                        "secondary-container": "#316bf3",
+                        "tertiary": "#000000",
+                        "surface-bright": "#f8f9ff",
+                        "outline": "#76777d",
+                        "on-primary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-primary": "#bec6e0",
+                        "on-primary-fixed": "#131b2e",
+                        "primary-fixed-dim": "#bec6e0",
+                        "on-surface-variant": "#45464d",
+                        "on-background": "#0b1c30",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "outline-variant": "#c6c6cd",
+                        "on-tertiary-container": "#009668",
+                        "error": "#ba1a1a",
+                        "on-secondary": "#ffffff",
+                        "surface-container-highest": "#d3e4fe",
+                        "surface-container-low": "#eff4ff",
+                        "secondary": "#0051d5",
+                        "surface-variant": "#d3e4fe",
+                        "error-container": "#ffdad6",
+                        "background": "#f8f9ff",
+                        "surface-container-high": "#dce9ff",
+                        "primary-fixed": "#dae2fd",
+                        "on-secondary-fixed-variant": "#003ea8",
+                        "inverse-surface": "#213145",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "on-secondary-fixed": "#00174b",
+                        "surface-dim": "#cbdbf5",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface-tint": "#565e74",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "on-primary-container": "#7c839b",
+                        "on-secondary-container": "#fefcff",
+                        "on-surface": "#0b1c30",
+                        "on-error-container": "#93000a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "margin-mobile": "16px",
+                        "unit": "4px",
+                        "container-max": "1440px",
+                        "margin-desktop": "48px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "code-sm": ["Geist"],
+                        "label-md": ["Geist"],
+                        "headline-lg-mobile": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "title-lg": ["18px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "code-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom scrollbar for data density if needed */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f8f9ff;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c6c6cd;
+            border-radius: 2px;
+        }
+        /* Tonal shifting for interactive elements */
+        .interactive-card:active {
+            background-color: #eff4ff;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col">
+<!-- Header / TopAppBar -->
+<header class="w-full top-0 sticky bg-surface border-b border-outline-variant flex justify-between items-center px-margin-mobile h-16 z-50">
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant active:opacity-80 transition-opacity">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<h1 class="font-headline-md text-headline-md-mobile font-bold text-primary">BidPulse</h1>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-container-high overflow-hidden flex-shrink-0">
+<img alt="User profile avatar" class="w-full h-full object-cover" data-alt="A small, professional headshot portrait of a user in corporate attire, set against a neutral gray background with bright, clear lighting. The image style is clean and modern, suitable for a secure government portal user avatar." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZmFaU6PPn8fo1Rz4wle9Ppilx9ZndLyq5cep4ipkYYVTvXS4GRfGlqwI19_6DB0jb6MFzfr9225TloZaJGzEGJBeWeuAoUfHukoPdF75Omo8J3uzPm2fCB55zU2MWfFAQhSBixahoFgCbJGa8xLPKKCPv_TIVznnAcrbi296_gCpF9Vi0uXX-9mlbUVATfJDha_dAxMDCRZSgZUFYGEXkB9PIo-Dq-Kb00I2e4yAYeNrXhsHfvJbhYQ"/>
+</div>
+</header>
+<!-- Main Canvas -->
+<!-- Suppressed navigation shell (BottomNavBar) because this is a transactional success/confirmation screen -->
+<main class="flex-1 px-margin-mobile py-6 flex flex-col gap-6 pb-[100px]">
+<!-- Confirmatory Banner -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-lg p-6 flex flex-col items-center justify-center text-center shadow-sm relative overflow-hidden">
+<!-- Vertical Success Green border-left simulation via absolutely positioned div -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-on-tertiary-container"></div>
+<div class="w-16 h-16 rounded-full bg-[#E6F4EA] flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-[32px] text-on-tertiary-container" data-icon="check_circle">check_circle</span>
+</div>
+<h2 class="font-title-lg text-title-lg text-primary mb-2">Submission Confirmed</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Your bid has been successfully transmitted and securely sealed.</p>
+</section>
+<!-- Project Summary -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-lg p-4">
+<h3 class="font-label-md text-label-md text-on-surface-variant mb-1 uppercase tracking-wider">Project Detals</h3>
+<div class="flex flex-col gap-1">
+<span class="font-code-sm text-code-sm text-primary font-medium">RFP-2024-DEF-9981</span>
+<span class="font-title-lg text-title-lg text-primary">Project Sentinel</span>
+</div>
+</section>
+<!-- Transmission Proof -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 flex flex-col gap-4">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-secondary" data-icon="fingerprint" data-weight="fill">fingerprint</span>
+<h3 class="font-label-md text-label-md text-primary font-semibold">Transmission Proof</h3>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface-variant">Transmission ID</label>
+<div class="bg-surface border border-outline-variant rounded p-2 flex justify-between items-center">
+<span class="font-code-sm text-code-sm text-primary break-all">TX-98765-ABCDE-43210</span>
+<button aria-label="Copy Transmission ID" class="text-secondary active:opacity-80 p-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="content_copy">content_copy</span>
+</button>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface-variant">Submission Hash (SHA-256)</label>
+<div class="bg-surface border border-outline-variant rounded p-2 flex justify-between items-center">
+<span class="font-code-sm text-code-sm text-primary break-all line-clamp-2">a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2</span>
+<button aria-label="Copy Hash" class="text-secondary active:opacity-80 p-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="content_copy">content_copy</span>
+</button>
+</div>
+</div>
+<div class="flex items-center justify-between mt-2 pt-4 border-t border-outline-variant">
+<span class="font-label-md text-label-md text-on-surface-variant">Timestamp</span>
+<span class="font-code-sm text-code-sm text-primary">2023-10-27 14:32:01 UTC</span>
+</div>
+</section>
+<!-- Sealed Files -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-lg p-4">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-secondary" data-icon="lock" data-weight="fill">lock</span>
+<h3 class="font-label-md text-label-md text-primary font-semibold">Sealed Volumes (3)</h3>
+</div>
+<ul class="flex flex-col gap-3">
+<li class="flex items-center justify-between p-3 bg-surface border border-outline-variant rounded hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-outline" data-icon="description">description</span>
+<div class="flex flex-col">
+<span class="font-body-md text-body-md text-primary font-medium">Vol_I_Technical.pdf</span>
+<span class="font-label-md text-label-md text-on-surface-variant">4.2 MB</span>
+</div>
+</div>
+<div class="bg-[#E6F4EA] text-on-tertiary-container px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" data-icon="verified">verified</span>
+                        Sealed
+                    </div>
+</li>
+<li class="flex items-center justify-between p-3 bg-surface border border-outline-variant rounded hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-outline" data-icon="description">description</span>
+<div class="flex flex-col">
+<span class="font-body-md text-body-md text-primary font-medium">Vol_II_Cost.pdf</span>
+<span class="font-label-md text-label-md text-on-surface-variant">1.8 MB</span>
+</div>
+</div>
+<div class="bg-[#E6F4EA] text-on-tertiary-container px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" data-icon="verified">verified</span>
+                        Sealed
+                    </div>
+</li>
+<li class="flex items-center justify-between p-3 bg-surface border border-outline-variant rounded hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-outline" data-icon="description">description</span>
+<div class="flex flex-col">
+<span class="font-body-md text-body-md text-primary font-medium">Vol_III_PastPerf.pdf</span>
+<span class="font-label-md text-label-md text-on-surface-variant">8.5 MB</span>
+</div>
+</div>
+<div class="bg-[#E6F4EA] text-on-tertiary-container px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" data-icon="verified">verified</span>
+                        Sealed
+                    </div>
+</li>
+</ul>
+</section>
+</main>
+<!-- Fixed Bottom Actions -->
+<div class="fixed bottom-0 left-0 w-full bg-surface border-t border-outline-variant p-4 z-40 pb-safe shadow-[0_-4px_16px_rgba(0,0,0,0.05)]">
+<div class="flex flex-col gap-3">
+<button class="w-full bg-primary text-on-primary font-body-lg text-body-lg font-medium py-3 rounded shadow-sm flex items-center justify-center gap-2 active:opacity-90 transition-opacity border border-transparent shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
+<span class="material-symbols-outlined" data-icon="download">download</span>
+                Download Receipt (PDF)
+            </button>
+<button class="w-full bg-surface-container text-secondary font-body-lg text-body-lg font-medium py-3 rounded border border-outline-variant shadow-sm flex items-center justify-center gap-2 active:bg-surface-container-high transition-colors">
+                Return to Dashboard
+            </button>
+</div>
+</div>
+</body></html>
