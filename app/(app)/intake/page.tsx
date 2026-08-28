@@ -31,10 +31,10 @@ export default async function IntakePage({
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mt-6">
         <div>
           <p className="text-label-md text-on-surface-variant uppercase tracking-wider mb-1">
-            RFP Intake Screen
+            New Job
           </p>
           <h1 className="text-headline-lg text-on-surface">
-            {bid?.title ?? "New Solicitation"}
+            {bid?.title ?? "New Job"}
           </h1>
         </div>
         <button className="px-4 py-2 bg-surface border border-outline-variant rounded hover:bg-surface-container-high transition-colors text-label-md text-on-surface">
@@ -49,18 +49,18 @@ export default async function IntakePage({
           <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
             <h2 className="text-title-lg text-on-surface mb-6 flex items-center gap-2">
               <span className="material-symbols-outlined text-on-surface-variant">info</span>
-              Solicitation Details
+              Job Details
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
-              <Field label="Agency Name" value={bid?.agency ?? "—"} />
-              <Field label="Solicitation Number" value={bid?.solicitation_number ?? "—"} mono />
+              <Field label="Agency" value={bid?.agency ?? "—"} />
+              <Field label="Job Number" value={bid?.solicitation_number ?? "—"} mono />
               <Field
-                label="Bid Due Date"
+                label="Due Date"
                 value={bid?.due_date ? new Date(bid.due_date).toLocaleString() : "—"}
                 warn
               />
               <Field
-                label="Estimated Value"
+                label="Estimated Price"
                 value={
                   bid?.estimated_value_low
                     ? `$${Number(bid.estimated_value_low).toLocaleString()} - $${Number(
@@ -69,18 +69,18 @@ export default async function IntakePage({
                     : "—"
                 }
               />
-              <Field label="Summary Description" value={bid?.scope ?? "—"} full />
+              <Field label="What's the Job" value={bid?.scope ?? "—"} full />
             </div>
           </div>
 
           <div className="bg-surface-container-lowest border-l-4 border-l-secondary border border-outline-variant rounded-r-xl p-6">
             <h2 className="text-title-lg text-on-surface mb-4 flex items-center gap-2">
               <span className="material-symbols-outlined text-secondary">gavel</span>
-              Procurement Integrity Act Attestation
+              Legal Agreement You Need to Sign
             </h2>
             <p className="text-body-md text-on-surface-variant mb-6 bg-surface p-4 rounded border border-outline-variant/30">
-              By submitting this intake form, you acknowledge and certify compliance with
-              the Procurement Integrity Act (41 U.S.C. §§ 2101-2107).
+              Before you send this in, you have to agree to bid fairly and honestly. This is
+              required by a law called the Procurement Integrity Act (41 U.S.C. §§ 2101-2107).
             </p>
             <IntakeActions bidId={bid?.id ?? null} alreadyAttested={bid?.pia_attested ?? false} />
           </div>
@@ -88,10 +88,10 @@ export default async function IntakePage({
 
         <div className="flex flex-col gap-6">
           <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 sticky top-[88px]">
-            <h3 className="text-title-lg text-on-surface mb-4">Intake Actions</h3>
+            <h3 className="text-title-lg text-on-surface mb-4">What To Do Next</h3>
             <p className="text-body-md text-on-surface-variant">
-              Submit and reviewer-assignment actions live in IntakeActions.tsx
-              (client component) — this server component only reads data.
+              Check that the job details on the left look right. Then read the agreement,
+              check the box, and click the button to send this job in.
             </p>
           </div>
         </div>

@@ -267,6 +267,34 @@ create policy "team managers can update team_members" on team_members
 create policy "team managers can add team members" on team_members
   for insert with check (is_org_member(org_id) and can_manage_team());
 
+-- /profile lets any user edit their own team_members row (full_name,
+-- avatar_url). A plain `auth_user_id = auth.uid()` USING clause would also
+-- let someone PATCH their own `role`/`org_id`/`email` directly (RLS can't
+-- restrict individual columns in a USING/CHECK clause), so a trigger
+-- pins those columns back to their old value unless the updater already
+-- has can_manage_team() — that's the same privilege /settings/team's role
+-- editor requires, so managers editing their own row are unaffected.
+create policy "users can update their own team_member row" on team_members
+  for update using (auth_user_id = auth.uid());
+
+create or replace function protect_team_member_privileged_columns()
+returns trigger as $$
+begin
+  if not can_manage_team() then
+    new.role := old.role;
+    new.org_id := old.org_id;
+    new.auth_user_id := old.auth_user_id;
+    new.email := old.email;
+  end if;
+  return new;
+end;
+$$ language plpgsql security definer;
+
+drop trigger if exists team_members_protect_privileged_columns on team_members;
+create trigger team_members_protect_privileged_columns
+  before update on team_members
+  for each row execute function protect_team_member_privileged_columns();
+
 -- role_permissions had no RLS at all (any table without `enable row level
 -- security` is fully open) — reads were fine since every page's permission
 -- check depends on it being readable, but that also meant any authenticated

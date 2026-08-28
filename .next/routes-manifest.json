@@ -58,40 +58,16 @@
       "namedRegex": "^/_not\\-found(?:/)?$"
     },
     {
-      "page": "/admin",
-      "regex": "^/admin(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/admin(?:/)?$"
-    },
-    {
-      "page": "/admin/audit-log",
-      "regex": "^/admin/audit\\-log(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/admin/audit\\-log(?:/)?$"
-    },
-    {
-      "page": "/admin/review",
-      "regex": "^/admin/review(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/admin/review(?:/)?$"
-    },
-    {
-      "page": "/admin/sign-off",
-      "regex": "^/admin/sign\\-off(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/admin/sign\\-off(?:/)?$"
-    },
-    {
-      "page": "/analytics",
-      "regex": "^/analytics(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/analytics(?:/)?$"
-    },
-    {
       "page": "/assembly",
       "regex": "^/assembly(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/assembly(?:/)?$"
+    },
+    {
+      "page": "/bids",
+      "regex": "^/bids(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/bids(?:/)?$"
     },
     {
       "page": "/compliance",
@@ -100,28 +76,10 @@
       "namedRegex": "^/compliance(?:/)?$"
     },
     {
-      "page": "/compliance/matrix",
-      "regex": "^/compliance/matrix(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/compliance/matrix(?:/)?$"
-    },
-    {
       "page": "/dashboard",
       "regex": "^/dashboard(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/dashboard(?:/)?$"
-    },
-    {
-      "page": "/deliverables/sign-off",
-      "regex": "^/deliverables/sign\\-off(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/deliverables/sign\\-off(?:/)?$"
-    },
-    {
-      "page": "/docs/api",
-      "regex": "^/docs/api(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/docs/api(?:/)?$"
     },
     {
       "page": "/intake",
@@ -136,34 +94,22 @@
       "namedRegex": "^/login(?:/)?$"
     },
     {
-      "page": "/market-intelligence",
-      "regex": "^/market\\-intelligence(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/market\\-intelligence(?:/)?$"
-    },
-    {
       "page": "/notifications",
       "regex": "^/notifications(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/notifications(?:/)?$"
     },
     {
-      "page": "/review/feedback",
-      "regex": "^/review/feedback(?:/)?$",
+      "page": "/opportunities",
+      "regex": "^/opportunities(?:/)?$",
       "routeKeys": {},
-      "namedRegex": "^/review/feedback(?:/)?$"
+      "namedRegex": "^/opportunities(?:/)?$"
     },
     {
-      "page": "/review/portal",
-      "regex": "^/review/portal(?:/)?$",
+      "page": "/profile",
+      "regex": "^/profile(?:/)?$",
       "routeKeys": {},
-      "namedRegex": "^/review/portal(?:/)?$"
-    },
-    {
-      "page": "/settings/roles",
-      "regex": "^/settings/roles(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/settings/roles(?:/)?$"
+      "namedRegex": "^/profile(?:/)?$"
     },
     {
       "page": "/settings/security",

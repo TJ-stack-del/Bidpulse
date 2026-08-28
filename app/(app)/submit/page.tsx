@@ -57,8 +57,8 @@ export default async function SubmitPage({
 
     return (
       <AppShell activePath="/submit">
-        <h1 className="text-headline-lg text-on-surface mt-6 mb-1">Execution &amp; Dispatch</h1>
-        <p className="text-body-md text-on-surface-variant mb-4">Pick a bid in Stage 6 to execute.</p>
+        <h1 className="text-headline-lg text-on-surface mt-6 mb-1">Send It In</h1>
+        <p className="text-body-md text-on-surface-variant mb-4">Pick a job that's ready to send in.</p>
         <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">
           {bids && bids.length > 0 ? (
             bids.map((bid) => (
@@ -75,7 +75,7 @@ export default async function SubmitPage({
               </Link>
             ))
           ) : (
-            <p className="text-body-md text-on-surface-variant px-6 py-6">No bids ready for submission.</p>
+            <p className="text-body-md text-on-surface-variant px-6 py-6">No jobs ready to send in yet.</p>
           )}
         </div>
       </AppShell>
@@ -115,13 +115,13 @@ export default async function SubmitPage({
   return (
     <AppShell activePath="/submit">
       <div className="flex items-center gap-2 text-on-surface-variant text-body-md mt-6 mb-2">
-        <span>My RFPs</span>
+        <span>My Jobs</span>
         <span className="material-symbols-outlined text-sm">chevron_right</span>
         <span className="text-on-surface">{bid.solicitation_number ?? bid.agency}</span>
         <span className="material-symbols-outlined text-sm">chevron_right</span>
-        <span className="text-on-surface">Submission</span>
+        <span className="text-on-surface">Send It In</span>
       </div>
-      <h1 className="text-headline-lg text-on-surface mb-1">Execution &amp; Dispatch</h1>
+      <h1 className="text-headline-lg text-on-surface mb-1">Send It In</h1>
       <p className="text-body-lg text-on-surface-variant mb-4">{bid.title}</p>
 
       <LifecycleStepper currentStage={6} />

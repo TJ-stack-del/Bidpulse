@@ -44,8 +44,8 @@ export function IntakeActions({
           className="peer appearance-none w-5 h-5 border border-outline-variant rounded bg-surface checked:bg-secondary checked:border-secondary transition-colors cursor-pointer mt-1"
         />
         <span className="text-body-md text-on-surface group-hover:text-primary transition-colors">
-          I have read, understand, and agree to the Procurement Integrity Act requirements
-          for this solicitation. <span className="text-error">*</span>
+          I read this and agree to bid fairly and honestly on this job.{" "}
+          <span className="text-error">*</span>
         </span>
       </label>
 
@@ -55,7 +55,7 @@ export function IntakeActions({
         className="w-full py-3 px-4 bg-primary text-on-primary rounded text-label-md hover:bg-on-background transition-colors flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
       >
         <span className="material-symbols-outlined text-[18px]">send</span>
-        {submitting ? "Submitting…" : "Submit Intake"}
+        {submitting ? "Sending…" : "Send This In"}
       </button>
     </>
   );

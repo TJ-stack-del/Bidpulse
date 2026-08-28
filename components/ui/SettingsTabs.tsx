@@ -3,7 +3,6 @@ import Link from "next/link";
 const TABS = [
   { href: "/settings/security", label: "Security" },
   { href: "/settings/team", label: "Team" },
-  { href: "/settings/roles", label: "Roles" },
 ];
 
 export function SettingsTabs({ active }: { active: string }) {

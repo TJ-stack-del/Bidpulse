@@ -104,17 +104,17 @@ export function SubmitForm({
         <div className="bg-surface-container-lowest border border-outline-variant rounded-lg p-6 flex flex-col gap-4">
           <div className="flex items-center gap-3 border-b border-outline-variant pb-4">
             <span className="material-symbols-outlined text-secondary text-2xl">verified_user</span>
-            <h3 className="text-title-lg text-on-surface">Submission Summary</h3>
+            <h3 className="text-title-lg text-on-surface">What You're Sending</h3>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1">
-              <span className="text-label-md text-on-surface-variant uppercase tracking-wider">Deliverables</span>
+              <span className="text-label-md text-on-surface-variant uppercase tracking-wider">Files</span>
               <span className="text-body-lg text-on-surface font-medium">
                 {deliverables.length} file{deliverables.length === 1 ? "" : "s"}
               </span>
             </div>
             <div className="flex flex-col gap-1">
-              <span className="text-label-md text-on-surface-variant uppercase tracking-wider">Solicitation</span>
+              <span className="text-label-md text-on-surface-variant uppercase tracking-wider">Job Number</span>
               <span className="text-body-lg text-on-surface font-medium">{solicitationNumber ?? bidAgency}</span>
             </div>
           </div>
@@ -132,24 +132,24 @@ export function SubmitForm({
         <div className="bg-surface-container-lowest border border-outline-variant rounded-lg p-6 flex flex-col gap-6">
           <div className="flex items-center gap-3 border-b border-outline-variant pb-4">
             <span className="material-symbols-outlined text-on-surface-variant text-2xl">upload_file</span>
-            <h3 className="text-title-lg text-on-surface">Submission Evidence</h3>
+            <h3 className="text-title-lg text-on-surface">Proof You Sent It</h3>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <label className="flex flex-col gap-2">
-              <span className="text-label-md text-on-surface-variant">Portal / Method</span>
+              <span className="text-label-md text-on-surface-variant">How You Sent It</span>
               <select
                 value={method}
                 onChange={(e) => setMethod(e.target.value)}
                 className="w-full h-10 px-3 rounded border border-outline-variant bg-surface text-body-md focus:border-secondary focus:ring-1 focus:ring-secondary outline-none"
               >
-                <option value="sam">SAM.gov Portal</option>
-                <option value="email">Direct Email</option>
-                <option value="portal">Agency Specific Portal</option>
+                <option value="sam">SAM.gov Website</option>
+                <option value="email">Email</option>
+                <option value="portal">Agency's Website</option>
                 <option value="hand_delivery">Hand Delivery</option>
               </select>
             </label>
             <label className="flex flex-col gap-2">
-              <span className="text-label-md text-on-surface-variant">Confirmation ID / Tracking #</span>
+              <span className="text-label-md text-on-surface-variant">Confirmation Number</span>
               <input
                 type="text"
                 value={confirmationNumber}
@@ -160,12 +160,12 @@ export function SubmitForm({
             </label>
           </div>
           <label className="flex flex-col gap-2">
-            <span className="text-label-md text-on-surface-variant">Receipt / Proof Link</span>
+            <span className="text-label-md text-on-surface-variant">Link to Your Receipt</span>
             <input
               type="url"
               value={sealedDocumentUrl}
               onChange={(e) => setSealedDocumentUrl(e.target.value)}
-              placeholder="Link to the confirmation document"
+              placeholder="Paste a link to your confirmation"
               className="w-full h-10 px-3 rounded border border-outline-variant bg-surface text-body-md focus:border-secondary focus:ring-1 focus:ring-secondary outline-none"
             />
           </label>
@@ -177,12 +177,12 @@ export function SubmitForm({
           <div>
             <div className="flex items-center gap-3 mb-4">
               <span className="material-symbols-outlined text-tertiary-fixed text-2xl">gavel</span>
-              <h3 className="text-title-lg font-bold text-on-primary">Final Authorization</h3>
+              <h3 className="text-title-lg font-bold text-on-primary">Last Step</h3>
             </div>
             <p className="text-body-md text-primary-fixed-dim mb-6 leading-relaxed">
-              By executing this submission, you legally attest that all provided documentation is accurate,
-              complete, and complies with the solicitation requirements. This action is irrevocable and will be
-              permanently recorded in the system audit log.
+              By clicking the button below, you're legally promising that everything here is true,
+              complete, and follows the job's rules. You can't undo this once you click it — it gets
+              saved in our records for good.
             </p>
             <label className="flex items-start gap-3 cursor-pointer mb-8">
               <input
@@ -192,7 +192,7 @@ export function SubmitForm({
                 className="mt-1"
               />
               <span className="text-body-md text-on-primary">
-                I acknowledge the legal implications and confirm readiness to submit.
+                I understand this is final, and I'm ready to send it in.
               </span>
             </label>
           </div>
@@ -202,7 +202,7 @@ export function SubmitForm({
             className="w-full py-4 px-6 bg-secondary hover:bg-on-secondary-fixed-variant text-on-secondary text-title-lg rounded flex items-center justify-center gap-3 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <span className="material-symbols-outlined">lock_open</span>
-            {submitting ? "Executing…" : "Execute Submission"}
+            {submitting ? "Sending…" : "Send It In"}
           </button>
         </div>
       </div>

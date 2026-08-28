@@ -5,6 +5,14 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { recordComplianceStatusChange } from "@/lib/compliance/record-status-change";
 
+const STATUS_LABEL: Record<string, string> = {
+  not_started: "Not Started",
+  in_progress: "Working On It",
+  passed: "Done",
+  failed: "Problem",
+  waived: "Not Needed",
+};
+
 export function ComplianceItemActions({
   itemId,
   bidId,
@@ -70,7 +78,7 @@ export function ComplianceItemActions({
         >
           {statusOptions.map((s) => (
             <option key={s} value={s}>
-              {s.replace("_", " ")}
+              {STATUS_LABEL[s] ?? s.replace("_", " ")}
             </option>
           ))}
         </select>
@@ -82,7 +90,7 @@ export function ComplianceItemActions({
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={5}
-          placeholder="Explain the decision — what was checked, what's outstanding..."
+          placeholder="Write what you checked and what's still left to do..."
           className="bg-surface border border-outline-variant rounded px-3 py-2 text-body-md text-on-surface focus:outline-none focus:border-secondary transition-colors resize-none"
         />
       </label>
@@ -92,7 +100,7 @@ export function ComplianceItemActions({
         disabled={saving}
         className="w-full py-3 px-4 bg-primary text-on-primary rounded text-label-md hover:bg-on-background transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
       >
-        {saving ? "Saving…" : "Save Review"}
+        {saving ? "Saving…" : "Save"}
       </button>
     </div>
   );
