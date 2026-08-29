@@ -187,8 +187,11 @@ export function IntakeWizard() {
 
   if (submitted) {
     return (
-      <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-8 text-center">
-        <h1 className="text-headline-md text-on-surface mb-2">We've got it.</h1>
+      <div className="text-center py-8">
+        <div className="w-16 h-16 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center mx-auto mb-4">
+          <span className="material-symbols-outlined text-[32px]">task_alt</span>
+        </div>
+        <h1 className="text-headline-md text-primary mb-2">We've got it.</h1>
         <p className="text-body-lg text-on-surface-variant">
           Thanks — we'll review your bid and be in touch. You can check on
           progress any time by logging in.
@@ -198,30 +201,39 @@ export function IntakeWizard() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       {/* Step indicator */}
-      <div className="flex gap-2">
-        {STEPS.map((label, i) => (
-          <div key={label} className="flex-1">
-            <div
-              className={`h-1 rounded ${i <= step ? "bg-secondary" : "bg-outline-variant"}`}
-            />
-            <p
-              className={`text-label-md mt-1 ${
-                i === step ? "text-secondary font-bold" : "text-on-surface-variant"
-              }`}
-            >
-              {label}
-            </p>
-          </div>
-        ))}
+      <div className="flex items-start justify-between relative">
+        <div className="absolute top-3 left-0 w-full h-0.5 bg-outline-variant -z-10" />
+        {STEPS.map((label, i) => {
+          const isDone = i < step;
+          const isActive = i === step;
+          return (
+            <div key={label} className="flex flex-col items-center gap-2 bg-surface-container-lowest px-1">
+              <div
+                className={`w-6 h-6 rounded-full flex items-center justify-center text-label-sm font-bold shrink-0 ${
+                  isDone
+                    ? "bg-secondary text-on-secondary"
+                    : isActive
+                    ? "border-2 border-secondary bg-surface text-secondary"
+                    : "border-2 border-outline-variant bg-surface text-on-surface-variant"
+                }`}
+              >
+                {isDone ? <span className="material-symbols-outlined text-[14px]">check</span> : i + 1}
+              </div>
+              <span className={`text-label-sm text-center ${isActive ? "text-secondary font-bold" : "text-on-surface-variant"}`}>
+                {label}
+              </span>
+            </div>
+          );
+        })}
       </div>
 
       {error && <p className="text-body-md text-error">{error}</p>}
 
       {step === 0 && (
         <form onSubmit={handleAboutYouNext} className="flex flex-col gap-4">
-          <h2 className="text-headline-md text-on-surface">About you</h2>
+          <h2 className="text-headline-md text-primary">Tell us about your business</h2>
           <Input label="Company name" value={form.companyName} onChange={(v) => update("companyName", v)} required />
           <Input label="Your name" value={form.contactName} onChange={(v) => update("contactName", v)} required />
           <Input label="Email" type="email" value={form.email} onChange={(v) => update("email", v)} required />
@@ -245,16 +257,17 @@ export function IntakeWizard() {
           <button
             type="submit"
             disabled={saving}
-            className="py-3 px-4 bg-primary text-on-primary rounded text-label-md hover:bg-on-background transition-colors disabled:opacity-40"
+            className="py-3 px-4 bg-secondary text-on-secondary rounded text-label-md hover:bg-on-secondary-container transition-colors disabled:opacity-40 flex items-center justify-center gap-2"
           >
             {saving ? "Saving…" : "Next"}
+            {!saving && <span className="material-symbols-outlined text-[18px]">arrow_forward</span>}
           </button>
         </form>
       )}
 
       {step === 1 && (
         <form onSubmit={handleAboutBidNext} className="flex flex-col gap-4">
-          <h2 className="text-headline-md text-on-surface">About the bid</h2>
+          <h2 className="text-headline-md text-primary">Tell us about the job</h2>
           <Input label="Agency" value={form.agency} onChange={(v) => update("agency", v)} required />
           <Input
             label="Solicitation number"
@@ -276,16 +289,17 @@ export function IntakeWizard() {
           <button
             type="submit"
             disabled={saving}
-            className="py-3 px-4 bg-primary text-on-primary rounded text-label-md hover:bg-on-background transition-colors disabled:opacity-40"
+            className="py-3 px-4 bg-secondary text-on-secondary rounded text-label-md hover:bg-on-secondary-container transition-colors disabled:opacity-40 flex items-center justify-center gap-2"
           >
             {saving ? "Saving…" : "Next"}
+            {!saving && <span className="material-symbols-outlined text-[18px]">arrow_forward</span>}
           </button>
         </form>
       )}
 
       {step === 2 && submissionId && (
         <div className="flex flex-col gap-4">
-          <h2 className="text-headline-md text-on-surface">Your bid file</h2>
+          <h2 className="text-headline-md text-primary">Your bid file</h2>
           <p className="text-body-md text-on-surface-variant">
             Upload the RFP file from the agency, if you have it. You can also
             add this later.
@@ -303,9 +317,10 @@ export function IntakeWizard() {
             <button
               onClick={handleFinalSubmit}
               disabled={saving}
-              className="flex-1 py-3 px-4 bg-primary text-on-primary rounded text-label-md hover:bg-on-background transition-colors disabled:opacity-40"
+              className="flex-1 py-3 px-4 bg-secondary text-on-secondary rounded text-label-md hover:bg-on-secondary-container transition-colors disabled:opacity-40 flex items-center justify-center gap-2"
             >
               {saving ? "Sending…" : "Send it to us"}
+              {!saving && <span className="material-symbols-outlined text-[18px]">arrow_forward</span>}
             </button>
           </div>
           {saved && <p className="text-body-md text-secondary">Saved — you can come back anytime.</p>}
@@ -330,7 +345,7 @@ function Input({
 }) {
   return (
     <div>
-      <label className="text-label-md text-on-surface-variant block mb-1">{label}</label>
+      <label className="text-label-md text-on-surface-variant uppercase tracking-wide block mb-1">{label}</label>
       <input
         type={type}
         required={required}

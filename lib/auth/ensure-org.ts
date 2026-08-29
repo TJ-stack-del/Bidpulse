@@ -1,12 +1,16 @@
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 
+// Admin-signup only — never call this for a client sign-in (see
+// app/page.tsx, which only calls it when neither a team_members nor a
+// clients row exists yet AND the account carries admin-signup metadata).
 // Runs once per account, right after we have a *real* session (a live
 // Supabase session is what lets RLS's auth.uid() resolve — see the
-// "Organizations & Team" policies in schema.sql). Called from SignupForm
-// right after supabase.auth.signUp() when email confirmation is off and a
-// session comes back immediately, and from LoginForm on every sign-in as a
-// no-op-if-already-done safety net for accounts that had to confirm their
-// email first (no session existed yet at signup time to do the insert).
+// "Organizations & Team" policies in schema.sql). Called from
+// app/admin/signup/SignupForm.tsx right after supabase.auth.signUp() when
+// email confirmation is off and a session comes back immediately, and from
+// app/page.tsx as a no-op-if-already-done fallback for accounts that had to
+// confirm their email first (no session existed yet at signup time to do
+// the insert).
 export async function ensureOrgAndMembership(
   supabase: SupabaseClient,
   user: User,
@@ -40,7 +44,7 @@ export async function ensureOrgAndMembership(
     auth_user_id: user.id,
     full_name: fullName,
     email: user.email ?? "",
-    role: "contractor_owner",
+    role: "admin",
   });
 
   if (memberError) {

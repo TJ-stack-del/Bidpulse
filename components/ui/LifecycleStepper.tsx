@@ -1,6 +1,22 @@
-const STAGES = ["Intake", "Review", "Pricing", "Drafting", "Approvals", "Submission"];
+// Matches the submission_stage enum in schema.sql, in order.
+export const SUBMISSION_STAGES = [
+  "submitted",
+  "in_review",
+  "deliverables_ready",
+  "client_review",
+  "confirmed_submitted",
+  "closed",
+] as const;
 
-// currentStage is 1-indexed to match the mockups (stage 1 = Intake)
+const STAGES = ["Submitted", "In Review", "Deliverables Ready", "Client Review", "Confirmed Submitted", "Closed"];
+
+// Converts a submissions.stage value into the 1-indexed number this
+// component expects (stage 1 = Submitted).
+export function stageNumber(stage: string): number {
+  const index = SUBMISSION_STAGES.indexOf(stage as (typeof SUBMISSION_STAGES)[number]);
+  return index === -1 ? 1 : index + 1;
+}
+
 export function LifecycleStepper({ currentStage }: { currentStage: number }) {
   return (
     <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 mt-4">
