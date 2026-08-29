@@ -3,7 +3,6 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { ensureOrgAndMembership } from "@/lib/auth/ensure-org";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
@@ -29,19 +28,11 @@ export function LoginForm() {
       return;
     }
 
-    try {
-      // No-op for most sign-ins — this only does work for an account that
-      // had to confirm its email before it ever got a session (see
-      // SignupForm.tsx), so the organizations/team_members rows never got
-      // created at signup time.
-      await ensureOrgAndMembership(supabase, data.user);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to finish setting up your workspace.");
-      setSubmitting(false);
-      return;
-    }
-
-    router.push("/dashboard");
+    // Deliberately no org/membership setup here — a client sign-in must
+    // never create an organizations/team_members row (see app/page.tsx,
+    // which handles the one case that legitimately needs that: an admin
+    // signup that was still pending email confirmation).
+    router.push("/");
     router.refresh();
   }
 

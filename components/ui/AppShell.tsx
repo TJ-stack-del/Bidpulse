@@ -4,28 +4,37 @@ import { SignOutButton } from "./SignOutButton";
 // Extracted from the <header> and mobile <nav> markup that repeats
 // near-identically across all 43 mockups/*/code.html files.
 // Every route wraps its content in this instead of copy-pasting the shell.
+//
+// Nav links are role-based since BidPulse split admin (your team,
+// works every client's submissions) from client (a contractor, sees only
+// their own) — see MIGRATION-TO-SPECWRIGHT.md. The header's notifications/
+// settings icons were dropped for now since those pages don't exist yet
+// (nothing built them since the pivot) — add them back once they are.
 
-const DESKTOP_LINKS = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/bids", label: "Bids" },
-  { href: "/intake", label: "My RFPs" },
-  { href: "/opportunities", label: "Opportunities" },
-];
+type Role = "admin" | "client";
 
-const MOBILE_LINKS = [
-  { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
-  { href: "/bids", label: "Bids", icon: "gavel" },
-  { href: "/intake", label: "My RFPs", icon: "description" },
-  { href: "/profile", label: "Profile", icon: "account_circle" },
-];
+const NAV_LINKS: Record<Role, { href: string; label: string; icon: string }[]> = {
+  admin: [
+    { href: "/admin/inbox", label: "Inbox", icon: "inbox" },
+    { href: "/admin/matches", label: "Matches", icon: "insights" },
+  ],
+  client: [
+    { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
+    { href: "/intake", label: "New Bid", icon: "add_circle" },
+  ],
+};
 
 export function AppShell({
   activePath,
+  role,
   children,
 }: {
   activePath: string;
+  role: Role;
   children: React.ReactNode;
 }) {
+  const links = NAV_LINKS[role];
+
   return (
     <div className="min-h-screen flex flex-col bg-surface">
       <header className="fixed top-0 w-full z-40 flex items-center justify-between px-margin-mobile md:px-margin-desktop py-3 bg-surface/95 backdrop-blur border-b border-outline-variant">
@@ -33,7 +42,7 @@ export function AppShell({
           <span className="font-bold text-headline-md text-on-surface">BidPulse</span>
         </div>
         <nav className="hidden md:flex gap-6">
-          {DESKTOP_LINKS.map((link) => (
+          {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -48,21 +57,7 @@ export function AppShell({
           ))}
         </nav>
         <div className="flex items-center gap-1">
-          <Link
-            href="/notifications"
-            title="Notifications"
-            className="w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"
-          >
-            <span className="material-symbols-outlined text-[20px]">notifications</span>
-          </Link>
-          <Link
-            href="/settings/security"
-            title="Settings"
-            className="w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"
-          >
-            <span className="material-symbols-outlined text-[20px]">settings</span>
-          </Link>
-          <div className="w-8 h-8 rounded-full overflow-hidden bg-surface-container border border-outline-variant shrink-0 ml-1" />
+          <div className="w-8 h-8 rounded-full overflow-hidden bg-surface-container border border-outline-variant shrink-0" />
           <SignOutButton />
         </div>
       </header>
@@ -72,7 +67,7 @@ export function AppShell({
       </main>
 
       <nav className="md:hidden fixed bottom-0 w-full z-50 flex justify-around items-center px-margin-mobile py-2 bg-surface border-t border-outline-variant">
-        {MOBILE_LINKS.map((link) => (
+        {links.map((link) => (
           <Link
             key={link.href}
             href={link.href}

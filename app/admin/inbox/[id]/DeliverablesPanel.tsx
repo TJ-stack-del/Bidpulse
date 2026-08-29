@@ -1,0 +1,208 @@
+"use client";
+
+import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+
+type Deliverable = {
+  id: string;
+  deliverable_type: string;
+  file_url: string | null;
+  content: string | null;
+  created_at: string;
+};
+
+const DELIVERABLE_TYPES: { value: string; label: string }[] = [
+  { value: "capability_statement", label: "Capability statement" },
+  { value: "compliance_matrix", label: "Compliance matrix" },
+  { value: "technical_narrative", label: "Technical narrative" },
+];
+
+// Step 7 — admin prepares each deliverable either by pasting text or
+// uploading a file; either counts as "prepared" per BUILD-ORDER-SPECWRIGHT.md
+// ("start simple"). One row per deliverable_type: saving replaces whichever
+// row already exists for that type instead of piling up duplicates, since
+// schema.sql has no unique constraint enforcing that itself.
+export function DeliverablesPanel({
+  submissionId,
+  orgId,
+  actorId,
+  initialDeliverables,
+}: {
+  submissionId: string;
+  orgId: string;
+  actorId: string;
+  initialDeliverables: Deliverable[];
+}) {
+  const [byType, setByType] = useState<Record<string, Deliverable | undefined>>(() => {
+    const map: Record<string, Deliverable | undefined> = {};
+    for (const d of initialDeliverables) map[d.deliverable_type] = d;
+    return map;
+  });
+  const [drafts, setDrafts] = useState<Record<string, string>>(() => {
+    const map: Record<string, string> = {};
+    for (const d of initialDeliverables) map[d.deliverable_type] = d.content ?? "";
+    return map;
+  });
+  const [saving, setSaving] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Record<string, string | undefined>>({});
+  const [savedTypes, setSavedTypes] = useState<Record<string, boolean>>({});
+  const supabase = createClient();
+
+  async function logPrepared(type: string, mode: "file" | "text") {
+    await supabase.from("audit_log").insert({
+      submission_id: submissionId,
+      org_id: orgId,
+      actor_id: actorId,
+      event_type: "deliverable_prepared",
+      event_detail: { deliverable_type: type, mode },
+    });
+  }
+
+  async function upsert(type: string, fields: { file_url?: string | null; content?: string | null }) {
+    const existing = byType[type];
+    const payload = {
+      submission_id: submissionId,
+      deliverable_type: type,
+      prepared_by: actorId,
+      file_url: fields.file_url ?? null,
+      content: fields.content ?? null,
+    };
+
+    if (existing) {
+      const { data, error: updateError } = await supabase
+        .from("deliverables")
+        .update(payload)
+        .eq("id", existing.id)
+        .select()
+        .single();
+      if (updateError || !data) throw new Error(updateError?.message ?? "Couldn't save.");
+      return data as Deliverable;
+    }
+
+    const { data, error: insertError } = await supabase
+      .from("deliverables")
+      .insert(payload)
+      .select()
+      .single();
+    if (insertError || !data) throw new Error(insertError?.message ?? "Couldn't save.");
+    return data as Deliverable;
+  }
+
+  async function handleSaveText(type: string) {
+    setSaving(type);
+    setErrors((e) => ({ ...e, [type]: undefined }));
+    setSavedTypes((s) => ({ ...s, [type]: false }));
+    try {
+      const saved = await upsert(type, { content: drafts[type] ?? "" });
+      setByType((b) => ({ ...b, [type]: saved }));
+      await logPrepared(type, "text");
+      setSavedTypes((s) => ({ ...s, [type]: true }));
+    } catch (err) {
+      setErrors((e) => ({ ...e, [type]: err instanceof Error ? err.message : "Couldn't save." }));
+    } finally {
+      setSaving(null);
+    }
+  }
+
+  async function handleUpload(type: string, e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setSaving(type);
+    setErrors((prev) => ({ ...prev, [type]: undefined }));
+    setSavedTypes((s) => ({ ...s, [type]: false }));
+
+    try {
+      const path = `${submissionId}/deliverables/${type}-${Date.now()}-${file.name}`;
+      const { error: uploadError } = await supabase.storage.from("rfp-documents").upload(path, file);
+      if (uploadError) throw new Error(uploadError.message);
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("rfp-documents").getPublicUrl(path);
+
+      const saved = await upsert(type, { file_url: publicUrl });
+      setByType((b) => ({ ...b, [type]: saved }));
+      setDrafts((d) => ({ ...d, [type]: "" }));
+      await logPrepared(type, "file");
+      setSavedTypes((s) => ({ ...s, [type]: true }));
+    } catch (err) {
+      setErrors((prev) => ({ ...prev, [type]: err instanceof Error ? err.message : "Upload failed." }));
+    } finally {
+      setSaving(null);
+      e.target.value = "";
+    }
+  }
+
+  return (
+    <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
+      <h2 className="text-title-lg text-on-surface mb-4">Deliverables</h2>
+
+      <div className="flex flex-col gap-6">
+        {DELIVERABLE_TYPES.map((t) => {
+          const existing = byType[t.value];
+          const isSaving = saving === t.value;
+          return (
+            <div key={t.value} className="border-t border-outline-variant pt-4 first:border-t-0 first:pt-0">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-label-md text-on-surface-variant uppercase tracking-wider">{t.label}</h3>
+                <span
+                  className={`text-[10px] px-2 py-0.5 rounded border font-bold uppercase ${
+                    existing
+                      ? "bg-surface-container-low text-on-tertiary-container border-on-tertiary-container/20"
+                      : "bg-surface-container-low text-on-surface-variant border-outline-variant"
+                  }`}
+                >
+                  {existing ? "Draft" : "Not started"}
+                </span>
+              </div>
+
+              {existing?.file_url && (
+                <a
+                  href={existing.file_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-secondary font-bold hover:underline text-body-md block mb-2"
+                >
+                  Current file
+                </a>
+              )}
+
+              <textarea
+                value={drafts[t.value] ?? ""}
+                onChange={(e) => {
+                  setDrafts((d) => ({ ...d, [t.value]: e.target.value }));
+                  setSavedTypes((s) => ({ ...s, [t.value]: false }));
+                }}
+                rows={3}
+                placeholder="Paste or write the content directly…"
+                className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none mb-2"
+              />
+
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => handleSaveText(t.value)}
+                  disabled={isSaving}
+                  className="px-4 py-2 bg-primary text-on-primary rounded text-label-md hover:bg-on-background transition-colors disabled:opacity-40"
+                >
+                  {isSaving ? "Saving…" : "Save text"}
+                </button>
+                <label className="px-4 py-2 rounded border border-secondary text-secondary text-label-md font-bold hover:bg-surface-container-low transition-colors cursor-pointer">
+                  {isSaving ? "Saving…" : "Upload file instead"}
+                  <input
+                    type="file"
+                    onChange={(e) => handleUpload(t.value, e)}
+                    disabled={isSaving}
+                    className="hidden"
+                  />
+                </label>
+                {savedTypes[t.value] && <span className="text-body-md text-secondary">Saved</span>}
+              </div>
+
+              {errors[t.value] && <p className="text-body-md text-error mt-2">{errors[t.value]}</p>}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

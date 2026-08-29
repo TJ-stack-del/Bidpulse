@@ -1,9 +1,14 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { LoginForm } from "./LoginForm";
+import { SignupForm } from "./SignupForm";
 
-export default async function LoginPage() {
+// Admin-only signup — creates the organizations + team_members(role: admin)
+// rows. This is you/your team, done rarely (often just once). Clients never
+// land here: they get an account as part of the intake wizard's "About
+// you" step instead (see app/intake/IntakeWizard.tsx).
+
+export default async function AdminSignupPage() {
   const supabase = await createClient();
   const {
     data: { user },
@@ -16,23 +21,19 @@ export default async function LoginPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <span className="font-bold text-headline-lg text-on-surface">BidPulse</span>
-          <p className="text-body-md text-on-surface-variant mt-2">Sign in to your workspace</p>
+          <p className="text-body-md text-on-surface-variant mt-2">
+            Set up your admin workspace
+          </p>
         </div>
 
         <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-8">
-          <LoginForm />
+          <SignupForm />
         </div>
 
         <p className="text-body-md text-on-surface-variant text-center mt-6">
-          Submitting a bid for the first time?{" "}
-          <Link href="/intake" className="text-secondary hover:underline">
-            Start here
-          </Link>
-        </p>
-        <p className="text-body-md text-on-surface-variant text-center mt-2">
-          Setting up your team&apos;s admin workspace for the first time?{" "}
-          <Link href="/admin/signup" className="text-secondary hover:underline">
-            Create it
+          Already have an account?{" "}
+          <Link href="/login" className="text-secondary hover:underline">
+            Sign in
           </Link>
         </p>
       </div>

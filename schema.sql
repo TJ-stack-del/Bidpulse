@@ -87,6 +87,8 @@ create table submissions (
   draft boolean not null default true,        -- true until client locks/submits
   draft_saved_at timestamptz,
   submitted_at timestamptz,
+  confirmation_sent_at timestamptz, -- Step 9: post-submission confirmation email,
+                                     -- marked manually until real email sending is wired up
   created_at timestamptz not null default now()
 );
 
@@ -137,6 +139,7 @@ create table matched_opportunities (
   assigned_client_id uuid references clients(id) on delete set null, -- null until admin assigns it
   source_title text not null,
   source_agency text not null,
+  source_url text, -- link back to the original listing, for admin review before assigning
   due_date timestamptz,
   match_score numeric,
   status text not null default 'new', -- 'new' | 'assigned' | 'dismissed'
@@ -176,7 +179,7 @@ returns boolean as $$
     select 1 from team_members
     where org_id = target_org_id and auth_user_id = auth.uid() and role = 'admin'
   );
-$$ language sql security definer stable;
+$$ language sql security definer stable set search_path = public;
 
 create or replace function is_own_client_record(target_client_id uuid)
 returns boolean as $$
@@ -184,15 +187,35 @@ returns boolean as $$
     select 1 from clients
     where id = target_client_id and auth_user_id = auth.uid()
   );
-$$ language sql security definer stable;
+$$ language sql security definer stable set search_path = public;
+
+-- security definer so this existence check bypasses team_members' own SELECT
+-- policy (is_admin-gated) — otherwise a non-admin querying it would see zero
+-- rows regardless of the org's real state, defeating the check below.
+create or replace function org_has_admin(target_org_id uuid)
+returns boolean as $$
+  select exists (select 1 from team_members where org_id = target_org_id);
+$$ language sql security definer stable set search_path = public;
 
 -- organizations / team_members: same bootstrap pattern as before
 create policy "any authenticated user can create an organization" on organizations
   for insert with check (auth.uid() is not null);
 create policy "admins can read their organization" on organizations
   for select using (is_admin(id));
-create policy "a user can insert their own team_members row" on team_members
-  for insert with check (auth_user_id = auth.uid());
+-- Any authenticated user can also just read organizations (not only admins):
+-- the client intake wizard looks up "the" org id before a clients row (and
+-- therefore is_own_client_record) exists yet, so it can't be admin-gated.
+-- Safe in this single-tenant model — id/name of your own business, nothing
+-- sensitive, and no other org's data is reachable through it.
+create policy "authenticated users can read organizations" on organizations
+  for select using (auth.uid() is not null);
+-- Only allows creating the FIRST team_members row for a given org (the
+-- legitimate admin-signup bootstrap, before is_admin() has anything to
+-- check yet) — without org_has_admin(), any authenticated user (including
+-- a client) could insert {org_id: <your org>, role: 'admin'} for themselves
+-- and gain full admin access to your organization.
+create policy "a user can bootstrap the first team_members row for a new org" on team_members
+  for insert with check (auth_user_id = auth.uid() and not org_has_admin(org_id));
 create policy "admins can read team_members in their org" on team_members
   for select using (is_admin(org_id));
 
@@ -201,16 +224,53 @@ create policy "admins read all clients" on clients
   for select using (is_admin(org_id));
 create policy "admins manage clients" on clients
   for all using (is_admin(org_id));
+-- Direct column comparison, not is_own_client_record(id) — that function's
+-- subquery selects from clients itself, and a same-table self-referencing
+-- RLS check evaluated as the RETURNING-visibility step right after an
+-- INSERT into that same table is a known Postgres/PostgREST rough edge
+-- (confirmed live: the identical insert succeeds with Prefer: return=minimal,
+-- and is_own_client_record() returns true when called standalone via RPC for
+-- the same row — it only fails embedded in the INSERT...RETURNING path).
+-- auth_user_id is a plain column on this row, so no subquery is needed here
+-- at all — is_own_client_record() stays as-is for every OTHER table, which
+-- call it cross-table (checking clients from a different table's policy).
 create policy "clients read their own record" on clients
-  for select using (is_own_client_record(id));
+  for select using (auth_user_id = auth.uid());
+-- Without this, the intake wizard's "About you" step (a brand-new client
+-- inserting their own row) fails RLS every time — is_own_client_record()
+-- can't authorize an insert of the very row it would check against.
+create policy "a client can insert their own record" on clients
+  for insert with check (auth_user_id = auth.uid());
+
+-- packages: admin-write, client read-only on their own (had RLS enabled
+-- above but no policies, which meant every query returned zero rows for
+-- everyone — needed for the client dashboard's package-info card)
+create policy "admins manage packages" on packages
+  for all using (exists (select 1 from clients c where c.id = client_id and is_admin(c.org_id)));
+create policy "clients read their own packages" on packages
+  for select using (is_own_client_record(client_id));
 
 -- submissions: admins see all in their org (via client); client sees only their own
 create policy "admins read all submissions" on submissions
   for select using (exists (select 1 from clients c where c.id = client_id and is_admin(c.org_id)));
 create policy "admins manage submissions" on submissions
   for all using (exists (select 1 from clients c where c.id = client_id and is_admin(c.org_id)));
-create policy "clients manage their own submissions" on submissions
-  for all using (is_own_client_record(client_id));
+-- Clients get three narrower policies instead of one FOR ALL: MIGRATION-
+-- TO-SPECWRIGHT.md is explicit that the client side is a "read-only status
+-- view" once submitted — a single unrestricted FOR ALL would let a client
+-- call the API directly to rewrite stage, confirmation_sent_at, is_test,
+-- etc. at any time, not just during their own intake.
+create policy "clients read their own submissions" on submissions
+  for select using (is_own_client_record(client_id));
+create policy "clients insert their own submissions" on submissions
+  for insert with check (is_own_client_record(client_id));
+-- USING is checked against the row's state *before* the update, so this
+-- still allows the exact transition intake needs (draft: true -> false on
+-- final submit) but permanently locks the row from further client writes
+-- the moment it's no longer a draft — no DELETE policy for clients at all.
+create policy "clients update their own draft submissions" on submissions
+  for update using (is_own_client_record(client_id) and draft = true)
+  with check (is_own_client_record(client_id));
 
 -- submission_documents: inherits access through the submission's client
 create policy "access submission_documents via submission" on submission_documents
@@ -255,16 +315,55 @@ create policy "admins only on admin_notes" on admin_notes
 create policy "admins manage matched_opportunities" on matched_opportunities
   for all using (is_admin(org_id));
 
--- audit_log: insert-only, admin-read
+-- audit_log: insert-only, admin-read. Clients are restricted to the one
+-- event_type the app actually has them log (submission_locked, from the
+-- intake wizard's final submit) — without this, a client could insert
+-- arbitrary event_type/event_detail rows against their own submission_id
+-- (harmless to real state, since audit_log doesn't drive anything, but
+-- still forged entries in what's supposed to be a trustworthy log).
 create policy "admins read audit_log" on audit_log
   for select using (is_admin(org_id));
 create policy "insert audit_log" on audit_log
   for insert with check (
-    is_admin(org_id) or exists (
-      select 1 from submissions s where s.id = submission_id and is_own_client_record(s.client_id)
+    is_admin(org_id) or (
+      event_type = 'submission_locked'
+      and exists (
+        select 1 from submissions s where s.id = submission_id and is_own_client_record(s.client_id)
+      )
     )
   );
 
 -- ---------- Storage bucket ----------
 insert into storage.buckets (id, name, public) values ('rfp-documents', 'rfp-documents', true)
 on conflict (id) do nothing;
+
+-- storage.objects has RLS enabled by default with no policies, which
+-- blocked every upload (submission_documents' RFP file, and deliverables'
+-- prepared files) even though the bucket itself is public. "Public" only
+-- lets a *known* object URL bypass auth for GET — it says nothing about
+-- who can list the bucket's contents or upload/overwrite/delete objects,
+-- both of which still need explicit policies here.
+--
+-- Every upload path in the app (SubmissionDocuments.tsx, DeliverablesPanel)
+-- names objects as "<submissionId>/...", so storage.foldername(name)[1] is
+-- always that submission's id — scoping on it mirrors the same admin-or-
+-- owning-client check used on the deliverables/submission_documents tables,
+-- instead of granting any authenticated user (i.e. any client) blanket
+-- read/write over every other client's files.
+create or replace function can_access_rfp_object(object_name text)
+returns boolean as $$
+  select exists (
+    select 1 from submissions s join clients c on c.id = s.client_id
+    where s.id::text = (storage.foldername(object_name))[1]
+      and (is_admin(c.org_id) or is_own_client_record(c.id))
+  );
+$$ language sql security definer stable set search_path = public;
+
+create policy "access rfp-documents via the owning submission" on storage.objects
+  for select to authenticated using (bucket_id = 'rfp-documents' and can_access_rfp_object(name));
+create policy "upload to rfp-documents via the owning submission" on storage.objects
+  for insert to authenticated with check (bucket_id = 'rfp-documents' and can_access_rfp_object(name));
+create policy "update rfp-documents via the owning submission" on storage.objects
+  for update to authenticated using (bucket_id = 'rfp-documents' and can_access_rfp_object(name));
+create policy "delete rfp-documents via the owning submission" on storage.objects
+  for delete to authenticated using (bucket_id = 'rfp-documents' and can_access_rfp_object(name));

@@ -1,0 +1,238 @@
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { AppShell } from "@/components/ui/AppShell";
+import { LifecycleStepper, stageNumber } from "@/components/ui/LifecycleStepper";
+
+// Converted per BUILD-ORDER-SPECWRIGHT.md Step 5: a read-only status view
+// for a client — package info, pending-info checklist (status only, no
+// editing — that's admin-only per schema.sql's RLS policies), the 6-stage
+// pilot timeline, and deliverables once the submission reaches
+// deliverables_ready or later.
+
+const STAGE_LABELS: Record<string, string> = {
+  submitted: "Submitted",
+  in_review: "In review",
+  deliverables_ready: "Deliverables ready",
+  client_review: "Client review",
+  confirmed_submitted: "Confirmed submitted",
+  closed: "Closed",
+};
+
+const CHECKLIST_STATUS_LABELS: Record<string, string> = {
+  not_started: "Not started",
+  in_progress: "In progress",
+  done: "Done",
+  waived: "Waived",
+};
+
+const DELIVERABLE_TYPE_LABELS: Record<string, string> = {
+  capability_statement: "Capability statement",
+  compliance_matrix: "Compliance matrix",
+  technical_narrative: "Technical narrative",
+};
+
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ submission?: string }>;
+}) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data: client } = await supabase
+    .from("clients")
+    .select("id, company_name")
+    .eq("auth_user_id", user.id)
+    .maybeSingle();
+
+  // Not a client account (e.g. an admin landed here directly) — the root
+  // page already knows how to route each account type correctly.
+  if (!client) redirect("/");
+
+  const { data: submissions } = await supabase
+    .from("submissions")
+    .select("id, agency, solicitation_number, due_date, scope, stage, is_test, package_id, created_at")
+    .eq("client_id", client.id)
+    .order("created_at", { ascending: false });
+
+  if (!submissions || submissions.length === 0) {
+    return (
+      <AppShell activePath="/dashboard" role="client">
+        <h1 className="text-headline-lg text-on-surface mt-6 mb-1">Welcome, {client.company_name}.</h1>
+        <p className="text-body-md text-on-surface-variant mb-4">
+          You haven&apos;t started a bid yet.
+        </p>
+        <Link
+          href="/intake"
+          className="inline-block py-3 px-4 bg-primary text-on-primary rounded text-label-md hover:bg-on-background transition-colors w-fit"
+        >
+          Start your first bid
+        </Link>
+      </AppShell>
+    );
+  }
+
+  const { submission: requestedId } = await searchParams;
+  const activeSubmission = (requestedId && submissions.find((s) => s.id === requestedId)) || submissions[0];
+
+  const { data: pkg } = activeSubmission.package_id
+    ? await supabase
+        .from("packages")
+        .select("package_type, price_note")
+        .eq("id", activeSubmission.package_id)
+        .maybeSingle()
+    : { data: null };
+
+  const { data: checklist } = await supabase
+    .from("checklist_items")
+    .select("id, label, status")
+    .eq("submission_id", activeSubmission.id)
+    .order("updated_at", { ascending: true });
+
+  const showDeliverables = stageNumber(activeSubmission.stage) >= stageNumber("deliverables_ready");
+
+  const { data: deliverables } = showDeliverables
+    ? await supabase
+        .from("deliverables")
+        .select("id, deliverable_type, file_url, content, created_at")
+        .eq("submission_id", activeSubmission.id)
+    : { data: null };
+
+  return (
+    <AppShell activePath="/dashboard" role="client">
+      {submissions.length > 1 && (
+        <div className="flex gap-2 flex-wrap mt-6">
+          {submissions.map((s) => (
+            <Link
+              key={s.id}
+              href={`/dashboard?submission=${s.id}`}
+              className={`px-3 py-2 rounded text-label-md border transition-colors ${
+                s.id === activeSubmission.id
+                  ? "bg-primary text-on-primary border-primary"
+                  : "bg-surface border-outline-variant text-on-surface hover:bg-surface-container-high"
+              }`}
+            >
+              {s.agency}
+            </Link>
+          ))}
+        </div>
+      )}
+
+      <div className={submissions.length > 1 ? "" : "mt-6"}>
+        <p className="text-label-md text-on-surface-variant uppercase tracking-wider mb-1">
+          {client.company_name}
+          {activeSubmission.is_test && (
+            <span className="ml-2 text-[10px] px-2 py-0.5 rounded bg-surface-container-highest text-on-surface-variant font-bold uppercase">
+              Test
+            </span>
+          )}
+        </p>
+        <h1 className="text-headline-lg text-on-surface mb-1">{activeSubmission.agency}</h1>
+        <p className="text-body-md text-on-surface-variant">
+          {activeSubmission.solicitation_number ?? "No solicitation number on file"}
+          {activeSubmission.due_date &&
+            ` · Due ${new Date(activeSubmission.due_date).toLocaleDateString()}`}
+        </p>
+      </div>
+
+      <LifecycleStepper currentStage={stageNumber(activeSubmission.stage)} />
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
+        <div className="lg:col-span-2 flex flex-col gap-6">
+          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
+            <h2 className="text-title-lg text-on-surface mb-4">Status</h2>
+            <p className="text-body-md text-on-surface">
+              {STAGE_LABELS[activeSubmission.stage] ?? activeSubmission.stage}
+            </p>
+          </div>
+
+          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">
+            <div className="px-6 py-4 border-b border-outline-variant bg-surface-container-low">
+              <h2 className="text-title-lg text-on-surface">What we still need from you</h2>
+            </div>
+            {checklist && checklist.length > 0 ? (
+              <div className="flex flex-col">
+                {checklist.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between px-6 py-4 border-b border-outline-variant last:border-b-0"
+                  >
+                    <span className="text-body-md text-on-surface">{item.label}</span>
+                    <span className="text-label-md px-2 py-0.5 rounded text-[10px] border border-outline-variant bg-surface-container-low text-on-surface-variant uppercase">
+                      {CHECKLIST_STATUS_LABELS[item.status] ?? item.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-body-md text-on-surface-variant px-6 py-6">Nothing pending right now.</p>
+            )}
+          </div>
+
+          {showDeliverables && (
+            <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">
+              <div className="px-6 py-4 border-b border-outline-variant bg-surface-container-low">
+                <h2 className="text-title-lg text-on-surface">Your deliverables</h2>
+              </div>
+              {deliverables && deliverables.length > 0 ? (
+                <div className="flex flex-col">
+                  {deliverables.map((d) => (
+                    <div key={d.id} className="px-6 py-4 border-b border-outline-variant last:border-b-0">
+                      <p className="text-label-md text-on-surface-variant uppercase tracking-wider mb-1">
+                        {DELIVERABLE_TYPE_LABELS[d.deliverable_type] ?? d.deliverable_type}
+                      </p>
+                      {d.file_url ? (
+                        <a
+                          href={d.file_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-secondary font-bold hover:underline"
+                        >
+                          Download
+                        </a>
+                      ) : d.content ? (
+                        <p className="text-body-md text-on-surface whitespace-pre-wrap">{d.content}</p>
+                      ) : (
+                        <p className="text-body-md text-on-surface-variant">Being prepared.</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-body-md text-on-surface-variant px-6 py-6">Being prepared.</p>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-6">
+          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
+            <h3 className="text-title-lg text-on-surface mb-4">Package</h3>
+            {pkg ? (
+              <>
+                <p className="text-body-md text-on-surface capitalize">{pkg.package_type.replace(/_/g, " ")}</p>
+                {pkg.price_note && (
+                  <p className="text-body-md text-on-surface-variant mt-1">{pkg.price_note}</p>
+                )}
+              </>
+            ) : (
+              <p className="text-body-md text-on-surface-variant">Not yet assigned.</p>
+            )}
+          </div>
+
+          {activeSubmission.scope && (
+            <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
+              <h3 className="text-title-lg text-on-surface mb-4">Scope</h3>
+              <p className="text-body-md text-on-surface-variant">{activeSubmission.scope}</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </AppShell>
+  );
+}
