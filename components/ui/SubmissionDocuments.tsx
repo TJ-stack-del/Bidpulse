@@ -98,7 +98,7 @@ export function SubmissionDocuments({ submissionId }: { submissionId: string }) 
             </option>
           ))}
         </select>
-        <label className="px-4 py-2 rounded border border-secondary text-secondary text-label-md font-bold hover:bg-surface-container-low transition-colors cursor-pointer">
+        <label className="px-4 py-2 rounded border border-secondary text-secondary text-label-md font-bold hover:bg-surface-container-low transition cursor-pointer">
           {uploading ? "Uploading…" : "Choose file"}
           <input type="file" onChange={handleUpload} disabled={uploading} className="hidden" />
         </label>

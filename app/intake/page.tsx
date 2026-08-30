@@ -1,9 +1,15 @@
+import type { Metadata } from "next";
 import { IntakeWizard } from "./IntakeWizard";
 
 // Public route — a client doesn't need an account before starting.
 // Their account gets created as part of step 1 ("About you"). Replaces
 // the old self-serve app/(app)/intake — this one is NOT wrapped in
 // AppShell since the visitor isn't logged into the app yet.
+
+export const metadata: Metadata = {
+  title: "Get Started",
+  description: "Tell us about your bid — we'll take it from there.",
+};
 
 export default function IntakePage() {
   return (
@@ -13,7 +19,7 @@ export default function IntakePage() {
           <span className="text-headline-md font-bold text-primary">BidPulse</span>
         </div>
       </header>
-      <main className="max-w-2xl mx-auto px-margin-mobile md:px-margin-desktop py-section-gap">
+      <main className="animate-fade-in max-w-2xl mx-auto px-margin-mobile md:px-margin-desktop py-section-gap">
         <div className="bg-surface-container-lowest rounded-lg border border-outline-variant p-margin-mobile md:p-gutter shadow-sm">
           <h1 className="text-headline-lg-mobile md:text-headline-lg text-primary mb-8">
             Client Intake

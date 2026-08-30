@@ -1,8 +1,8 @@
-# BidPulse → Open SpecWright: Migration Plan
+# BidPulse: Self-Serve → Done-for-You Migration Plan
 
 ## The core change
 BidPulse was self-serve: a contractor logs in and does their own bid work.
-Open SpecWright is done-for-you: a contractor submits their info, and
+The done-for-you model has a contractor submit their info, and
 **you** (the admin/team) prepare the capability statement, compliance
 matrix, and technical narrative for them.
 

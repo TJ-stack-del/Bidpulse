@@ -1,5 +1,8 @@
+import Image from "next/image";
 import Link from "next/link";
+import { TAGLINE } from "@/lib/brand";
 import { SignOutButton } from "./SignOutButton";
+import { ThemeToggle } from "./ThemeToggle";
 
 // Extracted from the <header> and mobile <nav> markup that repeats
 // near-identically across all 43 mockups/*/code.html files.
@@ -7,7 +10,7 @@ import { SignOutButton } from "./SignOutButton";
 //
 // Nav links are role-based since BidPulse split admin (your team,
 // works every client's submissions) from client (a contractor, sees only
-// their own) — see MIGRATION-TO-SPECWRIGHT.md. The header's notifications/
+// their own) — see MIGRATION-TO-BIDPULSE.md. The header's notifications/
 // settings icons were dropped for now since those pages don't exist yet
 // (nothing built them since the pivot) — add them back once they are.
 
@@ -21,16 +24,22 @@ const NAV_LINKS: Record<Role, { href: string; label: string; icon: string }[]> =
   client: [
     { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
     { href: "/intake", label: "New Bid", icon: "add_circle" },
+    { href: "/dashboard/profile", label: "Profile", icon: "badge" },
   ],
 };
 
 export function AppShell({
   activePath,
   role,
+  viewerName,
   children,
 }: {
   activePath: string;
   role: Role;
+  // The signed-in admin's full name (team_members.full_name) or the
+  // signed-in client's business name (clients.company_name) — whichever
+  // record the caller already fetched to know `role` in the first place.
+  viewerName: string;
   children: React.ReactNode;
 }) {
   const links = NAV_LINKS[role];
@@ -38,15 +47,18 @@ export function AppShell({
   return (
     <div className="min-h-screen flex flex-col bg-surface">
       <header className="fixed top-0 w-full z-40 flex items-center justify-between px-margin-mobile md:px-margin-desktop py-3 bg-surface/95 backdrop-blur border-b border-outline-variant">
-        <div className="flex items-center gap-2">
-          <span className="font-bold text-headline-md text-on-surface">BidPulse</span>
+        <div className="flex flex-col justify-center">
+          <Image src="/logo.png" alt="BidPulse" width={116} height={40} className="h-10 w-auto" priority />
+          <p className="hidden sm:block text-[9px] leading-snug text-on-surface-variant max-w-[280px]">
+            {TAGLINE}
+          </p>
         </div>
         <nav className="hidden md:flex gap-6">
           {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className={`text-label-md px-3 py-2 rounded-lg transition-colors ${
+              className={`text-label-md px-3 py-2 rounded-lg transition ${
                 activePath === link.href
                   ? "text-secondary font-bold bg-surface-container-highest"
                   : "text-on-surface-variant hover:bg-surface-container-high"
@@ -56,13 +68,19 @@ export function AppShell({
             </Link>
           ))}
         </nav>
-        <div className="flex items-center gap-1">
-          <div className="w-8 h-8 rounded-full overflow-hidden bg-surface-container border border-outline-variant shrink-0" />
-          <SignOutButton />
+        <div className="flex items-center gap-3">
+          <p className="hidden sm:block text-label-md text-on-surface-variant whitespace-nowrap">
+            {viewerName} · {role === "admin" ? "Admin" : "Client view"}
+          </p>
+          <ThemeToggle />
+          <div className="flex items-center gap-1">
+            <div className="w-8 h-8 rounded-full overflow-hidden bg-surface-container border border-outline-variant shrink-0" />
+            <SignOutButton />
+          </div>
         </div>
       </header>
 
-      <main className="flex-grow pt-[80px] pb-[80px] md:pb-8 px-margin-mobile md:px-margin-desktop max-w-container mx-auto w-full flex flex-col gap-6">
+      <main className="animate-fade-in flex-grow pt-[80px] sm:pt-[112px] pb-[80px] md:pb-8 px-margin-mobile md:px-margin-desktop max-w-container mx-auto w-full flex flex-col gap-6">
         {children}
       </main>
 

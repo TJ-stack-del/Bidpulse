@@ -3,8 +3,16 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { AppShell } from "@/components/ui/AppShell";
 import { LifecycleStepper, stageNumber } from "@/components/ui/LifecycleStepper";
+import { DeliverablesSection } from "./DeliverablesSection";
+import { ReportSubmittedButton } from "./ReportSubmittedButton";
 
-// Converted per BUILD-ORDER-SPECWRIGHT.md Step 5: a read-only status view
+// Reads cookies (via lib/supabase/server) which already opts this page out
+// of static rendering — confirmed via `Cache-Control: no-store` on the
+// actual response. Kept explicit anyway so a future refactor that drops
+// the cookies() call can't silently reintroduce caching here.
+export const dynamic = "force-dynamic";
+
+// Converted per BUILD-ORDER-BIDPULSE.md Step 5: a read-only status view
 // for a client — package info, pending-info checklist (status only, no
 // editing — that's admin-only per schema.sql's RLS policies), the 6-stage
 // pilot timeline, and deliverables once the submission reaches
@@ -26,12 +34,6 @@ const CHECKLIST_STATUS_LABELS: Record<string, string> = {
   waived: "Waived",
 };
 
-const DELIVERABLE_TYPE_LABELS: Record<string, string> = {
-  capability_statement: "Capability statement",
-  compliance_matrix: "Compliance matrix",
-  technical_narrative: "Technical narrative",
-};
-
 export default async function DashboardPage({
   searchParams,
 }: {
@@ -46,7 +48,7 @@ export default async function DashboardPage({
 
   const { data: client } = await supabase
     .from("clients")
-    .select("id, company_name")
+    .select("id, org_id, company_name")
     .eq("auth_user_id", user.id)
     .maybeSingle();
 
@@ -54,22 +56,52 @@ export default async function DashboardPage({
   // page already knows how to route each account type correctly.
   if (!client) redirect("/");
 
-  const { data: submissions } = await supabase
+  // Ordered by updated_at (bumped on every stage change), not created_at —
+  // the default tab should be whichever bid most recently had something
+  // happen to it, not just whichever was opened first. Otherwise an older
+  // submission that just got a fresh stage change loses the default slot
+  // to a newer-but-untouched-since one, and looks "stuck" on reload even
+  // though the data was never stale — just showing the wrong submission.
+  const { data: submissions, error: submissionsError } = await supabase
     .from("submissions")
-    .select("id, agency, solicitation_number, due_date, scope, stage, is_test, package_id, created_at")
+    .select(
+      "id, agency, solicitation_number, due_date, scope, stage, is_test, package_id, created_at, updated_at, client_reported_submitted_at"
+    )
     .eq("client_id", client.id)
-    .order("created_at", { ascending: false });
+    .order("updated_at", { ascending: false });
+
+  // A failed query (e.g. a column that exists in code but not yet in the
+  // live database — exactly what happened here once already) must never
+  // look identical to "this client genuinely has zero bids." Discarding
+  // `error` and falling through to the empty state on any failure is what
+  // made that migration gap invisible instead of an obvious error.
+  if (submissionsError) {
+    console.error("[dashboard] failed to load submissions", {
+      clientId: client.id,
+      message: submissionsError.message,
+      code: submissionsError.code,
+      details: submissionsError.details,
+      hint: submissionsError.hint,
+    });
+    return (
+      <AppShell activePath="/dashboard" role="client" viewerName={client.company_name}>
+        <p className="text-body-md text-error mt-6">
+          Something went wrong loading your bids. Please refresh, or contact us if this keeps happening.
+        </p>
+      </AppShell>
+    );
+  }
 
   if (!submissions || submissions.length === 0) {
     return (
-      <AppShell activePath="/dashboard" role="client">
-        <h1 className="text-headline-lg text-on-surface mt-6 mb-1">Welcome, {client.company_name}.</h1>
+      <AppShell activePath="/dashboard" role="client" viewerName={client.company_name}>
+        <h1 className="text-headline-lg text-primary mt-6 mb-1">Welcome, {client.company_name}.</h1>
         <p className="text-body-md text-on-surface-variant mb-4">
           You haven&apos;t started a bid yet.
         </p>
         <Link
           href="/intake"
-          className="inline-block py-3 px-4 bg-primary text-on-primary rounded text-label-md hover:bg-on-background transition-colors w-fit"
+          className="inline-block py-3 px-4 bg-secondary text-on-secondary rounded text-label-md font-semibold hover:bg-on-secondary-container transition active:scale-[0.97] w-fit"
         >
           Start your first bid
         </Link>
@@ -83,10 +115,16 @@ export default async function DashboardPage({
   const { data: pkg } = activeSubmission.package_id
     ? await supabase
         .from("packages")
-        .select("package_type, price_note")
+        .select("package_type, price_note, paid")
         .eq("id", activeSubmission.package_id)
         .maybeSingle()
     : { data: null };
+
+  // No linked package yet (or the package query came back empty) is treated
+  // as unpaid — downloads stay locked rather than erroring. Pilot packages
+  // are never paywalled — "on us to prove the process" — so they unlock
+  // regardless of the paid flag.
+  const isPaid = (pkg?.paid ?? false) || pkg?.package_type === "pilot";
 
   const { data: checklist } = await supabase
     .from("checklist_items")
@@ -104,16 +142,16 @@ export default async function DashboardPage({
     : { data: null };
 
   return (
-    <AppShell activePath="/dashboard" role="client">
+    <AppShell activePath="/dashboard" role="client" viewerName={client.company_name}>
       {submissions.length > 1 && (
         <div className="flex gap-2 flex-wrap mt-6">
           {submissions.map((s) => (
             <Link
               key={s.id}
               href={`/dashboard?submission=${s.id}`}
-              className={`px-3 py-2 rounded text-label-md border transition-colors ${
+              className={`px-3 py-2 rounded text-label-md border transition ${
                 s.id === activeSubmission.id
-                  ? "bg-primary text-on-primary border-primary"
+                  ? "bg-secondary text-on-secondary border-secondary"
                   : "bg-surface border-outline-variant text-on-surface hover:bg-surface-container-high"
               }`}
             >
@@ -132,7 +170,7 @@ export default async function DashboardPage({
             </span>
           )}
         </p>
-        <h1 className="text-headline-lg text-on-surface mb-1">{activeSubmission.agency}</h1>
+        <h1 className="text-headline-lg text-primary mb-1">{activeSubmission.agency}</h1>
         <p className="text-body-md text-on-surface-variant">
           {activeSubmission.solicitation_number ?? "No solicitation number on file"}
           {activeSubmission.due_date &&
@@ -145,24 +183,45 @@ export default async function DashboardPage({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
         <div className="lg:col-span-2 flex flex-col gap-6">
           <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
-            <h2 className="text-title-lg text-on-surface mb-4">Status</h2>
+            <h2 className="text-title-lg text-primary mb-4 flex items-center gap-2">
+              <span className="material-symbols-outlined text-secondary text-[20px]">timeline</span>
+              Status
+            </h2>
             <p className="text-body-md text-on-surface">
               {STAGE_LABELS[activeSubmission.stage] ?? activeSubmission.stage}
             </p>
+            {stageNumber(activeSubmission.stage) >= stageNumber("client_review") && (
+              <ReportSubmittedButton
+                submissionId={activeSubmission.id}
+                orgId={client.org_id}
+                initialReportedAt={activeSubmission.client_reported_submitted_at}
+              />
+            )}
           </div>
 
           <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">
             <div className="px-6 py-4 border-b border-outline-variant bg-surface-container-low">
-              <h2 className="text-title-lg text-on-surface">What we still need from you</h2>
+              <h2 className="text-title-lg text-primary flex items-center gap-2">
+                <span className="material-symbols-outlined text-secondary text-[20px]">fact_check</span>
+                What we still need from you
+              </h2>
             </div>
             {checklist && checklist.length > 0 ? (
               <div className="flex flex-col">
                 {checklist.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between px-6 py-4 border-b border-outline-variant last:border-b-0"
+                    className={`flex items-center justify-between px-6 py-4 border-b border-outline-variant last:border-b-0 border-l-4 ${
+                      item.status === "done"
+                        ? "border-l-secondary opacity-70"
+                        : item.status === "in_progress"
+                        ? "border-l-secondary"
+                        : "border-l-transparent"
+                    }`}
                   >
-                    <span className="text-body-md text-on-surface">{item.label}</span>
+                    <span className={`text-body-md text-on-surface ${item.status === "done" ? "line-through" : ""}`}>
+                      {item.label}
+                    </span>
                     <span className="text-label-md px-2 py-0.5 rounded text-[10px] border border-outline-variant bg-surface-container-low text-on-surface-variant uppercase">
                       {CHECKLIST_STATUS_LABELS[item.status] ?? item.status}
                     </span>
@@ -175,44 +234,21 @@ export default async function DashboardPage({
           </div>
 
           {showDeliverables && (
-            <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">
-              <div className="px-6 py-4 border-b border-outline-variant bg-surface-container-low">
-                <h2 className="text-title-lg text-on-surface">Your deliverables</h2>
-              </div>
-              {deliverables && deliverables.length > 0 ? (
-                <div className="flex flex-col">
-                  {deliverables.map((d) => (
-                    <div key={d.id} className="px-6 py-4 border-b border-outline-variant last:border-b-0">
-                      <p className="text-label-md text-on-surface-variant uppercase tracking-wider mb-1">
-                        {DELIVERABLE_TYPE_LABELS[d.deliverable_type] ?? d.deliverable_type}
-                      </p>
-                      {d.file_url ? (
-                        <a
-                          href={d.file_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-secondary font-bold hover:underline"
-                        >
-                          Download
-                        </a>
-                      ) : d.content ? (
-                        <p className="text-body-md text-on-surface whitespace-pre-wrap">{d.content}</p>
-                      ) : (
-                        <p className="text-body-md text-on-surface-variant">Being prepared.</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-body-md text-on-surface-variant px-6 py-6">Being prepared.</p>
-              )}
-            </div>
+            <DeliverablesSection
+              submissionId={activeSubmission.id}
+              orgId={client.org_id}
+              deliverables={deliverables ?? []}
+              paid={isPaid}
+            />
           )}
         </div>
 
         <div className="flex flex-col gap-6">
           <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
-            <h3 className="text-title-lg text-on-surface mb-4">Package</h3>
+            <h3 className="text-title-lg text-primary mb-4 flex items-center gap-2">
+              <span className="material-symbols-outlined text-secondary text-[20px]">folder_special</span>
+              Package
+            </h3>
             {pkg ? (
               <>
                 <p className="text-body-md text-on-surface capitalize">{pkg.package_type.replace(/_/g, " ")}</p>
@@ -227,7 +263,10 @@ export default async function DashboardPage({
 
           {activeSubmission.scope && (
             <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
-              <h3 className="text-title-lg text-on-surface mb-4">Scope</h3>
+              <h3 className="text-title-lg text-primary mb-4 flex items-center gap-2">
+                <span className="material-symbols-outlined text-secondary text-[20px]">description</span>
+                Scope
+              </h3>
               <p className="text-body-md text-on-surface-variant">{activeSubmission.scope}</p>
             </div>
           )}

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { scrapeJaa, type ScrapedOpportunity } from "@/lib/scrapers/jaa";
 
-// BUILD-ORDER-SPECWRIGHT.md Step 8: runs the scrapers and inserts whatever
+// BUILD-ORDER-BIDPULSE.md Step 8: runs the scrapers and inserts whatever
 // they find into matched_opportunities with assigned_client_id left null,
 // so they show up unassigned in app/admin/matches/ for manual review —
 // nothing here auto-assigns a client.

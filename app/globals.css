@@ -2,8 +2,90 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap");
+/* Design tokens as RGB-triplet CSS variables (not hex) so Tailwind's
+   `rgb(var(--color-x) / <alpha-value>)` pattern can still support opacity
+   modifiers like `bg-secondary/50`. tailwind.config.ts's `colors` block
+   references these names 1:1 — every token added there needs a pair of
+   entries here (light in :root, dark in .dark), except the "-fixed"
+   tokens, which are deliberately the same in both themes (that's their
+   whole purpose) and so stay as plain static hex in the config instead.
+   Values here are the same M3-style scheme this app already used, just
+   split into light/dark instead of being light-only. */
+:root {
+  --color-surface: 247 249 251;
+  --color-surface-dim: 216 218 220;
+  --color-surface-bright: 247 249 251;
+  --color-surface-container-lowest: 255 255 255;
+  --color-surface-container-low: 242 244 246;
+  --color-surface-container: 236 238 240;
+  --color-surface-container-high: 230 232 234;
+  --color-surface-container-highest: 224 227 229;
+  --color-on-surface: 25 28 30;
+  --color-on-surface-variant: 68 71 77;
+  --color-inverse-surface: 45 49 51;
+  --color-inverse-on-surface: 239 241 243;
+  --color-outline: 117 119 126;
+  --color-outline-variant: 197 198 205;
+  --color-surface-tint: 63 110 116;
+  --color-primary: 12 21 36;
+  --color-on-primary: 255 255 255;
+  --color-primary-container: 16 26 48;
+  --color-on-primary-container: 147 164 194;
+  --color-inverse-primary: 185 199 228;
+  --color-secondary: 15 110 122;
+  --color-on-secondary: 255 255 255;
+  --color-secondary-container: 169 236 232;
+  --color-on-secondary-container: 5 78 86;
+  --color-tertiary: 168 77 15;
+  --color-on-tertiary: 255 255 255;
+  --color-tertiary-container: 255 221 184;
+  --color-on-tertiary-container: 122 60 0;
+  --color-error: 186 26 26;
+  --color-on-error: 255 255 255;
+  --color-error-container: 255 218 214;
+  --color-on-error-container: 147 0 10;
+  --color-background: 247 249 251;
+  --color-on-background: 25 28 30;
+  --color-surface-variant: 224 227 229;
+}
+
+.dark {
+  --color-surface: 16 20 22;
+  --color-surface-dim: 16 20 22;
+  --color-surface-bright: 54 58 60;
+  --color-surface-container-lowest: 11 14 16;
+  --color-surface-container-low: 25 28 30;
+  --color-surface-container: 29 32 34;
+  --color-surface-container-high: 40 42 45;
+  --color-surface-container-highest: 51 53 55;
+  --color-on-surface: 226 226 230;
+  --color-on-surface-variant: 196 198 208;
+  --color-inverse-surface: 226 226 230;
+  --color-inverse-on-surface: 47 48 51;
+  --color-outline: 142 144 153;
+  --color-outline-variant: 67 71 78;
+  --color-surface-tint: 142 205 214;
+  --color-primary: 185 199 228;
+  --color-on-primary: 12 21 36;
+  --color-primary-container: 41 52 74;
+  --color-on-primary-container: 215 224 245;
+  --color-inverse-primary: 12 21 36;
+  --color-secondary: 15 110 122;
+  --color-on-secondary: 255 255 255;
+  --color-secondary-container: 10 61 67;
+  --color-on-secondary-container: 169 236 232;
+  --color-tertiary: 168 77 15;
+  --color-on-tertiary: 255 255 255;
+  --color-tertiary-container: 92 44 0;
+  --color-on-tertiary-container: 255 221 184;
+  --color-error: 255 180 171;
+  --color-on-error: 105 0 5;
+  --color-error-container: 147 0 10;
+  --color-on-error-container: 255 218 214;
+  --color-background: 16 20 22;
+  --color-on-background: 226 226 230;
+  --color-surface-variant: 67 71 78;
+}
 
 .material-symbols-outlined {
   font-family: "Material Symbols Outlined";
@@ -23,4 +105,22 @@
 
 body {
   @apply bg-surface text-on-surface font-sans;
+}
+
+/* Subtle page-load fade — applied to each page's <main>, which remounts on
+   every navigation since AppShell/MarketingShell are plain wrapper
+   components (not Next.js layouts), so this replays on every route change
+   without any client-side routing JS. */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in {
+  animation: fade-in 0.25s ease-out;
 }

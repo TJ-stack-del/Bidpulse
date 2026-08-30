@@ -1,7 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { MarketingShell } from "@/components/ui/MarketingShell";
 
-// Manual invoicing for now per BUILD-ORDER-SPECWRIGHT.md's "decisions
+export const metadata: Metadata = {
+  title: "Pricing",
+  description: "Simple, manually-confirmed pricing for done-for-you bid prep — pilot, one-off, and retainer options.",
+};
+
+// Manual invoicing for now per BUILD-ORDER-BIDPULSE.md's "decisions
 // already made" — no Stripe checkout, so every offer ends in "Get started"
 // (the intake wizard) or a mailto, not a payment button. Mirrors
 // packages.package_type: 'one_off' | 'retainer' | 'pilot'.
@@ -48,10 +54,10 @@ export default function PricingPage() {
         {PACKAGES.map((pkg) => (
           <article
             key={pkg.type}
-            className={`bg-surface-container-lowest rounded-lg p-gutter flex flex-col gap-6 relative overflow-hidden ${
+            className={`bg-surface-container-lowest rounded-lg p-gutter flex flex-col gap-6 relative overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg ${
               pkg.highlight
                 ? "border border-secondary shadow-md md:-translate-y-2"
-                : "border border-outline-variant"
+                : "border border-outline-variant hover:border-secondary/50"
             }`}
           >
             <div className={`absolute top-0 left-0 w-1 h-full ${pkg.highlight ? "bg-secondary" : "bg-surface-dim"}`} />
@@ -74,7 +80,7 @@ export default function PricingPage() {
             </ul>
             <Link
               href={pkg.cta.href}
-              className={`py-3 px-4 rounded text-label-md text-center transition-colors ${
+              className={`py-3 px-4 rounded text-label-md text-center transition active:scale-[0.97] ${
                 pkg.highlight
                   ? "bg-secondary text-on-secondary hover:bg-on-secondary-container"
                   : "bg-surface-container-low text-on-surface border border-outline hover:bg-surface-container-high"
@@ -95,7 +101,7 @@ export default function PricingPage() {
         </div>
         <Link
           href="/intake"
-          className="shrink-0 py-2 px-6 border border-primary text-primary rounded text-label-md hover:bg-surface-container-high transition-colors"
+          className="shrink-0 py-2 px-6 border border-primary text-primary rounded text-label-md hover:bg-surface-container-high transition active:scale-[0.97]"
         >
           Start a bid
         </Link>

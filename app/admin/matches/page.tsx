@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { AppShell } from "@/components/ui/AppShell";
 import { MatchesPanel } from "./MatchesPanel";
 
-// BUILD-ORDER-SPECWRIGHT.md Step 8: "adapt the existing scrapers
+// BUILD-ORDER-BIDPULSE.md Step 8: "adapt the existing scrapers
 // (lib/scrapers/*)" — that directory doesn't exist anywhere in this repo,
 // so there's nothing to adapt. What's built here is the other half that
 // stands on its own: an admin screen to review matched_opportunities and
@@ -20,7 +20,7 @@ export default async function AdminMatchesPage() {
 
   const { data: member } = await supabase
     .from("team_members")
-    .select("id, org_id")
+    .select("id, org_id, full_name")
     .eq("auth_user_id", user.id)
     .maybeSingle();
 
@@ -41,9 +41,9 @@ export default async function AdminMatchesPage() {
     .order("company_name", { ascending: true });
 
   return (
-    <AppShell activePath="/admin/matches" role="admin">
+    <AppShell activePath="/admin/matches" role="admin" viewerName={member.full_name}>
       <div className="mt-6">
-        <h1 className="text-headline-lg text-on-surface mb-1">Matched Opportunities</h1>
+        <h1 className="text-headline-lg text-primary mb-1">Matched Opportunities</h1>
         <p className="text-body-md text-on-surface-variant">
           Review new matches and assign each one to a client.
         </p>

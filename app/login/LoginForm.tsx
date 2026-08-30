@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { Spinner } from "@/components/ui/Spinner";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
@@ -50,6 +51,7 @@ export function LoginForm() {
         value={email}
         onChange={setEmail}
         autoComplete="email"
+        icon="mail"
         required
       />
       <Field
@@ -58,14 +60,16 @@ export function LoginForm() {
         value={password}
         onChange={setPassword}
         autoComplete="current-password"
+        icon="lock"
         required
       />
 
       <button
         type="submit"
         disabled={submitting}
-        className="w-full py-3 px-4 bg-primary text-on-primary rounded text-label-md hover:bg-on-background transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        className="w-full py-3 px-4 bg-secondary text-on-secondary rounded text-label-md font-semibold hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
+        {submitting && <Spinner />}
         {submitting ? "Signing in…" : "Sign In"}
       </button>
     </form>
@@ -78,6 +82,7 @@ function Field({
   value,
   onChange,
   autoComplete,
+  icon,
   required,
 }: {
   label: string;
@@ -85,19 +90,29 @@ function Field({
   value: string;
   onChange: (value: string) => void;
   autoComplete?: string;
+  icon?: string;
   required?: boolean;
 }) {
   return (
     <label className="flex flex-col gap-1">
       <span className="text-label-md text-on-surface-variant">{label}</span>
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        autoComplete={autoComplete}
-        required={required}
-        className="bg-surface border border-outline-variant rounded px-3 py-2 text-body-md text-on-surface focus:outline-none focus:border-secondary transition-colors"
-      />
+      <div className="relative">
+        {icon && (
+          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant pointer-events-none text-[20px]">
+            {icon}
+          </span>
+        )}
+        <input
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          autoComplete={autoComplete}
+          required={required}
+          className={`w-full bg-surface border border-outline-variant rounded py-2 text-body-md text-on-surface focus:outline-none focus:border-secondary transition ${
+            icon ? "pl-10 pr-3" : "px-3"
+          }`}
+        />
+      </div>
     </label>
   );
 }
