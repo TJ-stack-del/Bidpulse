@@ -44,6 +44,61 @@ function certificationLabel(cert: { cert_type: string; other_label: string | nul
   return cert.cert_type === "Other" ? cert.other_label || "Other" : cert.cert_type;
 }
 
+// Capitalizes each word's first letter without touching the rest, so an
+// existing acronym (HEPA, OSHA, VCT) survives instead of getting mangled.
+function titleCase(text: string): string {
+  return text
+    .split(" ")
+    .map((word) => (word.length === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)))
+    .join(" ");
+}
+
+// The client's scope field is free text, not a parsed RFP — this only
+// reorganizes what's already there into checklist-sized labels, it never
+// adds a requirement the scope didn't mention. Paragraphs (the client's own
+// line breaks) are the first choice since intake naturally separates one
+// service line per paragraph (see the RFP-0182-26 example: "Day porter
+// operations: ...", "Nightly custodial: ...", one per line); a single dense
+// paragraph falls back to sentence splitting so it doesn't collapse into
+// one catch-all row.
+function scopeSegments(scopeText: string): string[] {
+  const paragraphs = scopeText
+    .split(/\n\s*\n/)
+    .map((p) => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+  if (paragraphs.length > 1) return paragraphs;
+
+  return scopeText
+    .replace(/\s+/g, " ")
+    .split(/(?<=[.!?])\s+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+// A label is the segment's own lead-in ("Day porter operations:") when it
+// has one, since that's already the client's chosen name for that line
+// item; otherwise the segment's first few words stand in for it. Either
+// way the label is text lifted from the scope, never invented.
+const MAX_REQUIREMENT_ROWS = 6;
+const MAX_LABEL_WORDS = 6;
+
+function deriveRequirementLabels(scopeText: string): string[] {
+  const labels: string[] = [];
+  for (const segment of scopeSegments(scopeText)) {
+    const colonIdx = segment.indexOf(":");
+    const lead = colonIdx > 0 && colonIdx <= 60 ? segment.slice(0, colonIdx) : segment;
+    const label = lead
+      .split(" ")
+      .slice(0, MAX_LABEL_WORDS)
+      .join(" ")
+      .replace(/[.,;:]+$/, "")
+      .trim();
+    if (label) labels.push(titleCase(label));
+    if (labels.length >= MAX_REQUIREMENT_ROWS) break;
+  }
+  return labels;
+}
+
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const submissionId = body?.submissionId;
@@ -185,11 +240,27 @@ function buildDraft(deliverableType: string, submission: SubmissionInfo, verifie
     // generate a status that implies a requirement is already met (no
     // "Compliant" / "Fully Compliant" / anything like it), and never invent
     // a plausible-looking number, certification, registration ID, or
-    // coverage amount. Nothing here is sourced from the actual RFP text (it
-    // isn't parsed anywhere in this app — submission_documents only stores
-    // an uploaded file URL) or from any verified client documentation, so
-    // every row must stay an explicit, unmistakable gap for the admin to
-    // fill in after checking the real RFP and the client's real paperwork.
+    // coverage amount. The requirement labels below are the one exception
+    // to "nothing is sourced from the RFP" — they're lifted straight from
+    // the client's own scope text (deriveRequirementLabels only reorders
+    // words already there), never invented. The RFP itself still isn't
+    // parsed anywhere in this app (submission_documents only stores an
+    // uploaded file URL), so status and verification stay an explicit,
+    // unmistakable gap for the admin to fill in after checking the real RFP
+    // and the client's real paperwork.
+    const requirementLabels = submission.scope ? deriveRequirementLabels(submission.scope) : [];
+    const requirementRows =
+      requirementLabels.length > 0
+        ? requirementLabels.map(
+            (label, i) =>
+              `${i + 1}. ${label} | NEEDS VERIFICATION | [Not yet provided — confirm with the client before writing anything here]`
+          )
+        : [
+            "1. [Requirement from RFP — not yet identified] | NEEDS VERIFICATION | [Not yet provided — confirm with the client before writing anything here]",
+            "2. [Requirement from RFP — not yet identified] | NEEDS VERIFICATION | [Not yet provided — confirm with the client before writing anything here]",
+            "3. [Requirement from RFP — not yet identified] | NOT YET PROVIDED | [Not yet provided — confirm with the client before writing anything here]",
+          ];
+
     return [
       `COMPLIANCE MATRIX — ${agency}${solicitationLine}`,
       "",
@@ -201,9 +272,7 @@ function buildDraft(deliverableType: string, submission: SubmissionInfo, verifie
       "a real, verified value. Leave a field blank rather than guess.]",
       "",
       "Solicitation Requirement | Compliance Status | Proposer Methodology & Verification",
-      "1. [Requirement from RFP — not yet identified] | NEEDS VERIFICATION | [Not yet provided — confirm with the client before writing anything here]",
-      "2. [Requirement from RFP — not yet identified] | NEEDS VERIFICATION | [Not yet provided — confirm with the client before writing anything here]",
-      "3. [Requirement from RFP — not yet identified] | NOT YET PROVIDED | [Not yet provided — confirm with the client before writing anything here]",
+      ...requirementRows,
       "",
       `Scope reference: ${scope}`,
     ].join("\n");
