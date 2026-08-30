@@ -18,7 +18,7 @@ export default async function CompanyProfilePage() {
   const { data: client } = await supabase
     .from("clients")
     .select(
-      "id, company_name, contact_name, email, phone, license_number, years_in_business, business_address, business_phone, insurance_provider, insurance_policy_number, general_liability_coverage, workers_comp_coverage, differentiators"
+      "id, company_name, contact_name, email, phone, license_number, years_in_business, business_address, business_phone, insurance_provider, insurance_policy_number, general_liability_coverage, workers_comp_coverage, differentiators, naics_codes, small_business_statuses, set_asides"
     )
     .eq("auth_user_id", user.id)
     .maybeSingle();
@@ -59,6 +59,9 @@ export default async function CompanyProfilePage() {
             general_liability_coverage: client.general_liability_coverage,
             workers_comp_coverage: client.workers_comp_coverage,
             differentiators: client.differentiators,
+            naics_codes: client.naics_codes ?? [],
+            small_business_statuses: client.small_business_statuses ?? [],
+            set_asides: client.set_asides ?? [],
           }}
         />
       </div>

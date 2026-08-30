@@ -17,9 +17,9 @@ export function SignOutButton() {
     <button
       onClick={handleSignOut}
       title="Sign out"
-      className="w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition"
+      className="w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition"
     >
-      <span className="material-symbols-outlined text-[20px]">logout</span>
+      <span className="material-symbols-outlined text-[22px]">logout</span>
     </button>
   );
 }

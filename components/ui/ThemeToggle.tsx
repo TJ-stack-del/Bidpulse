@@ -30,13 +30,13 @@ export function ThemeToggle() {
           aria-label={opt.label}
           aria-pressed={mounted && theme === opt.value}
           title={opt.label}
-          className={`p-1.5 rounded-md transition ${
+          className={`w-10 h-10 flex items-center justify-center rounded-md transition ${
             mounted && theme === opt.value
               ? "bg-secondary-container text-on-secondary-container"
               : "text-on-surface-variant hover:bg-surface-container-high"
           }`}
         >
-          <span className="material-symbols-outlined text-[18px] block">{opt.icon}</span>
+          <span className="material-symbols-outlined text-[20px] block">{opt.icon}</span>
         </button>
       ))}
     </div>

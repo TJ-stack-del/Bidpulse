@@ -4,6 +4,8 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
 import { FadeMessage } from "@/components/ui/FadeMessage";
+import { CheckboxGroup } from "@/components/ui/CheckboxGroup";
+import { SMALL_BUSINESS_STATUSES, COMMON_SET_ASIDES, COMMON_NAICS_CODES } from "@/lib/business-options";
 
 type CompanyInfo = {
   license_number: string | null;
@@ -15,7 +17,21 @@ type CompanyInfo = {
   general_liability_coverage: string | null;
   workers_comp_coverage: string | null;
   differentiators: string | null;
+  naics_codes: string[];
+  small_business_statuses: string[];
+  set_asides: string[];
 };
+
+// Existing rows may hold values that predate these checkbox lists (e.g. a
+// local set-aside typed in before this changed from free text), so on load
+// each array is split into "matches a known checkbox" and "everything
+// else" — the leftover surfaces in the free-text field instead of silently
+// vanishing.
+function splitKnown(values: string[], known: readonly string[]): { checked: string[]; other: string } {
+  const checked = values.filter((v) => known.includes(v));
+  const other = values.filter((v) => !known.includes(v));
+  return { checked, other: other.join(", ") };
+}
 
 const FIELDS: { key: keyof CompanyInfo; label: string; type?: string; area?: boolean }[] = [
   { key: "license_number", label: "License number" },
@@ -38,7 +54,18 @@ export function CompanyInfoForm({
   clientId: string;
   initialInfo: CompanyInfo;
 }) {
+  const naicsKnownCodes = COMMON_NAICS_CODES.map((n) => n.code);
+  const initialNaics = splitKnown(initialInfo.naics_codes, naicsKnownCodes);
+  const initialSetAsides = splitKnown(initialInfo.set_asides, COMMON_SET_ASIDES);
+
   const [values, setValues] = useState<CompanyInfo>(initialInfo);
+  const [naicsCodes, setNaicsCodes] = useState<string[]>(initialNaics.checked);
+  const [naicsOther, setNaicsOther] = useState(initialNaics.other);
+  const [smallBusinessStatuses, setSmallBusinessStatuses] = useState<string[]>(
+    initialInfo.small_business_statuses
+  );
+  const [setAsides, setSetAsides] = useState<string[]>(initialSetAsides.checked);
+  const [setAsideOther, setSetAsideOther] = useState(initialSetAsides.other);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,12 +79,26 @@ export function CompanyInfoForm({
     setSaved(false);
   }
 
+  function parseOther(text: string): string[] {
+    return text
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
     setError(null);
 
-    const { error: updateError } = await supabase.from("clients").update(values).eq("id", clientId);
+    const payload = {
+      ...values,
+      naics_codes: [...naicsCodes, ...parseOther(naicsOther)],
+      small_business_statuses: smallBusinessStatuses,
+      set_asides: [...setAsides, ...parseOther(setAsideOther)],
+    };
+
+    const { error: updateError } = await supabase.from("clients").update(payload).eq("id", clientId);
 
     if (updateError) {
       setError(updateError.message);
@@ -81,6 +122,62 @@ export function CompanyInfoForm({
             />
           </div>
         ))}
+      </div>
+
+      <CheckboxGroup
+        legend="NAICS codes that apply"
+        options={COMMON_NAICS_CODES.map((n) => ({ value: n.code, label: `${n.code} — ${n.label}` }))}
+        selected={naicsCodes}
+        onChange={(v) => {
+          setNaicsCodes(v);
+          setSaved(false);
+        }}
+      />
+      <div>
+        <label className="text-label-md text-on-surface-variant block mb-1">Other NAICS code</label>
+        <input
+          type="text"
+          value={naicsOther}
+          onChange={(e) => {
+            setNaicsOther(e.target.value);
+            setSaved(false);
+          }}
+          className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+        />
+      </div>
+
+      <CheckboxGroup
+        legend="Small business status"
+        options={SMALL_BUSINESS_STATUSES.map((s) => ({ value: s, label: s }))}
+        selected={smallBusinessStatuses}
+        onChange={(v) => {
+          setSmallBusinessStatuses(v);
+          setSaved(false);
+        }}
+      />
+
+      <CheckboxGroup
+        legend="Set-asides that apply"
+        options={COMMON_SET_ASIDES.map((s) => ({ value: s, label: s }))}
+        selected={setAsides}
+        onChange={(v) => {
+          setSetAsides(v);
+          setSaved(false);
+        }}
+      />
+      <div>
+        <label className="text-label-md text-on-surface-variant block mb-1">
+          Other set-aside (e.g. a local/regional category)
+        </label>
+        <input
+          type="text"
+          value={setAsideOther}
+          onChange={(e) => {
+            setSetAsideOther(e.target.value);
+            setSaved(false);
+          }}
+          className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+        />
       </div>
 
       <div>

@@ -65,8 +65,13 @@ create table clients (
   auth_user_id uuid references auth.users(id) on delete cascade, -- null until they create a login
   company_name text not null,
   contact_name text not null,
-  email text not null,
+  -- Intake now asks for "email or phone", not both — a client who signs up
+  -- with a phone number (Supabase phone auth) has no email at all, so this
+  -- can no longer be not-null. constraint below guarantees at least one
+  -- contact method is always on file.
+  email text,
   phone text,
+  constraint clients_has_a_contact_method check (email is not null or phone is not null),
   naics_codes text[] default '{}',
   small_business_statuses text[] default '{}', -- e.g. 'WOSB', 'SDVOSB', '8(a)'
   set_asides text[] default '{}',
@@ -250,10 +255,27 @@ create policy "admins read all clients" on clients
   for select using (is_admin(org_id));
 create policy "admins manage clients" on clients
   for all using (is_admin(org_id));
+-- Direct column comparison, not is_own_client_record(id) — that function's
+-- subquery selects from clients itself, and a same-table self-referencing
+-- RLS check evaluated as the RETURNING-visibility step right after an
+-- INSERT into that same table is a known Postgres/PostgREST rough edge
+-- (confirmed live: the identical insert succeeds with Prefer: return=minimal,
+-- and is_own_client_record() returns true when called standalone via RPC for
+-- the same row — it only fails embedded in the INSERT...RETURNING path).
+-- auth_user_id is a plain column on this row, so no subquery is needed here
+-- at all — is_own_client_record() stays as-is for every OTHER table, which
+-- call it cross-table (checking clients from a different table's policy).
 create policy "clients read their own record" on clients
-  for select using (is_own_client_record(id));
--- Previously read-only for a client — the new Company Profile page needs
--- them to actually be able to save their own profile fields.
+  for select using (auth_user_id = auth.uid());
+-- Without this, the intake wizard's "About you" step (a brand-new client
+-- inserting their own row) fails RLS every time — is_own_client_record()
+-- can't authorize an insert of the very row it would check against.
+create policy "a client can insert their own record" on clients
+  for insert with check (auth_user_id = auth.uid());
+-- Previously read-only for a client — the Company Profile page needs
+-- them to actually be able to save their own profile fields. No RETURNING
+-- involved here (CompanyInfoForm's update has no .select()), so the
+-- self-referencing subquery in is_own_client_record() is safe for this one.
 create policy "clients update their own record" on clients
   for update using (is_own_client_record(id)) with check (is_own_client_record(id));
 

@@ -16,6 +16,25 @@ const DOC_TYPES = [
   { value: "other", label: "Other" },
 ];
 
+// Storage keys must be safe path segments — strip anything Supabase Storage
+// rejects (spaces, em dashes, etc.) while the real name stays in
+// submission_documents.file_name for display.
+function sanitizeForStorageKey(fileName: string): string {
+  const dotIndex = fileName.lastIndexOf(".");
+  const base = dotIndex > 0 ? fileName.slice(0, dotIndex) : fileName;
+  const ext = dotIndex > 0 ? fileName.slice(dotIndex + 1) : "";
+
+  const safeBase =
+    base
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-zA-Z0-9]+/g, "_")
+      .replace(/^_+|_+$/g, "") || "file";
+  const safeExt = ext.replace(/[^a-zA-Z0-9]+/g, "");
+
+  return safeExt ? `${safeBase}.${safeExt}` : safeBase;
+}
+
 // Replaces the old BidDocuments.tsx — same idea, but works against
 // submissions/submission_documents instead of the old bids/bid_documents
 // tables, which no longer exist after the schema reset.
@@ -41,7 +60,7 @@ export function SubmissionDocuments({ submissionId }: { submissionId: string }) 
     setUploading(true);
     setError(null);
 
-    const path = `${submissionId}/${Date.now()}-${file.name}`;
+    const path = `${submissionId}/${Date.now()}-${sanitizeForStorageKey(file.name)}`;
 
     const { error: uploadError } = await supabase.storage
       .from("rfp-documents")
