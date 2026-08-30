@@ -1,11 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ensureOrgAndMembership } from "@/lib/auth/ensure-org";
 import { MarketingShell } from "@/components/ui/MarketingShell";
 
+export const metadata: Metadata = {
+  description: "We help you win local government contracts. Send us the bid papers — our team handles the paperwork so you can send in a strong bid.",
+};
+
 // Also the one place that decides where a signed-in user actually lands —
-// see MIGRATION-TO-SPECWRIGHT.md: admin (team_members) and client (clients)
+// see MIGRATION-TO-BIDPULSE.md: admin (team_members) and client (clients)
 // are two completely separate account types now, so routing has to branch
 // on which row exists rather than sending everyone to the same dashboard.
 // An anonymous visitor gets the public marketing homepage instead (Step 3).
@@ -103,17 +108,48 @@ function Home() {
         <div className="flex flex-wrap gap-4 justify-center mt-2">
           <Link
             href="/intake"
-            className="px-8 py-4 bg-secondary text-on-secondary rounded text-label-md hover:bg-on-secondary-container transition-colors flex items-center gap-2"
+            className="px-8 py-4 bg-secondary text-on-secondary rounded text-label-md hover:bg-on-secondary-container transition active:scale-[0.97] flex items-center gap-2"
           >
             Get started
             <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
           </Link>
           <Link
             href="/gallery"
-            className="px-8 py-4 border border-outline-variant text-on-surface rounded text-label-md hover:bg-surface-container-low transition-colors"
+            className="px-8 py-4 border border-outline-variant text-on-surface rounded text-label-md hover:bg-surface-container-low transition active:scale-[0.97]"
           >
             See examples
           </Link>
+        </div>
+      </section>
+
+      <section className="flex flex-col items-center gap-6">
+        <span className="text-label-md text-secondary font-bold uppercase tracking-wide border border-secondary rounded-full px-4 py-1">
+          Now accepting founding clients
+        </span>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter w-full">
+          {[
+            {
+              icon: "chat",
+              title: "Plain-language process",
+              body: "No confusing paperwork jargon — we explain everything in plain English.",
+            },
+            {
+              icon: "construction",
+              title: "You focus on the job",
+              body: "We handle the writing so you can keep running your business.",
+            },
+            {
+              icon: "storefront",
+              title: "Built for small trades",
+              body: "Not a big consulting firm — made for HVAC, janitorial, and landscaping contractors.",
+            },
+          ].map((item) => (
+            <div key={item.title} className="flex flex-col items-center text-center gap-2 p-gutter">
+              <span className="material-symbols-outlined text-secondary text-[28px]">{item.icon}</span>
+              <h3 className="text-title-lg text-primary">{item.title}</h3>
+              <p className="text-body-sm text-on-surface-variant">{item.body}</p>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -163,16 +199,16 @@ function Home() {
         </ul>
       </section>
 
-      <section className="bg-primary-container text-on-primary-fixed rounded-xl px-margin-mobile md:px-margin-desktop py-section-gap flex flex-col items-center text-center gap-6">
-        <h2 className="text-headline-lg text-on-primary-fixed max-w-2xl">
+      <section className="bg-primary-container text-on-primary-container rounded-xl px-margin-mobile md:px-margin-desktop py-section-gap flex flex-col items-center text-center gap-6">
+        <h2 className="text-headline-lg text-on-primary-container max-w-2xl">
           Ready to send in a strong bid?
         </h2>
-        <p className="text-body-md text-on-primary-fixed-variant max-w-xl">
+        <p className="text-body-md text-on-primary-container/80 max-w-xl">
           Tell us about your bid. It only takes a few minutes.
         </p>
         <Link
           href="/intake"
-          className="px-8 py-4 bg-secondary text-on-secondary rounded text-label-md hover:bg-on-secondary-container transition-colors flex items-center gap-2"
+          className="px-8 py-4 bg-secondary text-on-secondary rounded text-label-md hover:bg-on-secondary-container transition active:scale-[0.97] flex items-center gap-2"
         >
           <span className="material-symbols-outlined text-[18px]">assignment</span>
           Get started

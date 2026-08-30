@@ -21,16 +21,49 @@ export default async function AdminInboxPage() {
   // where a client actually belongs.
   const { data: member } = await supabase
     .from("team_members")
-    .select("id")
+    .select("id, full_name")
     .eq("auth_user_id", user.id)
     .maybeSingle();
 
   if (!member) redirect("/");
 
-  const { data: submissions } = await supabase
+  const { data: rawSubmissions } = await supabase
     .from("submissions")
-    .select("id, agency, solicitation_number, stage, due_date, is_test, draft, clients(company_name)")
+    .select(
+      "id, agency, solicitation_number, stage, due_date, is_test, draft, submitted_at, updated_at, created_at, clients(company_name)"
+    )
     .order("created_at", { ascending: false });
+
+  const FORTY_EIGHT_HOURS_MS = 48 * 60 * 60 * 1000;
+  const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+  const now = Date.now();
+
+  // "Needs attention" — anything not already closed out, either past our
+  // 48-hour turnaround promise (still stuck in submitted/in_review more
+  // than 48h after the client's own submitted_at — a broken promise, not
+  // just staleness) or simply untouched for 3+ days (no explicit
+  // updated_at yet falls back to created_at).
+  const submissions = (rawSubmissions ?? [])
+    .map((sub: any) => {
+      const pastPromise =
+        sub.stage !== "closed" &&
+        (sub.stage === "submitted" || sub.stage === "in_review") &&
+        !!sub.submitted_at &&
+        now - new Date(sub.submitted_at).getTime() > FORTY_EIGHT_HOURS_MS;
+
+      const lastTouched = sub.updated_at ?? sub.created_at;
+      const isStale =
+        sub.stage !== "closed" && now - new Date(lastTouched).getTime() >= THREE_DAYS_MS;
+
+      return { ...sub, pastPromise, isStale };
+    })
+    .sort((a, b) => {
+      const aFlagged = a.pastPromise || a.isStale ? 1 : 0;
+      const bFlagged = b.pastPromise || b.isStale ? 1 : 0;
+      if (aFlagged !== bFlagged) return bFlagged - aFlagged;
+      if (a.pastPromise !== b.pastPromise) return a.pastPromise ? -1 : 1;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
 
   const stageLabels: Record<string, string> = {
     submitted: "Submitted",
@@ -41,10 +74,28 @@ export default async function AdminInboxPage() {
     closed: "Closed",
   };
 
+  const stagePillStyle: Record<string, string> = {
+    submitted: "bg-surface-container-high text-on-surface-variant",
+    in_review: "bg-surface-container-high text-on-surface-variant",
+    deliverables_ready: "bg-secondary-container text-on-secondary-container",
+    client_review: "bg-secondary-container text-on-secondary-container",
+    confirmed_submitted: "bg-secondary text-on-secondary",
+    closed: "bg-surface-variant text-on-surface-variant",
+  };
+
+  function initials(name: string) {
+    return name
+      .split(" ")
+      .map((w) => w[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase();
+  }
+
   return (
-    <AppShell activePath="/admin/inbox" role="admin">
+    <AppShell activePath="/admin/inbox" role="admin" viewerName={member.full_name}>
       <div className="mt-6">
-        <h1 className="text-headline-lg text-on-surface mb-1">Intake Inbox</h1>
+        <h1 className="text-headline-lg text-primary mb-1">Intake Inbox</h1>
         <p className="text-body-md text-on-surface-variant">
           Every client submission, across every stage.
         </p>
@@ -54,31 +105,60 @@ export default async function AdminInboxPage() {
         <table className="w-full text-body-md">
           <thead className="bg-surface-container-low">
             <tr>
-              <th className="text-left px-4 py-3 text-label-md text-on-surface-variant">Client</th>
-              <th className="text-left px-4 py-3 text-label-md text-on-surface-variant">Agency</th>
-              <th className="text-left px-4 py-3 text-label-md text-on-surface-variant">Stage</th>
-              <th className="text-left px-4 py-3 text-label-md text-on-surface-variant">Due</th>
-              <th className="text-left px-4 py-3 text-label-md text-on-surface-variant"></th>
+              <th className="text-left px-4 py-3 text-label-md text-on-surface-variant uppercase tracking-wider">Client</th>
+              <th className="text-left px-4 py-3 text-label-md text-on-surface-variant uppercase tracking-wider">Agency</th>
+              <th className="text-left px-4 py-3 text-label-md text-on-surface-variant uppercase tracking-wider">Stage</th>
+              <th className="text-left px-4 py-3 text-label-md text-on-surface-variant uppercase tracking-wider">Attention</th>
+              <th className="text-left px-4 py-3 text-label-md text-on-surface-variant uppercase tracking-wider">Due</th>
+              <th className="text-left px-4 py-3 text-label-md text-on-surface-variant uppercase tracking-wider"></th>
             </tr>
           </thead>
           <tbody>
             {(submissions ?? []).map((sub: any) => (
-              <tr key={sub.id} className="border-t border-outline-variant">
+              <tr key={sub.id} className="border-t border-outline-variant hover:bg-surface-container-low transition">
                 <td className="px-4 py-3 text-on-surface">
-                  {sub.clients?.company_name ?? "—"}
-                  {sub.is_test && (
-                    <span className="ml-2 text-[10px] px-2 py-0.5 rounded bg-surface-container-highest text-on-surface-variant font-bold uppercase">
-                      Test
-                    </span>
-                  )}
-                  {sub.draft && (
-                    <span className="ml-2 text-[10px] px-2 py-0.5 rounded bg-surface-container-highest text-on-surface-variant font-bold uppercase">
-                      Draft
-                    </span>
-                  )}
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center justify-center text-label-sm font-bold shrink-0">
+                      {initials(sub.clients?.company_name ?? "—")}
+                    </div>
+                    <div>
+                      <span className="font-semibold">{sub.clients?.company_name ?? "—"}</span>
+                      {sub.is_test && (
+                        <span className="ml-2 text-[10px] px-2 py-0.5 rounded bg-surface-container-highest text-on-surface-variant font-bold uppercase">
+                          Test
+                        </span>
+                      )}
+                      {sub.draft && (
+                        <span className="ml-2 text-[10px] px-2 py-0.5 rounded bg-surface-container-highest text-on-surface-variant font-bold uppercase">
+                          Draft
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </td>
                 <td className="px-4 py-3 text-on-surface-variant">{sub.agency}</td>
-                <td className="px-4 py-3 text-on-surface-variant">{stageLabels[sub.stage] ?? sub.stage}</td>
+                <td className="px-4 py-3">
+                  <span
+                    className={`inline-flex px-2.5 py-1 rounded-full text-label-sm font-medium ${
+                      stagePillStyle[sub.stage] ?? "bg-surface-container-high text-on-surface-variant"
+                    }`}
+                  >
+                    {stageLabels[sub.stage] ?? sub.stage}
+                  </span>
+                </td>
+                <td className="px-4 py-3">
+                  {sub.pastPromise ? (
+                    <span className="inline-flex px-2.5 py-1 rounded-full text-label-sm font-bold bg-error text-on-error uppercase">
+                      Past due
+                    </span>
+                  ) : sub.isStale ? (
+                    <span className="inline-flex px-2.5 py-1 rounded-full text-label-sm font-medium bg-surface-container-highest text-on-surface-variant">
+                      Needs attention
+                    </span>
+                  ) : (
+                    <span className="text-on-surface-variant">—</span>
+                  )}
+                </td>
                 <td className="px-4 py-3 text-on-surface-variant">
                   {sub.due_date ? new Date(sub.due_date).toLocaleDateString() : "—"}
                 </td>
@@ -91,7 +171,7 @@ export default async function AdminInboxPage() {
             ))}
             {(!submissions || submissions.length === 0) && (
               <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-on-surface-variant">
+                <td colSpan={6} className="px-4 py-6 text-center text-on-surface-variant">
                   No submissions yet.
                 </td>
               </tr>

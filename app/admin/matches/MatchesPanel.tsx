@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { Spinner } from "@/components/ui/Spinner";
 
 type Match = {
   id: string;
@@ -203,8 +204,9 @@ export function MatchesPanel({
         <button
           type="submit"
           disabled={logging}
-          className="py-2 px-4 bg-primary text-on-primary rounded text-label-md hover:bg-on-background transition-colors disabled:opacity-40"
+          className="py-2 px-4 bg-secondary text-on-secondary rounded text-label-md font-semibold hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
         >
+          {logging && <Spinner />}
           {logging ? "Logging…" : "Log opportunity"}
         </button>
       </form>
@@ -223,8 +225,13 @@ export function MatchesPanel({
           </thead>
           <tbody>
             {matches.map((m) => (
-              <tr key={m.id} className="border-t border-outline-variant align-top">
-                <td className="px-4 py-3 text-on-surface">
+              <tr
+                key={m.id}
+                className={`border-t border-outline-variant align-top border-l-4 ${
+                  m.status === "new" ? "border-l-secondary" : "border-l-transparent"
+                } hover:bg-surface-container-low transition`}
+              >
+                <td className="px-4 py-3 text-on-surface font-semibold">
                   {m.source_url ? (
                     <a
                       href={m.source_url}
@@ -249,11 +256,11 @@ export function MatchesPanel({
                       Assigned to {clientName(m.assigned_client_id)}
                     </span>
                   ) : m.status === "dismissed" ? (
-                    <span className="text-label-md px-2 py-0.5 rounded text-[10px] border border-outline-variant bg-surface-container-low text-on-surface-variant uppercase">
+                    <span className="inline-flex px-2.5 py-1 rounded-full text-label-sm font-medium bg-surface-variant text-on-surface-variant">
                       Dismissed
                     </span>
                   ) : (
-                    <span className="text-label-md px-2 py-0.5 rounded text-[10px] border border-on-tertiary-container/20 bg-surface-container-low text-on-tertiary-container uppercase">
+                    <span className="inline-flex px-2.5 py-1 rounded-full text-label-sm font-medium bg-secondary-container text-on-secondary-container">
                       New
                     </span>
                   )}
@@ -264,7 +271,7 @@ export function MatchesPanel({
                       <select
                         value={assignSelections[m.id] ?? ""}
                         onChange={(e) => setAssignSelections((s) => ({ ...s, [m.id]: e.target.value }))}
-                        className="px-2 py-1 rounded border border-outline-variant bg-surface text-body-md text-on-surface"
+                        className="px-2 py-1.5 rounded border border-outline-variant bg-surface text-body-sm text-on-surface"
                       >
                         <option value="">Assign to…</option>
                         {clients.map((c) => (
@@ -276,14 +283,15 @@ export function MatchesPanel({
                       <button
                         onClick={() => handleAssign(m.id)}
                         disabled={busyId === m.id}
-                        className="text-secondary font-bold hover:underline text-body-md disabled:opacity-40"
+                        className="px-3 py-1.5 rounded bg-secondary text-on-secondary text-label-md font-semibold hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
                       >
+                        {busyId === m.id && <Spinner />}
                         Assign
                       </button>
                       <button
                         onClick={() => handleDismiss(m.id)}
                         disabled={busyId === m.id}
-                        className="text-error hover:underline text-body-md disabled:opacity-40"
+                        className="px-3 py-1.5 rounded border border-outline-variant text-on-surface text-label-md hover:bg-surface-container-high transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100"
                       >
                         Dismiss
                       </button>

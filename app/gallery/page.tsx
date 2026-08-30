@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { MarketingShell } from "@/components/ui/MarketingShell";
+
+export const metadata: Metadata = {
+  title: "Gallery",
+  description: "Example deliverables — synthetic samples showing the kind of write-ups we prepare for HVAC, janitorial, and landscaping bids.",
+};
 
 // Clearly-labeled synthetic examples only — never a real client's data.
 // No photos here (the mockups used hotlinked stock-photo placeholders,
@@ -46,7 +52,7 @@ export default function GalleryPage() {
         {EXAMPLES.map((ex) => (
           <div
             key={ex.trade}
-            className="bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden flex flex-col"
+            className="bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden flex flex-col transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-secondary/50"
           >
             <div className={`h-32 flex items-center justify-center ${ex.accent}`}>
               <span className="material-symbols-outlined text-[40px]">{ex.icon}</span>

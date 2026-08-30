@@ -1,10 +1,11 @@
 import type { Config } from "tailwindcss";
 
-// Design tokens updated to the new BidPulse mockups (green #006c49 accent,
-// Inter + JetBrains Mono, sharper corners, neutral-gray surfaces replacing
-// the old blue-tinted ones). This is a shared, global file — the token
-// values below affect every page in the app, not just the ones the new
-// mockups cover (home, pricing, gallery, intake). `full` is deliberately
+// Design tokens matched to the BidPulse logo (deep teal #0f6e7a accent,
+// navy #0c1524/#101a30 ink and containers, burnt-orange #a84d0f tertiary
+// pulled from the logo's bolt), Inter + JetBrains Mono, sharper corners,
+// neutral-gray surfaces. This is a shared, global file — the token values
+// below affect every page in the app, not just the ones the original
+// mockups covered (home, pricing, gallery, intake). `full` is deliberately
 // NOT overridden to the mockup's 0.75rem: that value only reads as a circle
 // for one specific 24px element in the mockup itself, and overriding
 // Tailwind's real "fully rounded" keyword globally would flatten every
@@ -18,53 +19,59 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        surface: "#f7f9fb",
-        "surface-dim": "#d8dadc",
-        "surface-bright": "#f7f9fb",
-        "surface-container-lowest": "#ffffff",
-        "surface-container-low": "#f2f4f6",
-        "surface-container": "#eceef0",
-        "surface-container-high": "#e6e8ea",
-        "surface-container-highest": "#e0e3e5",
-        "on-surface": "#191c1e",
-        "on-surface-variant": "#44474d",
-        "inverse-surface": "#2d3133",
-        "inverse-on-surface": "#eff1f3",
-        outline: "#75777e",
-        "outline-variant": "#c5c6cd",
-        "surface-tint": "#515f78",
-        primary: "#000000",
-        "on-primary": "#ffffff",
-        "primary-container": "#0d1c32",
-        "on-primary-container": "#76849f",
-        "inverse-primary": "#b9c7e4",
-        secondary: "#006c49",
-        "on-secondary": "#ffffff",
-        "secondary-container": "#6cf8bb",
-        "on-secondary-container": "#00714d",
-        tertiary: "#000000",
-        "on-tertiary": "#ffffff",
-        "tertiary-container": "#0b1c30",
-        "on-tertiary-container": "#75859d",
-        error: "#ba1a1a",
-        "on-error": "#ffffff",
-        "error-container": "#ffdad6",
-        "on-error-container": "#93000a",
+        // Variable-backed — see app/globals.css for the light (:root) and
+        // dark (.dark) values. `<alpha-value>` keeps opacity modifiers
+        // (bg-secondary/50) working the same as with plain hex.
+        surface: "rgb(var(--color-surface) / <alpha-value>)",
+        "surface-dim": "rgb(var(--color-surface-dim) / <alpha-value>)",
+        "surface-bright": "rgb(var(--color-surface-bright) / <alpha-value>)",
+        "surface-container-lowest": "rgb(var(--color-surface-container-lowest) / <alpha-value>)",
+        "surface-container-low": "rgb(var(--color-surface-container-low) / <alpha-value>)",
+        "surface-container": "rgb(var(--color-surface-container) / <alpha-value>)",
+        "surface-container-high": "rgb(var(--color-surface-container-high) / <alpha-value>)",
+        "surface-container-highest": "rgb(var(--color-surface-container-highest) / <alpha-value>)",
+        "on-surface": "rgb(var(--color-on-surface) / <alpha-value>)",
+        "on-surface-variant": "rgb(var(--color-on-surface-variant) / <alpha-value>)",
+        "inverse-surface": "rgb(var(--color-inverse-surface) / <alpha-value>)",
+        "inverse-on-surface": "rgb(var(--color-inverse-on-surface) / <alpha-value>)",
+        outline: "rgb(var(--color-outline) / <alpha-value>)",
+        "outline-variant": "rgb(var(--color-outline-variant) / <alpha-value>)",
+        "surface-tint": "rgb(var(--color-surface-tint) / <alpha-value>)",
+        primary: "rgb(var(--color-primary) / <alpha-value>)",
+        "on-primary": "rgb(var(--color-on-primary) / <alpha-value>)",
+        "primary-container": "rgb(var(--color-primary-container) / <alpha-value>)",
+        "on-primary-container": "rgb(var(--color-on-primary-container) / <alpha-value>)",
+        "inverse-primary": "rgb(var(--color-inverse-primary) / <alpha-value>)",
+        secondary: "rgb(var(--color-secondary) / <alpha-value>)",
+        "on-secondary": "rgb(var(--color-on-secondary) / <alpha-value>)",
+        "secondary-container": "rgb(var(--color-secondary-container) / <alpha-value>)",
+        "on-secondary-container": "rgb(var(--color-on-secondary-container) / <alpha-value>)",
+        tertiary: "rgb(var(--color-tertiary) / <alpha-value>)",
+        "on-tertiary": "rgb(var(--color-on-tertiary) / <alpha-value>)",
+        "tertiary-container": "rgb(var(--color-tertiary-container) / <alpha-value>)",
+        "on-tertiary-container": "rgb(var(--color-on-tertiary-container) / <alpha-value>)",
+        error: "rgb(var(--color-error) / <alpha-value>)",
+        "on-error": "rgb(var(--color-on-error) / <alpha-value>)",
+        "error-container": "rgb(var(--color-error-container) / <alpha-value>)",
+        "on-error-container": "rgb(var(--color-on-error-container) / <alpha-value>)",
+        background: "rgb(var(--color-background) / <alpha-value>)",
+        "on-background": "rgb(var(--color-on-background) / <alpha-value>)",
+        "surface-variant": "rgb(var(--color-surface-variant) / <alpha-value>)",
+        // "-fixed" tokens are the same color in both themes by M3 design
+        // (a badge/chip that should look identical regardless of theme) —
+        // plain static hex, no CSS variable indirection needed.
         "primary-fixed": "#d6e3ff",
         "primary-fixed-dim": "#b9c7e4",
-        "on-primary-fixed": "#0d1c32",
+        "on-primary-fixed": "#101a30",
         "on-primary-fixed-variant": "#39475f",
-        "secondary-fixed": "#6ffbbe",
-        "secondary-fixed-dim": "#4edea3",
-        "on-secondary-fixed": "#002113",
-        "on-secondary-fixed-variant": "#005236",
-        "tertiary-fixed": "#d3e4fe",
-        "tertiary-fixed-dim": "#b7c8e1",
-        "on-tertiary-fixed": "#0b1c30",
-        "on-tertiary-fixed-variant": "#38485d",
-        background: "#f7f9fb",
-        "on-background": "#191c1e",
-        "surface-variant": "#e0e3e5",
+        "secondary-fixed": "#6ff0e2",
+        "secondary-fixed-dim": "#45d6c8",
+        "on-secondary-fixed": "#00201e",
+        "on-secondary-fixed-variant": "#0a4e52",
+        "tertiary-fixed": "#ffddb8",
+        "tertiary-fixed-dim": "#ffb870",
+        "on-tertiary-fixed": "#351a00",
+        "on-tertiary-fixed-variant": "#7a3c00",
       },
       fontFamily: {
         sans: ["Inter", "sans-serif"],

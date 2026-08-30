@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { Spinner } from "@/components/ui/Spinner";
+import { FadeMessage } from "@/components/ui/FadeMessage";
 
 type FormState = {
   // About you
@@ -23,6 +25,19 @@ type FormState = {
 
 const STEPS = ["About you", "About the bid", "Your bid file"];
 
+// Framed as readiness for OUR prep process, never as odds of winning —
+// "Worth a second look" reads as neutral/informative, not a rejection.
+const FIT_LABELS: Record<string, string> = {
+  strong: "Strong fit",
+  moderate: "Moderate fit",
+  weak: "Worth a second look",
+};
+const FIT_STYLE: Record<string, string> = {
+  strong: "bg-secondary-container text-on-secondary-container",
+  moderate: "bg-surface-container-highest text-on-surface-variant",
+  weak: "bg-surface-container-highest text-on-surface-variant",
+};
+
 export function IntakeWizard() {
   const [step, setStep] = useState(0);
   const [clientId, setClientId] = useState<string | null>(null);
@@ -31,6 +46,8 @@ export function IntakeWizard() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [fitCheck, setFitCheck] = useState<{ alignment: string; explanation: string } | null>(null);
+  const [fitCheckLoading, setFitCheckLoading] = useState(false);
   const [form, setForm] = useState<FormState>({
     companyName: "",
     contactName: "",
@@ -183,6 +200,26 @@ export function IntakeWizard() {
 
     setSaving(false);
     setSubmitted(true);
+
+    // Runs only now that the submission is actually marked submitted (real
+    // scope/agency data is saved) — never before. Fire-and-forget relative
+    // to the confirmation screen already showing; a slow or failed fit
+    // check shouldn't hold up or put an error on the client's "we've got
+    // it" moment, so failures are swallowed rather than surfaced here.
+    setFitCheckLoading(true);
+    fetch("/api/generate-fit-check", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ submissionId }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.fit_alignment) {
+          setFitCheck({ alignment: data.fit_alignment, explanation: data.fit_explanation });
+        }
+      })
+      .catch(() => {})
+      .finally(() => setFitCheckLoading(false));
   }
 
   if (submitted) {
@@ -196,6 +233,24 @@ export function IntakeWizard() {
           Thanks — we'll review your bid and be in touch. You can check on
           progress any time by logging in.
         </p>
+
+        {fitCheckLoading && (
+          <p className="text-label-md text-on-surface-variant mt-6 flex items-center justify-center gap-2">
+            <Spinner /> Taking a quick look…
+          </p>
+        )}
+        {fitCheck && (
+          <div className="mt-6 max-w-md mx-auto bg-surface-container-low border border-outline-variant rounded-xl p-5 text-left">
+            <span
+              className={`inline-flex px-2.5 py-1 rounded-full text-label-sm font-bold ${
+                FIT_STYLE[fitCheck.alignment] ?? "bg-surface-container-highest text-on-surface-variant"
+              }`}
+            >
+              {FIT_LABELS[fitCheck.alignment] ?? fitCheck.alignment}
+            </span>
+            <p className="text-body-md text-on-surface-variant mt-2">{fitCheck.explanation}</p>
+          </div>
+        )}
       </div>
     );
   }
@@ -257,8 +312,9 @@ export function IntakeWizard() {
           <button
             type="submit"
             disabled={saving}
-            className="py-3 px-4 bg-secondary text-on-secondary rounded text-label-md hover:bg-on-secondary-container transition-colors disabled:opacity-40 flex items-center justify-center gap-2"
+            className="py-3 px-4 bg-secondary text-on-secondary rounded text-label-md hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center justify-center gap-2"
           >
+            {saving && <Spinner />}
             {saving ? "Saving…" : "Next"}
             {!saving && <span className="material-symbols-outlined text-[18px]">arrow_forward</span>}
           </button>
@@ -289,8 +345,9 @@ export function IntakeWizard() {
           <button
             type="submit"
             disabled={saving}
-            className="py-3 px-4 bg-secondary text-on-secondary rounded text-label-md hover:bg-on-secondary-container transition-colors disabled:opacity-40 flex items-center justify-center gap-2"
+            className="py-3 px-4 bg-secondary text-on-secondary rounded text-label-md hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center justify-center gap-2"
           >
+            {saving && <Spinner />}
             {saving ? "Saving…" : "Next"}
             {!saving && <span className="material-symbols-outlined text-[18px]">arrow_forward</span>}
           </button>
@@ -305,25 +362,29 @@ export function IntakeWizard() {
             add this later.
           </p>
           {/* File upload wiring goes here once SubmissionDocuments component
-              is built — see BUILD-ORDER-SPECWRIGHT.md step 4 */}
+              is built — see BUILD-ORDER-BIDPULSE.md step 4 */}
           <div className="flex gap-3">
             <button
               onClick={handleSaveDraft}
               disabled={saving}
-              className="flex-1 py-3 px-4 bg-surface border border-outline-variant rounded text-label-md hover:bg-surface-container-high transition-colors disabled:opacity-40"
+              className="flex-1 py-3 px-4 bg-surface border border-outline-variant rounded text-label-md hover:bg-surface-container-high transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center justify-center gap-2"
             >
+              {saving && <Spinner />}
               {saving ? "Saving…" : "Save & finish later"}
             </button>
             <button
               onClick={handleFinalSubmit}
               disabled={saving}
-              className="flex-1 py-3 px-4 bg-secondary text-on-secondary rounded text-label-md hover:bg-on-secondary-container transition-colors disabled:opacity-40 flex items-center justify-center gap-2"
+              className="flex-1 py-3 px-4 bg-secondary text-on-secondary rounded text-label-md hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center justify-center gap-2"
             >
+              {saving && <Spinner />}
               {saving ? "Sending…" : "Send it to us"}
               {!saving && <span className="material-symbols-outlined text-[18px]">arrow_forward</span>}
             </button>
           </div>
-          {saved && <p className="text-body-md text-secondary">Saved — you can come back anytime.</p>}
+          <FadeMessage show={saved} className="text-body-md text-secondary block">
+            Saved — you can come back anytime.
+          </FadeMessage>
         </div>
       )}
     </div>

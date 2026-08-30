@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { Spinner } from "@/components/ui/Spinner";
+import { FadeMessage } from "@/components/ui/FadeMessage";
 
 type Note = { id: string; note: string; created_at: string };
 type ChecklistItem = { id: string; label: string; status: string; notes: string | null };
@@ -15,51 +17,94 @@ const STAGES = [
   "closed",
 ];
 
+// Human text for the notify route's non-error "not sent" reasons — these
+// aren't failures, so they're shown in a neutral tone, not error red.
+const SKIP_REASON_LABELS: Record<string, string> = {
+  test_submission: "test submission — no email sent",
+  no_client_email: "client has no email on file",
+  no_template_for_stage: "no email template for this stage",
+};
+
 export function AdminSubmissionActions({
   submissionId,
   orgId,
+  actorId,
   currentStage,
   checklist,
   notes,
-  confirmationSentAt,
+  clientReportedSubmittedAt,
 }: {
   submissionId: string;
   orgId: string;
+  actorId: string;
   currentStage: string;
   checklist: ChecklistItem[];
   notes: Note[];
-  confirmationSentAt: string | null;
+  clientReportedSubmittedAt: string | null;
 }) {
   const [stage, setStage] = useState(currentStage);
   const [noteText, setNoteText] = useState("");
   const [localNotes, setLocalNotes] = useState(notes);
   const [savingStage, setSavingStage] = useState(false);
-  const [confirmationSent, setConfirmationSent] = useState(confirmationSentAt);
-  const [sendingConfirmation, setSendingConfirmation] = useState(false);
+  const [notifyError, setNotifyError] = useState<string | null>(null);
+  const [notifySkipReason, setNotifySkipReason] = useState<string | null>(null);
+  const [notifySuccess, setNotifySuccess] = useState(false);
+  const [addingNote, setAddingNote] = useState(false);
+  const [savedChecklistIds, setSavedChecklistIds] = useState<Record<string, boolean>>({});
   const supabase = createClient();
 
   async function handleStageChange(newStage: string) {
     setSavingStage(true);
-    await supabase.from("submissions").update({ stage: newStage }).eq("id", submissionId);
+    setNotifyError(null);
+    setNotifySkipReason(null);
+    setNotifySuccess(false);
+
+    const nowIso = new Date().toISOString();
+    await supabase
+      .from("submissions")
+      .update({ stage: newStage, updated_at: nowIso })
+      .eq("id", submissionId);
 
     await supabase.from("audit_log").insert({
       submission_id: submissionId,
       org_id: orgId,
+      actor_id: actorId,
       event_type: "stage_change",
       event_detail: { from: stage, to: newStage },
     });
 
     setStage(newStage);
     setSavingStage(false);
+
+    // The stage change itself already succeeded above — a failure here
+    // (e.g. Resend's test-mode recipient restriction) shouldn't look like
+    // the stage change failed, so it's surfaced as its own small note.
+    try {
+      const res = await fetch("/api/notify-stage-change", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ submissionId, newStage }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error ?? "Couldn't send the client notification email.");
+      if (data.sent) {
+        setNotifySuccess(true);
+      } else {
+        setNotifySkipReason(data.reason ?? "skipped");
+      }
+    } catch (err) {
+      setNotifyError(err instanceof Error ? err.message : "Couldn't send the client notification email.");
+    }
   }
 
   async function handleAddNote(e: React.FormEvent) {
     e.preventDefault();
     if (!noteText.trim()) return;
+    setAddingNote(true);
 
     const { data: newNote } = await supabase
       .from("admin_notes")
-      .insert({ submission_id: submissionId, note: noteText })
+      .insert({ submission_id: submissionId, author_id: actorId, note: noteText })
       .select()
       .single();
 
@@ -67,50 +112,47 @@ export function AdminSubmissionActions({
       setLocalNotes((n) => [newNote, ...n]);
       setNoteText("");
     }
+    setAddingNote(false);
   }
 
   async function handleChecklistChange(itemId: string, newStatus: string) {
-    await supabase.from("checklist_items").update({ status: newStatus }).eq("id", itemId);
-  }
-
-  // No email service is wired up yet (BUILD-ORDER-SPECWRIGHT.md Step 9) —
-  // this just records that the admin sent the confirmation manually, same
-  // "start simple" placeholder the step explicitly allows.
-  async function handleMarkConfirmationSent() {
-    setSendingConfirmation(true);
-    const sentAt = new Date().toISOString();
-
-    const { error } = await supabase
-      .from("submissions")
-      .update({ confirmation_sent_at: sentAt })
-      .eq("id", submissionId);
-
+    const { error } = await supabase.from("checklist_items").update({ status: newStatus }).eq("id", itemId);
     if (!error) {
-      await supabase.from("audit_log").insert({
-        submission_id: submissionId,
-        org_id: orgId,
-        event_type: "confirmation_email_sent",
-        event_detail: { method: "manual" },
-      });
-      setConfirmationSent(sentAt);
+      setSavedChecklistIds((s) => ({ ...s, [itemId]: true }));
+      setTimeout(() => setSavedChecklistIds((s) => ({ ...s, [itemId]: false })), 1500);
     }
-
-    setSendingConfirmation(false);
   }
 
   return (
     <div className="flex flex-col gap-6">
+      {clientReportedSubmittedAt && stage !== "confirmed_submitted" && stage !== "closed" && (
+        <div className="bg-secondary-container border border-secondary/30 rounded-xl p-6">
+          <h2 className="text-title-lg text-on-secondary-container mb-1 flex items-center gap-2">
+            <span className="material-symbols-outlined text-[20px]">flag</span>
+            Client reports this was submitted
+          </h2>
+          <p className="text-body-md text-on-secondary-container">
+            On {new Date(clientReportedSubmittedAt).toLocaleString()} — confirm below by moving the stage to
+            &quot;confirmed submitted&quot; once you&apos;ve verified it.
+          </p>
+        </div>
+      )}
+
       <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
-        <h2 className="text-title-lg text-on-surface mb-4">Move to stage</h2>
+        <h2 className="text-title-lg text-primary mb-4 flex items-center gap-2">
+          <span className="material-symbols-outlined text-secondary text-[20px]">timeline</span>
+          Move to stage
+          {savingStage && <Spinner className="text-secondary" />}
+        </h2>
         <div className="flex flex-wrap gap-2">
           {STAGES.map((s) => (
             <button
               key={s}
               onClick={() => handleStageChange(s)}
               disabled={savingStage}
-              className={`px-3 py-2 rounded text-label-md border transition-colors disabled:opacity-40 ${
+              className={`px-3 py-2 rounded text-label-md border transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 ${
                 stage === s
-                  ? "bg-primary text-on-primary border-primary"
+                  ? "bg-secondary text-on-secondary border-secondary"
                   : "bg-surface border-outline-variant text-on-surface hover:bg-surface-container-high"
               }`}
             >
@@ -118,48 +160,46 @@ export function AdminSubmissionActions({
             </button>
           ))}
         </div>
-      </div>
-
-      <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
-        <h2 className="text-title-lg text-on-surface mb-4">Confirmation email</h2>
-        {confirmationSent ? (
-          <p className="text-body-md text-on-surface-variant">
-            Sent {new Date(confirmationSent).toLocaleString()}
+        <FadeMessage show={notifySuccess} className="text-body-md text-secondary block mt-3">
+          Client notified by email.
+        </FadeMessage>
+        {notifySkipReason && (
+          <p className="text-body-md text-on-surface-variant mt-3">
+            Client not notified — {SKIP_REASON_LABELS[notifySkipReason] ?? notifySkipReason}.
           </p>
-        ) : (
-          <>
-            <p className="text-body-md text-on-surface-variant mb-3">
-              No confirmation email sent yet. Email sending isn&apos;t wired up — send it
-              yourself, then mark it here.
-            </p>
-            <button
-              onClick={handleMarkConfirmationSent}
-              disabled={sendingConfirmation}
-              className="px-4 py-2 bg-surface border border-outline-variant rounded text-label-md hover:bg-surface-container-high transition-colors disabled:opacity-40"
-            >
-              {sendingConfirmation ? "Saving…" : "Mark confirmation email sent"}
-            </button>
-          </>
+        )}
+        {notifyError && (
+          <p className="text-body-md text-error mt-3">
+            Stage saved, but the client wasn&apos;t notified: {notifyError}
+          </p>
         )}
       </div>
 
       {checklist.length > 0 && (
         <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
-          <h2 className="text-title-lg text-on-surface mb-4">Compliance checklist</h2>
+          <h2 className="text-title-lg text-primary mb-4 flex items-center gap-2">
+            <span className="material-symbols-outlined text-secondary text-[20px]">fact_check</span>
+            Compliance checklist
+          </h2>
           <div className="flex flex-col gap-3">
             {checklist.map((item) => (
-              <div key={item.id} className="flex items-center justify-between">
+              <div key={item.id} className="flex items-center justify-between gap-3">
                 <span className="text-body-md text-on-surface">{item.label}</span>
-                <select
-                  defaultValue={item.status}
-                  onChange={(e) => handleChecklistChange(item.id, e.target.value)}
-                  className="px-2 py-1 rounded border border-outline-variant bg-surface text-body-md text-on-surface"
-                >
-                  <option value="not_started">Not started</option>
-                  <option value="in_progress">In progress</option>
-                  <option value="done">Done</option>
-                  <option value="waived">Waived</option>
-                </select>
+                <div className="flex items-center gap-2">
+                  <FadeMessage show={!!savedChecklistIds[item.id]} className="text-label-md text-secondary">
+                    Saved
+                  </FadeMessage>
+                  <select
+                    defaultValue={item.status}
+                    onChange={(e) => handleChecklistChange(item.id, e.target.value)}
+                    className="px-2 py-1 rounded border border-outline-variant bg-surface text-body-md text-on-surface transition"
+                  >
+                    <option value="not_started">Not started</option>
+                    <option value="in_progress">In progress</option>
+                    <option value="done">Done</option>
+                    <option value="waived">Waived</option>
+                  </select>
+                </div>
               </div>
             ))}
           </div>
@@ -167,7 +207,10 @@ export function AdminSubmissionActions({
       )}
 
       <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
-        <h2 className="text-title-lg text-on-surface mb-4">Internal notes</h2>
+        <h2 className="text-title-lg text-primary mb-4 flex items-center gap-2">
+          <span className="material-symbols-outlined text-secondary text-[20px]">edit_note</span>
+          Internal notes
+        </h2>
         <form onSubmit={handleAddNote} className="flex gap-2 mb-4">
           <input
             type="text"
@@ -178,8 +221,10 @@ export function AdminSubmissionActions({
           />
           <button
             type="submit"
-            className="px-4 py-2 bg-primary text-on-primary rounded text-label-md hover:bg-on-background transition-colors"
+            disabled={addingNote}
+            className="px-4 py-2 bg-secondary text-on-secondary rounded text-label-md hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
           >
+            {addingNote && <Spinner />}
             Add
           </button>
         </form>

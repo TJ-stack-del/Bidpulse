@@ -1,7 +1,14 @@
+import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { TAGLINE } from "@/lib/brand";
 import { LoginForm } from "./LoginForm";
+
+export const metadata: Metadata = {
+  title: "Log In",
+};
 
 export default async function LoginPage() {
   const supabase = await createClient();
@@ -12,11 +19,13 @@ export default async function LoginPage() {
   if (user) redirect("/");
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-surface px-margin-mobile py-12">
+    <main className="animate-fade-in min-h-screen flex items-center justify-center bg-surface px-margin-mobile py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <span className="font-bold text-headline-lg text-on-surface">BidPulse</span>
-          <p className="text-body-md text-on-surface-variant mt-2">Sign in to your workspace</p>
+          <Image src="/logo.png" alt="BidPulse" width={162} height={56} className="h-14 w-auto mx-auto" priority />
+          <p className="text-label-sm text-on-surface-variant max-w-xs mx-auto mt-1 mb-4">{TAGLINE}</p>
+          <span className="font-bold text-headline-lg text-primary">Welcome back</span>
+          <p className="text-body-md text-on-surface-variant mt-2">Sign in to your account.</p>
         </div>
 
         <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-8">

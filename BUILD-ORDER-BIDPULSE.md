@@ -1,6 +1,6 @@
-# Open SpecWright — Build Order
+# BidPulse — Build Order
 
-Read `MIGRATION-TO-SPECWRIGHT.md` first for the full picture of what's
+Read `MIGRATION-TO-BIDPULSE.md` first for the full picture of what's
 changing and why. This file is the actual step-by-step build checklist.
 
 **Decisions already made:**

@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { Spinner } from "@/components/ui/Spinner";
+import { FadeMessage } from "@/components/ui/FadeMessage";
+import { PacketButtons } from "@/components/ui/PacketButtons";
 
 type Deliverable = {
   id: string;
@@ -18,7 +21,7 @@ const DELIVERABLE_TYPES: { value: string; label: string }[] = [
 ];
 
 // Step 7 — admin prepares each deliverable either by pasting text or
-// uploading a file; either counts as "prepared" per BUILD-ORDER-SPECWRIGHT.md
+// uploading a file; either counts as "prepared" per BUILD-ORDER-BIDPULSE.md
 // ("start simple"). One row per deliverable_type: saving replaces whichever
 // row already exists for that type instead of piling up duplicates, since
 // schema.sql has no unique constraint enforcing that itself.
@@ -27,11 +30,13 @@ export function DeliverablesPanel({
   orgId,
   actorId,
   initialDeliverables,
+  lastPacketView,
 }: {
   submissionId: string;
   orgId: string;
   actorId: string;
   initialDeliverables: Deliverable[];
+  lastPacketView: { event_type: string; created_at: string } | null;
 }) {
   const [byType, setByType] = useState<Record<string, Deliverable | undefined>>(() => {
     const map: Record<string, Deliverable | undefined> = {};
@@ -44,6 +49,7 @@ export function DeliverablesPanel({
     return map;
   });
   const [saving, setSaving] = useState<string | null>(null);
+  const [generating, setGenerating] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
   const [savedTypes, setSavedTypes] = useState<Record<string, boolean>>({});
   const supabase = createClient();
@@ -104,6 +110,40 @@ export function DeliverablesPanel({
     }
   }
 
+  // Fills the text box with a generated starting draft — doesn't touch the
+  // deliverables table itself, so nothing is saved until the admin hits
+  // "Save text" as usual. Confirms first if there's existing content, since
+  // this replaces the box wholesale rather than appending.
+  async function handleAutoDraft(type: string) {
+    const label = DELIVERABLE_TYPES.find((d) => d.value === type)?.label ?? type;
+    const existingText = (drafts[type] ?? "").trim();
+    if (existingText) {
+      const confirmed = window.confirm(
+        `This will replace the current ${label.toLowerCase()} text with a generated draft. Continue?`
+      );
+      if (!confirmed) return;
+    }
+
+    setGenerating(type);
+    setErrors((e) => ({ ...e, [type]: undefined }));
+    setSavedTypes((s) => ({ ...s, [type]: false }));
+
+    try {
+      const res = await fetch("/api/generate-draft", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ submissionId, deliverableType: type }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error ?? "Couldn't generate a draft.");
+      setDrafts((d) => ({ ...d, [type]: data.content }));
+    } catch (err) {
+      setErrors((e) => ({ ...e, [type]: err instanceof Error ? err.message : "Couldn't generate a draft." }));
+    } finally {
+      setGenerating(null);
+    }
+  }
+
   async function handleUpload(type: string, e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -135,12 +175,17 @@ export function DeliverablesPanel({
 
   return (
     <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
-      <h2 className="text-title-lg text-on-surface mb-4">Deliverables</h2>
+      <h2 className="text-title-lg text-primary mb-4 flex items-center gap-2">
+        <span className="material-symbols-outlined text-secondary text-[20px]">description</span>
+        Deliverables
+      </h2>
 
       <div className="flex flex-col gap-6">
         {DELIVERABLE_TYPES.map((t) => {
           const existing = byType[t.value];
           const isSaving = saving === t.value;
+          const isGenerating = generating === t.value;
+          const isBusy = isSaving || isGenerating;
           return (
             <div key={t.value} className="border-t border-outline-variant pt-4 first:border-t-0 first:pt-0">
               <div className="flex items-center justify-between mb-2">
@@ -148,7 +193,7 @@ export function DeliverablesPanel({
                 <span
                   className={`text-[10px] px-2 py-0.5 rounded border font-bold uppercase ${
                     existing
-                      ? "bg-surface-container-low text-on-tertiary-container border-on-tertiary-container/20"
+                      ? "bg-secondary-container text-on-secondary-container border-secondary/20"
                       : "bg-surface-container-low text-on-surface-variant border-outline-variant"
                   }`}
                 >
@@ -178,30 +223,56 @@ export function DeliverablesPanel({
                 className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none mb-2"
               />
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
+                <button
+                  onClick={() => handleAutoDraft(t.value)}
+                  disabled={isBusy}
+                  className="px-4 py-2 rounded border border-outline-variant text-on-surface text-label-md font-bold hover:bg-surface-container-high transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
+                >
+                  {isGenerating ? <Spinner /> : <span className="material-symbols-outlined text-[18px]">auto_awesome</span>}
+                  {isGenerating ? "Generating…" : "Auto-draft"}
+                </button>
                 <button
                   onClick={() => handleSaveText(t.value)}
-                  disabled={isSaving}
-                  className="px-4 py-2 bg-primary text-on-primary rounded text-label-md hover:bg-on-background transition-colors disabled:opacity-40"
+                  disabled={isBusy}
+                  className="px-4 py-2 bg-secondary text-on-secondary rounded text-label-md hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
                 >
+                  {isSaving && <Spinner />}
                   {isSaving ? "Saving…" : "Save text"}
                 </button>
-                <label className="px-4 py-2 rounded border border-secondary text-secondary text-label-md font-bold hover:bg-surface-container-low transition-colors cursor-pointer">
+                <label className="px-4 py-2 rounded border border-secondary text-secondary text-label-md font-bold hover:bg-surface-container-low transition active:scale-[0.97] cursor-pointer flex items-center gap-2">
+                  {isSaving && <Spinner />}
                   {isSaving ? "Saving…" : "Upload file instead"}
                   <input
                     type="file"
                     onChange={(e) => handleUpload(t.value, e)}
-                    disabled={isSaving}
+                    disabled={isBusy}
                     className="hidden"
                   />
                 </label>
-                {savedTypes[t.value] && <span className="text-body-md text-secondary">Saved</span>}
+                <FadeMessage show={!!savedTypes[t.value]} className="text-body-md text-secondary">
+                  Saved
+                </FadeMessage>
               </div>
 
               {errors[t.value] && <p className="text-body-md text-error mt-2">{errors[t.value]}</p>}
             </div>
           );
         })}
+
+        <div className="border-t border-outline-variant pt-4">
+          <h3 className="text-label-md text-on-surface-variant uppercase tracking-wider mb-2">
+            Complete bid package
+          </h3>
+          <PacketButtons submissionId={submissionId} orgId={orgId} viewerRole="admin" />
+          <p className="text-label-md text-on-surface-variant mt-3">
+            {lastPacketView
+              ? `Client last ${lastPacketView.event_type === "client_downloaded_packet" ? "downloaded" : "viewed"}: ${new Date(
+                  lastPacketView.created_at
+                ).toLocaleString()}`
+              : "Not yet viewed"}
+          </p>
+        </div>
       </div>
     </div>
   );
