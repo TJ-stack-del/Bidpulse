@@ -5,6 +5,7 @@ import { AppShell } from "@/components/ui/AppShell";
 import { LifecycleStepper, stageNumber } from "@/components/ui/LifecycleStepper";
 import { DeliverablesSection } from "./DeliverablesSection";
 import { ReportSubmittedButton } from "./ReportSubmittedButton";
+import { CompleteBidFile } from "./CompleteBidFile";
 
 // Reads cookies (via lib/supabase/server) which already opts this page out
 // of static rendering — confirmed via `Cache-Control: no-store` on the
@@ -65,7 +66,7 @@ export default async function DashboardPage({
   const { data: submissions, error: submissionsError } = await supabase
     .from("submissions")
     .select(
-      "id, agency, solicitation_number, due_date, scope, stage, is_test, package_id, created_at, updated_at, client_reported_submitted_at"
+      "id, agency, solicitation_number, due_date, scope, stage, draft, is_test, package_id, created_at, updated_at, client_reported_submitted_at"
     )
     .eq("client_id", client.id)
     .order("updated_at", { ascending: false });
@@ -178,91 +179,18 @@ export default async function DashboardPage({
         </p>
       </div>
 
-      <LifecycleStepper currentStage={stageNumber(activeSubmission.stage)} />
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
-        <div className="lg:col-span-2 flex flex-col gap-6">
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
-            <h2 className="text-title-lg text-primary mb-4 flex items-center gap-2">
-              <span className="material-symbols-outlined text-secondary text-[20px]">timeline</span>
-              Status
-            </h2>
-            <p className="text-body-md text-on-surface">
-              {STAGE_LABELS[activeSubmission.stage] ?? activeSubmission.stage}
-            </p>
-            {stageNumber(activeSubmission.stage) >= stageNumber("client_review") && (
-              <ReportSubmittedButton
-                submissionId={activeSubmission.id}
-                orgId={client.org_id}
-                initialReportedAt={activeSubmission.client_reported_submitted_at}
-              />
-            )}
+      {activeSubmission.draft ? (
+        // Still a draft — usually one an admin created from a matched
+        // opportunity, with agency/scope/due date already on file. The
+        // stage/checklist/deliverables panels below all describe states
+        // that only make sense once this is actually locked in, so this
+        // replaces them with just the one thing still missing.
+        <div className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <CompleteBidFile submissionId={activeSubmission.id} />
           </div>
-
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">
-            <div className="px-6 py-4 border-b border-outline-variant bg-surface-container-low">
-              <h2 className="text-title-lg text-primary flex items-center gap-2">
-                <span className="material-symbols-outlined text-secondary text-[20px]">fact_check</span>
-                What we still need from you
-              </h2>
-            </div>
-            {checklist && checklist.length > 0 ? (
-              <div className="flex flex-col">
-                {checklist.map((item) => (
-                  <div
-                    key={item.id}
-                    className={`flex items-center justify-between px-6 py-4 border-b border-outline-variant last:border-b-0 border-l-4 ${
-                      item.status === "done"
-                        ? "border-l-secondary opacity-70"
-                        : item.status === "in_progress"
-                        ? "border-l-secondary"
-                        : "border-l-transparent"
-                    }`}
-                  >
-                    <span className={`text-body-md text-on-surface ${item.status === "done" ? "line-through" : ""}`}>
-                      {item.label}
-                    </span>
-                    <span className="text-label-md px-2 py-0.5 rounded text-[10px] border border-outline-variant bg-surface-container-low text-on-surface-variant uppercase">
-                      {CHECKLIST_STATUS_LABELS[item.status] ?? item.status}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-body-md text-on-surface-variant px-6 py-6">Nothing pending right now.</p>
-            )}
-          </div>
-
-          {showDeliverables && (
-            <DeliverablesSection
-              submissionId={activeSubmission.id}
-              orgId={client.org_id}
-              deliverables={deliverables ?? []}
-              paid={isPaid}
-            />
-          )}
-        </div>
-
-        <div className="flex flex-col gap-6">
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
-            <h3 className="text-title-lg text-primary mb-4 flex items-center gap-2">
-              <span className="material-symbols-outlined text-secondary text-[20px]">folder_special</span>
-              Package
-            </h3>
-            {pkg ? (
-              <>
-                <p className="text-body-md text-on-surface capitalize">{pkg.package_type.replace(/_/g, " ")}</p>
-                {pkg.price_note && (
-                  <p className="text-body-md text-on-surface-variant mt-1">{pkg.price_note}</p>
-                )}
-              </>
-            ) : (
-              <p className="text-body-md text-on-surface-variant">Not yet assigned.</p>
-            )}
-          </div>
-
           {activeSubmission.scope && (
-            <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
+            <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 h-fit">
               <h3 className="text-title-lg text-primary mb-4 flex items-center gap-2">
                 <span className="material-symbols-outlined text-secondary text-[20px]">description</span>
                 Scope
@@ -271,7 +199,104 @@ export default async function DashboardPage({
             </div>
           )}
         </div>
-      </div>
+      ) : (
+        <>
+          <LifecycleStepper currentStage={stageNumber(activeSubmission.stage)} />
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
+            <div className="lg:col-span-2 flex flex-col gap-6">
+              <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
+                <h2 className="text-title-lg text-primary mb-4 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-secondary text-[20px]">timeline</span>
+                  Status
+                </h2>
+                <p className="text-body-md text-on-surface">
+                  {STAGE_LABELS[activeSubmission.stage] ?? activeSubmission.stage}
+                </p>
+                {stageNumber(activeSubmission.stage) >= stageNumber("client_review") && (
+                  <ReportSubmittedButton
+                    submissionId={activeSubmission.id}
+                    orgId={client.org_id}
+                    initialReportedAt={activeSubmission.client_reported_submitted_at}
+                  />
+                )}
+              </div>
+
+              <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">
+                <div className="px-6 py-4 border-b border-outline-variant bg-surface-container-low">
+                  <h2 className="text-title-lg text-primary flex items-center gap-2">
+                    <span className="material-symbols-outlined text-secondary text-[20px]">fact_check</span>
+                    What we still need from you
+                  </h2>
+                </div>
+                {checklist && checklist.length > 0 ? (
+                  <div className="flex flex-col">
+                    {checklist.map((item) => (
+                      <div
+                        key={item.id}
+                        className={`flex items-center justify-between px-6 py-4 border-b border-outline-variant last:border-b-0 border-l-4 ${
+                          item.status === "done"
+                            ? "border-l-secondary opacity-70"
+                            : item.status === "in_progress"
+                            ? "border-l-secondary"
+                            : "border-l-transparent"
+                        }`}
+                      >
+                        <span className={`text-body-md text-on-surface ${item.status === "done" ? "line-through" : ""}`}>
+                          {item.label}
+                        </span>
+                        <span className="text-label-md px-2 py-0.5 rounded text-[10px] border border-outline-variant bg-surface-container-low text-on-surface-variant uppercase">
+                          {CHECKLIST_STATUS_LABELS[item.status] ?? item.status}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-body-md text-on-surface-variant px-6 py-6">Nothing pending right now.</p>
+                )}
+              </div>
+
+              {showDeliverables && (
+                <DeliverablesSection
+                  submissionId={activeSubmission.id}
+                  orgId={client.org_id}
+                  deliverables={deliverables ?? []}
+                  paid={isPaid}
+                />
+              )}
+            </div>
+
+            <div className="flex flex-col gap-6">
+              <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
+                <h3 className="text-title-lg text-primary mb-4 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-secondary text-[20px]">folder_special</span>
+                  Package
+                </h3>
+                {pkg ? (
+                  <>
+                    <p className="text-body-md text-on-surface capitalize">{pkg.package_type.replace(/_/g, " ")}</p>
+                    {pkg.price_note && (
+                      <p className="text-body-md text-on-surface-variant mt-1">{pkg.price_note}</p>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-body-md text-on-surface-variant">Not yet assigned.</p>
+                )}
+              </div>
+
+              {activeSubmission.scope && (
+                <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
+                  <h3 className="text-title-lg text-primary mb-4 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-secondary text-[20px]">description</span>
+                    Scope
+                  </h3>
+                  <p className="text-body-md text-on-surface-variant">{activeSubmission.scope}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
     </AppShell>
   );
 }

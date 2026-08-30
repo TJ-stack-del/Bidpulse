@@ -155,7 +155,7 @@ export default async function AdminSubmissionDetailPage({
               <span className="material-symbols-outlined text-secondary text-[20px]">info</span>
               Bid details
             </h2>
-            <div className="grid grid-cols-2 gap-4 text-body-md">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-body-md">
               <div>
                 <span className="text-label-md text-on-surface-variant block">Solicitation #</span>
                 {submission.solicitation_number ?? "—"}
@@ -176,7 +176,7 @@ export default async function AdminSubmissionDetailPage({
               <span className="material-symbols-outlined text-secondary text-[20px]">person</span>
               Client info
             </h2>
-            <div className="grid grid-cols-2 gap-4 text-body-md">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-body-md">
               <div>
                 <span className="text-label-md text-on-surface-variant block">Contact</span>
                 {client?.contact_name}

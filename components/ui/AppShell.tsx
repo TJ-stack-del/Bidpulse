@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { TAGLINE } from "@/lib/brand";
 import { SignOutButton } from "./SignOutButton";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -47,12 +46,7 @@ export function AppShell({
   return (
     <div className="min-h-screen flex flex-col bg-surface">
       <header className="fixed top-0 w-full z-40 flex items-center justify-between px-margin-mobile md:px-margin-desktop py-3 bg-surface/95 backdrop-blur border-b border-outline-variant">
-        <div className="flex flex-col justify-center">
-          <Image src="/logo.png" alt="BidPulse" width={116} height={40} className="h-10 w-auto" priority />
-          <p className="hidden sm:block text-[9px] leading-snug text-on-surface-variant max-w-[280px]">
-            {TAGLINE}
-          </p>
-        </div>
+        <Image src="/logo.png" alt="BidPulse" width={116} height={40} className="h-9 w-auto shrink-0" priority />
         <nav className="hidden md:flex gap-6">
           {links.map((link) => (
             <Link
@@ -80,7 +74,7 @@ export function AppShell({
         </div>
       </header>
 
-      <main className="animate-fade-in flex-grow pt-[80px] sm:pt-[112px] pb-[80px] md:pb-8 px-margin-mobile md:px-margin-desktop max-w-container mx-auto w-full flex flex-col gap-6">
+      <main className="animate-fade-in flex-grow pt-[72px] pb-[80px] md:pb-8 px-margin-mobile md:px-margin-desktop max-w-container mx-auto w-full flex flex-col gap-6">
         {children}
       </main>
 
