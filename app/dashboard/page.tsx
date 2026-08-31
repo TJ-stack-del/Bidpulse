@@ -6,6 +6,7 @@ import { LifecycleStepper, stageNumber } from "@/components/ui/LifecycleStepper"
 import { DeliverablesSection } from "./DeliverablesSection";
 import { ReportSubmittedButton } from "./ReportSubmittedButton";
 import { CompleteBidFile } from "./CompleteBidFile";
+import { signRfpDocumentUrls } from "@/lib/storage";
 
 // Reads cookies (via lib/supabase/server) which already opts this page out
 // of static rendering — confirmed via `Cache-Control: no-store` on the
@@ -135,12 +136,13 @@ export default async function DashboardPage({
 
   const showDeliverables = stageNumber(activeSubmission.stage) >= stageNumber("deliverables_ready");
 
-  const { data: deliverables } = showDeliverables
+  const { data: deliverablesRaw } = showDeliverables
     ? await supabase
         .from("deliverables")
         .select("id, deliverable_type, file_url, content, created_at")
         .eq("submission_id", activeSubmission.id)
     : { data: null };
+  const deliverables = await signRfpDocumentUrls(supabase, deliverablesRaw ?? []);
 
   return (
     <AppShell activePath="/dashboard" role="client" viewerName={client.company_name}>
@@ -260,7 +262,7 @@ export default async function DashboardPage({
                 <DeliverablesSection
                   submissionId={activeSubmission.id}
                   orgId={client.org_id}
-                  deliverables={deliverables ?? []}
+                  deliverables={deliverables}
                   paid={isPaid}
                 />
               )}

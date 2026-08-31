@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { signRfpDocumentUrl, signRfpDocumentUrls } from "@/lib/storage";
 
 type Doc = {
   id: string;
   document_type: string;
   file_name: string;
-  file_url: string;
+  file_url: string | null;
   created_at: string;
 };
 
@@ -51,7 +52,7 @@ export function SubmissionDocuments({ submissionId }: { submissionId: string }) 
       .select("id, document_type, file_name, file_url, created_at")
       .eq("submission_id", submissionId)
       .order("created_at", { ascending: false })
-      .then(({ data }) => setDocs(data ?? []));
+      .then(async ({ data }) => setDocs(await signRfpDocumentUrls(supabase, data ?? [])));
   }, [submissionId]);
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -72,17 +73,16 @@ export function SubmissionDocuments({ submissionId }: { submissionId: string }) 
       return;
     }
 
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from("rfp-documents").getPublicUrl(path);
-
+    // The bucket is private — the DB stores the bare path, and every read
+    // site (including this one, right after upload) generates its own
+    // signed URL rather than persisting one, since a signed URL expires.
     const { data: newDoc, error: insertError } = await supabase
       .from("submission_documents")
       .insert({
         submission_id: submissionId,
         document_type: docType,
         file_name: file.name,
-        file_url: publicUrl,
+        file_url: path,
       })
       .select()
       .single();
@@ -93,7 +93,8 @@ export function SubmissionDocuments({ submissionId }: { submissionId: string }) 
       return;
     }
 
-    setDocs((d) => [newDoc, ...d]);
+    const signedUrl = await signRfpDocumentUrl(supabase, path);
+    setDocs((d) => [{ ...newDoc, file_url: signedUrl }, ...d]);
     setUploading(false);
     e.target.value = "";
   }
@@ -134,14 +135,18 @@ export function SubmissionDocuments({ submissionId }: { submissionId: string }) 
               key={doc.id}
               className="flex items-center justify-between px-3 py-2 rounded border border-outline-variant bg-surface"
             >
-              <a
-                href={doc.file_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-body-md text-secondary hover:underline"
-              >
-                {doc.file_name}
-              </a>
+              {doc.file_url ? (
+                <a
+                  href={doc.file_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-body-md text-secondary hover:underline"
+                >
+                  {doc.file_name}
+                </a>
+              ) : (
+                <span className="text-body-md text-on-surface-variant">{doc.file_name}</span>
+              )}
               <button
                 onClick={() => handleDelete(doc.id)}
                 className="text-error text-label-md hover:underline"
