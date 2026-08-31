@@ -5,8 +5,8 @@
 // Shared so every place that reacts to agency type (the compliance-matrix
 // generator and the fit-check practical-requirement flags) uses the
 // identical determination for a given submission.
-const AIRPORT_AGENCY_PATTERN = /\b(aviation|airport|jaa)\b/i;
-const SCHOOL_AGENCY_PATTERN = /\b(school|board of education|district)\b/i;
+const AIRPORT_AGENCY_PATTERN = /\b(aviation|airports?|jaa)\b/i;
+const SCHOOL_AGENCY_PATTERN = /\b(schools?|board of education|district)\b/i;
 const TRANSIT_AGENCY_PATTERN = /\b(transit|transportation authority|jta)\b/i;
 
 export type AgencyType = "airport" | "school" | "transit";
