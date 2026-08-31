@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
+import { signRfpDocumentUrl } from "@/lib/storage";
 
 type Certification = {
   id: string;
@@ -22,9 +23,9 @@ function certLabel(cert: Pick<Certification, "cert_type" | "other_label">) {
   return cert.cert_type === "Other" ? cert.other_label || "Other" : cert.cert_type;
 }
 
-// Upload mechanics (bucket, path convention, upload -> getPublicUrl -> save
-// row) mirror components/ui/SubmissionDocuments.tsx — same storage bucket,
-// just a client-scoped path instead of a submission-scoped one.
+// Upload mechanics (bucket, path convention, upload -> save row) mirror
+// components/ui/SubmissionDocuments.tsx — same storage bucket, just a
+// client-scoped path instead of a submission-scoped one.
 export function CertificationsSection({
   clientId,
   initialCertifications,
@@ -73,10 +74,9 @@ export function CertificationsSection({
       return;
     }
 
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from("rfp-documents").getPublicUrl(path);
-
+    // The bucket is private — the DB stores the bare path, and every read
+    // site (including this one, right after upload) generates its own
+    // signed URL rather than persisting one, since a signed URL expires.
     const { data: newCert, error: insertError } = await supabase
       .from("client_certifications")
       .insert({
@@ -85,7 +85,7 @@ export function CertificationsSection({
         other_label: certType === "Other" ? otherLabel.trim() : null,
         certification_number: certNumber.trim() || null,
         expiration_date: expirationDate || null,
-        file_url: publicUrl,
+        file_url: path,
         file_name: file.name,
       })
       .select()
@@ -97,7 +97,8 @@ export function CertificationsSection({
       return;
     }
 
-    setCertifications((c) => [newCert, ...c]);
+    const signedUrl = await signRfpDocumentUrl(supabase, path);
+    setCertifications((c) => [{ ...newCert, file_url: signedUrl }, ...c]);
     resetForm();
     setSubmitting(false);
   }

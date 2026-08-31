@@ -5,6 +5,7 @@ import { AdminSubmissionActions } from "./AdminSubmissionActions";
 import { DeliverablesPanel } from "./DeliverablesPanel";
 import { PaymentStatus } from "./PaymentStatus";
 import { ClientCertifications } from "./ClientCertifications";
+import { signRfpDocumentUrls } from "@/lib/storage";
 
 // The actual review workspace: full intake info, stage editing, internal
 // notes, checklist, deliverables. This is where the "admin does the real
@@ -61,16 +62,18 @@ export default async function AdminSubmissionDetailPage({
     .select("id, label, status, notes")
     .eq("submission_id", id);
 
-  const { data: deliverables } = await supabase
+  const { data: deliverablesRaw } = await supabase
     .from("deliverables")
     .select("id, deliverable_type, file_url, content, created_at")
     .eq("submission_id", id);
+  const deliverables = await signRfpDocumentUrls(supabase, deliverablesRaw ?? []);
 
-  const { data: certifications } = await supabase
+  const { data: certificationsRaw } = await supabase
     .from("client_certifications")
     .select("id, cert_type, other_label, certification_number, expiration_date, file_url, file_name, verified")
     .eq("client_id", submission.client_id)
     .order("created_at", { ascending: false });
+  const certifications = await signRfpDocumentUrls(supabase, certificationsRaw ?? []);
 
   const { data: pkg } = submission.package_id
     ? await supabase
@@ -231,7 +234,7 @@ export default async function AdminSubmissionDetailPage({
             <ClientCertifications
               orgId={member.org_id}
               actorId={member.id}
-              certifications={certifications ?? []}
+              certifications={certifications}
             />
           </div>
 
@@ -259,7 +262,7 @@ export default async function AdminSubmissionDetailPage({
             submissionId={submission.id}
             orgId={member.org_id}
             actorId={member.id}
-            initialDeliverables={deliverables ?? []}
+            initialDeliverables={deliverables}
             lastPacketView={lastPacketView}
           />
         </div>

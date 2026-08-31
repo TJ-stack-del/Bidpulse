@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { AppShell } from "@/components/ui/AppShell";
 import { CertificationsSection } from "./CertificationsSection";
 import { CompanyInfoForm } from "./CompanyInfoForm";
+import { signRfpDocumentUrls } from "@/lib/storage";
 
 // Same cookies()-forces-dynamic reasoning as app/dashboard/page.tsx.
 export const dynamic = "force-dynamic";
@@ -25,11 +26,12 @@ export default async function CompanyProfilePage() {
 
   if (!client) redirect("/");
 
-  const { data: certifications } = await supabase
+  const { data: certificationsRaw } = await supabase
     .from("client_certifications")
     .select("id, cert_type, other_label, certification_number, expiration_date, file_url, file_name, verified, created_at")
     .eq("client_id", client.id)
     .order("created_at", { ascending: false });
+  const certifications = await signRfpDocumentUrls(supabase, certificationsRaw ?? []);
 
   return (
     <AppShell activePath="/dashboard/profile" role="client" viewerName={client.company_name}>
@@ -76,7 +78,7 @@ export default async function CompanyProfilePage() {
           team reviews the document before a certification is used in anything we prepare for you — you&apos;ll
           see its status change to &quot;Verified&quot; here once that happens.
         </p>
-        <CertificationsSection clientId={client.id} initialCertifications={certifications ?? []} />
+        <CertificationsSection clientId={client.id} initialCertifications={certifications} />
       </div>
     </AppShell>
   );

@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
 import { FadeMessage } from "@/components/ui/FadeMessage";
 import { PacketButtons } from "@/components/ui/PacketButtons";
+import { signRfpDocumentUrl } from "@/lib/storage";
 
 type Deliverable = {
   id: string;
@@ -156,12 +157,13 @@ export function DeliverablesPanel({
       const { error: uploadError } = await supabase.storage.from("rfp-documents").upload(path, file);
       if (uploadError) throw new Error(uploadError.message);
 
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from("rfp-documents").getPublicUrl(path);
-
-      const saved = await upsert(type, { file_url: publicUrl });
-      setByType((b) => ({ ...b, [type]: saved }));
+      // The bucket is private — the DB stores the bare path (`saved.file_url`
+      // below), and every read site (including this one, right after upload)
+      // generates its own signed URL rather than persisting one, since a
+      // signed URL expires.
+      const saved = await upsert(type, { file_url: path });
+      const signedUrl = await signRfpDocumentUrl(supabase, path);
+      setByType((b) => ({ ...b, [type]: { ...saved, file_url: signedUrl } }));
       setDrafts((d) => ({ ...d, [type]: "" }));
       await logPrepared(type, "file");
       setSavedTypes((s) => ({ ...s, [type]: true }));
