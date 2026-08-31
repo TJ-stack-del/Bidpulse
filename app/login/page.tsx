@@ -36,12 +36,6 @@ export default async function LoginPage() {
             Start here
           </Link>
         </p>
-        <p className="text-body-md text-on-surface-variant text-center mt-2">
-          Setting up your team&apos;s admin workspace for the first time?{" "}
-          <Link href="/admin/signup" className="text-secondary hover:underline">
-            Create it
-          </Link>
-        </p>
       </div>
     </main>
   );
