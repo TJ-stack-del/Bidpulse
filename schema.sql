@@ -62,7 +62,12 @@ create table team_members (
 create table clients (
   id uuid primary key default uuid_generate_v4(),
   org_id uuid not null references organizations(id) on delete cascade,
-  auth_user_id uuid references auth.users(id) on delete cascade, -- null until they create a login
+  -- null until they create a login; unique once set so one auth account can
+  -- never end up mapped to two client rows — that invariant is what makes a
+  -- retried intake insert safe (a 23505 on retry means an earlier attempt
+  -- already succeeded, so the existing row is reused instead of erroring or
+  -- duplicating).
+  auth_user_id uuid unique references auth.users(id) on delete cascade,
   company_name text not null,
   contact_name text not null,
   -- Intake now asks for "email or phone", not both — a client who signs up
