@@ -26,6 +26,27 @@ type FormState = {
 
 const STEPS = ["About you", "About the bid", "Your bid file"];
 
+// Small backoff retry for the two RLS-gated calls right after signup — org
+// lookup and the client insert. Not a fix for a session race (signUp()
+// already awaits saving its session into this client instance before it
+// resolves, and getUser() below re-confirms that server-side), but real
+// production traffic can still hit a transient blip — a cold-started
+// connection pool, a dropped response — in the seconds right after a brand
+// new account is created, and a single unguarded attempt turned that into a
+// permanently missing clients row with only a vague error to show for it.
+async function withRetry<T>(
+  run: () => Promise<{ data: T | null; error: { message: string } | null }>,
+  attempts = 3
+): Promise<{ data: T | null; error: { message: string } | null }> {
+  let last: { data: T | null; error: { message: string } | null } = { data: null, error: null };
+  for (let i = 0; i < attempts; i++) {
+    last = await run();
+    if (last.data) return last;
+    if (i < attempts - 1) await new Promise((resolve) => setTimeout(resolve, 400 * (i + 1)));
+  }
+  return last;
+}
+
 // Framed as readiness for OUR prep process, never as odds of winning —
 // "Worth a second look" reads as neutral/informative, not a rejection.
 const FIT_LABELS: Record<string, string> = {
@@ -152,13 +173,36 @@ export function IntakeWizard() {
         return;
       }
 
-      user = signUpData.user;
+      // signUp() already awaited saving this session into the client
+      // instance before it resolved, so the access token is already
+      // attached to every request below — that only proves it was accepted
+      // locally, though, not that Supabase's own API will recognize it as
+      // valid yet. getUser() is a real round-trip that asks the server to
+      // verify the token (getSession() would just echo local state back),
+      // so it's the actual confirmation that the session the inserts below
+      // depend on is live, not merely present in memory.
+      const {
+        data: { user: confirmedUser },
+        error: confirmError,
+      } = await supabase.auth.getUser();
+
+      if (confirmError || !confirmedUser) {
+        setError(
+          "Your account was created, but we couldn't confirm your session yet. Please try submitting this step again — you won't need to sign up a second time."
+        );
+        setSaving(false);
+        return;
+      }
+
+      user = confirmedUser;
     }
 
     // First org in the system becomes "the" org for now — single-tenant
     // service business. In a real multi-admin setup this would look up
     // the right org differently; fine as a starting assumption here.
-    const { data: org } = await supabase.from("organizations").select("id").limit(1).single();
+    const { data: org } = await withRetry<{ id: string }>(async () =>
+      await supabase.from("organizations").select("id").limit(1).single()
+    );
 
     if (!org) {
       setError("No admin organization set up yet. Contact support.");
@@ -168,28 +212,44 @@ export function IntakeWizard() {
 
     const contact = form.contact.trim();
     const usingEmail = isEmail(contact);
+    const authUserId = user.id;
 
-    const { data: client, error: clientError } = await supabase
-      .from("clients")
-      .insert({
-        org_id: org.id,
-        auth_user_id: user.id,
-        company_name: form.companyName,
-        contact_name: form.contactName,
-        email: usingEmail ? contact : null,
-        phone: usingEmail ? null : normalizePhone(contact),
-      })
-      .select()
-      .single();
+    // Checks for an existing row before every insert attempt (including
+    // retries) rather than inserting blindly — clients.auth_user_id is
+    // unique, so a retry after a request whose response got lost (not its
+    // insert) would otherwise either 23505 or, worse, double up if the
+    // constraint isn't live yet. Re-checking first means the retry always
+    // converges on the one real row instead of erroring on its own success.
+    const { data: client, error: clientError } = await withRetry<Record<string, unknown>>(async () => {
+      const { data: existing } = await supabase.from("clients").select().eq("auth_user_id", authUserId).maybeSingle();
+      if (existing) return { data: existing, error: null };
+
+      return await supabase
+        .from("clients")
+        .insert({
+          org_id: org.id,
+          auth_user_id: authUserId,
+          company_name: form.companyName,
+          contact_name: form.contactName,
+          email: usingEmail ? contact : null,
+          phone: usingEmail ? null : normalizePhone(contact),
+        })
+        .select()
+        .single();
+    });
 
     setSaving(false);
 
     if (clientError || !client) {
-      setError(clientError?.message ?? "Couldn't save your info.");
+      setError(
+        clientError?.message
+          ? `Your account was created, but saving your company info failed: ${clientError.message}. Please try this step again.`
+          : "Your account was created, but we couldn't save your company info. Please try this step again."
+      );
       return;
     }
 
-    setClientId(client.id);
+    setClientId(client.id as string);
     setStep(1);
   }
 
