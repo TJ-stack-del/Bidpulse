@@ -45,6 +45,10 @@ export function AdminSubmissionActions({
   const [stage, setStage] = useState(currentStage);
   const [noteText, setNoteText] = useState("");
   const [localNotes, setLocalNotes] = useState(notes);
+  const [localChecklist, setLocalChecklist] = useState(checklist);
+  const [checklistLabel, setChecklistLabel] = useState("");
+  const [addingChecklistItem, setAddingChecklistItem] = useState(false);
+  const [checklistError, setChecklistError] = useState<string | null>(null);
   const [savingStage, setSavingStage] = useState(false);
   const [notifyError, setNotifyError] = useState<string | null>(null);
   const [notifySkipReason, setNotifySkipReason] = useState<string | null>(null);
@@ -123,6 +127,27 @@ export function AdminSubmissionActions({
     }
   }
 
+  async function handleAddChecklistItem(e: React.FormEvent) {
+    e.preventDefault();
+    if (!checklistLabel.trim()) return;
+    setAddingChecklistItem(true);
+    setChecklistError(null);
+
+    const { data: newItem, error } = await supabase
+      .from("checklist_items")
+      .insert({ submission_id: submissionId, label: checklistLabel.trim() })
+      .select()
+      .single();
+
+    if (error || !newItem) {
+      setChecklistError(error?.message ?? "Couldn't add that item.");
+    } else {
+      setLocalChecklist((c) => [...c, newItem]);
+      setChecklistLabel("");
+    }
+    setAddingChecklistItem(false);
+  }
+
   return (
     <div className="flex flex-col gap-6">
       {clientReportedSubmittedAt && stage !== "confirmed_submitted" && stage !== "closed" && (
@@ -175,14 +200,35 @@ export function AdminSubmissionActions({
         )}
       </div>
 
-      {checklist.length > 0 && (
-        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
-          <h2 className="text-title-lg text-primary mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-secondary text-[20px]">fact_check</span>
-            Compliance checklist
-          </h2>
+      <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
+        <h2 className="text-title-lg text-primary mb-4 flex items-center gap-2">
+          <span className="material-symbols-outlined text-secondary text-[20px]">fact_check</span>
+          Compliance checklist
+        </h2>
+        {/* Shows up on the client's own dashboard as "What we still need
+            from you" — this is the only way to put something on that list. */}
+        <form onSubmit={handleAddChecklistItem} className="flex gap-2 mb-4">
+          <input
+            type="text"
+            value={checklistLabel}
+            onChange={(e) => setChecklistLabel(e.target.value)}
+            placeholder="e.g. Complete your Company Profile (address, phone, insurance)…"
+            className="flex-1 px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+          />
+          <button
+            type="submit"
+            disabled={addingChecklistItem}
+            className="px-4 py-2 bg-secondary text-on-secondary rounded text-label-md hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
+          >
+            {addingChecklistItem && <Spinner />}
+            Add
+          </button>
+        </form>
+        {checklistError && <p className="text-body-md text-error mb-4">{checklistError}</p>}
+
+        {localChecklist.length > 0 ? (
           <div className="flex flex-col gap-3">
-            {checklist.map((item) => (
+            {localChecklist.map((item) => (
               <div key={item.id} className="flex items-center justify-between gap-3">
                 <span className="text-body-md text-on-surface">{item.label}</span>
                 <div className="flex items-center gap-2">
@@ -203,8 +249,10 @@ export function AdminSubmissionActions({
               </div>
             ))}
           </div>
-        </div>
-      )}
+        ) : (
+          <p className="text-body-md text-on-surface-variant">Nothing on the checklist yet.</p>
+        )}
+      </div>
 
       <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
         <h2 className="text-title-lg text-primary mb-4 flex items-center gap-2">

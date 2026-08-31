@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { isFederalAgency } from "@/lib/federal-agency";
+import { detectAgencyTypes } from "@/lib/agency-type";
 
 // Admin-only "auto-draft" helper for DeliverablesPanel — removes the
 // blank-page problem by returning a structured starting draft built from
@@ -81,6 +82,60 @@ function scopeSegments(scopeText: string): string[] {
 // way the label is text lifted from the scope, never invented.
 const MAX_REQUIREMENT_ROWS = 6;
 const MAX_LABEL_WORDS = 6;
+
+// Local Jacksonville-area bodies whose default set-aside program is JSEB —
+// overridden below for the ones (JAA, JTA) whose projects commonly carry
+// federal funding despite being locally administered.
+const LOCAL_JACKSONVILLE_AGENCY_PATTERN = /\b(city of jacksonville|jea|jaa|jta)\b/i;
+
+// One extra compliance-matrix row per agency-type signal, appended after
+// the scope-derived requirement rows. Same "NEEDS VERIFICATION" rule as
+// everything else in this matrix: these note a category of requirement
+// that agency type typically carries, never a specific number, badge ID,
+// or percentage — that still has to come from the real RFP.
+function agencyTypeRequirementRows(agency: string): string[] {
+  const rows: string[] = [];
+  const agencyTypes = detectAgencyTypes(agency);
+  const isAirport = agencyTypes.includes("airport");
+  const isSchool = agencyTypes.includes("school");
+  const isTransit = agencyTypes.includes("transit");
+  const isLocalJacksonville = LOCAL_JACKSONVILLE_AGENCY_PATTERN.test(agency);
+
+  if (isAirport) {
+    rows.push(
+      "SIDA badging / airport security clearance | NEEDS VERIFICATION | [Confirm SIDA badging and airport security clearance requirements with the agency before submission]"
+    );
+  }
+  if (isSchool) {
+    rows.push(
+      "Level 2 background checks / school district badge requirements | NEEDS VERIFICATION | [Confirm Level 2 background check and district badging requirements before submission]"
+    );
+  }
+  if (isTransit) {
+    rows.push(
+      "DBE (Disadvantaged Business Enterprise) participation goals | NEEDS VERIFICATION | [Confirm DBE participation goals with the agency before submission]"
+    );
+  }
+
+  // Transit projects commonly carry federal (FTA) funding and aviation
+  // projects commonly carry federal (FAA/AIP) funding even when the
+  // authority is locally administered — that funding source is what
+  // determines whether DBE/SDB or the local JSEB program applies, so it
+  // takes priority over the local-Jacksonville default below. The transit
+  // row above already names DBE by requirement type, so it isn't repeated
+  // here as a separate set-aside row.
+  if (isAirport) {
+    rows.push(
+      "Set-aside participation (DBE/SDB) | NEEDS VERIFICATION | [Confirm whether this project carries federal (FAA/AIP) funding and, if so, DBE/SDB set-aside participation requirements — federal funding is common on airport projects even when the authority is locally administered]"
+    );
+  } else if (!isTransit && isLocalJacksonville) {
+    rows.push(
+      "Local set-aside program (JSEB) | NEEDS VERIFICATION | [Confirm JSEB (Jacksonville Small/Emerging Business) eligibility and participation requirements with the agency before submission]"
+    );
+  }
+
+  return rows;
+}
 
 function deriveRequirementLabels(scopeText: string): string[] {
   const labels: string[] = [];
@@ -228,7 +283,17 @@ function buildDraft(deliverableType: string, submission: SubmissionInfo, verifie
       `Primary NAICS Codes: ${naics}`,
       "",
       "Core Competencies:",
-      `[Summarize ${company}'s core service lines relevant to: ${scope}]`,
+      `- [Core service line relevant to: ${scope}]`,
+      "- [Add one short bullet per additional core service line — no paragraphs]",
+      "",
+      "Past Performance:",
+      // Real capability statement convention — one line per project, not a
+      // paragraph: client, scope, dollar value, outcome. Never invent a
+      // client name, contract value, or result; this app doesn't collect
+      // past-project data anywhere yet, so every field here stays an
+      // explicit placeholder for the admin/client to fill in with real work.
+      "- [Client name] — [scope of work] — $[contract value] — [outcome/result]",
+      "- [Client name] — [scope of work] — $[contract value] — [outcome/result]",
       "",
       "Differentiators:",
       differentiators,
@@ -248,18 +313,26 @@ function buildDraft(deliverableType: string, submission: SubmissionInfo, verifie
     // uploaded file URL), so status and verification stay an explicit,
     // unmistakable gap for the admin to fill in after checking the real RFP
     // and the client's real paperwork.
+    // Strict pipe-delimited rows, one requirement per line, nothing else on
+    // the line (no numbering, no bullets) — this is what lets the packet PDF
+    // (lib/pdf/deliverables-packet.ts) parse it into a real autoTable grid
+    // instead of flowing text. Never put a column header or any other
+    // pipe-containing line in with the rows below: the PDF's row filter
+    // only excludes lines starting with "[", so a stray "|" anywhere else
+    // gets rendered as a bogus table row.
     const requirementLabels = submission.scope ? deriveRequirementLabels(submission.scope) : [];
     const requirementRows =
       requirementLabels.length > 0
         ? requirementLabels.map(
-            (label, i) =>
-              `${i + 1}. ${label} | NEEDS VERIFICATION | [Not yet provided — confirm with the client before writing anything here]`
+            (label) =>
+              `${label} | NEEDS VERIFICATION | [Not yet provided — confirm with the client before writing anything here]`
           )
         : [
-            "1. [Requirement from RFP — not yet identified] | NEEDS VERIFICATION | [Not yet provided — confirm with the client before writing anything here]",
-            "2. [Requirement from RFP — not yet identified] | NEEDS VERIFICATION | [Not yet provided — confirm with the client before writing anything here]",
-            "3. [Requirement from RFP — not yet identified] | NOT YET PROVIDED | [Not yet provided — confirm with the client before writing anything here]",
+            "[Requirement from RFP — not yet identified] | NEEDS VERIFICATION | [Not yet provided — confirm with the client before writing anything here]",
+            "[Requirement from RFP — not yet identified] | NEEDS VERIFICATION | [Not yet provided — confirm with the client before writing anything here]",
+            "[Requirement from RFP — not yet identified] | NOT YET PROVIDED | [Not yet provided — confirm with the client before writing anything here]",
           ];
+    requirementRows.push(...agencyTypeRequirementRows(agency));
 
     return [
       `COMPLIANCE MATRIX — ${agency}${solicitationLine}`,
@@ -269,9 +342,12 @@ function buildDraft(deliverableType: string, submission: SubmissionInfo, verifie
       "PROVIDED until you check the actual RFP and the client's real documentation —",
       "never change a status to \"Compliant\" without confirming it first, and never",
       "fill in a number, certification, registration ID, or coverage amount unless it's",
-      "a real, verified value. Leave a field blank rather than guess.]",
+      "a real, verified value. Leave a field blank rather than guess.",
       "",
-      "Solicitation Requirement | Compliance Status | Proposer Methodology & Verification",
+      "Each row below is strict pipe-delimited: Requirement, then Status, then",
+      "Methodology & Verification, separated by pipes, one requirement per line —",
+      "nothing else on the line. Don't add numbering, bullets, or a header row.]",
+      "",
       ...requirementRows,
       "",
       `Scope reference: ${scope}`,
@@ -282,15 +358,21 @@ function buildDraft(deliverableType: string, submission: SubmissionInfo, verifie
   return [
     `TECHNICAL APPROACH & OPERATIONAL PLAN — ${agency}${solicitationLine}`,
     "",
-    `[DRAFT — replace each section below with specifics for: ${scope}]`,
+    `[DRAFT — replace each bullet below with specifics for: ${scope}. Keep each`,
+    "point to one short line — no dense paragraphs.]",
     "",
     "1. Work Execution & Operational Cadence",
-    `${company} proposes to [describe the day-to-day operational approach for this scope].`,
+    `- [Day-to-day operational approach ${company} proposes for this scope]`,
+    "- [Staffing / scheduling approach]",
+    "- [Add one bullet per additional operational point]",
     "",
     "2. Quality Assurance & Compliance Controls",
-    `[Describe QA processes and how compliance with the ${naics} scope requirements is verified.]`,
+    `- [QA process that verifies compliance with the ${naics} scope requirements]`,
+    "- [Inspection / reporting cadence]",
     "",
     "3. Management Oversight",
-    "[Describe supervision structure, reporting cadence, and issue-resolution SLA.]",
+    "- [Supervision structure]",
+    "- [Reporting cadence]",
+    "- [Issue-resolution SLA]",
   ].join("\n");
 }

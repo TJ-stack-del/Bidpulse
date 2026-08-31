@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { detectAgencyTypes, type AgencyType } from "@/lib/agency-type";
 
 // Called by the intake wizard right after the client's own final submit —
 // no LLM wired up (same as generate-draft/route.ts), so this is a
@@ -12,6 +13,31 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 type FitResult = { alignment: "strong" | "moderate" | "weak"; explanation: string };
 
+// Same agency-type detection as the compliance matrix (lib/agency-type.ts) —
+// one plain-language flag per signal, appended to the explanation. These are
+// purely informational: never scored into the strong/moderate/weak tier,
+// never blocking, and never a claim that the contractor does or doesn't
+// meet the requirement — just naming a real thing to go confirm.
+function agencyTypeFitNotes(agencyTypes: AgencyType[]): string[] {
+  const notes: string[] = [];
+  if (agencyTypes.includes("airport")) {
+    notes.push(
+      "This job is at a secured airport facility. Before pursuing this, confirm your team can pass TSA background checks and get SIDA badged."
+    );
+  }
+  if (agencyTypes.includes("school")) {
+    notes.push(
+      "This job is with a school district. Before pursuing this, confirm your team can pass Level 2 background checks and meet the district's badging requirements."
+    );
+  }
+  if (agencyTypes.includes("transit")) {
+    notes.push(
+      "This job is with a transit agency. Before pursuing this, confirm whether DBE (Disadvantaged Business Enterprise) participation goals apply to this project and whether your team can meet them."
+    );
+  }
+  return notes;
+}
+
 function assessFit(input: {
   naicsCodes: string[];
   scope: string | null;
@@ -19,6 +45,7 @@ function assessFit(input: {
   hasLicense: boolean;
   hasInsurance: boolean;
   verifiedCertLabels: string[];
+  agencyTypes: AgencyType[];
 }): FitResult {
   const hasProfile = input.naicsCodes.length > 0;
   const hasDetailedScope = !!input.scope && input.scope.trim().length >= 40;
@@ -69,6 +96,8 @@ function assessFit(input: {
       : "No verified certifications on file yet — if you hold any (WOSB, 8(a), SDVOSB, etc.), add them to your Company Profile so our team can confirm and use them."
   );
 
+  notes.push(...agencyTypeFitNotes(input.agencyTypes));
+
   return { alignment, explanation: notes.join(" ") };
 }
 
@@ -92,7 +121,7 @@ export async function POST(request: Request) {
   const { data: submission } = await supabase
     .from("submissions")
     .select(
-      "id, scope, due_date, client_id, clients(naics_codes, license_number, insurance_provider, general_liability_coverage)"
+      "id, agency, scope, due_date, client_id, clients(naics_codes, license_number, insurance_provider, general_liability_coverage)"
     )
     .eq("id", submissionId)
     .maybeSingle();
@@ -126,6 +155,7 @@ export async function POST(request: Request) {
     hasLicense: !!client?.license_number,
     hasInsurance: !!(client?.insurance_provider || client?.general_liability_coverage),
     verifiedCertLabels,
+    agencyTypes: detectAgencyTypes(submission.agency ?? ""),
   });
 
   // The intake wizard calls this right after the client's own final submit,
