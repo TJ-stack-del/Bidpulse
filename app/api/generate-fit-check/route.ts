@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { detectAgencyTypes, type AgencyType } from "@/lib/agency-type";
+import { assessSetAsideEligibility } from "@/lib/compliance/set-aside-eligibility";
 
 // Called by the intake wizard right after the client's own final submit —
 // no LLM wired up (same as generate-draft/route.ts), so this is a
@@ -38,7 +39,7 @@ function agencyTypeFitNotes(agencyTypes: AgencyType[]): string[] {
   return notes;
 }
 
-function assessFit(input: {
+export function assessFit(input: {
   naicsCodes: string[];
   scope: string | null;
   dueDate: string | null;
@@ -158,6 +159,12 @@ export async function POST(request: Request) {
     agencyTypes: detectAgencyTypes(submission.agency ?? ""),
   });
 
+  // Separate from the strong/moderate/weak readiness tier above — this only
+  // checks set-aside restriction language in the bid's own scope text
+  // against the client's VERIFIED certifications (lib/compliance/set-aside-eligibility.ts).
+  // Never a disqualification claim, always framed as something to check.
+  const eligibility = assessSetAsideEligibility(submission.scope ?? "", verifiedCerts ?? []);
+
   // The intake wizard calls this right after the client's own final submit,
   // which in that same action already flips draft to false — submissions'
   // RLS update policy only lets a client write while draft = true, so
@@ -166,12 +173,22 @@ export async function POST(request: Request) {
   const service = createServiceClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
   const { error: updateError } = await service
     .from("submissions")
-    .update({ fit_alignment: result.alignment, fit_explanation: result.explanation })
+    .update({
+      fit_alignment: result.alignment,
+      fit_explanation: result.explanation,
+      fit_eligibility_concern: eligibility.concern,
+      fit_eligibility_explanation: eligibility.explanation,
+    })
     .eq("id", submissionId);
 
   if (updateError) {
     return NextResponse.json({ error: updateError.message }, { status: 500 });
   }
 
-  return NextResponse.json({ fit_alignment: result.alignment, fit_explanation: result.explanation });
+  return NextResponse.json({
+    fit_alignment: result.alignment,
+    fit_explanation: result.explanation,
+    fit_eligibility_concern: eligibility.concern,
+    fit_eligibility_explanation: eligibility.explanation,
+  });
 }

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { MarketingShell } from "@/components/ui/MarketingShell";
 import { FaqAccordion } from "./FaqAccordion";
 
@@ -66,13 +67,13 @@ export default function FaqPage() {
 
       <section className="text-center flex flex-col items-center gap-4">
         <p className="text-body-lg text-on-surface-variant">Can&apos;t find the answer you&apos;re looking for?</p>
-        <a
-          href="mailto:hello@bidpulse.com"
+        <Link
+          href="/contact"
           className="inline-flex items-center gap-2 px-6 py-3 bg-secondary text-on-secondary rounded text-label-md font-semibold hover:bg-on-secondary-container transition active:scale-[0.97]"
         >
-          Contact us
+          Contact support
           <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-        </a>
+        </Link>
       </section>
     </MarketingShell>
   );
