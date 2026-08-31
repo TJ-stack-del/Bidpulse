@@ -38,11 +38,13 @@ export default async function RootPage() {
 
   if (client) redirect("/dashboard");
 
-  // Signed in, but neither row exists yet: the only legitimate case is an
-  // admin signup that required email confirmation, so SignupForm couldn't
-  // create the organizations/team_members rows at signup time (no session
-  // existed yet). org_name in user_metadata is only ever set by
-  // app/admin/signup/SignupForm.tsx, never by the client intake wizard.
+  // Signed in, but neither row exists yet: the only legitimate case left is
+  // an already-pending admin account whose org_name metadata was set by the
+  // admin signup form back when it existed — that form has since been
+  // removed (single-org business, no legitimate reason for a second org to
+  // ever get created through the UI again), but this self-heal path stays
+  // so any account still mid-confirmation from before the removal finishes
+  // setting up on next login instead of being left stuck.
   if (user.user_metadata?.org_name) {
     await ensureOrgAndMembership(supabase, user);
     redirect("/admin/inbox");

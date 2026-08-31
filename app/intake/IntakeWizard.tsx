@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
 import { BidFileStep } from "@/components/ui/BidFileStep";
@@ -321,6 +322,24 @@ export function IntakeWizard() {
             <p className="text-body-md text-on-surface-variant mt-2">{fitCheck.explanation}</p>
           </div>
         )}
+
+        {/* The fit-check note above is actively telling the client to fill
+            in their profile — Company Profile is the more prominent action
+            here for that reason, not just as a default primary-button choice. */}
+        <div className="flex flex-col items-center gap-3 mt-8">
+          <Link
+            href="/dashboard/profile"
+            className="py-3 px-6 bg-secondary text-on-secondary rounded text-label-md font-semibold hover:bg-on-secondary-container transition active:scale-[0.97]"
+          >
+            Complete your Company Profile
+          </Link>
+          <Link
+            href="/dashboard"
+            className="py-3 px-6 border border-outline-variant text-on-surface rounded text-label-md hover:bg-surface-container-high transition active:scale-[0.97]"
+          >
+            Go to your dashboard
+          </Link>
+        </div>
       </div>
     );
   }
