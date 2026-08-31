@@ -190,6 +190,8 @@ create table matched_opportunities (
   assigned_client_id uuid references clients(id) on delete set null, -- null until admin assigns it
   source_title text not null,
   source_agency text not null,
+  scope text, -- what the job actually involves; carried into the submission's scope on assign
+  solicitation_number text,
   due_date timestamptz,
   match_score numeric,
   status text not null default 'new', -- 'new' | 'assigned' | 'dismissed'

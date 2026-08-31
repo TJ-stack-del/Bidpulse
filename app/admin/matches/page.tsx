@@ -29,7 +29,7 @@ export default async function AdminMatchesPage() {
   const { data: matches } = await supabase
     .from("matched_opportunities")
     .select(
-      "id, source_title, source_agency, source_url, due_date, match_score, status, assigned_client_id, created_at"
+      "id, source_title, source_agency, source_url, scope, solicitation_number, due_date, match_score, status, assigned_client_id, created_at"
     )
     .eq("org_id", member.org_id)
     .order("created_at", { ascending: false });

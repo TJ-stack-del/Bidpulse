@@ -9,6 +9,8 @@ type Match = {
   source_title: string;
   source_agency: string;
   source_url: string | null;
+  scope: string | null;
+  solicitation_number: string | null;
   due_date: string | null;
   match_score: number | null;
   status: string;
@@ -37,8 +39,9 @@ export function MatchesPanel({
   const [logging, setLogging] = useState(false);
   const [title, setTitle] = useState("");
   const [agency, setAgency] = useState("");
+  const [scope, setScope] = useState("");
+  const [solicitationNumber, setSolicitationNumber] = useState("");
   const [dueDate, setDueDate] = useState("");
-  const [matchScore, setMatchScore] = useState("");
 
   const supabase = createClient();
 
@@ -58,8 +61,9 @@ export function MatchesPanel({
         org_id: orgId,
         source_title: title,
         source_agency: agency,
+        scope: scope.trim() || null,
+        solicitation_number: solicitationNumber.trim() || null,
         due_date: dueDate || null,
-        match_score: matchScore ? Number(matchScore) : null,
         status: "new",
       })
       .select()
@@ -75,8 +79,9 @@ export function MatchesPanel({
     setMatches((m) => [data, ...m]);
     setTitle("");
     setAgency("");
+    setScope("");
+    setSolicitationNumber("");
     setDueDate("");
-    setMatchScore("");
   }
 
   async function handleAssign(matchId: string) {
@@ -103,7 +108,8 @@ export function MatchesPanel({
       .insert({
         client_id: clientId,
         agency: match.source_agency,
-        scope: `From matched opportunity: ${match.source_title}`,
+        scope: match.scope ?? `From matched opportunity: ${match.source_title}`,
+        solicitation_number: match.solicitation_number,
         due_date: match.due_date,
       })
       .select()
@@ -133,6 +139,21 @@ export function MatchesPanel({
       event_type: "submission_created_from_match",
       event_detail: { opportunity_id: matchId },
     });
+
+    // The intake wizard triggers this right after a client's own submit
+    // (lib/submissions.ts finalizeSubmission); a submission created here by
+    // an admin assigning a match skips that path entirely, so it has to be
+    // kicked off explicitly or the admin inbox's Fit check panel is stuck on
+    // "Not run yet" forever for every match-assigned submission. Scope/
+    // agency/due date are already real at this point (taken from the
+    // matched opportunity), so there's no need to wait for the client to
+    // finalize the bid file first — non-fatal if it fails, since a missing
+    // fit check shouldn't block the assignment that already succeeded.
+    fetch("/api/generate-fit-check", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ submissionId: submission.id }),
+    }).catch(() => {});
 
     setMatches((m) =>
       m.map((x) => (x.id === matchId ? { ...x, status: "assigned", assigned_client_id: clientId } : x))
@@ -165,50 +186,59 @@ export function MatchesPanel({
 
       <form
         onSubmit={handleLogOpportunity}
-        className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 flex flex-col md:flex-row gap-3 items-end flex-wrap"
+        className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 flex flex-col gap-3"
       >
-        <div className="flex-1 min-w-[160px]">
-          <label className="text-label-md text-on-surface-variant block mb-1">Title</label>
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-            className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
-          />
-        </div>
-        <div className="flex-1 min-w-[160px]">
-          <label className="text-label-md text-on-surface-variant block mb-1">Agency</label>
-          <input
-            value={agency}
-            onChange={(e) => setAgency(e.target.value)}
-            required
-            className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
-          />
+        <div className="flex flex-col md:flex-row gap-3 items-end flex-wrap">
+          <div className="flex-1 min-w-[160px]">
+            <label className="text-label-md text-on-surface-variant block mb-1">Title</label>
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+              className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+            />
+          </div>
+          <div className="flex-1 min-w-[160px]">
+            <label className="text-label-md text-on-surface-variant block mb-1">Agency</label>
+            <input
+              value={agency}
+              onChange={(e) => setAgency(e.target.value)}
+              required
+              className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+            />
+          </div>
+          <div className="flex-1 min-w-[160px]">
+            <label className="text-label-md text-on-surface-variant block mb-1">Solicitation number</label>
+            <input
+              value={solicitationNumber}
+              onChange={(e) => setSolicitationNumber(e.target.value)}
+              className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+            />
+          </div>
+          <div>
+            <label className="text-label-md text-on-surface-variant block mb-1">Due date</label>
+            <input
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+              className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+            />
+          </div>
         </div>
         <div>
-          <label className="text-label-md text-on-surface-variant block mb-1">Due date</label>
-          <input
-            type="date"
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
-            className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
-          />
-        </div>
-        <div className="w-28">
-          <label className="text-label-md text-on-surface-variant block mb-1">Match score</label>
-          <input
-            type="number"
-            min={0}
-            max={100}
-            value={matchScore}
-            onChange={(e) => setMatchScore(e.target.value)}
-            className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+          <label className="text-label-md text-on-surface-variant block mb-1">Scope of work</label>
+          <textarea
+            value={scope}
+            onChange={(e) => setScope(e.target.value)}
+            rows={3}
+            placeholder="What the job actually involves…"
+            className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none resize-y"
           />
         </div>
         <button
           type="submit"
           disabled={logging}
-          className="py-2 px-4 bg-secondary text-on-secondary rounded text-label-md font-semibold hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
+          className="self-end py-2 px-4 bg-secondary text-on-secondary rounded text-label-md font-semibold hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
         >
           {logging && <Spinner />}
           {logging ? "Logging…" : "Log opportunity"}
