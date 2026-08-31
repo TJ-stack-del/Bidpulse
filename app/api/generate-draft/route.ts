@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { isFederalAgency } from "@/lib/federal-agency";
 import { detectAgencyTypes } from "@/lib/agency-type";
+import { referenceRequirementRows } from "@/lib/compliance/requirements-reference";
 
 // Admin-only "auto-draft" helper for DeliverablesPanel — removes the
 // blank-page problem by returning a structured starting draft built from
@@ -18,7 +19,7 @@ const DELIVERABLE_LABELS: Record<string, string> = {
   technical_narrative: "Technical narrative",
 };
 
-type ClientInfo = {
+export type ClientInfo = {
   company_name: string | null;
   naics_codes: string[] | null;
   set_asides: string[] | null;
@@ -33,7 +34,7 @@ type ClientInfo = {
   differentiators: string | null;
 };
 
-type SubmissionInfo = {
+export type SubmissionInfo = {
   id: string;
   agency: string;
   solicitation_number: string | null;
@@ -214,7 +215,7 @@ export async function POST(request: Request) {
   return NextResponse.json({ content });
 }
 
-function buildDraft(deliverableType: string, submission: SubmissionInfo, verifiedCertLabels: string[]): string {
+export function buildDraft(deliverableType: string, submission: SubmissionInfo, verifiedCertLabels: string[]): string {
   const client = submission.clients ?? {
     company_name: null,
     naics_codes: null,
@@ -333,6 +334,13 @@ function buildDraft(deliverableType: string, submission: SubmissionInfo, verifie
             "[Requirement from RFP — not yet identified] | NOT YET PROVIDED | [Not yet provided — confirm with the client before writing anything here]",
           ];
     requirementRows.push(...agencyTypeRequirementRows(agency));
+    // Reference-library rows (lib/compliance/requirements-reference.ts): the
+    // ALWAYS_MANDATORY tier always appears; CONDITIONAL_REQUIREMENTS and
+    // TRADE_SPECIFIC_CERTIFICATIONS only appear when their trigger keyword is
+    // actually present in the client's own scope text — never defaulted to
+    // required. Appended after the scope-derived and agency-type rows above,
+    // which stay untouched.
+    requirementRows.push(...referenceRequirementRows(submission.scope ?? ""));
 
     return [
       `COMPLIANCE MATRIX — ${agency}${solicitationLine}`,

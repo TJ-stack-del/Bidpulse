@@ -46,8 +46,21 @@ directly.
   michaeltcoleman@gmail.com until a custom domain is verified)
 - Daily digest + 48-hour turnaround SLA tracking (Vercel Cron, 2 jobs/day limit
   on Hobby tier — already at that limit)
-- Contact form (`/contact`, saves to `support_messages` + emails admin)
+- Contact form (`/contact`, saves to `support_messages` + emails admin) +
+  `/admin/messages` inbox — verified 2026-08-31 end-to-end (real browser
+  session submitted a message, admin login confirmed it in the inbox)
 - Real logo (multiple variants — stacked, horizontal nav, app icon/favicon)
+- Compliance matrix mandatory/conditional/trade-specific categorization
+  (`lib/compliance/requirements-reference.ts`) — verified 2026-08-31: real
+  admin session generated a compliance matrix for a test submission whose
+  scope mentioned "prevailing wage" and "pesticide," and the generated
+  draft correctly included all 7 always-mandatory rows plus the two
+  triggered conditional/trade-specific rows
+- Fit-check set-aside eligibility flag (`lib/compliance/set-aside-eligibility.ts`,
+  `fit_eligibility_concern`/`fit_eligibility_explanation`) — verified
+  2026-08-31: a real intake submission mentioning "SDVOSB Set-Aside" from a
+  client with no verified SDVOSB cert correctly set the concern flag with
+  the right explanation
 
 ## Known Issues / Recently Fixed
 - Fixed twice: RLS blocking `clients` insert during signup. Most recent
@@ -84,20 +97,12 @@ directly.
   bucket to private. Doing this out of order breaks existing document links
   for active clients mid-flight.
 
-## In Progress / Sent to Claude Code, Not Yet Confirmed Working
-- Compliance matrix mandatory/conditional categorization using
-  `lib/compliance/requirements-reference.ts` (ALWAYS_MANDATORY,
-  CONDITIONAL_REQUIREMENTS, TRADE_SPECIFIC_CERTIFICATIONS)
-- Fit-check eligibility/disqualification flag (set-aside restrictions vs.
-  client's verified certs) — schema columns added
-  (`fit_eligibility_concern`, `fit_eligibility_explanation`)
-
 ## Deliberately Deferred (in priority order, decided together)
 1. Static "always true" bid-process warnings (Cone of Silence — never contact
    agency staff directly once a solicitation is published; Florida Public
    Records/Sunshine Law — bids become public record, proprietary content must
-   be explicitly marked "Exempt/Trade Secret") — low-risk, no AI needed,
-   next up once the two in-progress items above are confirmed.
+   be explicitly marked "Exempt/Trade Secret") — low-risk, no AI needed, next
+   up now that the compliance-matrix and fit-check items above are confirmed.
 2. Bid-specific variable items needing real detection from bid text:
    prevailing wage requirements, mandatory vs. optional site visits,
    mobilization/NTP timelines, payment-terms cash-flow education.

@@ -47,6 +47,17 @@ export function getStageChangeEmail(stage: string, agency: string, companyName: 
   };
 }
 
+export function getContactMessageEmail(name: string, email: string, message: string) {
+  return {
+    subject: `New contact form message from ${name}`,
+    html: `
+      <p>New message from the /contact form:</p>
+      <p><strong>${name}</strong> — ${email}</p>
+      <p>${message.replace(/\n/g, "<br>")}</p>
+    `,
+  };
+}
+
 export function getDailyDigestEmail(
   staleItems: {
     companyName: string;

@@ -101,7 +101,11 @@ export function PacketButtons({
     setError(null);
     try {
       const { submission, deliverables } = await buildDoc();
-      const canDownload = await isPaidOrPilot(submission.package_id);
+      // Admin is the one producing this packet in the first place — the
+      // payment gate exists to stop a CLIENT getting the finished file
+      // before they've paid, not to stop staff pulling their own work
+      // product to QC it or send it manually.
+      const canDownload = viewerRole === "admin" || (await isPaidOrPilot(submission.package_id));
       if (!canDownload) {
         setError("Available once payment is confirmed.");
         return;

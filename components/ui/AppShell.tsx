@@ -19,6 +19,7 @@ const NAV_LINKS: Record<Role, { href: string; label: string; icon: string }[]> =
   admin: [
     { href: "/admin/inbox", label: "Inbox", icon: "inbox" },
     { href: "/admin/matches", label: "Matches", icon: "insights" },
+    { href: "/admin/messages", label: "Messages", icon: "mail" },
   ],
   client: [
     { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
