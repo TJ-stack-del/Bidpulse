@@ -39,7 +39,7 @@ function agencyTypeFitNotes(agencyTypes: AgencyType[]): string[] {
   return notes;
 }
 
-export function assessFit(input: {
+function assessFit(input: {
   naicsCodes: string[];
   scope: string | null;
   dueDate: string | null;
