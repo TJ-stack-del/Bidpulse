@@ -1,16 +1,5 @@
--- ============================================================================
--- BidPulse — Schema (generated reference, do not run by hand)
--- ============================================================================
--- This file is a snapshot of the live Supabase schema, generated via
--- `npx supabase db dump --schema public`. It documents current structure for
--- reference (code comments across the app point here for RLS policies, enum
--- values, etc.) — it is NOT the mechanism for changing the schema.
---
--- Schema changes go through supabase/migrations/ (`npx supabase migration new
--- <name>`, then `npx supabase db push`). After applying migrations, regenerate
--- this file with the same dump command and commit the diff so it stays
--- accurate.
--- ============================================================================
+
+
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -24,13 +13,35 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 
-CREATE SCHEMA IF NOT EXISTS "public";
-
-
-ALTER SCHEMA "public" OWNER TO "pg_database_owner";
-
-
 COMMENT ON SCHEMA "public" IS 'standard public schema';
+
+
+
+CREATE EXTENSION IF NOT EXISTS "pg_stat_statements" WITH SCHEMA "extensions";
+
+
+
+
+
+
+CREATE EXTENSION IF NOT EXISTS "pgcrypto" WITH SCHEMA "extensions";
+
+
+
+
+
+
+CREATE EXTENSION IF NOT EXISTS "supabase_vault" WITH SCHEMA "vault";
+
+
+
+
+
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
+
+
+
 
 
 
@@ -45,13 +56,6 @@ CREATE TYPE "public"."checklist_status" AS ENUM (
 ALTER TYPE "public"."checklist_status" OWNER TO "postgres";
 
 
--- Pilot timeline stages:
---   submitted            client finished intake
---   in_review            admin reviewing the RFP
---   deliverables_ready   capability statement / compliance matrix / narrative prepared
---   client_review        client reviewing the deliverables
---   confirmed_submitted  admin confirmed the bid was actually submitted to the agency
---   closed               review/credit decision made
 CREATE TYPE "public"."submission_stage" AS ENUM (
     'submitted',
     'in_review',
@@ -65,8 +69,6 @@ CREATE TYPE "public"."submission_stage" AS ENUM (
 ALTER TYPE "public"."submission_stage" OWNER TO "postgres";
 
 
--- Only two roles: admin (Mike/team, sees every client) and client
--- (a contractor, sees only their own submission).
 CREATE TYPE "public"."user_role" AS ENUM (
     'admin',
     'client'
@@ -76,9 +78,6 @@ CREATE TYPE "public"."user_role" AS ENUM (
 ALTER TYPE "public"."user_role" OWNER TO "postgres";
 
 
--- Backs storage.objects RLS policies on the rfp-documents bucket (not shown
--- in this public-schema dump) — not unused despite no public-schema policy
--- referencing it directly.
 CREATE OR REPLACE FUNCTION "public"."can_access_rfp_object"("object_name" "text") RETURNS boolean
     LANGUAGE "sql" STABLE SECURITY DEFINER
     SET "search_path" TO 'public'
@@ -150,7 +149,6 @@ SET default_tablespace = '';
 SET default_table_access_method = "heap";
 
 
--- Admin's internal notes (never shown to the client).
 CREATE TABLE IF NOT EXISTS "public"."admin_notes" (
     "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
     "submission_id" "uuid" NOT NULL,
@@ -163,7 +161,6 @@ CREATE TABLE IF NOT EXISTS "public"."admin_notes" (
 ALTER TABLE "public"."admin_notes" OWNER TO "postgres";
 
 
--- Immutable audit log.
 CREATE TABLE IF NOT EXISTS "public"."audit_log" (
     "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
     "submission_id" "uuid",
@@ -178,7 +175,32 @@ CREATE TABLE IF NOT EXISTS "public"."audit_log" (
 ALTER TABLE "public"."audit_log" OWNER TO "postgres";
 
 
--- Compliance-readiness checklist (per submission).
+CREATE TABLE IF NOT EXISTS "public"."bids" (
+    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+    "org_id" "uuid" NOT NULL,
+    "title" "text" NOT NULL,
+    "agency" "text" NOT NULL,
+    "solicitation_number" "text",
+    "due_date" timestamp with time zone,
+    "estimated_value_low" numeric,
+    "estimated_value_high" numeric,
+    "scope" "text",
+    "fit_score" numeric,
+    "match_score" numeric,
+    "scoring_breakdown" "jsonb",
+    "document_url" "text",
+    "document_name" "text",
+    "pia_attested" boolean DEFAULT false NOT NULL,
+    "pia_attested_at" timestamp with time zone,
+    "pia_attested_by" "uuid",
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL
+);
+
+
+ALTER TABLE "public"."bids" OWNER TO "postgres";
+
+
 CREATE TABLE IF NOT EXISTS "public"."checklist_items" (
     "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
     "submission_id" "uuid" NOT NULL,
@@ -192,20 +214,16 @@ CREATE TABLE IF NOT EXISTS "public"."checklist_items" (
 ALTER TABLE "public"."checklist_items" OWNER TO "postgres";
 
 
--- Client certifications (structured, per-cert — supersedes the old
--- clients.small_business_statuses text[] for anything that needs to know
--- WHICH cert, its number/expiration, the actual document, and whether an
--- admin has actually verified it).
 CREATE TABLE IF NOT EXISTS "public"."client_certifications" (
     "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
     "client_id" "uuid" NOT NULL,
-    "cert_type" "text" NOT NULL, -- '8(a)' | 'WOSB' | 'EDWOSB' | 'HUBZone' | 'SDVOSB' | 'VOSB' | 'Other'
-    "other_label" "text", -- only set when cert_type = 'Other', e.g. 'MBE', 'DBE' (state/local certs)
+    "cert_type" "text" NOT NULL,
+    "other_label" "text",
     "certification_number" "text",
     "expiration_date" "date",
     "file_url" "text",
     "file_name" "text",
-    "verified" boolean DEFAULT false NOT NULL, -- admin must actually look at the document — never client-set
+    "verified" boolean DEFAULT false NOT NULL,
     "verified_at" timestamp with time zone,
     "verified_by" "uuid",
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL
@@ -215,40 +233,42 @@ CREATE TABLE IF NOT EXISTS "public"."client_certifications" (
 ALTER TABLE "public"."client_certifications" OWNER TO "postgres";
 
 
--- Clients (each contractor who submits intake).
+CREATE TABLE IF NOT EXISTS "public"."client_reviews" (
+    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+    "bid_id" "uuid" NOT NULL,
+    "reviewer_id" "uuid",
+    "deliverable_id" "uuid",
+    "feedback" "text",
+    "decision" "text",
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL
+);
+
+
+ALTER TABLE "public"."client_reviews" OWNER TO "postgres";
+
+
 CREATE TABLE IF NOT EXISTS "public"."clients" (
     "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
     "org_id" "uuid" NOT NULL,
-    -- null until they create a login; unique once set so one auth account can
-    -- never end up mapped to two client rows — that invariant is what makes a
-    -- retried intake insert safe (a 23505 on retry means an earlier attempt
-    -- already succeeded, so the existing row is reused instead of erroring or
-    -- duplicating).
     "auth_user_id" "uuid",
     "company_name" "text" NOT NULL,
     "contact_name" "text" NOT NULL,
-    -- Intake asks for "email or phone", not both — a client who signs up with
-    -- a phone number (Supabase phone auth) has no email at all, so neither
-    -- column can be not-null. The check constraint below guarantees at least
-    -- one contact method is always on file.
     "email" "text",
     "phone" "text",
     "naics_codes" "text"[] DEFAULT '{}'::"text"[],
-    "small_business_statuses" "text"[] DEFAULT '{}'::"text"[], -- e.g. 'WOSB', 'SDVOSB', '8(a)'
+    "small_business_statuses" "text"[] DEFAULT '{}'::"text"[],
     "set_asides" "text"[] DEFAULT '{}'::"text"[],
-    "trade_keywords" "text"[] DEFAULT '{}'::"text"[], -- for matching scraped opportunities to this client
+    "trade_keywords" "text"[] DEFAULT '{}'::"text"[],
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    -- Company Profile fields (app/dashboard/profile) — filled in once by the
-    -- client, reused as facts across every future bid instead of re-asking.
     "license_number" "text",
     "years_in_business" integer,
     "business_address" "text",
     "business_phone" "text",
     "insurance_provider" "text",
     "insurance_policy_number" "text",
-    "general_liability_coverage" "text", -- free text: coverage amounts are commonly written as "$1M/$2M" pairs, not a single number
+    "general_liability_coverage" "text",
     "workers_comp_coverage" "text",
-    "differentiators" "text", -- free text: "what sets us apart" / notable past projects
+    "differentiators" "text",
     CONSTRAINT "clients_has_a_contact_method" CHECK ((("email" IS NOT NULL) OR ("phone" IS NOT NULL)))
 );
 
@@ -256,13 +276,27 @@ CREATE TABLE IF NOT EXISTS "public"."clients" (
 ALTER TABLE "public"."clients" OWNER TO "postgres";
 
 
--- Deliverables (what admin prepares for the client).
+CREATE TABLE IF NOT EXISTS "public"."compliance_items" (
+    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+    "bid_id" "uuid" NOT NULL,
+    "clause_reference" "text" NOT NULL,
+    "requirement" "text" NOT NULL,
+    "notes" "text",
+    "reviewed_by" "uuid",
+    "reviewed_at" timestamp with time zone,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL
+);
+
+
+ALTER TABLE "public"."compliance_items" OWNER TO "postgres";
+
+
 CREATE TABLE IF NOT EXISTS "public"."deliverables" (
     "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
     "submission_id" "uuid" NOT NULL,
-    "deliverable_type" "text" NOT NULL, -- 'capability_statement' | 'compliance_matrix' | 'technical_narrative'
+    "deliverable_type" "text" NOT NULL,
     "file_url" "text",
-    "content" "text", -- for deliverables generated/edited as text rather than a file
+    "content" "text",
     "prepared_by" "uuid",
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL
 );
@@ -271,20 +305,18 @@ CREATE TABLE IF NOT EXISTS "public"."deliverables" (
 ALTER TABLE "public"."deliverables" OWNER TO "postgres";
 
 
--- Matched opportunities (scraper output — admin-curated, not client-facing
--- directly).
 CREATE TABLE IF NOT EXISTS "public"."matched_opportunities" (
     "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
     "org_id" "uuid" NOT NULL,
-    "assigned_client_id" "uuid", -- null until admin assigns it
+    "assigned_client_id" "uuid",
     "source_title" "text" NOT NULL,
     "source_agency" "text" NOT NULL,
     "due_date" timestamp with time zone,
     "match_score" numeric,
-    "status" "text" DEFAULT 'new'::"text" NOT NULL, -- 'new' | 'assigned' | 'dismissed'
+    "status" "text" DEFAULT 'new'::"text" NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "source_url" "text",
-    "scope" "text", -- what the job actually involves; carried into the submission's scope on assign
+    "scope" "text",
     "solicitation_number" "text"
 );
 
@@ -292,7 +324,6 @@ CREATE TABLE IF NOT EXISTS "public"."matched_opportunities" (
 ALTER TABLE "public"."matched_opportunities" OWNER TO "postgres";
 
 
--- Your business (single row, but kept as a table for future team growth).
 CREATE TABLE IF NOT EXISTS "public"."organizations" (
     "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
     "name" "text" NOT NULL,
@@ -303,15 +334,14 @@ CREATE TABLE IF NOT EXISTS "public"."organizations" (
 ALTER TABLE "public"."organizations" OWNER TO "postgres";
 
 
--- Packages (what a client purchased or is piloting).
 CREATE TABLE IF NOT EXISTS "public"."packages" (
     "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
     "client_id" "uuid" NOT NULL,
-    "package_type" "text" DEFAULT 'pilot'::"text" NOT NULL, -- 'one_off' | 'retainer' | 'pilot' | 'test'
-    "price_note" "text", -- manual invoicing for now, just a note/amount
-    "is_test" boolean DEFAULT false NOT NULL, -- internal rehearsal, excluded from revenue reporting
+    "package_type" "text" DEFAULT 'pilot'::"text" NOT NULL,
+    "price_note" "text",
+    "is_test" boolean DEFAULT false NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "paid" boolean DEFAULT false NOT NULL, -- gates deliverable downloads; set manually by admin for now
+    "paid" boolean DEFAULT false NOT NULL,
     "paid_at" timestamp with time zone
 );
 
@@ -319,11 +349,22 @@ CREATE TABLE IF NOT EXISTS "public"."packages" (
 ALTER TABLE "public"."packages" OWNER TO "postgres";
 
 
--- Submission documents (the client's uploaded RFP file, etc.).
+CREATE TABLE IF NOT EXISTS "public"."role_permissions" (
+    "can_view_admin" boolean DEFAULT false NOT NULL,
+    "can_view_margin_data" boolean DEFAULT false NOT NULL,
+    "can_sign_off" boolean DEFAULT false NOT NULL,
+    "can_manage_team" boolean DEFAULT false NOT NULL,
+    "can_export_audit_log" boolean DEFAULT false NOT NULL
+);
+
+
+ALTER TABLE "public"."role_permissions" OWNER TO "postgres";
+
+
 CREATE TABLE IF NOT EXISTS "public"."submission_documents" (
     "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
     "submission_id" "uuid" NOT NULL,
-    "document_type" "text" NOT NULL, -- 'rfp_file' | 'other'
+    "document_type" "text" NOT NULL,
     "file_name" "text" NOT NULL,
     "file_url" "text" NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL
@@ -333,7 +374,6 @@ CREATE TABLE IF NOT EXISTS "public"."submission_documents" (
 ALTER TABLE "public"."submission_documents" OWNER TO "postgres";
 
 
--- Submissions (one RFP intake — the core record).
 CREATE TABLE IF NOT EXISTS "public"."submissions" (
     "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
     "client_id" "uuid" NOT NULL,
@@ -344,20 +384,14 @@ CREATE TABLE IF NOT EXISTS "public"."submissions" (
     "scope" "text",
     "stage" "public"."submission_stage" DEFAULT 'submitted'::"public"."submission_stage" NOT NULL,
     "is_test" boolean DEFAULT false NOT NULL,
-    "draft" boolean DEFAULT true NOT NULL, -- true until client locks/submits
+    "draft" boolean DEFAULT true NOT NULL,
     "draft_saved_at" timestamp with time zone,
     "submitted_at" timestamp with time zone,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL, -- bumped explicitly on stage change; no auto-update trigger
-    "fit_alignment" "text", -- 'strong' | 'moderate' | 'weak' — set once by /api/generate-fit-check right after client submit
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "fit_alignment" "text",
     "fit_explanation" "text",
-    -- client's own "I've submitted this" click; a claim to verify, never
-    -- auto-trusted — admin still moves the stage to confirmed_submitted by hand
     "client_reported_submitted_at" timestamp with time zone,
-    -- Eligibility/disqualification flag from fit-check: does the client's
-    -- verified certification set actually satisfy this bid's set-aside
-    -- restrictions? A concern here doesn't block the submission, just
-    -- surfaces the mismatch for admin review.
     "fit_eligibility_concern" boolean,
     "fit_eligibility_explanation" "text"
 );
@@ -382,7 +416,6 @@ CREATE TABLE IF NOT EXISTS "public"."support_messages" (
 ALTER TABLE "public"."support_messages" OWNER TO "postgres";
 
 
--- Your team (admin/staff who work the intake inbox).
 CREATE TABLE IF NOT EXISTS "public"."team_members" (
     "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
     "org_id" "uuid" NOT NULL,
@@ -407,6 +440,11 @@ ALTER TABLE ONLY "public"."audit_log"
 
 
 
+ALTER TABLE ONLY "public"."bids"
+    ADD CONSTRAINT "bids_pkey" PRIMARY KEY ("id");
+
+
+
 ALTER TABLE ONLY "public"."checklist_items"
     ADD CONSTRAINT "checklist_items_pkey" PRIMARY KEY ("id");
 
@@ -417,8 +455,18 @@ ALTER TABLE ONLY "public"."client_certifications"
 
 
 
+ALTER TABLE ONLY "public"."client_reviews"
+    ADD CONSTRAINT "client_reviews_pkey" PRIMARY KEY ("id");
+
+
+
 ALTER TABLE ONLY "public"."clients"
     ADD CONSTRAINT "clients_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."compliance_items"
+    ADD CONSTRAINT "compliance_items_pkey" PRIMARY KEY ("id");
 
 
 
@@ -507,6 +555,11 @@ ALTER TABLE ONLY "public"."client_certifications"
 
 
 
+ALTER TABLE ONLY "public"."client_reviews"
+    ADD CONSTRAINT "client_reviews_bid_id_fkey" FOREIGN KEY ("bid_id") REFERENCES "public"."bids"("id") ON DELETE CASCADE;
+
+
+
 ALTER TABLE ONLY "public"."clients"
     ADD CONSTRAINT "clients_auth_user_id_fkey" FOREIGN KEY ("auth_user_id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
 
@@ -514,6 +567,11 @@ ALTER TABLE ONLY "public"."clients"
 
 ALTER TABLE ONLY "public"."clients"
     ADD CONSTRAINT "clients_org_id_fkey" FOREIGN KEY ("org_id") REFERENCES "public"."organizations"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."compliance_items"
+    ADD CONSTRAINT "compliance_items_bid_id_fkey" FOREIGN KEY ("bid_id") REFERENCES "public"."bids"("id") ON DELETE CASCADE;
 
 
 
@@ -582,16 +640,6 @@ ALTER TABLE ONLY "public"."team_members"
 
 
 
--- ============================================================================
--- Row Level Security
--- Admins see everything in their org. Clients see only their own submissions.
--- (Policy order below is alphabetical, as pg_dump emits it — not grouped by
--- table.)
--- ============================================================================
-
--- Without this, the intake wizard's "About you" step (a brand-new client
--- inserting their own row) fails RLS every time — is_own_client_record()
--- can't authorize an insert of the very row it would check against.
 CREATE POLICY "a client can insert their own record" ON "public"."clients" FOR INSERT WITH CHECK (("auth_user_id" = "auth"."uid"()));
 
 
@@ -622,12 +670,6 @@ CREATE POLICY "admins can read their organization" ON "public"."organizations" F
 
 
 
--- NOTE: this overlaps with "admins manage client_certifications" below —
--- two separate admin-access policies on the same table via two different
--- paths (team_members join here vs. is_admin() there). Functionally
--- redundant; not from the original hand-written schema, found during the
--- 2026-08-31 schema reconciliation. Left as-is since both are correct, just
--- worth cleaning up in a future migration.
 CREATE POLICY "admins manage certifications in their org" ON "public"."client_certifications" USING ((EXISTS ( SELECT 1
    FROM ("public"."clients" "c"
      JOIN "public"."team_members" "tm" ON (("tm"."org_id" = "c"."org_id")))
@@ -659,17 +701,10 @@ CREATE POLICY "admins manage deliverables" ON "public"."deliverables" USING ((EX
 
 
 
--- Admin-only — clients see their assigned ones through their own
--- submissions once converted, not through this table directly.
 CREATE POLICY "admins manage matched_opportunities" ON "public"."matched_opportunities" USING ("public"."is_admin"("org_id"));
 
 
 
--- RLS was enabled on this table with no policies ever added for a while,
--- which under Postgres RLS means "nobody can see any row, including
--- admins" — PaymentStatus's toggle and the client dashboard's paid check
--- would both silently no-op/read-null the moment a real package row
--- existed, with no error to say why. These two policies fixed that.
 CREATE POLICY "admins manage packages" ON "public"."packages" USING ((EXISTS ( SELECT 1
    FROM "public"."clients" "c"
   WHERE (("c"."id" = "packages"."client_id") AND "public"."is_admin"("c"."org_id")))));
@@ -730,10 +765,16 @@ CREATE POLICY "authenticated users can read organizations" ON "public"."organiza
 
 
 
+ALTER TABLE "public"."bids" ENABLE ROW LEVEL SECURITY;
+
+
 ALTER TABLE "public"."checklist_items" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."client_certifications" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."client_reviews" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."clients" ENABLE ROW LEVEL SECURITY;
@@ -743,11 +784,6 @@ CREATE POLICY "clients insert their own submissions" ON "public"."submissions" F
 
 
 
--- A client can manage their own certs (add/edit/delete/upload), but the
--- WITH CHECK forces verified = false on any row they write — the only way
--- a row becomes verified is the separate admin policy, i.e. an admin
--- actually doing it. Enforced at the data layer, not just hidden in the
--- UI: a client crafting a raw API call can't set their own cert to verified.
 CREATE POLICY "clients manage their own certifications" ON "public"."client_certifications" USING ("public"."is_own_client_record"("client_id")) WITH CHECK (("public"."is_own_client_record"("client_id") AND ("verified" = false)));
 
 
@@ -772,16 +808,6 @@ CREATE POLICY "clients read their own packages" ON "public"."packages" FOR SELEC
 
 
 
--- Direct column comparison, not is_own_client_record(id) — that function's
--- subquery selects from clients itself, and a same-table self-referencing
--- RLS check evaluated as the RETURNING-visibility step right after an
--- INSERT into that same table is a known Postgres/PostgREST rough edge
--- (confirmed live: the identical insert succeeds with Prefer: return=minimal,
--- and is_own_client_record() returns true when called standalone via RPC for
--- the same row — it only fails embedded in the INSERT...RETURNING path).
--- auth_user_id is a plain column on this row, so no subquery is needed here
--- at all — is_own_client_record() stays as-is for every OTHER table, which
--- calls it cross-table (checking clients from a different table's policy).
 CREATE POLICY "clients read their own record" ON "public"."clients" FOR SELECT USING (("auth_user_id" = "auth"."uid"()));
 
 
@@ -794,12 +820,11 @@ CREATE POLICY "clients update their own draft submissions" ON "public"."submissi
 
 
 
--- The Company Profile page needs clients to actually be able to save their
--- own profile fields. No RETURNING involved in that update, so the
--- self-referencing subquery in is_own_client_record() is safe here (see the
--- note on "clients read their own record" above for why SELECT avoids it).
 CREATE POLICY "clients update their own record" ON "public"."clients" FOR UPDATE USING ("public"."is_own_client_record"("id")) WITH CHECK ("public"."is_own_client_record"("id"));
 
+
+
+ALTER TABLE "public"."compliance_items" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."deliverables" ENABLE ROW LEVEL SECURITY;
@@ -820,6 +845,9 @@ ALTER TABLE "public"."organizations" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."packages" ENABLE ROW LEVEL SECURITY;
 
 
+ALTER TABLE "public"."role_permissions" ENABLE ROW LEVEL SECURITY;
+
+
 ALTER TABLE "public"."submission_documents" ENABLE ROW LEVEL SECURITY;
 
 
@@ -832,10 +860,162 @@ ALTER TABLE "public"."support_messages" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."team_members" ENABLE ROW LEVEL SECURITY;
 
 
+
+
+ALTER PUBLICATION "supabase_realtime" OWNER TO "postgres";
+
+
 GRANT USAGE ON SCHEMA "public" TO "postgres";
 GRANT USAGE ON SCHEMA "public" TO "anon";
 GRANT USAGE ON SCHEMA "public" TO "authenticated";
 GRANT USAGE ON SCHEMA "public" TO "service_role";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -869,6 +1049,21 @@ GRANT ALL ON FUNCTION "public"."org_has_admin"("target_org_id" "uuid") TO "servi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 GRANT ALL ON TABLE "public"."admin_notes" TO "anon";
 GRANT ALL ON TABLE "public"."admin_notes" TO "authenticated";
 GRANT ALL ON TABLE "public"."admin_notes" TO "service_role";
@@ -878,6 +1073,12 @@ GRANT ALL ON TABLE "public"."admin_notes" TO "service_role";
 GRANT ALL ON TABLE "public"."audit_log" TO "anon";
 GRANT ALL ON TABLE "public"."audit_log" TO "authenticated";
 GRANT ALL ON TABLE "public"."audit_log" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."bids" TO "anon";
+GRANT ALL ON TABLE "public"."bids" TO "authenticated";
+GRANT ALL ON TABLE "public"."bids" TO "service_role";
 
 
 
@@ -893,9 +1094,21 @@ GRANT ALL ON TABLE "public"."client_certifications" TO "service_role";
 
 
 
+GRANT ALL ON TABLE "public"."client_reviews" TO "anon";
+GRANT ALL ON TABLE "public"."client_reviews" TO "authenticated";
+GRANT ALL ON TABLE "public"."client_reviews" TO "service_role";
+
+
+
 GRANT ALL ON TABLE "public"."clients" TO "anon";
 GRANT ALL ON TABLE "public"."clients" TO "authenticated";
 GRANT ALL ON TABLE "public"."clients" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."compliance_items" TO "anon";
+GRANT ALL ON TABLE "public"."compliance_items" TO "authenticated";
+GRANT ALL ON TABLE "public"."compliance_items" TO "service_role";
 
 
 
@@ -923,6 +1136,12 @@ GRANT ALL ON TABLE "public"."packages" TO "service_role";
 
 
 
+GRANT ALL ON TABLE "public"."role_permissions" TO "anon";
+GRANT ALL ON TABLE "public"."role_permissions" TO "authenticated";
+GRANT ALL ON TABLE "public"."role_permissions" TO "service_role";
+
+
+
 GRANT ALL ON TABLE "public"."submission_documents" TO "anon";
 GRANT ALL ON TABLE "public"."submission_documents" TO "authenticated";
 GRANT ALL ON TABLE "public"."submission_documents" TO "service_role";
@@ -944,6 +1163,12 @@ GRANT ALL ON TABLE "public"."support_messages" TO "service_role";
 GRANT ALL ON TABLE "public"."team_members" TO "anon";
 GRANT ALL ON TABLE "public"."team_members" TO "authenticated";
 GRANT ALL ON TABLE "public"."team_members" TO "service_role";
+
+
+
+
+
+
 
 
 
@@ -973,27 +1198,28 @@ ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TAB
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "service_role";
 
 
--- ============================================================================
--- Storage (not captured above — this dump is --schema public only)
--- ============================================================================
--- A public bucket "rfp-documents" exists (storage.buckets), holding clients'
--- uploaded RFP files, deliverables, and certifications, referenced by
--- submission_documents.file_url / deliverables.file_url /
--- client_certifications.file_url. Access is scoped via storage.objects RLS
--- policies (not shown in this public-schema dump) using two SECURITY
--- DEFINER functions above: can_access_rfp_object() for submission-id-
--- prefixed paths, can_access_client_object() for client-id-prefixed paths
--- (the certifications upload folder).
---
--- 2026-08-31 fix: four broad, ownership-blind policies (anyone-can-read,
--- authenticated-can-update/delete/upload with no ownership check) were
--- found and removed in migration 20260831210857_fix_rfp_documents_storage_rls.sql,
--- after confirming can_access_client_object() coverage so certification
--- uploads kept working. Residual consideration, not yet addressed: the
--- bucket itself is still marked public, so any file's direct public URL is
--- fetchable by anyone who obtains that URL, regardless of RLS — switching
--- to a private bucket + signed URLs would need app code changes
--- (getPublicUrl → createSignedUrl) and is a separate decision.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
