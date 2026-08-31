@@ -19,7 +19,7 @@ const DELIVERABLE_LABELS: Record<string, string> = {
   technical_narrative: "Technical narrative",
 };
 
-export type ClientInfo = {
+type ClientInfo = {
   company_name: string | null;
   naics_codes: string[] | null;
   set_asides: string[] | null;
@@ -34,7 +34,7 @@ export type ClientInfo = {
   differentiators: string | null;
 };
 
-export type SubmissionInfo = {
+type SubmissionInfo = {
   id: string;
   agency: string;
   solicitation_number: string | null;
@@ -215,7 +215,7 @@ export async function POST(request: Request) {
   return NextResponse.json({ content });
 }
 
-export function buildDraft(deliverableType: string, submission: SubmissionInfo, verifiedCertLabels: string[]): string {
+function buildDraft(deliverableType: string, submission: SubmissionInfo, verifiedCertLabels: string[]): string {
   const client = submission.clients ?? {
     company_name: null,
     naics_codes: null,
