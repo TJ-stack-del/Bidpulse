@@ -75,7 +75,12 @@ directly.
   verified live with a real submission where this exact mismatch fired
   correctly). JSEB and DBE/SDB are now real trackable certification types
   (client-facing dropdown in `CertificationsSection.tsx`) — neither existed
-  anywhere in the app before this.
+  anywhere in the app before this. Re-verified live during the September
+  audit against all 5 hardening edge cases: ambiguous funding source,
+  multiple set-aside mentions in one bid, client holding a different
+  (wrong) verified cert than what's required, near-miss keyword text not
+  false-firing (e.g. "vosb" inside "sdvosb"), and casing/spacing variance
+  in set-aside language (e.g. "8 ( A )  SET-ASIDE") — all 5 passed.
 - Static bid-process warnings (Cone of Silence, Florida Sunshine Law/public
   records, government payment lag Net-30/45, mobilization/NTP timeline) —
   shared `BidProcessNotices` component shown on the intake confirmation
@@ -114,6 +119,52 @@ directly.
   Insurance is a summary of what's on file, not a substitute for the real
   uploaded COI document. Verified 2026-09-01 with real below/above-threshold
   submissions.
+- Package-linking UI: `PaymentStatus.tsx` — admin can now create a new
+  package (type, price note) or reuse an existing one from the same client
+  (packages are 1:many with submissions — no unique constraint ties one to
+  the other, confirmed against `schema.sql`), link it to the submission,
+  and mark it paid. The earlier "No package linked to this submission yet"
+  message with no way to act on it is closed. Verified with a real
+  DB-backed test: before linking, `isPaidOrPilot` → false; after linking +
+  marking paid → true; a `pilot`-type package unlocks downloads without
+  `paid = true`, as designed.
+- Tracked Supabase CLI migrations: 8 real migration files in
+  `supabase/migrations/`, confirmed via a live query that every column they
+  add actually exists on the live database (not just sitting as unapplied
+  local files).
+- IT/Computer Support compliance vertical: three new
+  `TRADE_SPECIFIC_CERTIFICATIONS` tiers in
+  `lib/compliance/requirements-reference.ts` — VA information-system/data
+  access (VA Handbook 6500.6, VAAR 852.239-70), Section 508/ICT
+  accessibility (VAAR 852.239-75), and Controlled Unclassified Information
+  (NIST SP 800-171 / CMMC / DFARS 252.204-7012 family). Trigger keywords
+  are real VAAR/DFARS clause citations, verified against actual
+  Acquisition.gov clause text rather than generic terms, specifically so
+  "veteran" or "computer" alone in a bid never triggers any of the three.
+  `lib/agency-type.ts` also gained a `"va"` agency type (matched on agency
+  name: "veterans affairs," "VAMC," "VISN," etc. — deliberately not a bare
+  "VA," which collides with the Virginia state abbreviation) for a softer,
+  non-blocking fit-check note. Verified live against 7 cases (no VA/CUI
+  language, VA system-access language, Section 508 language, CUI/NIST
+  language, plus false-positive probes for "circuit" — which contains the
+  substring "cui" — and generic "veteran"/"computer" mentions) — all
+  correct. See "Known Issues" for the real Dar Mano Consulting bid this
+  vertical was built to address.
+- Trade-coverage safety net: `lib/compliance/known-trades.ts` defines the
+  currently-supported trades (HVAC, Janitorial, Landscaping, IT/Computer
+  Support) as the single source of truth for three touchpoints — a red
+  admin-facing banner on the submission detail page, an 8th-grade-level
+  note inside the actual compliance-matrix deliverable content (client
+  reads this in preview/download), and an intake-time heads-up on the
+  client dashboard. Verified live: an electrical-contracting test
+  submission (unsupported trade) correctly triggers all three; a
+  landscaping test submission (supported) triggers none, no regression.
+  One byproduct fix needed to make the deliverable note actually reach the
+  downloaded PDF: `lib/pdf/deliverables-packet.ts`'s compliance-matrix
+  renderer previously only ever drew the pipe-delimited table and silently
+  dropped every surrounding prose line (including the pre-existing
+  "[DRAFT...]" disclaimer and the trailing scope-reference line) — fixed to
+  render prose and table segments in their original order.
 
 ## Known Issues / Recently Fixed
 - Fixed twice: RLS blocking `clients` insert during signup. Most recent
@@ -150,16 +201,47 @@ directly.
   using plural "Airports" (e.g. "Metropolitan Washington Airports
   Authority"). Fixed to `\bschools?\b` / `\bairports?\b`; `transit` checked
   and didn't have the same bug.
+- Not a bug, but worth a manual look: the Dar Mano Consulting "Computer
+  support for Veterans" submission (the real bid that prompted the IT
+  vertical and trade-coverage safety net work) correctly shows NO
+  VA-system/CUI flags right now — but that's because the bid's scope text
+  doesn't contain confirmed trigger language, not because we've verified
+  it's actually safe. The system is correctly declining to guess rather
+  than confirming an answer either way (its NAICS code, 238290, is also
+  generic enough — "Other Building Equipment Contractors" — to give no
+  extra signal). Worth reading the actual solicitation by hand for this
+  one specific bid before treating the silence as a clean bill of health.
 
-## Deliberately Deferred (in priority order, decided together)
+## Open — Needs Attention
+- Session timeout is currently unset — Supabase Auth defaults to sessions
+  that never expire from inactivity, silently refreshing forever. This is
+  a project-level setting (applies to both admin and client sessions
+  alike, not settable per-role), configured in the Supabase Dashboard
+  under Authentication → Sessions, not in code. Given client data includes
+  real insurance policy numbers, license numbers, and uploaded RFP files,
+  this shouldn't stay on the indefinite default by accident. Recommendation
+  discussed: set an inactivity timeout in the 14-30 day range; skip a hard
+  time-box for now (more appropriate for stricter compliance needs than
+  BidPulse actually has, and would add re-login friction for admin with no
+  real security gain). Not yet set — needs a deliberate choice, not left
+  as a default.
+- Manually verify the Dar Mano Consulting "Computer support for Veterans"
+  bid's actual VA-system/CUI exposure by reading the real solicitation —
+  see the matching note in Known Issues above. The system correctly stayed
+  quiet, but quiet isn't the same as verified-safe for this one.
+
+## Deliberately Deferred (remaining items)
 Items #1, #2, and #4 from the original list (static bid-process warnings,
 bid-specific wage/site-visit/cash-flow/mobilization detection, and the
 dollar-threshold lean package) were completed 2026-09-01 — see Confirmed
 Working above. Remaining:
 1. Law enforcement/detention facility category for agency-aware compliance
-   (background checks, bloodborne pathogen cert — partially covered now by
-   TRADE_SPECIFIC_CERTIFICATIONS, but not fully integrated into the agency
-   keyword-detection system alongside airport/school/transit).
+   (background checks, bloodborne pathogen cert — covered by
+   TRADE_SPECIFIC_CERTIFICATIONS and confirmed working via keyword
+   detection, but not yet confirmed whether it's integrated into the
+   `lib/agency-type.ts` keyword-detection system alongside
+   airport/school/transit/`va` — worth a quick check next time agency-type
+   is touched).
 2. "Message admin" feature tied to a specific bid (same `support_messages`
    table already supports this via `submission_id` — just needs the UI).
 3. Retainer package usage tracking (how many bids used this month vs. the
@@ -172,6 +254,28 @@ advised this isn't a legal opinion and to check the USPTO database or consult
 an attorney before investing further in the name. Also relevant: he's not
 fully happy with the current logo and was already planning to revisit it —
 worth reconsidering both together.
+
+**New shield/heartbeat logo is now wired in**, ahead of the trademark
+question being resolved — the three PNG variants (BP-monogram shield icon,
+horizontal shield+wordmark, stacked shield+wordmark) were trimmed to their
+real content bounds and given a transparent background (the originals were
+opaque-white 1024x1024 canvases, which would have shown ugly white boxes
+against the app's own surface color), then wired into every actual asset
+location: `app/icon.png` is the new shield+BP+heartbeat mark (replacing
+both the old glossy 3D icon and the `app/icon.tsx` placeholder — that
+placeholder's own comment said "until a real designed logo exists," so
+it's deleted now that one does), `public/logo.png` is the new horizontal
+shield+wordmark (used by `AppShell.tsx` nav, `MarketingShell.tsx` nav +
+footer, and the `PacketButtons.tsx` PDF-preview watermark — all four call
+sites' width/height props updated to the new image's real aspect ratio so
+none of them render squished), and the new `public/login-logo.png` (stacked
+variant) now replaces the old wide logo on the login page. Verified with
+real Playwright screenshots of the live dev server's homepage nav and login
+page — both render correctly. This does supersede the current logo
+entirely (the old `logo.png`/`icon.png` are gone, not kept as alternates) —
+worth flagging that the trademark question is still open, so this
+represents committing real design/engineering time to a name that might
+still change.
 
 ## Working Style Notes (for continuity)
 - Always verify fixes with real regenerated output/evidence, not just "done"

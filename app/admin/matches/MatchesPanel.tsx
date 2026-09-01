@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
+import { useToast } from "@/components/Toast";
 
 type Match = {
   id: string;
@@ -34,7 +35,6 @@ export function MatchesPanel({
   const [matches, setMatches] = useState(initialMatches);
   const [assignSelections, setAssignSelections] = useState<Record<string, string>>({});
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   const [logging, setLogging] = useState(false);
   const [title, setTitle] = useState("");
@@ -44,6 +44,7 @@ export function MatchesPanel({
   const [dueDate, setDueDate] = useState("");
 
   const supabase = createClient();
+  const { showToast } = useToast();
 
   function clientName(clientId: string | null) {
     return clients.find((c) => c.id === clientId)?.company_name ?? "—";
@@ -53,7 +54,6 @@ export function MatchesPanel({
     e.preventDefault();
     if (!title.trim() || !agency.trim()) return;
     setLogging(true);
-    setError(null);
 
     const { data, error: insertError } = await supabase
       .from("matched_opportunities")
@@ -72,7 +72,7 @@ export function MatchesPanel({
     setLogging(false);
 
     if (insertError || !data) {
-      setError(insertError?.message ?? "Couldn't log that opportunity.");
+      showToast(insertError?.message ?? "Couldn't log that opportunity.", "error");
       return;
     }
 
@@ -87,7 +87,7 @@ export function MatchesPanel({
   async function handleAssign(matchId: string) {
     const clientId = assignSelections[matchId];
     if (!clientId) {
-      setError("Pick a client to assign this to first.");
+      showToast("Pick a client to assign this to first.", "error");
       return;
     }
 
@@ -95,7 +95,6 @@ export function MatchesPanel({
     if (!match) return;
 
     setBusyId(matchId);
-    setError(null);
 
     // Left as a draft (schema default) rather than immediately finalized —
     // the agency/scope/due date are already known, but the client still
@@ -116,7 +115,7 @@ export function MatchesPanel({
       .single();
 
     if (submissionError || !submission) {
-      setError(submissionError?.message ?? "Couldn't create a submission for this client.");
+      showToast(submissionError?.message ?? "Couldn't create a submission for this client.", "error");
       setBusyId(null);
       return;
     }
@@ -127,7 +126,7 @@ export function MatchesPanel({
       .eq("id", matchId);
 
     if (updateError) {
-      setError(updateError.message);
+      showToast(updateError.message, "error");
       setBusyId(null);
       return;
     }
@@ -163,7 +162,6 @@ export function MatchesPanel({
 
   async function handleDismiss(matchId: string) {
     setBusyId(matchId);
-    setError(null);
 
     const { error: updateError } = await supabase
       .from("matched_opportunities")
@@ -171,7 +169,7 @@ export function MatchesPanel({
       .eq("id", matchId);
 
     if (updateError) {
-      setError(updateError.message);
+      showToast(updateError.message, "error");
       setBusyId(null);
       return;
     }
@@ -182,8 +180,6 @@ export function MatchesPanel({
 
   return (
     <div className="flex flex-col gap-6 mt-4">
-      {error && <p className="text-body-md text-error">{error}</p>}
-
       <form
         onSubmit={handleLogOpportunity}
         className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 flex flex-col gap-3"
@@ -377,7 +373,19 @@ function StatusPill({
   className?: string;
 }) {
   if (match.status === "assigned") {
-    return <span className={`text-body-md text-on-surface-variant ${className}`}>Assigned to {clientName(match.assigned_client_id)}</span>;
+    // Deliberately ignores the incoming `className` (mobile's caller passes
+    // "shrink-0" for the pill badges below) — a flex sibling with
+    // flex-shrink: 0 and unbounded text (a long client name) refuses to
+    // shrink itself, so the *other* sibling (the title/agency block) was
+    // absorbing 100% of the squeeze and collapsing to width: 0, wrapping
+    // its own break-words text one character per line. Letting this text
+    // shrink and wrap too (min-w-0 + break-words) shares the squeeze
+    // between both siblings instead.
+    return (
+      <span className="text-body-md text-on-surface-variant break-words min-w-0">
+        Assigned to {clientName(match.assigned_client_id)}
+      </span>
+    );
   }
   if (match.status === "dismissed") {
     return (

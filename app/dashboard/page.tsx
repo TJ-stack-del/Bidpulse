@@ -8,6 +8,7 @@ import { ReportSubmittedButton } from "./ReportSubmittedButton";
 import { CompleteBidFile } from "./CompleteBidFile";
 import { signRfpDocumentUrls } from "@/lib/storage";
 import { BidProcessNotices } from "@/components/ui/BidProcessNotices";
+import { isKnownTrade } from "@/lib/compliance/known-trades";
 
 // Reads cookies (via lib/supabase/server) which already opts this page out
 // of static rendering — confirmed via `Cache-Control: no-store` on the
@@ -51,7 +52,7 @@ export default async function DashboardPage({
 
   const { data: client } = await supabase
     .from("clients")
-    .select("id, org_id, company_name")
+    .select("id, org_id, company_name, naics_codes")
     .eq("auth_user_id", user.id)
     .maybeSingle();
 
@@ -145,6 +146,11 @@ export default async function DashboardPage({
     : { data: null };
   const deliverables = await signRfpDocumentUrls(supabase, deliverablesRaw ?? []);
 
+  // Safety net: heads-up shown BEFORE the client ever gets to deliverables,
+  // not a surprise buried in the compliance matrix document later (see the
+  // matching note in that document's own content, generate-draft/route.ts).
+  const tradeKnown = isKnownTrade({ naicsCodes: client.naics_codes ?? [], scopeText: activeSubmission.scope ?? "" });
+
   return (
     <AppShell activePath="/dashboard" role="client" viewerName={client.company_name}>
       {submissions.length > 1 && (
@@ -212,6 +218,23 @@ export default async function DashboardPage({
                   Mandatory site visit — read this
                 </p>
                 <p className="text-body-md text-on-surface">{activeSubmission.mandatory_site_visit_explanation}</p>
+              </div>
+            </div>
+          )}
+
+          {!tradeKnown && (
+            <div className="mt-4 bg-surface-container-highest border border-outline-variant rounded-xl p-5 flex gap-3">
+              <span className="material-symbols-outlined text-on-surface-variant text-[20px] shrink-0">info</span>
+              <div>
+                <p className="text-label-md text-on-surface font-bold uppercase tracking-wide mb-1">
+                  A note about your trade
+                </p>
+                <p className="text-body-md text-on-surface-variant">
+                  We&apos;re still building extra bid-help for your kind of business. We&apos;ll still write your
+                  capability statement and approach summary in full. The compliance checklist might not catch
+                  everything specific to your trade yet. We&apos;ll flag that for you when it&apos;s ready. You can
+                  always ask us directly.
+                </p>
               </div>
             </div>
           )}

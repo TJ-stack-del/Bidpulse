@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { isFederalAgency } from "@/lib/federal-agency";
 import { detectAgencyTypes } from "@/lib/agency-type";
 import { referenceRequirementRows } from "@/lib/compliance/requirements-reference";
+import { isKnownTrade } from "@/lib/compliance/known-trades";
 
 // Admin-only "auto-draft" helper for DeliverablesPanel — removes the
 // blank-page problem by returning a structured starting draft built from
@@ -103,6 +104,7 @@ function agencyTypeRequirementRows(agency: string): string[] {
   const isAirport = agencyTypes.includes("airport");
   const isSchool = agencyTypes.includes("school");
   const isTransit = agencyTypes.includes("transit");
+  const isVA = agencyTypes.includes("va");
   const isLocalJacksonville = LOCAL_JACKSONVILLE_AGENCY_PATTERN.test(agency);
 
   if (isAirport) {
@@ -118,6 +120,17 @@ function agencyTypeRequirementRows(agency: string): string[] {
   if (isTransit) {
     rows.push(
       "DBE (Disadvantaged Business Enterprise) participation goals | NEEDS VERIFICATION | [Confirm DBE participation goals with the agency before submission]"
+    );
+  }
+  // Named by agency (VA facility name), separate from the scope-text-keyword
+  // tiers in requirements-reference.ts — this is a categorical nudge for
+  // when the agency itself is clearly VA but the client's own scope text is
+  // too thin to have triggered any of the three specific tiers there. Never
+  // asserts which (if any) tier actually applies — that still needs the
+  // real RFP.
+  if (isVA) {
+    rows.push(
+      "VA/federal IT security, accessibility, and CUI requirements | NEEDS VERIFICATION | [This is a VA engagement — confirm with the contracting officer whether VA Handbook 6500.6 (contractor system/data access), a Section 508 accessibility checklist, or CUI/NIST 800-171/CMMC handling requirements apply to this specific scope]"
     );
   }
 
@@ -345,6 +358,24 @@ function buildDraft(deliverableType: string, submission: SubmissionInfo, verifie
     // which stay untouched.
     requirementRows.push(...referenceRequirementRows(submission.scope ?? ""));
 
+    // Safety net for trades this app has no real TRADE_SPECIFIC_CERTIFICATIONS
+    // coverage for yet (lib/compliance/known-trades.ts) — plain-language,
+    // 8th-grade-level note so the client themselves (this deliverable is
+    // client-readable, not admin-only) sees the gap instead of the matrix
+    // silently looking complete. Placed right after the admin disclaimer,
+    // before the requirement rows, so it isn't buried under the table.
+    const tradeKnown = isKnownTrade({ naicsCodes: client.naics_codes ?? [], scopeText: submission.scope ?? "" });
+    const tradeCoverageNote = tradeKnown
+      ? []
+      : [
+          "This checklist covers the rules every government bid needs. We've also built",
+          "in extra rules for HVAC, janitorial, landscaping, and IT/computer support bids.",
+          "Your trade isn't on that list yet. Some rules just for your industry might be",
+          "missing here. Please check the real bid documents yourself, or ask us, before",
+          "you count on this checklist alone.",
+          "",
+        ];
+
     return [
       `COMPLIANCE MATRIX — ${agency}${solicitationLine}`,
       "",
@@ -359,6 +390,7 @@ function buildDraft(deliverableType: string, submission: SubmissionInfo, verifie
       "Methodology & Verification, separated by pipes, one requirement per line —",
       "nothing else on the line. Don't add numbering, bullets, or a header row.]",
       "",
+      ...tradeCoverageNote,
       ...requirementRows,
       "",
       `Scope reference: ${scope}`,

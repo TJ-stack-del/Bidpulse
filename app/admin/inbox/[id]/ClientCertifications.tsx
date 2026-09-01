@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
+import { useToast } from "@/components/Toast";
 
 type Certification = {
   id: string;
@@ -35,6 +36,7 @@ export function ClientCertifications({
   const [certifications, setCertifications] = useState(initialCertifications);
   const [saving, setSaving] = useState<string | null>(null);
   const supabase = createClient();
+  const { showToast } = useToast();
 
   async function handleToggle(cert: Certification) {
     setSaving(cert.id);
@@ -58,6 +60,8 @@ export function ClientCertifications({
         event_detail: { certification_id: cert.id, cert_type: certLabel(cert) },
       });
       setCertifications((certs) => certs.map((c) => (c.id === cert.id ? { ...c, verified: nextVerified } : c)));
+    } else {
+      showToast(error.message, "error");
     }
     setSaving(null);
   }

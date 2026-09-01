@@ -7,6 +7,7 @@ import { PaymentStatus } from "./PaymentStatus";
 import { ClientCertifications } from "./ClientCertifications";
 import { signRfpDocumentUrls } from "@/lib/storage";
 import { EstimatedValueInput } from "./EstimatedValueInput";
+import { isKnownTrade } from "@/lib/compliance/known-trades";
 
 // The actual review workspace: full intake info, stage editing, internal
 // notes, checklist, deliverables. This is where the "admin does the real
@@ -79,10 +80,20 @@ export default async function AdminSubmissionDetailPage({
   const { data: pkg } = submission.package_id
     ? await supabase
         .from("packages")
-        .select("id, package_type, paid, paid_at")
+        .select("id, package_type, price_note, paid, paid_at")
         .eq("id", submission.package_id)
         .maybeSingle()
     : { data: null };
+
+  // Packages are 1:many with submissions (no unique constraint ties a
+  // package to one submission, and packages has no submission_id column at
+  // all) — a retainer can cover several bids for the same client, so the
+  // Payment card offers reusing one of these instead of always creating new.
+  const { data: clientPackages } = await supabase
+    .from("packages")
+    .select("id, package_type, price_note, paid, paid_at, created_at")
+    .eq("client_id", submission.client_id)
+    .order("created_at", { ascending: false });
 
   const { data: org } = await supabase
     .from("organizations")
@@ -97,6 +108,13 @@ export default async function AdminSubmissionDetailPage({
     .order("created_at", { ascending: false });
 
   const client = submission.clients as any;
+
+  // Safety net: is this bid's trade one BidPulse has real compliance
+  // coverage for at all (lib/compliance/known-trades.ts)? If not, the
+  // compliance matrix can look complete without being complete — flag it
+  // here with the same visual weight as the mandatory-site-visit warning
+  // below, not just in the deliverable content itself.
+  const tradeKnown = isKnownTrade({ naicsCodes: client?.naics_codes ?? [], scopeText: submission.scope ?? "" });
 
   const STAGE_LABELS: Record<string, string> = {
     submitted: "Submitted",
@@ -128,6 +146,7 @@ export default async function AdminSubmissionDetailPage({
     submission_created_from_match: "Created from matched opportunity",
     payment_marked_paid: "Marked as paid",
     payment_marked_unpaid: "Marked as unpaid",
+    package_linked: "Package linked",
     stage_change_email_sent: "Client notified by email",
     client_reported_submitted: "Client reported submitted",
     client_viewed_packet: "Client viewed packet",
@@ -146,6 +165,20 @@ export default async function AdminSubmissionDetailPage({
 
   return (
     <AppShell activePath="/admin/inbox" role="admin" viewerName={member.full_name}>
+      {!tradeKnown && (
+        <div className="mt-6 bg-error-container/20 border border-error/30 rounded-xl p-4 flex gap-3">
+          <span className="material-symbols-outlined text-error text-[20px] shrink-0">warning</span>
+          <div>
+            <p className="text-label-md text-error font-bold uppercase tracking-wide mb-1">
+              No trade-specific compliance rules on file for this industry
+            </p>
+            <p className="text-body-md text-on-surface">
+              Verify requirements manually before relying on this checklist.
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="mt-6 flex items-center justify-between flex-wrap gap-3">
         <div>
           <p className="text-label-md text-on-surface-variant uppercase tracking-wider mb-1">
@@ -262,10 +295,13 @@ export default async function AdminSubmissionDetailPage({
             submissionId={submission.id}
             orgId={member.org_id}
             actorId={member.id}
+            clientId={submission.client_id}
             packageId={pkg?.id ?? null}
             packageType={pkg?.package_type ?? null}
+            packagePriceNote={pkg?.price_note ?? null}
             initialPaid={pkg?.paid ?? false}
             initialPaidAt={pkg?.paid_at ?? null}
+            existingPackages={(clientPackages ?? []).filter((p) => p.id !== pkg?.id)}
           />
 
           <DeliverablesPanel

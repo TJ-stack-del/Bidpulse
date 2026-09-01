@@ -1,8 +1,26 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
+import { useToast } from "@/components/Toast";
+
+type ExistingPackage = {
+  id: string;
+  package_type: string;
+  price_note: string | null;
+  paid: boolean;
+  paid_at: string | null;
+  created_at: string;
+};
+
+const PACKAGE_TYPE_LABELS: Record<string, string> = {
+  one_off: "One-off",
+  retainer: "Retainer",
+  pilot: "Pilot",
+  test: "Test",
+};
 
 // Payment gate for deliverable downloads: toggles packages.paid for the
 // submission's linked package_id. A submission with no package_id yet has
@@ -11,34 +29,102 @@ export function PaymentStatus({
   submissionId,
   orgId,
   actorId,
+  clientId,
   packageId,
   packageType,
+  packagePriceNote,
   initialPaid,
   initialPaidAt,
+  existingPackages,
 }: {
   submissionId: string;
   orgId: string;
   actorId: string;
+  clientId: string;
   packageId: string | null;
   packageType: string | null;
+  packagePriceNote: string | null;
   initialPaid: boolean;
   initialPaidAt: string | null;
+  existingPackages: ExistingPackage[];
 }) {
+  const router = useRouter();
   const [paid, setPaid] = useState(initialPaid);
   const [paidAt, setPaidAt] = useState(initialPaidAt);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [linking, setLinking] = useState(false);
+  const [mode, setMode] = useState<"new" | "existing">(existingPackages.length > 0 ? "existing" : "new");
+  const [newType, setNewType] = useState("one_off");
+  const [newPriceNote, setNewPriceNote] = useState("");
+  const [selectedExistingId, setSelectedExistingId] = useState(existingPackages[0]?.id ?? "");
   const supabase = createClient();
+  const { showToast } = useToast();
 
   // Pilot packages are never paywalled ("on us to prove the process") — the
   // client dashboard unlocks their downloads regardless of this flag. Kept
   // in sync with the isPaid check in dashboard/page.tsx.
   const isPilot = packageType === "pilot";
 
+  async function linkPackage(newPackageId: string) {
+    const { error: updateError } = await supabase
+      .from("submissions")
+      .update({ package_id: newPackageId })
+      .eq("id", submissionId);
+
+    if (updateError) {
+      showToast(updateError.message, "error");
+      return false;
+    }
+
+    await supabase.from("audit_log").insert({
+      submission_id: submissionId,
+      org_id: orgId,
+      actor_id: actorId,
+      event_type: "package_linked",
+      event_detail: { package_id: newPackageId },
+    });
+
+    return true;
+  }
+
+  async function handleLinkNew() {
+    setLinking(true);
+
+    const { data: newPkg, error: insertError } = await supabase
+      .from("packages")
+      .insert({
+        client_id: clientId,
+        package_type: newType,
+        price_note: newPriceNote.trim() || null,
+      })
+      .select()
+      .single();
+
+    if (insertError || !newPkg) {
+      showToast(insertError?.message ?? "Couldn't create the package.", "error");
+      setLinking(false);
+      return;
+    }
+
+    const linked = await linkPackage(newPkg.id);
+    setLinking(false);
+    if (linked) router.refresh();
+  }
+
+  async function handleLinkExisting() {
+    if (!selectedExistingId) {
+      showToast("Pick a package to link first.", "error");
+      return;
+    }
+    setLinking(true);
+    const linked = await linkPackage(selectedExistingId);
+    setLinking(false);
+    if (linked) router.refresh();
+  }
+
   async function handleToggle() {
     if (!packageId) return;
     setSaving(true);
-    setError(null);
 
     const nextPaid = !paid;
     const nextPaidAt = nextPaid ? new Date().toISOString() : null;
@@ -49,7 +135,7 @@ export function PaymentStatus({
       .eq("id", packageId);
 
     if (updateError) {
-      setError(updateError.message);
+      showToast(updateError.message, "error");
       setSaving(false);
       return;
     }
@@ -75,12 +161,106 @@ export function PaymentStatus({
       </h2>
 
       {!packageId ? (
-        <p className="text-body-md text-on-surface-variant">
-          No package linked to this submission yet — link one before payment can be tracked.
-          Deliverable downloads stay locked for the client until then.
-        </p>
+        <div className="flex flex-col gap-4">
+          <p className="text-body-md text-on-surface-variant">
+            No package linked to this submission yet — link one before payment can be tracked.
+            Deliverable downloads stay locked for the client until then.
+          </p>
+
+          {existingPackages.length > 0 && (
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setMode("existing")}
+                className={`px-3 py-1.5 rounded text-label-md font-bold transition ${
+                  mode === "existing"
+                    ? "bg-secondary text-on-secondary"
+                    : "border border-outline-variant text-on-surface hover:bg-surface-container-high"
+                }`}
+              >
+                Use existing package
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode("new")}
+                className={`px-3 py-1.5 rounded text-label-md font-bold transition ${
+                  mode === "new"
+                    ? "bg-secondary text-on-secondary"
+                    : "border border-outline-variant text-on-surface hover:bg-surface-container-high"
+                }`}
+              >
+                Create new package
+              </button>
+            </div>
+          )}
+
+          {mode === "existing" && existingPackages.length > 0 ? (
+            <div className="flex flex-col gap-3">
+              <select
+                value={selectedExistingId}
+                onChange={(e) => setSelectedExistingId(e.target.value)}
+                className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+              >
+                {existingPackages.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {PACKAGE_TYPE_LABELS[p.package_type] ?? p.package_type}
+                    {p.price_note ? ` — ${p.price_note}` : ""} ({p.paid ? "paid" : "unpaid"})
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={handleLinkExisting}
+                disabled={linking}
+                className="self-start px-4 py-2 bg-secondary text-on-secondary rounded text-label-md font-bold hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
+              >
+                {linking && <Spinner />}
+                {linking ? "Linking…" : "Link this package"}
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              <div>
+                <label className="text-label-md text-on-surface-variant block mb-1">Package type</label>
+                <select
+                  value={newType}
+                  onChange={(e) => setNewType(e.target.value)}
+                  className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+                >
+                  <option value="one_off">One-off</option>
+                  <option value="retainer">Retainer</option>
+                  <option value="pilot">Pilot</option>
+                  <option value="test">Test</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-label-md text-on-surface-variant block mb-1">
+                  Price note (manual invoicing)
+                </label>
+                <input
+                  type="text"
+                  value={newPriceNote}
+                  onChange={(e) => setNewPriceNote(e.target.value)}
+                  placeholder="e.g. $450 flat, invoiced separately"
+                  className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+                />
+              </div>
+              <button
+                onClick={handleLinkNew}
+                disabled={linking}
+                className="self-start px-4 py-2 bg-secondary text-on-secondary rounded text-label-md font-bold hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
+              >
+                {linking && <Spinner />}
+                {linking ? "Linking…" : "Create and link package"}
+              </button>
+            </div>
+          )}
+        </div>
       ) : (
         <>
+          <p className="text-label-md text-on-surface-variant uppercase tracking-wider font-bold mb-1">
+            {PACKAGE_TYPE_LABELS[packageType ?? ""] ?? packageType}
+            {packagePriceNote ? ` — ${packagePriceNote}` : ""}
+          </p>
           {isPilot && (
             <p className="text-label-md text-secondary mb-2 uppercase tracking-wider font-bold">
               Pilot package — downloads are unlocked for the client regardless of this flag
@@ -110,7 +290,6 @@ export function PaymentStatus({
             {saving && <Spinner />}
             {saving ? "Saving…" : paid ? "Mark as unpaid" : "Mark as paid"}
           </button>
-          {error && <p className="text-body-md text-error mt-2">{error}</p>}
         </>
       )}
     </div>

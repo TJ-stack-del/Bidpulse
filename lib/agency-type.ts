@@ -9,13 +9,24 @@ const AIRPORT_AGENCY_PATTERN = /\b(aviation|airports?|jaa)\b/i;
 const SCHOOL_AGENCY_PATTERN = /\b(schools?|board of education|district)\b/i;
 const TRANSIT_AGENCY_PATTERN = /\b(transit|transportation authority|jta)\b/i;
 
-export type AgencyType = "airport" | "school" | "transit";
+// Deliberately NOT a bare \bva\b — "VA" alone is also the USPS state
+// abbreviation for Virginia, which shows up in ordinary agency names
+// ("City of Richmond, VA") with nothing to do with the Department of
+// Veterans Affairs. Full "veterans affairs"/"veterans health
+// administration" and the distinctive VAMC/VISN acronyms avoid that
+// collision. This is intentionally narrower than "federal IT" — VA
+// Handbook 6500.6 etc. are VA-specific policy, not something a generic
+// DoD or other federal IT contract is bound by.
+const VA_AGENCY_PATTERN = /\b(veterans affairs|veterans health administration|va medical center|vamc|va health care system|visn)\b/i;
+
+export type AgencyType = "airport" | "school" | "transit" | "va";
 
 export function detectAgencyTypes(agency: string): AgencyType[] {
   const types: AgencyType[] = [];
   if (AIRPORT_AGENCY_PATTERN.test(agency)) types.push("airport");
   if (SCHOOL_AGENCY_PATTERN.test(agency)) types.push("school");
   if (TRANSIT_AGENCY_PATTERN.test(agency)) types.push("transit");
+  if (VA_AGENCY_PATTERN.test(agency)) types.push("va");
   return types;
 }
 

@@ -161,7 +161,7 @@ export function PacketButtons({
               src="/logo.png"
               alt=""
               aria-hidden="true"
-              width={116}
+              width={134}
               height={40}
               className="absolute bottom-4 right-4 h-6 w-auto opacity-10 pointer-events-none select-none"
             />

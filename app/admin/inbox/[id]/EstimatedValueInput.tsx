@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
 import { FadeMessage } from "@/components/ui/FadeMessage";
+import { useToast } from "@/components/Toast";
 
 // Admin-entered only — never asked of the client at intake, and often not
 // known yet at that point anyway. Feeds the lean-package suggestion in
@@ -22,17 +23,16 @@ export function EstimatedValueInput({
   const [value, setValue] = useState(initialValue != null ? String(initialValue) : "");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
+  const { showToast } = useToast();
 
   async function handleSave() {
-    setError(null);
     setSaved(false);
 
     const trimmed = value.trim();
     const parsed = trimmed === "" ? null : Number(trimmed);
     if (parsed !== null && (!Number.isFinite(parsed) || parsed < 0)) {
-      setError("Enter a valid dollar amount, or leave blank.");
+      showToast("Enter a valid dollar amount, or leave blank.", "error");
       return;
     }
 
@@ -44,7 +44,7 @@ export function EstimatedValueInput({
     setSaving(false);
 
     if (updateError) {
-      setError(updateError.message);
+      showToast(updateError.message, "error");
       return;
     }
     setSaved(true);
@@ -76,7 +76,6 @@ export function EstimatedValueInput({
           Saved
         </FadeMessage>
       </div>
-      {error && <p className="text-label-md text-error mt-1">{error}</p>}
     </div>
   );
 }
