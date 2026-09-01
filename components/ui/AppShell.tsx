@@ -48,7 +48,15 @@ export function AppShell({
   return (
     <div className="min-h-screen flex flex-col bg-surface">
       <header className="fixed top-0 w-full z-40 flex items-center justify-between px-margin-mobile md:px-margin-desktop py-3 bg-surface/95 backdrop-blur border-b border-outline-variant">
-        <Image src="/logo.png" alt="BidPulse" width={134} height={40} className="h-9 w-auto shrink-0" priority />
+        <Image src="/logo.png" alt="BidPulse" width={134} height={40} className="h-9 w-auto shrink-0 dark:hidden" priority />
+        <Image
+          src="/logo-dark.png"
+          alt="BidPulse"
+          width={134}
+          height={40}
+          className="hidden h-9 w-auto shrink-0 dark:block"
+          priority
+        />
         <nav className="hidden md:flex gap-6">
           {links.map((link) => (
             <Link
@@ -70,7 +78,6 @@ export function AppShell({
           </p>
           <ThemeToggle />
           <div className="flex items-center gap-1">
-            <div className="w-8 h-8 rounded-full overflow-hidden bg-surface-container border border-outline-variant shrink-0" />
             <SignOutButton />
           </div>
         </div>
