@@ -21,22 +21,24 @@ export default async function LoginPage() {
     <main className="animate-fade-in min-h-screen flex items-center justify-center bg-surface px-margin-mobile py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Image
-            src="/login-logo.png"
-            alt="BidPulse"
-            width={142}
-            height={112}
-            className="h-28 w-auto mx-auto mb-4 dark:hidden"
-            priority
-          />
-          <Image
-            src="/login-logo-dark.png"
-            alt="BidPulse"
-            width={142}
-            height={112}
-            className="hidden h-28 w-auto mx-auto mb-4 dark:block"
-            priority
-          />
+          <Link href="/" className="block w-fit mx-auto mb-4">
+            <Image
+              src="/login-logo.png"
+              alt="BidPulse"
+              width={142}
+              height={112}
+              className="h-28 w-auto mx-auto dark:hidden"
+              priority
+            />
+            <Image
+              src="/login-logo-dark.png"
+              alt="BidPulse"
+              width={142}
+              height={112}
+              className="hidden h-28 w-auto mx-auto dark:block"
+              priority
+            />
+          </Link>
           <span className="font-bold text-headline-lg text-primary">Welcome back</span>
           <p className="text-body-md text-on-surface-variant mt-2">Sign in to your account.</p>
         </div>
