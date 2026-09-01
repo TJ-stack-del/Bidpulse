@@ -80,24 +80,26 @@ export function MarketingShell({
         </div>
 
         {menuOpen && (
-          <nav className="md:hidden border-t border-outline-variant bg-surface px-margin-mobile py-4 flex flex-col gap-1">
+          <nav className="md:hidden border-t border-outline-variant bg-surface px-margin-mobile py-4 flex flex-col gap-2">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setMenuOpen(false)}
-                className={`text-label-md py-3 transition ${
-                  activePath === link.href ? "text-secondary font-bold" : "text-on-surface-variant"
+                className={`px-4 py-3 border rounded text-label-md text-center transition active:scale-[0.97] ${
+                  activePath === link.href
+                    ? "border-secondary text-secondary font-bold"
+                    : "border-outline-variant text-on-surface-variant hover:bg-surface-container-low"
                 }`}
               >
                 {link.label}
               </Link>
             ))}
-            <div className="border-t border-outline-variant mt-2 pt-4 flex flex-col gap-3">
+            <div className="border-t border-outline-variant mt-2 pt-4 flex flex-col gap-2">
               <Link
                 href="/login"
                 onClick={() => setMenuOpen(false)}
-                className="text-label-md text-on-surface-variant"
+                className="px-4 py-3 border border-outline-variant text-on-surface-variant rounded text-label-md text-center hover:bg-surface-container-low transition active:scale-[0.97]"
               >
                 Log in
               </Link>
