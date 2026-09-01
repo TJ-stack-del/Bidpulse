@@ -131,6 +131,72 @@ export const TRADE_SPECIFIC_CERTIFICATIONS: TriggeredRequirementDefinition[] = [
     triggerKeywords: ["medical facility", "healthcare", "hipaa", "clinic", "hospital", "patient"],
     verificationNote: "[Confirm assigned staff complete HIPAA privacy/security awareness training before servicing areas with patient information]",
   },
+  // IT/Computer Support — three tiers of increasing severity, deliberately
+  // NOT collapsed into one generic "IT compliance" line since each has a
+  // different real trigger and a different real consequence. Trigger
+  // keywords are full VAAR/DFARS clause citations and multi-word phrases,
+  // verified against real VA Acquisition Regulation and DFARS clause text
+  // (VAAR 852.239-70, 852.239-75, DFARS 252.204-7012/7019/7020/7021) rather
+  // than generic terms — "veteran" or "computer" alone must NEVER trigger
+  // any of these three, since a bid can mention veterans/computers with
+  // zero actual VA-system, CUI, or accessibility obligation (see the real
+  // "Computer support for Veterans" scope text that surfaced this gap:
+  // that phrase alone correctly triggers none of these three tiers, since
+  // it contains no confirmed system-access, CUI, or Section 508 language —
+  // under-triggering here is the SAFE failure mode, not a bug). Deliberately
+  // scope-text-only (no agency-type AND-gate): agency-name data is often too
+  // thin/wrong to rely on (that same real submission has agency = "Agency"),
+  // so precision comes entirely from these phrases being specific enough to
+  // never appear outside a genuine VA-system/CUI/Section 508 context.
+  {
+    id: "va-handbook-6500-contract-security",
+    label: "VA Handbook 6500.6 (Contract Security) Compliance",
+    triggerKeywords: [
+      "va handbook 6500",
+      "6500.6",
+      "852.239-70",
+      "va information system",
+      "va information systems",
+      "access to va information",
+      "access to va data",
+      "va network",
+      "va sensitive information",
+      "veterans affairs information system",
+    ],
+    verificationNote:
+      '[Confirm whether this contract requires contractor access to VA information systems or VA sensitive data — if so, VA Handbook 6500.6 (Contract Security, VAAR clause 852.239-70) governs data protection, destruction/sanitization procedures, and self-certification to the VA contracting officer. Do NOT assume this applies just because "veteran" or "VA" appears in the bid title or agency name — confirm actual system/data access is required, not just a topical mention]',
+  },
+  {
+    id: "va-section-508-checklist",
+    label: "VA Section 508 Checklist (ICT Accessibility)",
+    triggerKeywords: [
+      "section 508",
+      "852.239-75",
+      "ict accessibility",
+      "information and communication technology accessibility",
+      "va section 508",
+      "wcag",
+    ],
+    verificationNote:
+      "[Confirm whether this solicitation requires a completed VA Section 508 Checklist (VAAR clause 852.239-75) for software, website, or other digital/ICT deliverables — required on essentially all VA IT/ICT solicitations involving a digital product. Confirm the actual bid text requires this rather than assuming from agency type alone]",
+  },
+  {
+    id: "cui-nist-800-171-cmmc",
+    label: "NIST SP 800-171 / CMMC 2.0 Compliance (Controlled Unclassified Information)",
+    triggerKeywords: [
+      "controlled unclassified information",
+      "nist 800-171",
+      "nist sp 800-171",
+      "cmmc",
+      "dfars 252.204-7012",
+      "252.204-7012",
+      "252.204-7019",
+      "252.204-7020",
+      "252.204-7021",
+    ],
+    verificationNote:
+      "[SERIOUS, HIGH-COST COMPLIANCE FLAG, NOT a routine checklist item — this bid's own text references Controlled Unclassified Information (CUI), NIST SP 800-171, CMMC, or a related DFARS clause. Real scope: 110 security controls, a self-assessment reported to SPRS, and for many contracts a mandatory third-party (C3PAO) CMMC Level 2 assessment before award. Flag this to the client immediately — this should almost never be silently treated as a simple item to tick off like the other requirements above, and likely requires specialist cybersecurity compliance help beyond what BidPulse provides]",
+  },
 ];
 
 export type MatchedRequirement = {

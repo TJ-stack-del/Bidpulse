@@ -6,6 +6,7 @@ import { Spinner } from "@/components/ui/Spinner";
 import { FadeMessage } from "@/components/ui/FadeMessage";
 import { PacketButtons } from "@/components/ui/PacketButtons";
 import { signRfpDocumentUrl } from "@/lib/storage";
+import { useToast } from "@/components/Toast";
 
 type Deliverable = {
   id: string;
@@ -30,6 +31,10 @@ const LEAN_DELIVERABLE_TYPES: { value: string; label: string }[] = [
   { value: "executive_cover", label: "Executive cover" },
   { value: "certificate_of_insurance", label: "Certificate of insurance" },
 ];
+
+function deliverableLabel(type: string) {
+  return [...FULL_DELIVERABLE_TYPES, ...LEAN_DELIVERABLE_TYPES].find((d) => d.value === type)?.label ?? type;
+}
 
 // Step 7 — admin prepares each deliverable either by pasting text or
 // uploading a file; either counts as "prepared" per BUILD-ORDER-BIDPULSE.md
@@ -73,9 +78,9 @@ export function DeliverablesPanel({
   });
   const [saving, setSaving] = useState<string | null>(null);
   const [generating, setGenerating] = useState<string | null>(null);
-  const [errors, setErrors] = useState<Record<string, string | undefined>>({});
   const [savedTypes, setSavedTypes] = useState<Record<string, boolean>>({});
   const supabase = createClient();
+  const { showToast } = useToast();
 
   async function logPrepared(type: string, mode: "file" | "text") {
     await supabase.from("audit_log").insert({
@@ -119,7 +124,6 @@ export function DeliverablesPanel({
 
   async function handleSaveText(type: string) {
     setSaving(type);
-    setErrors((e) => ({ ...e, [type]: undefined }));
     setSavedTypes((s) => ({ ...s, [type]: false }));
     try {
       const saved = await upsert(type, { content: drafts[type] ?? "" });
@@ -127,7 +131,8 @@ export function DeliverablesPanel({
       await logPrepared(type, "text");
       setSavedTypes((s) => ({ ...s, [type]: true }));
     } catch (err) {
-      setErrors((e) => ({ ...e, [type]: err instanceof Error ? err.message : "Couldn't save." }));
+      const message = err instanceof Error ? err.message : "Couldn't save.";
+      showToast(`${deliverableLabel(type)}: ${message}`, "error");
     } finally {
       setSaving(null);
     }
@@ -148,7 +153,6 @@ export function DeliverablesPanel({
     }
 
     setGenerating(type);
-    setErrors((e) => ({ ...e, [type]: undefined }));
     setSavedTypes((s) => ({ ...s, [type]: false }));
 
     try {
@@ -161,7 +165,8 @@ export function DeliverablesPanel({
       if (!res.ok) throw new Error(data?.error ?? "Couldn't generate a draft.");
       setDrafts((d) => ({ ...d, [type]: data.content }));
     } catch (err) {
-      setErrors((e) => ({ ...e, [type]: err instanceof Error ? err.message : "Couldn't generate a draft." }));
+      const message = err instanceof Error ? err.message : "Couldn't generate a draft.";
+      showToast(`${deliverableLabel(type)}: ${message}`, "error");
     } finally {
       setGenerating(null);
     }
@@ -171,7 +176,6 @@ export function DeliverablesPanel({
     const file = e.target.files?.[0];
     if (!file) return;
     setSaving(type);
-    setErrors((prev) => ({ ...prev, [type]: undefined }));
     setSavedTypes((s) => ({ ...s, [type]: false }));
 
     try {
@@ -190,7 +194,8 @@ export function DeliverablesPanel({
       await logPrepared(type, "file");
       setSavedTypes((s) => ({ ...s, [type]: true }));
     } catch (err) {
-      setErrors((prev) => ({ ...prev, [type]: err instanceof Error ? err.message : "Upload failed." }));
+      const message = err instanceof Error ? err.message : "Upload failed.";
+      showToast(`${deliverableLabel(type)}: ${message}`, "error");
     } finally {
       setSaving(null);
       e.target.value = "";
@@ -302,8 +307,6 @@ export function DeliverablesPanel({
                   Saved
                 </FadeMessage>
               </div>
-
-              {errors[t.value] && <p className="text-body-md text-error mt-2">{errors[t.value]}</p>}
             </div>
           );
         })}

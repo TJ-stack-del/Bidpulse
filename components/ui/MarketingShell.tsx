@@ -32,7 +32,7 @@ export function MarketingShell({
       <header className="sticky top-0 z-50 bg-surface border-b border-outline-variant">
         <div className="flex items-center justify-between w-full px-margin-mobile md:px-margin-desktop py-4 max-w-container-max mx-auto">
           <Link href="/" onClick={() => setMenuOpen(false)} className="flex flex-col justify-center">
-            <Image src="/logo.png" alt="BidPulse" width={116} height={40} className="h-10 w-auto" priority />
+            <Image src="/logo.png" alt="BidPulse" width={134} height={40} className="h-10 w-auto" priority />
             <span className="hidden sm:block text-[9px] leading-snug text-on-surface-variant max-w-[280px]">
               {TAGLINE}
             </span>
@@ -115,7 +115,7 @@ export function MarketingShell({
       <footer className="bg-surface-container-lowest border-t border-outline-variant mt-auto">
         <div className="w-full px-margin-mobile md:px-margin-desktop py-gutter max-w-container-max mx-auto flex flex-col md:flex-row justify-between items-center gap-base">
           <div className="flex items-center gap-2">
-            <Image src="/logo.png" alt="BidPulse" width={93} height={32} className="h-8 w-auto" />
+            <Image src="/logo.png" alt="BidPulse" width={107} height={32} className="h-8 w-auto" />
             <div className="flex flex-col">
               <span className="text-label-sm text-on-surface-variant">{TAGLINE}</span>
               <span className="text-body-sm text-on-surface-variant">© {new Date().getFullYear()} BidPulse</span>

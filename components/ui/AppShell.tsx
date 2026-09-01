@@ -48,7 +48,7 @@ export function AppShell({
   return (
     <div className="min-h-screen flex flex-col bg-surface">
       <header className="fixed top-0 w-full z-40 flex items-center justify-between px-margin-mobile md:px-margin-desktop py-3 bg-surface/95 backdrop-blur border-b border-outline-variant">
-        <Image src="/logo.png" alt="BidPulse" width={116} height={40} className="h-9 w-auto shrink-0" priority />
+        <Image src="/logo.png" alt="BidPulse" width={134} height={40} className="h-9 w-auto shrink-0" priority />
         <nav className="hidden md:flex gap-6">
           {links.map((link) => (
             <Link

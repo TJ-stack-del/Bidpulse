@@ -4,22 +4,22 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
 import { FadeMessage } from "@/components/ui/FadeMessage";
+import { useToast } from "@/components/Toast";
 
 export function ThresholdSettingsForm({ orgId, initialThreshold }: { orgId: string; initialThreshold: number }) {
   const [value, setValue] = useState(String(initialThreshold));
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
+  const { showToast } = useToast();
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
     setSaved(false);
 
     const parsed = Number(value);
     if (!Number.isFinite(parsed) || parsed < 0) {
-      setError("Enter a valid dollar amount.");
+      showToast("Enter a valid dollar amount.", "error");
       return;
     }
 
@@ -31,7 +31,7 @@ export function ThresholdSettingsForm({ orgId, initialThreshold }: { orgId: stri
     setSaving(false);
 
     if (updateError) {
-      setError(updateError.message);
+      showToast(updateError.message, "error");
       return;
     }
     setSaved(true);
@@ -61,7 +61,6 @@ export function ThresholdSettingsForm({ orgId, initialThreshold }: { orgId: stri
       <FadeMessage show={saved} className="text-body-md text-secondary">
         Saved
       </FadeMessage>
-      {error && <p className="text-body-md text-error w-full">{error}</p>}
     </form>
   );
 }

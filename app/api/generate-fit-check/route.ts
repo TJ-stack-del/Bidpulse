@@ -21,21 +21,26 @@ type FitResult = { alignment: "strong" | "moderate" | "weak"; explanation: strin
 // purely informational: never scored into the strong/moderate/weak tier,
 // never blocking, and never a claim that the contractor does or doesn't
 // meet the requirement — just naming a real thing to go confirm.
-function agencyTypeFitNotes(agencyTypes: AgencyType[]): string[] {
+function agencyTypeFitNotes(agencyTypes: AgencyType[], companyName: string): string[] {
   const notes: string[] = [];
   if (agencyTypes.includes("airport")) {
     notes.push(
-      "This job is at a secured airport facility. Before pursuing this, confirm your team can pass TSA background checks and get SIDA badged."
+      `This job is at a secured airport facility. Before pursuing this, confirm ${companyName}'s team can pass TSA background checks and get SIDA badged.`
     );
   }
   if (agencyTypes.includes("school")) {
     notes.push(
-      "This job is with a school district. Before pursuing this, confirm your team can pass Level 2 background checks and meet the district's badging requirements."
+      `This job is with a school district. Before pursuing this, confirm ${companyName}'s team can pass Level 2 background checks and meet the district's badging requirements.`
     );
   }
   if (agencyTypes.includes("transit")) {
     notes.push(
-      "This job is with a transit agency. Before pursuing this, confirm whether DBE (Disadvantaged Business Enterprise) participation goals apply to this project and whether your team can meet them."
+      `This job is with a transit agency. Before pursuing this, confirm whether DBE (Disadvantaged Business Enterprise) participation goals apply to this project and whether ${companyName}'s team can meet them.`
+    );
+  }
+  if (agencyTypes.includes("va")) {
+    notes.push(
+      `This job is with the VA. Before pursuing this, confirm whether ${companyName}'s team will need access to VA information systems or VA sensitive data (VA Handbook 6500.6), whether a Section 508 accessibility checklist is required for any software/digital deliverable, and whether the scope touches Controlled Unclassified Information (CUI/NIST 800-171/CMMC) — that last one is a serious, high-cost compliance requirement if it applies, likely requiring specialist cybersecurity compliance help beyond what BidPulse provides.`
     );
   }
   return notes;
@@ -49,11 +54,13 @@ function assessFit(input: {
   hasInsurance: boolean;
   verifiedCertLabels: string[];
   agencyTypes: AgencyType[];
+  companyName: string | null;
 }): FitResult {
   const hasProfile = input.naicsCodes.length > 0;
   const hasDetailedScope = !!input.scope && input.scope.trim().length >= 40;
   const daysUntilDue = input.dueDate ? Math.ceil((new Date(input.dueDate).getTime() - Date.now()) / DAY_MS) : null;
   const hasRunway = daysUntilDue === null || daysUntilDue >= 5;
+  const companyName = input.companyName ?? "the client";
 
   // The strong/moderate/weak tier stays scoped to exactly these three
   // submission-specific readiness signals, unchanged from before — that's
@@ -68,19 +75,19 @@ function assessFit(input: {
   const notes: string[] = [];
   notes.push(
     hasProfile
-      ? "You've given us your NAICS codes, which helps our team place this bid in the right context right away."
-      : "We don't have your NAICS codes on file yet — adding them helps us tailor the paperwork faster."
+      ? `${companyName} has NAICS codes on file, which helps place this bid in the right context right away.`
+      : `${companyName} doesn't have NAICS codes on file yet — adding them would help tailor the paperwork faster.`
   );
   notes.push(
     hasDetailedScope
-      ? "The scope you described gives us enough detail to start preparing your paperwork."
-      : "The scope description is pretty brief — we may follow up with a few questions before we can prepare a strong capability statement."
+      ? "The scope described gives our team enough detail to start preparing the paperwork."
+      : "The scope description is pretty brief — may need to follow up with the client for a few questions before a strong capability statement can be prepared."
   );
   if (daysUntilDue !== null) {
     notes.push(
       hasRunway
         ? `With ${daysUntilDue} day${daysUntilDue === 1 ? "" : "s"} until the due date, there's reasonable time to prepare this properly.`
-        : `The due date is only ${daysUntilDue <= 0 ? "very close" : `${daysUntilDue} day${daysUntilDue === 1 ? "" : "s"} away`} — we'll move fast, but a tight timeline makes thorough prep harder.`
+        : `The due date is only ${daysUntilDue <= 0 ? "very close" : `${daysUntilDue} day${daysUntilDue === 1 ? "" : "s"} away`} — the team will move fast, but a tight timeline makes thorough prep harder.`
     );
   }
 
@@ -91,15 +98,17 @@ function assessFit(input: {
     (x): x is string => !!x
   );
   if (missingProfileItems.length > 0) {
-    notes.push(`Adding your ${missingProfileItems.join(" and ")} to your Company Profile speeds up how quickly we can prepare your paperwork.`);
+    notes.push(
+      `${companyName} is missing ${missingProfileItems.join(" and ")} from their Company Profile — adding these would speed up how quickly paperwork can be prepared.`
+    );
   }
   notes.push(
     input.verifiedCertLabels.length > 0
-      ? `We also have your verified certification${input.verifiedCertLabels.length === 1 ? "" : "s"} on file (${input.verifiedCertLabels.join(", ")}), which we'll put to use where it strengthens this bid.`
-      : "No verified certifications on file yet — if you hold any (WOSB, 8(a), SDVOSB, etc.), add them to your Company Profile so our team can confirm and use them."
+      ? `${companyName} has a verified certification${input.verifiedCertLabels.length === 1 ? "" : "s"} on file (${input.verifiedCertLabels.join(", ")}), which will be put to use where it strengthens this bid.`
+      : `No verified certifications on file yet for ${companyName} — if they hold any (WOSB, 8(a), SDVOSB, etc.), these should be added to their Company Profile so the team can confirm and use them.`
   );
 
-  notes.push(...agencyTypeFitNotes(input.agencyTypes));
+  notes.push(...agencyTypeFitNotes(input.agencyTypes, companyName));
 
   return { alignment, explanation: notes.join(" ") };
 }
@@ -124,7 +133,7 @@ export async function POST(request: Request) {
   const { data: submission } = await supabase
     .from("submissions")
     .select(
-      "id, agency, scope, due_date, client_id, clients(naics_codes, license_number, insurance_provider, general_liability_coverage)"
+      "id, agency, scope, due_date, client_id, clients(company_name, naics_codes, license_number, insurance_provider, general_liability_coverage)"
     )
     .eq("id", submissionId)
     .maybeSingle();
@@ -134,6 +143,7 @@ export async function POST(request: Request) {
   }
 
   const client = submission.clients as unknown as {
+    company_name: string | null;
     naics_codes: string[] | null;
     license_number: string | null;
     insurance_provider: string | null;
@@ -159,6 +169,7 @@ export async function POST(request: Request) {
     hasInsurance: !!(client?.insurance_provider || client?.general_liability_coverage),
     verifiedCertLabels,
     agencyTypes: detectAgencyTypes(submission.agency ?? ""),
+    companyName: client?.company_name ?? null,
   });
 
   // Separate from the strong/moderate/weak readiness tier above — this only

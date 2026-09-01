@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
 import { FadeMessage } from "@/components/ui/FadeMessage";
+import { useToast } from "@/components/Toast";
 
 type Note = { id: string; note: string; created_at: string };
 type ChecklistItem = { id: string; label: string; status: string; notes: string | null };
@@ -48,18 +49,16 @@ export function AdminSubmissionActions({
   const [localChecklist, setLocalChecklist] = useState(checklist);
   const [checklistLabel, setChecklistLabel] = useState("");
   const [addingChecklistItem, setAddingChecklistItem] = useState(false);
-  const [checklistError, setChecklistError] = useState<string | null>(null);
   const [savingStage, setSavingStage] = useState(false);
-  const [notifyError, setNotifyError] = useState<string | null>(null);
   const [notifySkipReason, setNotifySkipReason] = useState<string | null>(null);
   const [notifySuccess, setNotifySuccess] = useState(false);
   const [addingNote, setAddingNote] = useState(false);
   const [savedChecklistIds, setSavedChecklistIds] = useState<Record<string, boolean>>({});
   const supabase = createClient();
+  const { showToast } = useToast();
 
   async function handleStageChange(newStage: string) {
     setSavingStage(true);
-    setNotifyError(null);
     setNotifySkipReason(null);
     setNotifySuccess(false);
 
@@ -97,7 +96,8 @@ export function AdminSubmissionActions({
         setNotifySkipReason(data.reason ?? "skipped");
       }
     } catch (err) {
-      setNotifyError(err instanceof Error ? err.message : "Couldn't send the client notification email.");
+      const message = err instanceof Error ? err.message : "Couldn't send the client notification email.";
+      showToast(`Stage saved, but the client wasn't notified: ${message}`, "error");
     }
   }
 
@@ -131,7 +131,6 @@ export function AdminSubmissionActions({
     e.preventDefault();
     if (!checklistLabel.trim()) return;
     setAddingChecklistItem(true);
-    setChecklistError(null);
 
     const { data: newItem, error } = await supabase
       .from("checklist_items")
@@ -140,7 +139,7 @@ export function AdminSubmissionActions({
       .single();
 
     if (error || !newItem) {
-      setChecklistError(error?.message ?? "Couldn't add that item.");
+      showToast(error?.message ?? "Couldn't add that item.", "error");
     } else {
       setLocalChecklist((c) => [...c, newItem]);
       setChecklistLabel("");
@@ -193,11 +192,6 @@ export function AdminSubmissionActions({
             Client not notified — {SKIP_REASON_LABELS[notifySkipReason] ?? notifySkipReason}.
           </p>
         )}
-        {notifyError && (
-          <p className="text-body-md text-error mt-3">
-            Stage saved, but the client wasn&apos;t notified: {notifyError}
-          </p>
-        )}
       </div>
 
       <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
@@ -224,7 +218,6 @@ export function AdminSubmissionActions({
             Add
           </button>
         </form>
-        {checklistError && <p className="text-body-md text-error mb-4">{checklistError}</p>}
 
         {localChecklist.length > 0 ? (
           <div className="flex flex-col gap-3">
