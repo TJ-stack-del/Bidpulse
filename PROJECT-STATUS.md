@@ -242,7 +242,10 @@ directly.
   (`46c999f`) — **but this commit sat unpushed for a while after landing,
   which caused a real, confusing production symptom: see the note below
   under Known Issues about "Forgot password?" appearing to send the wrong
-  email.** Now actually pushed (`bebb5b6`).
+  email.** Now actually pushed (`bebb5b6`), and **confirmed fully working
+  live**: a real click-through on the deployed site received an actual
+  "Reset your password" email, followed it to a working form, changed the
+  password, and logged in with the new one successfully. Fully closed.
 - "No guarantee of winning" disclaimer — closes the loop on the fit-check
   system's existing no-win-probability-claims stance for the client-facing
   side. `components/ui/BidFileStep.tsx` (the real final-submit step, shared
@@ -306,6 +309,23 @@ directly.
   The active/current page keeps a distinct highlighted border+color state.
   Verified with real before/after screenshots at a real mobile viewport,
   plus the active-page and dark-mode states.
+- Admin inbox (`/admin/inbox`) is now a genuine FIFO queue, oldest-submitted-
+  first — previously there was no consistent order at all (a flag-priority
+  sort that ignored `submitted_at` entirely, so due dates jumped around
+  row to row with no visible logic). The query now excludes `draft = true`
+  rows outright (not yet actionable, no `submitted_at` to queue by) and
+  sorts `is_test` ascending before `submitted_at` ascending, so rehearsal
+  submissions always sort after every real one regardless of their own
+  submission date, matching the existing principle of excluding test data
+  from real reporting elsewhere in the app. The "Past due"/"Needs
+  attention" badges are unchanged and still computed the same way — they
+  no longer reorder rows, just flag them in place, since a real FIFO means
+  row position always matches submission order. Verified with a real
+  DB-backed test: inserted rows with deliberately out-of-order
+  `submitted_at` values, a draft row, and a test row whose `submitted_at`
+  was the *oldest* of all — confirmed the real rendered admin inbox
+  excluded the draft entirely, ordered the real rows correctly
+  oldest-first, and still sorted the test row dead last despite its date.
 
 ## Known Issues / Recently Fixed
 - **"Forgot password?" appeared to send a sign-in link instead of a
@@ -328,10 +348,11 @@ directly.
   = "Reset your password"` vs. `mailer_subjects_magic_link = "Your
   sign-in link"`) — so there was nothing to fix in either the app code or
   the Supabase project config. Pushed the previously-stranded commits
-  (`bebb5b6` now on `origin/main`) so this stops recurring. **Needs a real
-  retest against the live site now that it's actually deployed** — I
-  can't personally trigger and check a real inbox, so this needs an
-  actual click-through confirmation before treating it as fully closed.
+  (`bebb5b6` now on `origin/main`) so this stops recurring. **Retested
+  live and confirmed fully working**: a real click-through received an
+  actual "Reset your password" email, followed it to a working form,
+  changed the password, and logged in with the new one successfully.
+  Fully closed.
 - Fixed twice: RLS blocking `clients` insert during signup. Most recent
   instance was Vercel-only (didn't reproduce in Codespace) — suspected timing
   issue between `signUp()` resolving and the session being ready for the

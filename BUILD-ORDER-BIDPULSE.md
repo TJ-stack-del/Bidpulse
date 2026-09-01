@@ -40,7 +40,56 @@ backlog, in suggested order.
 
 ## Next up
 
-### 1. Session timeout decision (Open — Needs Attention, not yet a brief)
+### 1. Due-date alerting, independent of staleness
+Real feedback 2026-09-01. The existing daily digest
+(`app/api/daily-digest/route.ts`) only fires on **staleness** — no
+`updated_at` change in 3+ days — and only *within* that stale query does
+it also flag `daysUntilDue <= 5`. That means a submission due tomorrow
+that was touched today currently gets no alert at all, since it never
+enters the stale query in the first place. Wanted: a real due-date alert
+that fires regardless of recent activity.
+**Scope decision needed:** what should trigger it — a due-date-specific
+section added to the existing daily digest (simplest, reuses the cron
+already running at 8am, no new Vercel Cron job needed — worth noting the
+Hobby-tier 2-jobs/day limit is already maxed out, so a new standalone cron
+isn't an option without upgrading), or a different urgency threshold (e.g.
+3 days instead of 5)? Recommend: extend the existing digest email with a
+due-soon section pulled independently of the staleness filter, rather
+than a new cron job.
+Needs: real submissions with near-term due dates and recent `updated_at`
+timestamps, confirmed to actually appear in a real generated digest email
+before this counts as done.
+
+### 2. Admin → client "need more info" messaging
+Real feedback 2026-09-01, tied to a real case: the Dar Mano Consulting
+submission's Fit Check panel already generates useful admin-facing
+suggestions ("We don't have your NAICS codes on file yet," "No verified
+certifications on file yet," etc.) but there's currently no way to
+actually send that ask to the client. The existing `checklist_items`
+table is client-readable (not client-editable) per RLS, and stage-change
+emails only cover the 6 fixed pipeline stages — none of which is "we need
+something from you to proceed."
+Proposed approach (not yet decided — confirm before building): add a
+"Request info from client" action on the submission detail page — a text
+box the admin fills in (can start pre-filled from the Fit Check
+suggestions text), on submit: (a) creates a real `checklist_items` row so
+it's visibly tracked on both admin and client sides, and (b) sends a real
+email to the client via the existing `sendEmail()` — needs a new template
+in `lib/email/templates.ts` (something like `getInfoRequestEmail()`, same
+plain-language 8th-grade standard as the rest of the client-facing copy).
+Also log a real `audit_log` entry (`info_requested`) alongside the
+existing event types.
+Alternative worth considering instead of/alongside the above: since
+`support_messages.submission_id` already exists and was scoped for
+exactly this kind of bid-specific messaging in the deferred "Message
+admin" item below (#6), this could extend that same table/UI to be
+bidirectional (client→admin already covered; add admin→client) rather
+than building a separate mechanism. Worth deciding which one before
+Claude Code starts, since building both would be redundant.
+Needs real end-to-end verification: admin sends a request, client
+actually receives the email, checklist item appears on both dashboards.
+
+### 3. Session timeout decision (Open — Needs Attention, not yet a brief)
 Not a Claude Code task — a decision Mike needs to make first. Supabase
 Auth sessions currently never expire from inactivity (project-level
 default). Recommendation on the table: set an inactivity timeout in the
@@ -49,14 +98,14 @@ skip a hard time-box (unnecessary friction for BidPulse's actual risk
 profile). Once decided, this is a one-line dashboard setting, not code —
 log the decision and the value chosen in `PROJECT-STATUS.md` either way.
 
-### 2. Manual verification: Dar Mano Consulting VA/CUI exposure
+### 4. Manual verification: Dar Mano Consulting VA/CUI exposure
 Not a Claude Code task — a real-world read of the actual solicitation
 document for this one specific bid, to confirm the system's silence
 (no VA-system/CUI trigger language found) reflects genuine safety and
 not just absent keywords. Log the outcome in `PROJECT-STATUS.md`'s Known
 Issues section regardless of what's found.
 
-### 3. Law enforcement/detention agency-type integration check
+### 5. Law enforcement/detention agency-type integration check
 Confirm whether `lib/agency-type.ts`'s keyword-detection system covers
 law enforcement/detention facilities alongside airport/school/transit/`va`,
 or whether that category currently only fires through
@@ -64,28 +113,38 @@ or whether that category currently only fires through
 build — do this the next time `agency-type.ts` is touched for any other
 reason rather than as a standalone brief.
 
-### 4. "Message admin" UI tied to a specific bid
+### 6. "Message admin" UI tied to a specific bid
 `support_messages` already supports `submission_id` — this is UI-only:
 a message box on the submission detail page (both client and admin sides)
 that inserts against the existing table and existing RLS policies. No
-schema changes needed.
+schema changes needed. **See item #2 above** — this may get built as part
+of that work instead of standalone, if the bidirectional-messaging
+approach is chosen.
 
-### 5. Retainer package usage tracking
+### 7. Retainer package usage tracking
 Track how many bids a retainer client has used this month against the
 "up to 2/month" promise. No schema yet — needs a usage-count field or
 derived query against `submissions`/`packages`, plus a decision on how
 resets are timed (calendar month vs. rolling 30 days). Explicitly
 deferred until there's a real retainer client to test against.
 
-### 6. Theme no longer matches the new logo
-Reported 2026-09-01, still not triaged. Likely fallout from the
-shield/heartbeat logo swap (see `PROJECT-STATUS.md`'s Business/Naming
-Note) — the app's color tokens/theme were never revisited alongside the
-new logo's actual palette. Needs: pull the real colors from the new logo
-assets, compare against current Tailwind/design-token theme values, and
-decide what to update (primary/secondary colors, surface tones, etc.).
-Verify with real screenshots showing logo + theme together before closing
-out.
+### 8. Favicon vs. nav/login logo mismatch
+Not a code bug — confirmed during the logo consistency audit that every
+location already renders its correctly *intended* asset. The three
+source PNGs themselves just weren't drawn as a matched set: the favicon
+is a flat navy "BP" monogram with heavier strokes, while the nav/login
+mark is a plain heartbeat-only shield with a lighter gradient and
+thinner strokes. Needs a design decision (redesign the favicon to match,
+or keep the bolder monogram deliberately for small-size legibility), not
+an engineering fix — and per the Business/Naming Note, sits in the same
+paused bucket as other logo/branding work pending the trademark question.
+
+### 9. Theme color tokens vs. the new logo's palette
+Not yet looked at. Flagged as likely fallout from the shield/heartbeat
+logo swap — needs pulling the actual colors from the logo assets and
+comparing against the current Tailwind/design tokens. Worth doing
+alongside item #8 above, since both are visual/design-token passes on the
+same brand assets.
 
 ## Closed since the last update (2026-09-01)
 
@@ -140,9 +199,10 @@ supposed to. Confirmed the real code (`resetPasswordForEmail`, correctly
 wired) and the Supabase project's mailer templates (recovery vs.
 magic-link are genuinely distinct subjects/content) both check out —
 nothing to fix in either. Pushed the stranded commits; `origin/main` is
-now at `bebb5b6`. **Needs a real retest against the live site** to
-confirm the actual email now arrives correctly — not closed on code
-inspection alone, since a real inbox couldn't be checked directly.
+now at `bebb5b6`. **Retested live and confirmed fully working**: a real
+click-through received an actual "Reset your password" email, followed
+it to a working form, changed the password, and logged in with the new
+one successfully. Fully closed.
 
 **Lesson for next time:** "committed" and "deployed" got conflated more
 than once this session — several fixes sat committed-but-unpushed while
@@ -164,6 +224,22 @@ highlighted state (`border-secondary`, bold teal text) instead of just
 plain bold text. Verified with real before/after screenshots at a real
 mobile viewport (390×700), plus the active-page highlight state and dark
 mode — all render correctly.
+
+### Admin inbox: FIFO queue ordering — RESOLVED
+Used the doc's own stated default rather than re-confirming, since it was
+offered as an assumption to flag-if-wrong, not a decision to confirm
+first: sort by `submitted_at` ascending, exclude `draft = true` rows
+entirely, deprioritize `is_test = true` rows below every real one. The
+previous sort ignored `submitted_at` completely (a flag-priority sort by
+recency), which is exactly why due dates looked random row to row. Now a
+real `ORDER BY is_test ASC, submitted_at ASC` at the query level; the
+existing "Past due"/"Needs attention" badges are unchanged, just no
+longer used to reorder rows. Verified with a real DB-backed test:
+inserted rows with deliberately out-of-order `submitted_at`, a draft, and
+a test row with the *oldest* `submitted_at` of all — confirmed the real
+admin inbox excluded the draft, ordered the real rows correctly, and
+still sorted the test row dead last despite its date. Screenshot
+evidence in `PROJECT-STATUS.md`.
 
 ## Also closed this session (folded in from earlier same-day work)
 - Homepage trade list (tagline + "Trades we work with" cards) — generated

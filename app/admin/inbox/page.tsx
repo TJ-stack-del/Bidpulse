@@ -27,12 +27,22 @@ export default async function AdminInboxPage() {
 
   if (!member) redirect("/");
 
+  // Real FIFO queue, oldest-submitted-first, so nothing sits unnoticed
+  // further down the list — draft rows are excluded entirely (not yet
+  // actionable, no submitted_at to queue by), and test rows sort after
+  // every real one so rehearsal data never competes with real client
+  // queue position (same principle as excluding is_test from reporting
+  // elsewhere in the app). "Needs attention"/"Past due" stay as visual
+  // badges computed below, not as a reordering signal — the point of a
+  // real FIFO is that row position always matches submission order.
   const { data: rawSubmissions } = await supabase
     .from("submissions")
     .select(
       "id, agency, solicitation_number, stage, due_date, is_test, draft, submitted_at, updated_at, created_at, clients(company_name)"
     )
-    .order("created_at", { ascending: false });
+    .eq("draft", false)
+    .order("is_test", { ascending: true })
+    .order("submitted_at", { ascending: true });
 
   const FORTY_EIGHT_HOURS_MS = 48 * 60 * 60 * 1000;
   const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
@@ -43,27 +53,19 @@ export default async function AdminInboxPage() {
   // than 48h after the client's own submitted_at — a broken promise, not
   // just staleness) or simply untouched for 3+ days (no explicit
   // updated_at yet falls back to created_at).
-  const submissions = (rawSubmissions ?? [])
-    .map((sub: any) => {
-      const pastPromise =
-        sub.stage !== "closed" &&
-        (sub.stage === "submitted" || sub.stage === "in_review") &&
-        !!sub.submitted_at &&
-        now - new Date(sub.submitted_at).getTime() > FORTY_EIGHT_HOURS_MS;
+  const submissions = (rawSubmissions ?? []).map((sub: any) => {
+    const pastPromise =
+      sub.stage !== "closed" &&
+      (sub.stage === "submitted" || sub.stage === "in_review") &&
+      !!sub.submitted_at &&
+      now - new Date(sub.submitted_at).getTime() > FORTY_EIGHT_HOURS_MS;
 
-      const lastTouched = sub.updated_at ?? sub.created_at;
-      const isStale =
-        sub.stage !== "closed" && now - new Date(lastTouched).getTime() >= THREE_DAYS_MS;
+    const lastTouched = sub.updated_at ?? sub.created_at;
+    const isStale =
+      sub.stage !== "closed" && now - new Date(lastTouched).getTime() >= THREE_DAYS_MS;
 
-      return { ...sub, pastPromise, isStale };
-    })
-    .sort((a, b) => {
-      const aFlagged = a.pastPromise || a.isStale ? 1 : 0;
-      const bFlagged = b.pastPromise || b.isStale ? 1 : 0;
-      if (aFlagged !== bFlagged) return bFlagged - aFlagged;
-      if (a.pastPromise !== b.pastPromise) return a.pastPromise ? -1 : 1;
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-    });
+    return { ...sub, pastPromise, isStale };
+  });
 
   const stageLabels: Record<string, string> = {
     submitted: "Submitted",
