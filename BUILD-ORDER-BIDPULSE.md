@@ -20,9 +20,20 @@ a third time), audited the Fit-Score Quiz (fully built, no action needed),
 audited logo consistency (no code mismatches; one source-art style
 question left for Mike, see `PROJECT-STATUS.md`), added the "no guarantee
 of winning" disclaimer (gated checkbox + audit_log + marketing copy), and
-closed item #6 below (login page navigation + missing reset-password link)
-in full. See `PROJECT-STATUS.md`'s "Confirmed Working" for the real
+closed the login page navigation + missing reset-password link bug in
+full — then, from further real-browser testing that same day, found and
+fixed a deeper layer of the same complaint: signed-in users (both roles)
+had no way back to the marketing site at all until AppShell's logo got a
+real link. See `PROJECT-STATUS.md`'s "Confirmed Working" for the real
 evidence behind each.
+
+One important wrinkle discovered late the same day: several of these
+fixes, including the forgot-password flow, had been committed locally
+but never actually pushed — production was still running old code while
+the handoff docs already described the fixes as done. That's what caused
+the "Forgot password? sends the wrong email" report below; see that entry
+for the full story. Everything through `bebb5b6` is now actually pushed
+to `origin/main`.
 
 Nothing is currently mid-flight. The items below are the real remaining
 backlog, in suggested order.
@@ -79,24 +90,65 @@ out.
 ## Closed since the last update (2026-09-01)
 
 ### Login page bug: can't navigate away, missing reset-password link — RESOLVED
-Both symptoms confirmed and fixed, with real evidence in
+Both original symptoms confirmed and fixed, with real evidence in
 `PROJECT-STATUS.md`'s Confirmed Working section:
-- Navigation away was genuinely missing (no link, no nav at all) — the
-  logo is now a real `Link` to `/`; click-through and browser back both
-  verified working in a real browser.
+- Navigation away from the anonymous `/login` page was genuinely missing
+  (no link, no nav at all) — the logo is now a real `Link` to `/`;
+  click-through and browser back both verified working in a real browser.
 - The reset-password link was genuinely missing from the code (not just
   broken) — built a full forgot-password flow (`LoginForm.tsx` +
   `app/reset-password/`), reusing the existing `/auth/callback` PKCE
   route rather than duplicating it. Verified end-to-end with a real test
   account, including signing back in with the changed password to prove
-  it actually took effect. **Not yet committed as of this writing** — flag
-  this if picking the repo up before that commit lands.
+  it actually took effect. Committed (`46c999f`).
 - A related but separate bug was found and fixed along the way: the
   Supabase project's Auth `site_url` was still `http://localhost:3000`
   with an empty redirect allowlist, silently overriding every auth email
   redirect (reset AND magic-link) back to localhost regardless of what the
   app sent. Fixed via the Management API and verified with a real
   generated recovery link resolving to the production domain.
+
+**Follow-up found via further real-browser testing (same day):** the fix
+above only covered the *anonymous* `/login` page. A deeper layer of the
+same complaint was still real — once actually signed in (either role),
+there was no way back to the marketing site at all except signing out
+completely. `AppShell.tsx` (shared by every `/admin/*` and `/dashboard/*`
+page) had its logo as a plain unlinked image, and even a link to `/`
+wouldn't have helped, since `app/page.tsx`'s root routing always bounces a
+signed-in user straight back into the app. Reproduced with real admin and
+client test accounts, then fixed by linking AppShell's logo to `/pricing`
+instead — a real public page the signed-in redirect doesn't touch.
+Verified for both roles. Committed (`20d2b57`).
+
+Also investigated the same day: a real hydration-mismatch console error
+a browser session captured turned out to be a Chrome DevTools Responsive
+device-emulation artifact (it injects a `zoom` style onto `<body>`,
+which is exactly the attribute React flagged as mismatched) — not a real
+bug, confirmed from the screenshot's own visible device toolbar and by
+re-testing outside that mode with zero errors.
+
+### "Forgot password?" sending the wrong email — RESOLVED (deployment gap, not a code bug)
+Real evidence (actual emails titled "Your sign-in link," four within a
+~3 hour window) pointed at something calling `signInWithOtp` instead of
+`resetPasswordForEmail`. Root cause turned out to be much simpler and more
+important: **the forgot-password commit (`46c999f`) had never been
+pushed** — `origin/main` was still sitting at `e83f77a` when this was
+reported, so production had no "Forgot password?" feature at all yet,
+only the pre-existing "Sign in without a password" magic-link option.
+That's what actually got tested, and it correctly did exactly what it's
+supposed to. Confirmed the real code (`resetPasswordForEmail`, correctly
+wired) and the Supabase project's mailer templates (recovery vs.
+magic-link are genuinely distinct subjects/content) both check out —
+nothing to fix in either. Pushed the stranded commits; `origin/main` is
+now at `bebb5b6`. **Needs a real retest against the live site** to
+confirm the actual email now arrives correctly — not closed on code
+inspection alone, since a real inbox couldn't be checked directly.
+
+**Lesson for next time:** "committed" and "deployed" got conflated more
+than once this session — several fixes sat committed-but-unpushed while
+marked as done in the handoff docs. Worth pushing immediately after
+every commit rather than batching, especially for anything the build
+order calls blocking.
 
 ## Also closed this session (folded in from earlier same-day work)
 - Homepage trade list (tagline + "Trades we work with" cards) — generated
