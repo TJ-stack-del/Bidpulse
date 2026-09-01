@@ -9,7 +9,12 @@ const DELIVERABLE_LABELS: Record<string, string> = {
   capability_statement: "Capability Statement",
   compliance_matrix: "Compliance Matrix",
   technical_narrative: "Technical Narrative",
+  rate_sheet: "Rate Sheet",
+  executive_cover: "Executive Cover",
+  certificate_of_insurance: "Certificate of Insurance",
 };
+const FULL_ORDER = ["capability_statement", "compliance_matrix", "technical_narrative"];
+const LEAN_ORDER = ["rate_sheet", "executive_cover", "certificate_of_insurance"];
 
 // Drop this on both the admin submission detail page and the client
 // dashboard: <PacketButtons submissionId={...} orgId={...} viewerRole="admin" | "client" />
@@ -177,7 +182,10 @@ export function PacketButtons({
               <p className="text-body-md text-on-surface-variant mb-6">
                 {previewData.submission.agency}
               </p>
-              {["capability_statement", "compliance_matrix", "technical_narrative"].map((type) => {
+              {(previewData.deliverables.some((d) => LEAN_ORDER.includes(d.deliverable_type))
+                ? LEAN_ORDER
+                : FULL_ORDER
+              ).map((type) => {
                 const d = previewData.deliverables.find((x) => x.deliverable_type === type);
                 return (
                   <div key={type} className="mb-6">

@@ -6,6 +6,7 @@ import { DeliverablesPanel } from "./DeliverablesPanel";
 import { PaymentStatus } from "./PaymentStatus";
 import { ClientCertifications } from "./ClientCertifications";
 import { signRfpDocumentUrls } from "@/lib/storage";
+import { EstimatedValueInput } from "./EstimatedValueInput";
 
 // The actual review workspace: full intake info, stage editing, internal
 // notes, checklist, deliverables. This is where the "admin does the real
@@ -82,6 +83,12 @@ export default async function AdminSubmissionDetailPage({
         .eq("id", submission.package_id)
         .maybeSingle()
     : { data: null };
+
+  const { data: org } = await supabase
+    .from("organizations")
+    .select("lean_package_threshold")
+    .eq("id", member.org_id)
+    .single();
 
   const { data: auditLog } = await supabase
     .from("audit_log")
@@ -166,6 +173,9 @@ export default async function AdminSubmissionDetailPage({
               <div>
                 <span className="text-label-md text-on-surface-variant block">Due date</span>
                 {submission.due_date ? new Date(submission.due_date).toLocaleDateString() : "—"}
+              </div>
+              <div>
+                <EstimatedValueInput submissionId={submission.id} initialValue={submission.estimated_value} />
               </div>
               <div className="col-span-2">
                 <span className="text-label-md text-on-surface-variant block">Scope</span>
@@ -264,6 +274,8 @@ export default async function AdminSubmissionDetailPage({
             actorId={member.id}
             initialDeliverables={deliverables}
             lastPacketView={lastPacketView}
+            estimatedValue={submission.estimated_value}
+            leanPackageThreshold={org?.lean_package_threshold ?? 35000}
           />
         </div>
 
@@ -301,6 +313,42 @@ export default async function AdminSubmissionDetailPage({
               <p className="text-body-md text-on-surface-variant">
                 Not run yet — this only runs automatically right after a client submits via the intake wizard.
               </p>
+            )}
+
+            {submission.mandatory_site_visit_concern && (
+              <div className="mt-4 bg-error-container/20 border border-error/30 rounded-lg p-4 flex gap-3">
+                <span className="material-symbols-outlined text-error text-[20px] shrink-0">warning</span>
+                <div>
+                  <p className="text-label-md text-error font-bold uppercase tracking-wide mb-1">
+                    Mandatory site visit
+                  </p>
+                  <p className="text-body-md text-on-surface">{submission.mandatory_site_visit_explanation}</p>
+                </div>
+              </div>
+            )}
+
+            {submission.wage_risk_concern && (
+              <div className="mt-4 bg-surface-container-highest border border-outline-variant rounded-lg p-4 flex gap-3">
+                <span className="material-symbols-outlined text-on-surface-variant text-[20px] shrink-0">payments</span>
+                <div>
+                  <p className="text-label-md text-on-surface font-bold uppercase tracking-wide mb-1">
+                    Wage pricing risk
+                  </p>
+                  <p className="text-body-md text-on-surface-variant">{submission.wage_risk_explanation}</p>
+                </div>
+              </div>
+            )}
+
+            {submission.fit_eligibility_concern && (
+              <div className="mt-4 bg-surface-container-highest border border-outline-variant rounded-lg p-4 flex gap-3">
+                <span className="material-symbols-outlined text-on-surface-variant text-[20px] shrink-0">fact_check</span>
+                <div>
+                  <p className="text-label-md text-on-surface font-bold uppercase tracking-wide mb-1">
+                    Eligibility to check
+                  </p>
+                  <p className="text-body-md text-on-surface-variant">{submission.fit_eligibility_explanation}</p>
+                </div>
+              </div>
             )}
           </div>
         </div>

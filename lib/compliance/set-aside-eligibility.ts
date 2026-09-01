@@ -9,6 +9,15 @@
 // keyword match won't fully capture (partial set-asides, tiered
 // preferences, etc.) and because certification status can change after the
 // admin's last verification pass.
+//
+// JSEB and DBE/SDB are NOT interchangeable — JSEB is Jacksonville's own
+// local certification, DBE/SDB is what federal transit/aviation funding
+// requires (lib/agency-type.ts's isFederallyFunded()). A contractor with
+// one doesn't satisfy a requirement for the other, so when either is
+// detected, the funding context gets cross-checked and a mismatch is
+// called out explicitly rather than silently naming the wrong program.
+
+import { isFederallyFunded } from "@/lib/agency-type";
 
 export type SetAsideRestriction = {
   id: string;
@@ -48,7 +57,26 @@ export const SET_ASIDE_RESTRICTIONS: SetAsideRestriction[] = [
     certType: null,
     matcher: /\btotal\b[^a-z0-9]{0,10}small business[^a-z0-9]{0,10}set[- ]?aside|100\s*%[^a-z0-9]{0,20}small business[^a-z0-9]{0,10}set[- ]?aside/i,
   },
+  // JSEB/DBE language is rarely phrased with the word "set-aside" itself —
+  // real text reads more like "certified JSEB firm" or "DBE participation
+  // goal of 12%" — so these match the program name directly rather than
+  // requiring "set-aside" nearby, unlike the entries above.
+  { id: "jseb-requirement", label: "JSEB Requirement", certType: "JSEB", matcher: /\bjseb\b/i },
+  {
+    id: "dbe-sdb-requirement",
+    label: "DBE/SDB Requirement",
+    certType: "DBE/SDB",
+    matcher: /\b(dbe|sdb|disadvantaged business enterprise)\b/i,
+  },
 ];
+
+// JSEB and DBE/SDB are the two entries with a real funding-source
+// counterpart to cross-check against — every other restriction here is
+// national-program language with no local/federal ambiguity.
+const FUNDING_CROSS_CHECK: Record<string, { expectFederal: boolean; otherProgram: string }> = {
+  "jseb-requirement": { expectFederal: false, otherProgram: "DBE/SDB" },
+  "dbe-sdb-requirement": { expectFederal: true, otherProgram: "JSEB" },
+};
 
 export type EligibilityResult = { concern: boolean; explanation: string | null };
 
@@ -81,6 +109,20 @@ export function assessSetAsideEligibility(
     if (!hasMatchingCert) {
       notes.push(
         `The bid text references a "${restriction.label}" (matched: "${hit}") — check this: there's no verified ${restriction.certType} certification on file for this client. Confirm whether the client actually holds this certification before pursuing the bid.`
+      );
+    }
+
+    // JSEB and DBE/SDB aren't interchangeable — flag a likely funding-source
+    // mismatch even when the client DOES hold the named cert, since holding
+    // JSEB doesn't help on a federally funded requirement and vice versa.
+    // This can add a second, distinct concern for the same match.
+    const crossCheck = FUNDING_CROSS_CHECK[restriction.id];
+    if (crossCheck && isFederallyFunded(bidText) !== crossCheck.expectFederal) {
+      const fundingDescription = crossCheck.expectFederal
+        ? "doesn't appear to reference federal funding"
+        : "appears to reference federal funding";
+      notes.push(
+        `The bid text references a "${restriction.label}" (matched: "${hit}"), but this bid ${fundingDescription} — ${restriction.certType} may not be the right program here. Confirm whether ${crossCheck.otherProgram} is what's actually required instead; a ${restriction.certType} certification doesn't satisfy a ${crossCheck.otherProgram} requirement or vice versa.`
       );
     }
   }

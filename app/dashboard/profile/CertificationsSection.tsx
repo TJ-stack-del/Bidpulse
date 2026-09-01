@@ -17,7 +17,7 @@ type Certification = {
   created_at: string;
 };
 
-const CERT_TYPES = ["8(a)", "WOSB", "EDWOSB", "HUBZone", "SDVOSB", "VOSB", "Other"];
+const CERT_TYPES = ["8(a)", "WOSB", "EDWOSB", "HUBZone", "SDVOSB", "VOSB", "JSEB", "DBE/SDB", "Other"];
 
 function certLabel(cert: Pick<Certification, "cert_type" | "other_label">) {
   return cert.cert_type === "Other" ? cert.other_label || "Other" : cert.cert_type;
