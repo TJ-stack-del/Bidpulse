@@ -14,6 +14,9 @@
 // this produces stays "NEEDS VERIFICATION" with a bracketed instruction to confirm against
 // the real RFP, same fabrication safeguard as the rest of buildDraft().
 
+import { assessWageRisk } from "./wage-risk";
+import { detectMandatorySiteVisit } from "./mandatory-site-visit";
+
 export type RequirementCategory = "mandatory" | "conditional" | "trade_specific";
 
 type RequirementDefinition = {
@@ -78,12 +81,6 @@ export const CONDITIONAL_REQUIREMENTS: TriggeredRequirementDefinition[] = [
     verificationNote: "[Confirm performance and payment bond amounts and arrange them with a surety before contract award]",
   },
   {
-    id: "prevailing-wage",
-    label: "Prevailing Wage / Davis-Bacon Wage Certification",
-    triggerKeywords: ["prevailing wage", "davis-bacon", "davis bacon"],
-    verificationNote: "[Confirm the applicable wage determination and certified payroll requirements before submission]",
-  },
-  {
     id: "e-verify",
     label: "E-Verify Enrollment / Affidavit",
     triggerKeywords: ["e-verify", "e verify", "everify"],
@@ -94,12 +91,6 @@ export const CONDITIONAL_REQUIREMENTS: TriggeredRequirementDefinition[] = [
     label: "Employee Background Check",
     triggerKeywords: ["background check", "background screening"],
     verificationNote: "[Confirm the specific background-check standard required (e.g. Level 2) and screen assigned staff before work begins]",
-  },
-  {
-    id: "mandatory-site-visit",
-    label: "Mandatory Pre-Bid Site Visit Acknowledgment",
-    triggerKeywords: ["mandatory site visit", "mandatory pre-bid", "pre-bid conference"],
-    verificationNote: "[Confirm attendance at the mandatory site visit/pre-bid conference is documented — missing it can disqualify the bid]",
   },
 ];
 
@@ -180,6 +171,34 @@ export function matchRequirements(bidText: string): MatchedRequirement[] {
     if (hit) {
       matched.push({ id: req.id, label: req.label, category: "trade_specific", matchedKeyword: hit, verificationNote: req.verificationNote });
     }
+  }
+
+  // These two need proximity-aware regex detection (a bare keyword match is
+  // either too false-positive-prone — see mandatory-site-visit.ts's header
+  // comment — or would need an unsafe short acronym like "SCA" under this
+  // file's plain substring matching, see wage-risk.ts). Same detectors used
+  // by generate-fit-check/route.ts's more prominent flags, so the matrix row
+  // and the fit-check flag always agree.
+  const wageRisk = assessWageRisk(bidText);
+  if (wageRisk.concern) {
+    matched.push({
+      id: "prevailing-wage",
+      label: "Prevailing Wage / Davis-Bacon Wage Certification",
+      category: "conditional",
+      matchedKeyword: "prevailing/living wage language",
+      verificationNote: "[Confirm the applicable wage determination and certified payroll requirements before submission]",
+    });
+  }
+
+  const siteVisit = detectMandatorySiteVisit(bidText);
+  if (siteVisit.flagged) {
+    matched.push({
+      id: "mandatory-site-visit",
+      label: "Mandatory Pre-Bid Site Visit Acknowledgment",
+      category: "conditional",
+      matchedKeyword: "mandatory site visit language",
+      verificationNote: "[Confirm attendance at the mandatory site visit/pre-bid conference is documented — missing it can disqualify the bid]",
+    });
   }
 
   return matched;

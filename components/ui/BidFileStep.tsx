@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "./Spinner";
 import { FadeMessage } from "./FadeMessage";
 import { SubmissionDocuments } from "./SubmissionDocuments";
-import { finalizeSubmission } from "@/lib/submissions";
+import { finalizeSubmission, type FitCheckResult } from "@/lib/submissions";
 
 // The "Your bid file" step — upload the RFP, then either save for later or
 // lock the submission. Shared by the intake wizard (a brand-new client's
@@ -19,7 +19,7 @@ export function BidFileStep({
 }: {
   submissionId: string;
   onSubmitted?: () => void;
-  onFitCheck?: (result: { alignment: string; explanation: string } | null) => void;
+  onFitCheck?: (result: FitCheckResult | null) => void;
 }) {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);

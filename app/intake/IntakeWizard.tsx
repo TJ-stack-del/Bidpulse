@@ -6,7 +6,9 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
 import { BidFileStep } from "@/components/ui/BidFileStep";
+import { BidProcessNotices } from "@/components/ui/BidProcessNotices";
 import { isEmail, normalizePhone } from "@/lib/phone";
+import type { FitCheckResult } from "@/lib/submissions";
 
 // NAICS codes, small business status, and set-asides used to be collected
 // here too — moved to Company Profile (app/dashboard/profile) instead, so a
@@ -68,7 +70,7 @@ export function IntakeWizard() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
-  const [fitCheck, setFitCheck] = useState<{ alignment: string; explanation: string } | null>(null);
+  const [fitCheck, setFitCheck] = useState<FitCheckResult | null>(null);
   const [fitCheckLoading, setFitCheckLoading] = useState(false);
   // Blocks rendering step 0 until this resolves — without it, a client who's
   // already logged in (e.g. starting a second bid) would briefly see the
@@ -322,6 +324,17 @@ export function IntakeWizard() {
             <p className="text-body-md text-on-surface-variant mt-2">{fitCheck.explanation}</p>
           </div>
         )}
+        {fitCheck?.mandatorySiteVisitConcern && (
+          <div className="mt-4 max-w-md mx-auto bg-error-container/20 border border-error/30 rounded-xl p-5 text-left flex gap-3">
+            <span className="material-symbols-outlined text-error text-[20px] shrink-0">warning</span>
+            <div>
+              <p className="text-label-md text-error font-bold uppercase tracking-wide mb-1">
+                Mandatory site visit — read this
+              </p>
+              <p className="text-body-md text-on-surface">{fitCheck.mandatorySiteVisitExplanation}</p>
+            </div>
+          </div>
+        )}
 
         {/* The fit-check note above is actively telling the client to fill
             in their profile — Company Profile is the more prominent action
@@ -339,6 +352,13 @@ export function IntakeWizard() {
           >
             Go to your dashboard
           </Link>
+        </div>
+
+        <div className="mt-8 max-w-md mx-auto bg-surface-container-low border border-outline-variant rounded-xl p-5 text-left">
+          <p className="text-label-md text-on-surface-variant uppercase tracking-wide mb-3">
+            A couple things to know
+          </p>
+          <BidProcessNotices />
         </div>
       </div>
     );

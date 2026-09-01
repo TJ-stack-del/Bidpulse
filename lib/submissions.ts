@@ -10,10 +10,17 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 // saved) — never before. A caller that wants to show the result (the
 // wizard's confirmation screen) passes onFitCheck; a caller that doesn't
 // (the dashboard card, which just refreshes the page) can omit it.
+export type FitCheckResult = {
+  alignment: string;
+  explanation: string;
+  mandatorySiteVisitConcern: boolean;
+  mandatorySiteVisitExplanation: string | null;
+};
+
 export async function finalizeSubmission(
   supabase: SupabaseClient,
   submissionId: string,
-  onFitCheck?: (result: { alignment: string; explanation: string } | null) => void
+  onFitCheck?: (result: FitCheckResult | null) => void
 ) {
   const { data: submission, error: submitError } = await supabase
     .from("submissions")
@@ -51,7 +58,18 @@ export async function finalizeSubmission(
 
   if (onFitCheck) {
     fitCheckFetch
-      .then((data) => onFitCheck(data?.fit_alignment ? { alignment: data.fit_alignment, explanation: data.fit_explanation } : null))
+      .then((data) =>
+        onFitCheck(
+          data?.fit_alignment
+            ? {
+                alignment: data.fit_alignment,
+                explanation: data.fit_explanation,
+                mandatorySiteVisitConcern: !!data.mandatory_site_visit_concern,
+                mandatorySiteVisitExplanation: data.mandatory_site_visit_explanation ?? null,
+              }
+            : null
+        )
+      )
       .catch(() => onFitCheck(null));
   } else {
     fitCheckFetch.catch(() => {});
