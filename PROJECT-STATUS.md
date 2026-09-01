@@ -411,6 +411,21 @@ directly.
     Profile's fields persisted only after clicking Save and confirmed via
     a fresh page reload, intake's fields persisted immediately and
     confirmed via direct query.
+- A follow-up report claimed three "systemic field-mapping" bugs in the
+  above (insurance provider holding coverage text, license# still
+  colliding with the Sunbiz number, phone/business_phone confusion) —
+  re-verified against the actual shipped code rather than assumed stale:
+  none are present. Specifically retested with a new fixture variant
+  that, unlike the original, states a real insurance carrier name — came
+  back correctly as `insuranceProvider`, with `workersCompCoverage`
+  still separate and correct. Field mapping is by JSON key name
+  throughout (`obj.insuranceProvider`, `obj.workersCompCoverage`, etc.),
+  not array position, so there's no structural way for values to shift
+  between fields. The "phone empty" observation is by design, not a
+  bug: `clients.phone` is the account's login/SMS-auth number, and
+  extraction deliberately never writes to it — overwriting a real
+  auth-linked phone from a guessed document value would be a real risk.
+  Confirmed with Mike: leave as-is, business_phone only.
 
 ## Known Issues / Recently Fixed
 - **Due-date alerting was reported as broken but is actually already
