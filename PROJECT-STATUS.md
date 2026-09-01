@@ -14,10 +14,14 @@ using AI-assisted drafting, then the client pays and downloads the package.
 (Postgres + Auth + Storage), Vercel (now deployed at bidpulse-nine.vercel.app).
 GitHub Codespaces for development.
 
-**Deploy status (2026-09-01):** `origin/main` is at `439b91e`, pushed and
-should be live on Vercel. All schema migrations through
+**Deploy status (2026-09-01):** `origin/main` is at `e83f77a`, pushed and
+should be live on Vercel. One more commit is staged but not yet pushed as of
+this writing — the forgot-password flow (see Confirmed Working below); ask
+before assuming it's live. All schema migrations through
 `20260831233428_add_estimated_value_and_lean_package_threshold.sql` are
-applied to the live Supabase project.
+applied to the live Supabase project. No new migrations this session — the
+"no guarantee of winning" acknowledgment reused the existing `audit_log`
+table instead of adding a column.
 
 ## How schema changes get made now
 As of 2026-08-31, all schema changes go through Supabase CLI migrations —
@@ -165,6 +169,88 @@ directly.
   dropped every surrounding prose line (including the pre-existing
   "[DRAFT...]" disclaimer and the trailing scope-reference line) — fixed to
   render prose and table segments in their original order.
+- Homepage trade list is now generated, not hardcoded, in both places it
+  appears: the "Built for small trades" tagline (`app/page.tsx`) is built
+  from `KNOWN_TRADES` via `Intl.ListFormat` (proper Oxford-comma "X, Y, and
+  Z" joining) plus a small sentence-casing helper (keeps acronyms like
+  HVAC/IT uppercase, lowercases the rest so it reads naturally mid-sentence).
+  The separate "Trades we work with" card grid (icon + description per
+  trade) can't be auto-generated the same way — it needs real authored
+  content per trade — so instead it has a module-scope check that throws if
+  `KNOWN_TRADES` ever gets an entry with no matching card, both in dev
+  (real 500 + exact error) and in `next build` itself (confirmed a real
+  build failure, not just a dev-time one). The IT/Computer Support card
+  that was missing (added when the vertical shipped, but never added here)
+  is now present. Verified with real screenshots; the drift check was
+  proven by temporarily adding a 5th fake trade with no card and confirming
+  both dev and build failed loudly, then reverting.
+- Fit-Score Quiz (`/quiz`) audited and confirmed fully built and working —
+  not a stub. Four real yes/no questions, `yesCount >= 2` -> "strong fit"
+  vs. "we can still help" branch, both routing to `/intake`. Purely
+  client-side (`useState`, no `supabase`/`fetch` calls, no schema table) —
+  deliberate, not an oversight, per the code's own comment. Means a visitor
+  who finishes the quiz but doesn't click through leaves zero trace; worth
+  knowing if lead capture on drop-off ever becomes a priority.
+- Logo consistency audit: every location that renders a BidPulse
+  logo/icon — favicon, marketing nav, marketing footer, admin header,
+  client dashboard header (same shared `AppShell`, so these two can't
+  drift from each other), login page — already uses its correctly intended
+  asset per the three-variant mapping (icon-only for favicon, horizontal
+  for nav bars, stacked for login). No code-level mismatches found. Email
+  templates (`lib/email/templates.ts`) are plain text, no logo, nothing to
+  fix there. See Open — Needs Attention for a real visual inconsistency
+  found in the source art itself (not a code bug).
+- Login page (`app/login/page.tsx`): the logo is now a `Link` to `/` — the
+  page previously had no way out at all except closing the tab. Kept
+  minimal, no full nav bar added. Verified real click-through to `/` and
+  browser back to `/login` both work.
+- **Password reset was redirecting to localhost — root-caused and fixed.**
+  Not an app-code bug: there was (and still is, until the item below is
+  committed) no `resetPasswordForEmail` call anywhere in the codebase. The
+  actual cause was the Supabase project's Auth settings — `site_url` was
+  `http://localhost:3000` and the redirect allowlist was completely empty,
+  so *any* redirect target, even a correct dynamic one, got silently
+  overridden back to localhost. Fixed via the Management API: `site_url` ->
+  `https://bidpulse-nine.vercel.app`, redirect allowlist ->
+  `https://bidpulse-nine.vercel.app/**,http://localhost:3000/**` (both, so
+  local dev keeps working). Verified live: generated a real recovery link
+  via the admin API for a real existing user and confirmed the actual HTTP
+  303 redirect lands on the production domain, not localhost.
+- Forgot-password flow — genuinely missing before, now built.
+  `LoginForm.tsx` gained a "Forgot password?" link and a request-reset mode
+  calling `resetPasswordForEmail` with `redirectTo` pointed at the existing
+  `/auth/callback` route (same PKCE code-exchange route the passwordless
+  magic-link flow already used — reused, not duplicated) with
+  `next=/reset-password`. New `app/reset-password/page.tsx` +
+  `ResetPasswordForm.tsx` lets the user set a new password once a real
+  session exists (from the exchanged recovery code), with a clear "this
+  link is invalid or expired" fallback if there's no session (link already
+  used, expired, or the page opened directly). Verified end-to-end with a
+  real test account: real request submitted, signed in with the original
+  password, reset the password with a real session, **signed out and back
+  in with the new password to confirm it actually changed** (not just that
+  the UI reported success), and confirmed the no-session fallback state
+  renders correctly for a fresh visitor. A literal inbox click-through
+  couldn't be tested (this project's PKCE flow needs the same browser that
+  requests the reset to hold the matching code-verifier when it completes
+  the exchange, and there's no real inbox to check in this environment) —
+  every other real code path this touches was verified instead. **Not yet
+  committed as of this writing.**
+- "No guarantee of winning" disclaimer — closes the loop on the fit-check
+  system's existing no-win-probability-claims stance for the client-facing
+  side. `components/ui/BidFileStep.tsx` (the real final-submit step, shared
+  by the intake wizard and the dashboard's "complete your bid" card) now
+  has a required checkbox that genuinely gates the "Send it to us" button
+  (`disabled={saving || !acknowledged}`, not just decorative text).
+  Persisted as a real `audit_log` entry (`no_guarantee_acknowledged`, exact
+  acknowledgment text, real timestamp) right alongside the existing
+  `submission_locked` entry in `finalizeSubmission()` — no new
+  column/migration needed. Also added short plain-language disclaimer text
+  to the marketing footer (every page) and the pricing page (right after
+  the bottom CTA). Verified end-to-end with a real signup: confirmed the
+  submit button is genuinely disabled unchecked, enables once checked, and
+  a real DB read-back after submitting showed the audit_log row with the
+  correct text and timestamp. Test accounts cleaned up afterward.
 
 ## Known Issues / Recently Fixed
 - Fixed twice: RLS blocking `clients` insert during signup. Most recent
@@ -229,6 +315,21 @@ directly.
   bid's actual VA-system/CUI exposure by reading the real solicitation —
   see the matching note in Known Issues above. The system correctly stayed
   quiet, but quiet isn't the same as verified-safe for this one.
+- Favicon doesn't visually match the nav/login logo mark. The logo audit
+  (2026-09-01) confirmed every location uses its correctly *intended* asset
+  (no code-level mismatch), but the three source PNGs weren't drawn as a
+  matched set: the favicon (`app/icon.png`) is a flat navy "BP" monogram
+  with heavier strokes, while the nav/login mark is a plain heartbeat-only
+  shield with a lighter gradient and thinner strokes. Not something a code
+  fix can resolve — needs a design decision (redesign the favicon to match,
+  or leave the bolder "BP" monogram as deliberate for small-size
+  legibility), and per the Business/Naming Note below, further
+  logo/branding work is already paused pending the trademark question — put
+  this in the same bucket rather than deciding it standalone.
+- Theme color tokens vs. the new logo's real palette — not yet looked at.
+  Flagged in the 2026-09-01 build order as likely fallout from the
+  shield/heartbeat logo swap; needs pulling the actual colors from the logo
+  assets and comparing against the current Tailwind/design tokens.
 
 ## Deliberately Deferred (remaining items)
 Items #1, #2, and #4 from the original list (static bid-process warnings,
