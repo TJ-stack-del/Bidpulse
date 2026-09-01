@@ -24,6 +24,7 @@ export function BidFileStep({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [acknowledged, setAcknowledged] = useState(false);
   const supabase = createClient();
 
   async function handleSaveDraft() {
@@ -41,7 +42,7 @@ export function BidFileStep({
     setSaving(true);
     setError(null);
     try {
-      await finalizeSubmission(supabase, submissionId, onFitCheck);
+      await finalizeSubmission(supabase, submissionId, onFitCheck, acknowledged);
       onSubmitted?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't submit.");
@@ -56,6 +57,17 @@ export function BidFileStep({
 
       {error && <p className="text-body-md text-error">{error}</p>}
 
+      <label className="flex items-start gap-3 text-body-md text-on-surface-variant">
+        <input
+          type="checkbox"
+          checked={acknowledged}
+          onChange={(e) => setAcknowledged(e.target.checked)}
+          className="mt-1 h-4 w-4 shrink-0 rounded border-outline-variant text-secondary focus:ring-secondary"
+        />
+        I understand that BidPulse helps prepare my bid but does not guarantee I will win the
+        contract.
+      </label>
+
       <div className="flex gap-3">
         <button
           onClick={handleSaveDraft}
@@ -67,7 +79,7 @@ export function BidFileStep({
         </button>
         <button
           onClick={handleFinalSubmit}
-          disabled={saving}
+          disabled={saving || !acknowledged}
           className="flex-1 py-3 px-4 bg-secondary text-on-secondary rounded text-label-md hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center justify-center gap-2"
         >
           {saving && <Spinner />}

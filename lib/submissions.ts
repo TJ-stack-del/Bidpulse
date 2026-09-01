@@ -20,7 +20,13 @@ export type FitCheckResult = {
 export async function finalizeSubmission(
   supabase: SupabaseClient,
   submissionId: string,
-  onFitCheck?: (result: FitCheckResult | null) => void
+  onFitCheck?: (result: FitCheckResult | null) => void,
+  // Real legal record that the client actively checked the "no guarantee of
+  // winning" box, not just UI copy they could've skimmed past — BidFileStep
+  // disables the submit button until this is true, so by the time this runs
+  // it's already a hard true, but the audit_log row is what makes it provable
+  // later rather than only ever having existed in React state.
+  acknowledgedNoGuarantee?: boolean
 ) {
   const { data: submission, error: submitError } = await supabase
     .from("submissions")
@@ -49,6 +55,17 @@ export async function finalizeSubmission(
     event_type: "submission_locked",
     event_detail: { event: "client_submitted" },
   });
+
+  if (acknowledgedNoGuarantee) {
+    await supabase.from("audit_log").insert({
+      submission_id: submissionId,
+      org_id: client?.org_id,
+      event_type: "no_guarantee_acknowledged",
+      event_detail: {
+        text: "I understand that BidPulse helps prepare my bid but does not guarantee I will win the contract.",
+      },
+    });
+  }
 
   const fitCheckFetch = fetch("/api/generate-fit-check", {
     method: "POST",
