@@ -14,6 +14,11 @@ using AI-assisted drafting, then the client pays and downloads the package.
 (Postgres + Auth + Storage), Vercel (now deployed at bidpulse-nine.vercel.app).
 GitHub Codespaces for development.
 
+**Deploy status (2026-09-01):** `origin/main` is at `439b91e`, pushed and
+should be live on Vercel. All schema migrations through
+`20260831233428_add_estimated_value_and_lean_package_threshold.sql` are
+applied to the live Supabase project.
+
 ## How schema changes get made now
 As of 2026-08-31, all schema changes go through Supabase CLI migrations —
 `npx supabase migration new <name>`, edit the generated file under
@@ -60,7 +65,55 @@ directly.
   `fit_eligibility_concern`/`fit_eligibility_explanation`) — verified
   2026-08-31: a real intake submission mentioning "SDVOSB Set-Aside" from a
   client with no verified SDVOSB cert correctly set the concern flag with
-  the right explanation
+  the right explanation. As of 2026-09-01 this also names the SPECIFIC
+  program (JSEB vs. DBE/SDB) based on funding source
+  (`lib/agency-type.ts`'s `isFederallyFunded()`, checked against the bid's
+  own scope text) instead of a generic "set-aside certification" message,
+  and flags a cross-contamination risk even when the client holds the
+  *wrong* program's cert for the funding source in play (a JSEB cert
+  doesn't satisfy a federally-funded DBE/SDB requirement, or vice versa —
+  verified live with a real submission where this exact mismatch fired
+  correctly). JSEB and DBE/SDB are now real trackable certification types
+  (client-facing dropdown in `CertificationsSection.tsx`) — neither existed
+  anywhere in the app before this.
+- Static bid-process warnings (Cone of Silence, Florida Sunshine Law/public
+  records, government payment lag Net-30/45, mobilization/NTP timeline) —
+  shared `BidProcessNotices` component shown on the intake confirmation
+  screen and the client dashboard. Verified 2026-09-01 rendering in the
+  real flow via screenshots at both locations.
+- Bid-specific risk detection from real scope text, verified 2026-09-01
+  with present/absent real submissions for both:
+  - Prevailing/living wage risk (`lib/compliance/wage-risk.ts`,
+    `wage_risk_concern`/`wage_risk_explanation`) — flags prevailing wage,
+    living wage, Davis-Bacon, Service Contract Act, or wage determination
+    language; never invents a dollar figure.
+  - Mandatory site visit detection (`lib/compliance/mandatory-site-visit.ts`,
+    `mandatory_site_visit_concern`/`mandatory_site_visit_explanation`) —
+    requires an actual "mandatory"-equivalent word near a site-visit term
+    in the same sentence, so a bare/optional site-visit mention never
+    false-positives. Fixed a related bug in the existing compliance-matrix
+    reference-library entry, which had a bare "pre-bid conference" keyword
+    that would have fired even when a bid called the conference optional.
+  - All three fit-check concern flags (this pair plus the pre-existing
+    eligibility one) now actually render in the UI for the first time —
+    they were computed and persisted by an earlier session but never shown
+    anywhere. Escalating visual prominence: mandatory site visit renders
+    most urgently (red), since missing a truly mandatory walkthrough gets a
+    bid rejected unopened as non-responsive.
+- Dollar-value threshold → lean package — `submissions.estimated_value`
+  (admin-entered, nullable) and admin-adjustable
+  `organizations.lean_package_threshold` (default $35,000, FL Statute
+  287.017 Category Two *state* threshold; editable at the new
+  `/admin/settings` page since local bodies may set their own). When
+  estimated_value is below threshold, the deliverables panel shows a
+  suggestion banner — never automatic, confirmed with Mike, since
+  estimated_value is often a rough guess — to switch from the full
+  3-deliverable set to a lean one (Rate Sheet, Executive Cover, Certificate
+  of Insurance). No pricing data exists anywhere in the schema, so Rate
+  Sheet is placeholder-only (never invents a rate); Certificate of
+  Insurance is a summary of what's on file, not a substitute for the real
+  uploaded COI document. Verified 2026-09-01 with real below/above-threshold
+  submissions.
 
 ## Known Issues / Recently Fixed
 - Fixed twice: RLS blocking `clients` insert during signup. Most recent
@@ -79,46 +132,37 @@ directly.
   (added `can_access_client_object()` for the certifications upload path,
   which the old scoped policies didn't cover, then dropped the four broad
   policies).
-- **Tracked follow-up, not yet done:** the `rfp-documents` bucket is still
-  marked `public`, so any file's direct URL is fetchable by anyone who
-  obtains it, independent of RLS (lower urgency than the fix above — this
-  needs someone to already have a specific unguessable UUID-bearing URL).
-  Proper fix is a sequenced change, not a quick patch: (1) switch the 3
-  upload sites — `app/dashboard/profile/CertificationsSection.tsx`,
-  `app/admin/inbox/[id]/DeliverablesPanel.tsx`,
-  `components/ui/SubmissionDocuments.tsx` — to store the bare storage path
-  instead of a public URL; (2) backfill existing `file_url` rows (parse the
-  path out of their current public-URL format) across
-  `submission_documents`, `deliverables`, `client_certifications`; (3)
-  switch the 3 server pages that select `file_url`
-  (`app/admin/inbox/[id]/page.tsx`, `app/dashboard/page.tsx`,
-  `app/dashboard/profile/page.tsx`) to call `createSignedUrl()` at render
-  time instead of passing through a stored value; (4) only then flip the
-  bucket to private. Doing this out of order breaks existing document links
-  for active clients mid-flight.
+- Fixed 2026-08-31: the follow-up above is done. `file_url` columns
+  (`submission_documents`, `deliverables`, `client_certifications`) now
+  store the bare storage path, not a public URL; every read site generates
+  a signed URL at request time (`lib/storage.ts`) instead of persisting
+  one. The `rfp-documents` bucket is now private
+  (`supabase/migrations/20260831214629_make_rfp_documents_bucket_private.sql`).
+  One bug found and fixed mid-migration: certification/deliverable uploads
+  never sanitized filenames, so the initial backfill left percent-encoded
+  paths (spaces as `%20`) that didn't match the real storage key — corrected
+  in a follow-up migration and verified live against `storage.objects`.
+- Fixed 2026-08-31: `lib/agency-type.ts`'s school/airport detection regexes
+  (`\bschool\b`, `\bairport\b`) never matched their own plurals — no word
+  boundary between "l"/"t" and a trailing "s" in "Schools"/"Airports". Real
+  impact: "Duval County Public Schools" silently never triggered the Level 2
+  background-check compliance row. Also affects real airport-authority names
+  using plural "Airports" (e.g. "Metropolitan Washington Airports
+  Authority"). Fixed to `\bschools?\b` / `\bairports?\b`; `transit` checked
+  and didn't have the same bug.
 
 ## Deliberately Deferred (in priority order, decided together)
-1. Static "always true" bid-process warnings (Cone of Silence — never contact
-   agency staff directly once a solicitation is published; Florida Public
-   Records/Sunshine Law — bids become public record, proprietary content must
-   be explicitly marked "Exempt/Trade Secret") — low-risk, no AI needed, next
-   up now that the compliance-matrix and fit-check items above are confirmed.
-2. Bid-specific variable items needing real detection from bid text:
-   prevailing wage requirements, mandatory vs. optional site visits,
-   mobilization/NTP timelines, payment-terms cash-flow education.
-3. Law enforcement/detention facility category for agency-aware compliance
+Items #1, #2, and #4 from the original list (static bid-process warnings,
+bid-specific wage/site-visit/cash-flow/mobilization detection, and the
+dollar-threshold lean package) were completed 2026-09-01 — see Confirmed
+Working above. Remaining:
+1. Law enforcement/detention facility category for agency-aware compliance
    (background checks, bloodborne pathogen cert — partially covered now by
    TRADE_SPECIFIC_CERTIFICATIONS, but not fully integrated into the agency
    keyword-detection system alongside airport/school/transit).
-4. Dollar-value threshold → lean package (Rate Sheet + Cover + COI only) for
-   informal quotes. Default threshold researched: $35,000 (FL Statute 287.017
-   Category Two) — but this is the *state* threshold; local bodies (JEA, JAA,
-   City of Jacksonville, Duval Schools) may set their own. Needs an
-   `estimated_value` field and admin-adjustable threshold setting, neither
-   built yet.
-5. "Message admin" feature tied to a specific bid (same `support_messages`
+2. "Message admin" feature tied to a specific bid (same `support_messages`
    table already supports this via `submission_id` — just needs the UI).
-6. Retainer package usage tracking (how many bids used this month vs. the
+3. Retainer package usage tracking (how many bids used this month vs. the
    "up to 2/month" promise) — explicitly deferred, no schema yet.
 
 ## Business/Naming Note
