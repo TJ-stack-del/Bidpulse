@@ -32,64 +32,22 @@ fixes, including the forgot-password flow, had been committed locally
 but never actually pushed — production was still running old code while
 the handoff docs already described the fixes as done. That's what caused
 the "Forgot password? sends the wrong email" report below; see that entry
-for the full story. Everything through `bebb5b6` is now actually pushed
-to `origin/main`.
+for the full story. It was later retested live and confirmed fully
+working.
+
+Also closed the same day: admin inbox FIFO ordering (a real fix), and
+admin→client "need more info" requests (a real fix, new
+`checklist_items` + email flow). The due-date-alerting report turned out
+to already be correct — audited and confirmed with a real isolated test,
+no code change needed. See `PROJECT-STATUS.md`'s "Confirmed Working" for
+the evidence behind each.
 
 Nothing is currently mid-flight. The items below are the real remaining
 backlog, in suggested order.
 
 ## Next up
 
-### 1. Due-date alerting, independent of staleness
-Real feedback 2026-09-01. The existing daily digest
-(`app/api/daily-digest/route.ts`) only fires on **staleness** — no
-`updated_at` change in 3+ days — and only *within* that stale query does
-it also flag `daysUntilDue <= 5`. That means a submission due tomorrow
-that was touched today currently gets no alert at all, since it never
-enters the stale query in the first place. Wanted: a real due-date alert
-that fires regardless of recent activity.
-**Scope decision needed:** what should trigger it — a due-date-specific
-section added to the existing daily digest (simplest, reuses the cron
-already running at 8am, no new Vercel Cron job needed — worth noting the
-Hobby-tier 2-jobs/day limit is already maxed out, so a new standalone cron
-isn't an option without upgrading), or a different urgency threshold (e.g.
-3 days instead of 5)? Recommend: extend the existing digest email with a
-due-soon section pulled independently of the staleness filter, rather
-than a new cron job.
-Needs: real submissions with near-term due dates and recent `updated_at`
-timestamps, confirmed to actually appear in a real generated digest email
-before this counts as done.
-
-### 2. Admin → client "need more info" messaging
-Real feedback 2026-09-01, tied to a real case: the Dar Mano Consulting
-submission's Fit Check panel already generates useful admin-facing
-suggestions ("We don't have your NAICS codes on file yet," "No verified
-certifications on file yet," etc.) but there's currently no way to
-actually send that ask to the client. The existing `checklist_items`
-table is client-readable (not client-editable) per RLS, and stage-change
-emails only cover the 6 fixed pipeline stages — none of which is "we need
-something from you to proceed."
-Proposed approach (not yet decided — confirm before building): add a
-"Request info from client" action on the submission detail page — a text
-box the admin fills in (can start pre-filled from the Fit Check
-suggestions text), on submit: (a) creates a real `checklist_items` row so
-it's visibly tracked on both admin and client sides, and (b) sends a real
-email to the client via the existing `sendEmail()` — needs a new template
-in `lib/email/templates.ts` (something like `getInfoRequestEmail()`, same
-plain-language 8th-grade standard as the rest of the client-facing copy).
-Also log a real `audit_log` entry (`info_requested`) alongside the
-existing event types.
-Alternative worth considering instead of/alongside the above: since
-`support_messages.submission_id` already exists and was scoped for
-exactly this kind of bid-specific messaging in the deferred "Message
-admin" item below (#6), this could extend that same table/UI to be
-bidirectional (client→admin already covered; add admin→client) rather
-than building a separate mechanism. Worth deciding which one before
-Claude Code starts, since building both would be redundant.
-Needs real end-to-end verification: admin sends a request, client
-actually receives the email, checklist item appears on both dashboards.
-
-### 3. Session timeout decision (Open — Needs Attention, not yet a brief)
+### 1. Session timeout decision (Open — Needs Attention, not yet a brief)
 Not a Claude Code task — a decision Mike needs to make first. Supabase
 Auth sessions currently never expire from inactivity (project-level
 default). Recommendation on the table: set an inactivity timeout in the
@@ -98,14 +56,14 @@ skip a hard time-box (unnecessary friction for BidPulse's actual risk
 profile). Once decided, this is a one-line dashboard setting, not code —
 log the decision and the value chosen in `PROJECT-STATUS.md` either way.
 
-### 4. Manual verification: Dar Mano Consulting VA/CUI exposure
+### 2. Manual verification: Dar Mano Consulting VA/CUI exposure
 Not a Claude Code task — a real-world read of the actual solicitation
 document for this one specific bid, to confirm the system's silence
 (no VA-system/CUI trigger language found) reflects genuine safety and
 not just absent keywords. Log the outcome in `PROJECT-STATUS.md`'s Known
 Issues section regardless of what's found.
 
-### 5. Law enforcement/detention agency-type integration check
+### 3. Law enforcement/detention agency-type integration check
 Confirm whether `lib/agency-type.ts`'s keyword-detection system covers
 law enforcement/detention facilities alongside airport/school/transit/`va`,
 or whether that category currently only fires through
@@ -113,22 +71,14 @@ or whether that category currently only fires through
 build — do this the next time `agency-type.ts` is touched for any other
 reason rather than as a standalone brief.
 
-### 6. "Message admin" UI tied to a specific bid
-`support_messages` already supports `submission_id` — this is UI-only:
-a message box on the submission detail page (both client and admin sides)
-that inserts against the existing table and existing RLS policies. No
-schema changes needed. **See item #2 above** — this may get built as part
-of that work instead of standalone, if the bidirectional-messaging
-approach is chosen.
-
-### 7. Retainer package usage tracking
+### 4. Retainer package usage tracking
 Track how many bids a retainer client has used this month against the
 "up to 2/month" promise. No schema yet — needs a usage-count field or
 derived query against `submissions`/`packages`, plus a decision on how
 resets are timed (calendar month vs. rolling 30 days). Explicitly
 deferred until there's a real retainer client to test against.
 
-### 8. Favicon vs. nav/login logo mismatch
+### 5. Favicon vs. nav/login logo mismatch
 Not a code bug — confirmed during the logo consistency audit that every
 location already renders its correctly *intended* asset. The three
 source PNGs themselves just weren't drawn as a matched set: the favicon
@@ -139,11 +89,11 @@ or keep the bolder monogram deliberately for small-size legibility), not
 an engineering fix — and per the Business/Naming Note, sits in the same
 paused bucket as other logo/branding work pending the trademark question.
 
-### 9. Theme color tokens vs. the new logo's palette
+### 6. Theme color tokens vs. the new logo's palette
 Not yet looked at. Flagged as likely fallout from the shield/heartbeat
 logo swap — needs pulling the actual colors from the logo assets and
 comparing against the current Tailwind/design tokens. Worth doing
-alongside item #8 above, since both are visual/design-token passes on the
+alongside item #5 above, since both are visual/design-token passes on the
 same brand assets.
 
 ## Closed since the last update (2026-09-01)
@@ -240,6 +190,48 @@ a test row with the *oldest* `submitted_at` of all — confirmed the real
 admin inbox excluded the draft, ordered the real rows correctly, and
 still sorted the test row dead last despite its date. Screenshot
 evidence in `PROJECT-STATUS.md`.
+
+### Due-date alerting, independent of staleness — NOT A BUG, audited and confirmed already correct
+Traced the actual filter in `app/api/daily-digest/route.ts` before
+building anything, rather than trusting the report at face value (git
+history shows this file has only ever been touched once, so this logic
+isn't a recent regression either). The filter is a real 3-way OR —
+`breachedTurnaround || daysUntilDue <= 5 || stale` — not a nested
+staleness-gated check. A submission due tomorrow that was touched today
+already fires the alert today, on the `daysUntilDue <= 5` branch alone.
+The email template also already labels this distinctly ("DUE SOON — N
+days left," in red, sorted to the top) separately from a turnaround
+breach or plain staleness. Likely explanation for the report: the
+variable name `staleItems` and the `"nothing_stale"` skip-reason string
+read as if staleness gates everything, without tracing the actual OR.
+Verified for real rather than trusting the code read alone: inserted an
+isolated test submission — `daysSinceUpdate: 0` (touched today),
+`breachedTurnaround: false` (no broken promise), due tomorrow — and
+confirmed it was included in the real filter output purely because of
+the due-soon condition. No code change made.
+
+### Admin → client "need more info" messaging — RESOLVED
+Went with the `checklist_items` + email approach (confirmed over the
+bidirectional `support_messages` alternative first: that table is
+currently INSERT-anyone/SELECT-admin-only with zero client-facing read
+UI, so making it truly bidirectional would need a new migration, RLS in
+both directions, and a client-side UI built from scratch — the
+checklist_items approach needed none of that). New "Request info from
+client" card on the submission detail page
+(`app/admin/inbox/[id]/RequestInfoForm.tsx`), pre-filled from the real
+Fit Check explanation text (the one actual source of "what's missing"
+copy — it's a single joined paragraph, not separate structured
+suggestions, so pre-fill is the whole paragraph for the admin to edit
+down). New `app/api/request-info/route.ts` (same shape as the existing
+`notify-stage-change` route): creates a real `checklist_items` row,
+emails the client via a new `getInfoRequestEmail()` template, and logs a
+real `audit_log` entry (`info_requested`). Test submissions skip the
+real email send, matching the existing convention elsewhere. Verified
+end-to-end with a real submission: prefill pulled the actual Fit Check
+text, edited and sent, real DB read-back confirmed the checklist_items
+row, the audit_log entry, and that the item is visible via the exact
+query the client dashboard already uses (zero changes needed there — it
+already reads checklist_items for its own submissions).
 
 ## Also closed this session (folded in from earlier same-day work)
 - Homepage trade list (tagline + "Trades we work with" cards) — generated
