@@ -7,6 +7,7 @@ import { DeliverablesSection } from "./DeliverablesSection";
 import { ReportSubmittedButton } from "./ReportSubmittedButton";
 import { CompleteBidFile } from "./CompleteBidFile";
 import { signRfpDocumentUrls } from "@/lib/storage";
+import { BidProcessNotices } from "@/components/ui/BidProcessNotices";
 
 // Reads cookies (via lib/supabase/server) which already opts this page out
 // of static rendering — confirmed via `Cache-Control: no-store` on the
@@ -67,7 +68,7 @@ export default async function DashboardPage({
   const { data: submissions, error: submissionsError } = await supabase
     .from("submissions")
     .select(
-      "id, agency, solicitation_number, due_date, scope, stage, draft, is_test, package_id, created_at, updated_at, client_reported_submitted_at"
+      "id, agency, solicitation_number, due_date, scope, stage, draft, is_test, package_id, created_at, updated_at, client_reported_submitted_at, mandatory_site_visit_concern, mandatory_site_visit_explanation"
     )
     .eq("client_id", client.id)
     .order("updated_at", { ascending: false });
@@ -203,6 +204,18 @@ export default async function DashboardPage({
         </div>
       ) : (
         <>
+          {activeSubmission.mandatory_site_visit_concern && (
+            <div className="mt-4 bg-error-container/20 border border-error/30 rounded-xl p-5 flex gap-3">
+              <span className="material-symbols-outlined text-error text-[20px] shrink-0">warning</span>
+              <div>
+                <p className="text-label-md text-error font-bold uppercase tracking-wide mb-1">
+                  Mandatory site visit — read this
+                </p>
+                <p className="text-body-md text-on-surface">{activeSubmission.mandatory_site_visit_explanation}</p>
+              </div>
+            </div>
+          )}
+
           <LifecycleStepper currentStage={stageNumber(activeSubmission.stage)} />
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
@@ -295,6 +308,14 @@ export default async function DashboardPage({
                   <p className="text-body-md text-on-surface-variant">{activeSubmission.scope}</p>
                 </div>
               )}
+
+              <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
+                <h3 className="text-title-lg text-primary mb-4 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-secondary text-[20px]">balance</span>
+                  Bid process reminders
+                </h3>
+                <BidProcessNotices />
+              </div>
             </div>
           </div>
         </>

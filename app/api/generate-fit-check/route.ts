@@ -3,6 +3,8 @@ import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { detectAgencyTypes, type AgencyType } from "@/lib/agency-type";
 import { assessSetAsideEligibility } from "@/lib/compliance/set-aside-eligibility";
+import { assessWageRisk } from "@/lib/compliance/wage-risk";
+import { detectMandatorySiteVisit } from "@/lib/compliance/mandatory-site-visit";
 
 // Called by the intake wizard right after the client's own final submit —
 // no LLM wired up (same as generate-draft/route.ts), so this is a
@@ -165,6 +167,12 @@ export async function POST(request: Request) {
   // Never a disqualification claim, always framed as something to check.
   const eligibility = assessSetAsideEligibility(submission.scope ?? "", verifiedCerts ?? []);
 
+  // Same rule as eligibility above — text detection against the bid's own
+  // scope, never a computed fact (no dollar figure, no assumed date), always
+  // framed as something for admin/client to go verify.
+  const wageRisk = assessWageRisk(submission.scope ?? "");
+  const mandatorySiteVisit = detectMandatorySiteVisit(submission.scope ?? "");
+
   // The intake wizard calls this right after the client's own final submit,
   // which in that same action already flips draft to false — submissions'
   // RLS update policy only lets a client write while draft = true, so
@@ -178,6 +186,10 @@ export async function POST(request: Request) {
       fit_explanation: result.explanation,
       fit_eligibility_concern: eligibility.concern,
       fit_eligibility_explanation: eligibility.explanation,
+      wage_risk_concern: wageRisk.concern,
+      wage_risk_explanation: wageRisk.explanation,
+      mandatory_site_visit_concern: mandatorySiteVisit.flagged,
+      mandatory_site_visit_explanation: mandatorySiteVisit.explanation,
     })
     .eq("id", submissionId);
 
@@ -190,5 +202,9 @@ export async function POST(request: Request) {
     fit_explanation: result.explanation,
     fit_eligibility_concern: eligibility.concern,
     fit_eligibility_explanation: eligibility.explanation,
+    wage_risk_concern: wageRisk.concern,
+    wage_risk_explanation: wageRisk.explanation,
+    mandatory_site_visit_concern: mandatorySiteVisit.flagged,
+    mandatory_site_visit_explanation: mandatorySiteVisit.explanation,
   });
 }
