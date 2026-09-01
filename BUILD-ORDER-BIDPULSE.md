@@ -244,6 +244,14 @@ row, the audit_log entry, and that the item is visible via the exact
 query the client dashboard already uses (zero changes needed there — it
 already reads checklist_items for its own submissions).
 
+**Follow-up verification (2026-09-01):** a later report correctly noted
+"built" and "verified" aren't the same thing here and asked for a real
+inbox check, not just a successful-response check. Sent a real request
+through the actual UI to a real, publicly-checkable mailinator inbox and
+read back the actual delivered email: subject "We need some info for
+your Verify Agency bid" — the real template, not a sign-in-link-style
+mixup. Now fully verified.
+
 ### Document upload/extraction: expand file types, fix real extraction gaps — RESOLVED
 All 4 gaps closed, but two of the brief's own premises turned out wrong —
 worth knowing since it changed the actual shape of the work:
@@ -318,6 +326,27 @@ and real DB read-backs: every field correct, all 4 certifications
 inserted as separate rows, `licenseNumber` correctly null in both
 places, Company Profile confirmed via a fresh reload after clicking
 Save, intake confirmed via direct query.
+
+**Follow-up (2026-09-01): a report of three "systemic field-mapping"
+bugs in this feature was investigated and does not apply to the shipped
+code.** Re-verified with a fresh fixture that (unlike the original)
+states a real insurance carrier name — came back correctly as
+`insuranceProvider`, `workersCompCoverage` still separate; field mapping
+is by JSON key name throughout, no positional-shift risk. The
+"phone/business_phone" complaint is intentional design, not a bug —
+extraction never touches `clients.phone` (the auth-linked login
+number), confirmed with Mike to leave as-is. See `PROJECT-STATUS.md`
+Known Issues for the full re-verification.
+
+**However, one real live bad record did exist** — not from this
+feature's code, but hand-typed into the old Company Profile form
+before it had a dedicated Business Registration field: "Coastal Clean
+Facility Services, LLC" (`cbow038@gmail.com`). Backfilled the exact
+three named corrections only (license_number → null,
+business_registration_number → the Sunbiz number, insurance_provider →
+null since its correct value already lived in workers_comp_coverage) —
+not a broader sweep. Verified with a direct before/after read of the
+real record.
 
 ## Also closed this session (folded in from earlier same-day work)
 - Homepage trade list (tagline + "Trades we work with" cards) — generated

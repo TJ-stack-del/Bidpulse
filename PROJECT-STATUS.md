@@ -426,6 +426,34 @@ directly.
   extraction deliberately never writes to it — overwriting a real
   auth-linked phone from a guessed document value would be a real risk.
   Confirmed with Mike: leave as-is, business_phone only.
+- **One real, live bad record found and corrected.** The re-verification
+  above was about the *code* — separately, a genuinely live `clients` row
+  ("Coastal Clean Facility Services, LLC," `cbow038@gmail.com`, created
+  17:05 that day, well before the extraction feature shipped) actually
+  did have the exact bad values described: `license_number` held the
+  Sunbiz number with a trailing space, `insurance_provider` held
+  "Statutory FL limits." Whitespace/tab artifacts throughout the record
+  point to this having been hand-typed into the *old* Company Profile
+  form (before it had a dedicated Business Registration field) rather
+  than produced by the extraction feature. Backfilled exactly the three
+  named corrections, nothing broader: `license_number` → null,
+  `business_registration_number` → `L25000TEST99` (trimmed),
+  `insurance_provider` → null (its correct value was already separately
+  present in `workers_comp_coverage`, left untouched). `phone` left null
+  per the same business_phone-only decision above. Verified with a
+  direct before/after read of the actual record, not just "the query ran
+  without error."
+- **Admin → client "need more info" requests — now fully verified, not
+  just built.** This was built and committed (`2eb27d6`) but a follow-up
+  correctly pointed out that build vs. verified are different things
+  here. Closed the one real gap: previously confirmed the email *send*
+  succeeded (no error, correct `checklist_items`/`audit_log` rows) but
+  never literally checked a received email's content — this time sent a
+  real request through the actual UI to a real, publicly-checkable
+  mailinator inbox and read back the actual delivered email: subject
+  **"We need some info for your Verify Agency bid"** — the real
+  `getInfoRequestEmail()` template, not a sign-in-link-style mixup.
+  Confirmed working end-to-end.
 
 ## Known Issues / Recently Fixed
 - **Due-date alerting was reported as broken but is actually already
