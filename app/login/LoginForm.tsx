@@ -7,12 +7,17 @@ import { Spinner } from "@/components/ui/Spinner";
 import { isEmail, normalizePhone } from "@/lib/phone";
 
 export function LoginForm() {
-  const [mode, setMode] = useState<"password" | "passwordless">("password");
+  const [mode, setMode] = useState<"password" | "passwordless" | "forgot">("password");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotError, setForgotError] = useState<string | null>(null);
+  const [forgotSubmitting, setForgotSubmitting] = useState(false);
+  const [forgotSent, setForgotSent] = useState(false);
 
   // Passwordless: a magic link for an email contact, a texted code for a
   // phone one — Supabase's own signInWithOtp/verifyOtp, not a custom code
@@ -113,6 +118,88 @@ export function LoginForm() {
     setCode("");
   }
 
+  async function handleSendResetLink(e: FormEvent) {
+    e.preventDefault();
+    setForgotError(null);
+    setForgotSubmitting(true);
+
+    // redirectTo lands on /auth/callback (this project's existing PKCE code
+    // exchange route — same one the passwordless email link already uses)
+    // with next=/reset-password, so the recovery code gets exchanged for a
+    // real session before the client ever sees the reset-password form.
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+      redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
+    });
+
+    setForgotSubmitting(false);
+    if (resetError) {
+      setForgotError(resetError.message);
+      return;
+    }
+    setForgotSent(true);
+  }
+
+  if (mode === "forgot") {
+    return (
+      <div className="flex flex-col gap-5">
+        {forgotSent ? (
+          <div className="flex flex-col gap-4 text-center">
+            <p className="text-body-md text-on-surface-variant">
+              If an account exists for {forgotEmail}, we emailed a link to reset the password.
+              Open it on this device to continue.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setMode("password");
+                setForgotSent(false);
+                setForgotEmail("");
+              }}
+              className="text-body-md text-secondary hover:underline"
+            >
+              Back to sign in
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleSendResetLink} className="flex flex-col gap-5">
+            {forgotError && (
+              <p className="text-body-md text-error bg-error-container/20 border border-error/30 rounded px-3 py-2">
+                {forgotError}
+              </p>
+            )}
+            <p className="text-body-md text-on-surface-variant">
+              Enter your email and we'll send you a link to reset your password.
+            </p>
+            <Field
+              label="Email"
+              type="email"
+              value={forgotEmail}
+              onChange={setForgotEmail}
+              autoComplete="email"
+              icon="mail"
+              required
+            />
+            <button
+              type="submit"
+              disabled={forgotSubmitting}
+              className="w-full py-3 px-4 bg-secondary text-on-secondary rounded text-label-md font-semibold hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {forgotSubmitting && <Spinner />}
+              {forgotSubmitting ? "Sending…" : "Send reset link"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("password")}
+              className="text-body-md text-secondary hover:underline text-center"
+            >
+              Back to sign in
+            </button>
+          </form>
+        )}
+      </div>
+    );
+  }
+
   if (mode === "passwordless") {
     return (
       <div className="flex flex-col gap-5">
@@ -210,15 +297,24 @@ export function LoginForm() {
         icon="mail"
         required
       />
-      <Field
-        label="Password"
-        type="password"
-        value={password}
-        onChange={setPassword}
-        autoComplete="current-password"
-        icon="lock"
-        required
-      />
+      <div>
+        <Field
+          label="Password"
+          type="password"
+          value={password}
+          onChange={setPassword}
+          autoComplete="current-password"
+          icon="lock"
+          required
+        />
+        <button
+          type="button"
+          onClick={() => setMode("forgot")}
+          className="text-label-md text-secondary hover:underline mt-1"
+        >
+          Forgot password?
+        </button>
+      </div>
 
       <button
         type="submit"
