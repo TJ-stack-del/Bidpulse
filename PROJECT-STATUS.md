@@ -295,6 +295,17 @@ directly.
   tsconfig file's own directory without it. Confirmed via both
   `tsc --noEmit` and a real `next build` that every `@/*` import still
   resolves correctly.
+- Mobile nav menu items now read as real tappable buttons. Confirmed
+  mobile-only (desktop nav's plain text links are a standard, working
+  pattern with hover states — the gap was specifically the full-width,
+  stacked, touch-only mobile drawer). `MarketingShell.tsx`'s mobile menu
+  items (Pricing, Fit-Score Quiz, Gallery, FAQ, Blog, Log in) now use the
+  same secondary-button treatment already established elsewhere on the
+  site — bordered, rounded, full-width, hover/active states — matching
+  "Get started"'s visual weight instead of sitting as plain stacked text.
+  The active/current page keeps a distinct highlighted border+color state.
+  Verified with real before/after screenshots at a real mobile viewport,
+  plus the active-page and dark-mode states.
 
 ## Known Issues / Recently Fixed
 - **"Forgot password?" appeared to send a sign-in link instead of a

@@ -150,6 +150,21 @@ marked as done in the handoff docs. Worth pushing immediately after
 every commit rather than batching, especially for anything the build
 order calls blocking.
 
+### Mobile nav menu items need button styling — RESOLVED
+Confirmed mobile-only, matching the report's own assumption: the desktop
+nav's plain text links are fine as-is (standard pattern, hover states
+work, not full-width/stacked), but the mobile hamburger drawer's items —
+Pricing, Fit-Score Quiz, Gallery, FAQ, Blog, Log in — rendered as plain
+stacked text with no button affordance, unlike "Get started" right below
+them. Fixed by giving each item the same secondary-button treatment
+already used elsewhere on the site (e.g. the homepage's "See examples"
+button): bordered, rounded, full-width row, `hover:bg-surface-container-low`,
+`active:scale-[0.97]`. The active/current-page item keeps a distinct
+highlighted state (`border-secondary`, bold teal text) instead of just
+plain bold text. Verified with real before/after screenshots at a real
+mobile viewport (390×700), plus the active-page highlight state and dark
+mode — all render correctly.
+
 ## Also closed this session (folded in from earlier same-day work)
 - Homepage trade list (tagline + "Trades we work with" cards) — generated
   from `known-trades.ts` now, with a build-time drift check on the card
