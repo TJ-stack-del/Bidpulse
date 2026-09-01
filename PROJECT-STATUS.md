@@ -347,6 +347,70 @@ directly.
   sent a real request, and a real DB read-back showed the correct
   `checklist_items` row and `audit_log` entry, plus confirmed the item is
   visible via the exact query the client dashboard already uses.
+- **Company-profile document upload/extraction — a real, net-new
+  capability, not an enhancement of an existing one.** The brief that
+  requested this assumed an existing extraction route already handled
+  company-profile fields (company name, license, insurance,
+  certifications); that route (`extract-from-document`) only ever
+  extracted bid/RFP fields (agency, due date, scope, etc.) — nothing in
+  the app extracted company-profile info from a document before this.
+  Built as a separate route, `app/api/extract-company-profile/route.ts`
+  (kept separate from the bid-extraction route since the schemas and
+  consumers are entirely different), sharing a new
+  `lib/document-parsing.ts` helper with the bid-extraction route so
+  PDF/DOCX/TXT support only needs maintaining in one place (also closes
+  the file-type gap on the bid-extraction route itself — legacy binary
+  `.doc` deliberately stays unsupported, no safe parser exists without
+  adding a new dependency).
+  - Two new `clients` columns via a tracked migration:
+    `business_registration_number` (state/Sunbiz filing number) and
+    `commercial_auto_coverage`, alongside the existing
+    `general_liability_coverage`/`workers_comp_coverage`. Also found and
+    fixed real drift in `schema.sql` itself while regenerating it — a
+    function and an RLS policy that existed live but had gone missing
+    from the committed reference file at some earlier point.
+  - Added a new mandatory compliance-matrix item, "Business Registration
+    (Sunbiz / State Filing)," distinct from the existing "Local Business
+    Tax Receipt / Occupational License" row — the brief claimed this
+    distinction already existed in `requirements-reference.ts`; it
+    didn't, so this closes that gap for real rather than assuming it was
+    already done.
+  - The extraction prompt is deliberately explicit that
+    business-registration numbers and trade-license numbers are
+    different things — the one real fabrication risk here, verified with
+    a synthetic test fixture whose only registration-style number was a
+    Sunbiz Doc# with no separate trade license stated anywhere: extracted
+    `licenseNumber: null` correctly, never confused the two.
+  - Certifications extract as an array (`client_certifications` is a
+    real one-to-many table) using the *actual* `cert_type` vocabulary in
+    use in `CertificationsSection.tsx` (`JSEB`, `DBE/SDB` are real
+    first-class values there, not just the six federal SBA program types
+    the schema comment implied) rather than the stale schema comment —
+    caught this before wiring the UI, not after.
+  - Wired into both the Company Profile page (`CompanyProfileClient.tsx`
+    — upload prefills the form via a remount-on-extraction pattern,
+    nothing saved to the `clients` row until the existing "Save company
+    info" button is clicked; certifications insert immediately since
+    that's a separate table with its own existing "add" flow) and the
+    intake wizard's "About you" step, as a new optional micro-step shown
+    right after account creation (`Want to save some typing?`) — the
+    extraction route requires a real session, so it can't run any
+    earlier in an anonymous visitor's flow than that; the wizard's own
+    fields stay exactly as minimal as before for anyone who skips it.
+  - Along the way, found `/dashboard/*` had no `ToastProvider` at all
+    (only `/admin/*` got one earlier this session) — `useToast()` was
+    crashing the whole Company Profile page render. Added
+    `app/dashboard/layout.tsx` to fix it for real, not just this one
+    feature.
+  - Verified end-to-end on both surfaces with a synthetic test fixture
+    (no real fixture was available in this environment — built one
+    matching every field and value the brief specified) via real
+    Playwright sessions and real DB read-backs: correct field values
+    across the board, all 4 certifications inserted as separate rows
+    (not collapsed to one), `licenseNumber` correctly null, Company
+    Profile's fields persisted only after clicking Save and confirmed via
+    a fresh page reload, intake's fields persisted immediately and
+    confirmed via direct query.
 
 ## Known Issues / Recently Fixed
 - **Due-date alerting was reported as broken but is actually already

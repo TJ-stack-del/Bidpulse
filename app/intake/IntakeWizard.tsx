@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
 import { BidFileStep } from "@/components/ui/BidFileStep";
 import { BidProcessNotices } from "@/components/ui/BidProcessNotices";
+import { CompanyProfileUpload, type ExtractedCompanyProfile } from "@/components/ui/CompanyProfileUpload";
 import { isEmail, normalizePhone } from "@/lib/phone";
 import type { FitCheckResult } from "@/lib/submissions";
 
@@ -89,6 +90,12 @@ export function IntakeWizard() {
     dueDate: "",
     scope: "",
   });
+  // Optional micro-step shown right after account creation (see
+  // handleProfileExtracted below) — no new required fields added to step 0
+  // itself, since it's deliberately kept minimal (see the comment on
+  // FormState above).
+  const [showProfileUpload, setShowProfileUpload] = useState(false);
+  const [profileUploadDone, setProfileUploadDone] = useState(false);
   const supabase = createClient();
 
   // A client who's already logged in (starting a second bid, or just
@@ -253,7 +260,56 @@ export function IntakeWizard() {
     }
 
     setClientId(client.id as string);
-    setStep(1);
+    setShowProfileUpload(true);
+  }
+
+  // Optional micro-step shown once right after account creation, before
+  // "About the bid" — the extraction route requires a real session, so this
+  // can't run any earlier than this point (step 0's own fields are filled by
+  // an anonymous visitor). Updates the just-created clients row directly
+  // rather than merging into the insert above, and rides certifications
+  // along the same way the Company Profile page does. A failure here (or
+  // just clicking past it) never blocks reaching "About the bid" — this is
+  // a convenience, not a requirement.
+  async function handleProfileExtracted(data: ExtractedCompanyProfile, file: File) {
+    if (!clientId) return;
+
+    await supabase
+      .from("clients")
+      .update({
+        license_number: data.licenseNumber,
+        business_registration_number: data.businessRegistrationNumber,
+        years_in_business: data.yearsInBusiness,
+        business_address: data.businessAddress,
+        business_phone: data.businessPhone,
+        insurance_provider: data.insuranceProvider,
+        insurance_policy_number: data.insurancePolicyNumber,
+        general_liability_coverage: data.generalLiabilityCoverage,
+        workers_comp_coverage: data.workersCompCoverage,
+        commercial_auto_coverage: data.commercialAutoCoverage,
+        naics_codes: data.naicsCodes,
+      })
+      .eq("id", clientId);
+
+    if (data.certifications.length > 0) {
+      const path = `${clientId}/certifications/${Date.now()}-${file.name}`;
+      const { error: uploadError } = await supabase.storage.from("rfp-documents").upload(path, file);
+      if (!uploadError) {
+        await supabase.from("client_certifications").insert(
+          data.certifications.map((c) => ({
+            client_id: clientId,
+            cert_type: c.certType,
+            other_label: c.certType === "Other" ? c.otherLabel : null,
+            certification_number: c.certificationNumber,
+            expiration_date: c.expirationDate,
+            file_url: path,
+            file_name: file.name,
+          }))
+        );
+      }
+    }
+
+    setProfileUploadDone(true);
   }
 
   // Step 2 -> 3: creates the draft submission.
@@ -395,7 +451,29 @@ export function IntakeWizard() {
 
       {error && <p className="text-body-md text-error">{error}</p>}
 
-      {step === 0 && (
+      {step === 0 && showProfileUpload && (
+        <div className="flex flex-col gap-4">
+          <h2 className="text-headline-md text-primary">Want to save some typing?</h2>
+          <p className="text-body-md text-on-surface-variant">
+            Upload a company document (capability statement, license packet, insurance certificates) and
+            we&apos;ll fill in your Company Profile — you can always add or fix details there later.
+          </p>
+          <CompanyProfileUpload onExtracted={handleProfileExtracted} />
+          {profileUploadDone && (
+            <p className="text-body-md text-secondary">Got it — filled in what we found.</p>
+          )}
+          <button
+            type="button"
+            onClick={() => setStep(1)}
+            className="self-start py-3 px-4 bg-secondary text-on-secondary rounded text-label-md hover:bg-on-secondary-container transition active:scale-[0.97] flex items-center gap-2"
+          >
+            {profileUploadDone ? "Continue" : "Skip for now"}
+            <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+          </button>
+        </div>
+      )}
+
+      {step === 0 && !showProfileUpload && (
         <form onSubmit={handleAboutYouNext} className="flex flex-col gap-4">
           <h2 className="text-headline-md text-primary">Tell us about your business</h2>
           <Input label="Company name" value={form.companyName} onChange={(v) => update("companyName", v)} required />
