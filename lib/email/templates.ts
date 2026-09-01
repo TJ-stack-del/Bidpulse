@@ -47,6 +47,19 @@ export function getStageChangeEmail(stage: string, agency: string, companyName: 
   };
 }
 
+export function getInfoRequestEmail(message: string, agency: string, companyName: string) {
+  return {
+    subject: `We need some info for your ${agency} bid`,
+    html: `
+      <p>Hi ${companyName},</p>
+      <p>We need a bit more information to keep working on your ${agency} bid:</p>
+      <p>${message.replace(/\n/g, "<br>")}</p>
+      <p>Log in to your dashboard any time to check on this.</p>
+      <p>— BidPulse</p>
+    `,
+  };
+}
+
 export function getContactMessageEmail(name: string, email: string, message: string) {
   return {
     subject: `New contact form message from ${name}`,

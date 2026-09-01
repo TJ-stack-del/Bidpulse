@@ -7,6 +7,7 @@ import { PaymentStatus } from "./PaymentStatus";
 import { ClientCertifications } from "./ClientCertifications";
 import { signRfpDocumentUrls } from "@/lib/storage";
 import { EstimatedValueInput } from "./EstimatedValueInput";
+import { RequestInfoForm } from "./RequestInfoForm";
 import { isKnownTrade } from "@/lib/compliance/known-trades";
 
 // The actual review workspace: full intake info, stage editing, internal
@@ -144,6 +145,7 @@ export default async function AdminSubmissionDetailPage({
     confirmation_email_sent: "Confirmation email sent",
     submission_locked: "Submitted by client",
     no_guarantee_acknowledged: "Client acknowledged no guarantee of winning",
+    info_requested: "Requested info from client",
     submission_created_from_match: "Created from matched opportunity",
     payment_marked_paid: "Marked as paid",
     payment_marked_unpaid: "Marked as unpaid",
@@ -388,6 +390,8 @@ export default async function AdminSubmissionDetailPage({
               </div>
             )}
           </div>
+
+          <RequestInfoForm submissionId={submission.id} prefillText={submission.fit_explanation ?? ""} />
         </div>
       </div>
 

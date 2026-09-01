@@ -326,8 +326,45 @@ directly.
   was the *oldest* of all — confirmed the real rendered admin inbox
   excluded the draft entirely, ordered the real rows correctly
   oldest-first, and still sorted the test row dead last despite its date.
+- Admin → client "need more info" requests: new "Request info from
+  client" card on the submission detail page. Went with the
+  `checklist_items` + email approach over extending `support_messages`
+  bidirectionally — checked that table's actual RLS first (currently
+  INSERT-anyone/SELECT-admin-only, no client-facing read UI at all), so
+  bidirectional would have needed a new migration, RLS in both
+  directions, and a client UI built from scratch; the checklist_items
+  route needed none of that. The text box pre-fills from the real Fit
+  Check explanation (the one actual "what's missing" text that exists —
+  a single joined paragraph, not separate structured suggestions) for the
+  admin to edit down before sending. On submit: creates a real
+  `checklist_items` row (already client-readable, zero dashboard changes
+  needed), emails the client via a new `getInfoRequestEmail()` template
+  (`lib/email/templates.ts`), and logs a real `audit_log` entry
+  (`info_requested`, alongside the existing event types in
+  `AUDIT_EVENT_LABELS`). Test submissions skip the real email send,
+  matching the existing convention. Verified end-to-end with a real
+  submission: confirmed the prefill pulled the actual Fit Check text,
+  sent a real request, and a real DB read-back showed the correct
+  `checklist_items` row and `audit_log` entry, plus confirmed the item is
+  visible via the exact query the client dashboard already uses.
 
 ## Known Issues / Recently Fixed
+- **Due-date alerting was reported as broken but is actually already
+  correct — audited, not fixed.** The report claimed the daily digest
+  (`app/api/daily-digest/route.ts`) only fires on staleness, so a
+  submission due tomorrow that was touched today would get no alert.
+  Traced the actual filter before writing any code: it's a genuine 3-way
+  OR (`breachedTurnaround || daysUntilDue <= 5 || stale`), not staleness
+  gating the due-soon check — a due-tomorrow-but-fresh submission already
+  fires today, and the email template already labels it distinctly ("DUE
+  SOON — N days left," sorted to the top). Git history shows this file
+  was only ever touched once, so it's not a regression either. Likely
+  explanation for the report: the variable name `staleItems` and the
+  `"nothing_stale"` skip reason read as if staleness gates everything,
+  without tracing the actual OR. Verified for real, not just by reading
+  the code: inserted an isolated test submission (`daysSinceUpdate: 0`,
+  `breachedTurnaround: false`, due tomorrow) and confirmed it passed the
+  real filter purely on the due-soon condition. No code change made.
 - **"Forgot password?" appeared to send a sign-in link instead of a
   password-reset link — root cause was a deployment gap, not a code
   bug.** Real evidence: emails received while testing on the live site
