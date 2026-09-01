@@ -15,10 +15,20 @@ type Deliverable = {
   created_at: string;
 };
 
-const DELIVERABLE_TYPES: { value: string; label: string }[] = [
+const FULL_DELIVERABLE_TYPES: { value: string; label: string }[] = [
   { value: "capability_statement", label: "Capability statement" },
   { value: "compliance_matrix", label: "Compliance matrix" },
   { value: "technical_narrative", label: "Technical narrative" },
+];
+
+// For informal quotes under the org's lean_package_threshold — the full
+// 3-deliverable set is overkill for a small job. Admin-confirmed, never
+// automatic: estimated_value is often a rough guess, not authoritative, so
+// silently swapping the whole deliverable set on a save would be surprising.
+const LEAN_DELIVERABLE_TYPES: { value: string; label: string }[] = [
+  { value: "rate_sheet", label: "Rate sheet" },
+  { value: "executive_cover", label: "Executive cover" },
+  { value: "certificate_of_insurance", label: "Certificate of insurance" },
 ];
 
 // Step 7 — admin prepares each deliverable either by pasting text or
@@ -32,18 +42,30 @@ export function DeliverablesPanel({
   actorId,
   initialDeliverables,
   lastPacketView,
+  estimatedValue,
+  leanPackageThreshold,
 }: {
   submissionId: string;
   orgId: string;
   actorId: string;
   initialDeliverables: Deliverable[];
   lastPacketView: { event_type: string; created_at: string } | null;
+  estimatedValue: number | null;
+  leanPackageThreshold: number;
 }) {
   const [byType, setByType] = useState<Record<string, Deliverable | undefined>>(() => {
     const map: Record<string, Deliverable | undefined> = {};
     for (const d of initialDeliverables) map[d.deliverable_type] = d;
     return map;
   });
+  // Sticky across reloads: if a lean-type deliverable already exists, stay
+  // in lean mode rather than reverting to the full set and hiding it.
+  const [leanMode, setLeanMode] = useState(() =>
+    initialDeliverables.some((d) => LEAN_DELIVERABLE_TYPES.some((t) => t.value === d.deliverable_type))
+  );
+  const DELIVERABLE_TYPES = leanMode ? LEAN_DELIVERABLE_TYPES : FULL_DELIVERABLE_TYPES;
+  const showLeanSuggestion =
+    !leanMode && estimatedValue != null && estimatedValue > 0 && estimatedValue < leanPackageThreshold;
   const [drafts, setDrafts] = useState<Record<string, string>>(() => {
     const map: Record<string, string> = {};
     for (const d of initialDeliverables) map[d.deliverable_type] = d.content ?? "";
@@ -181,6 +203,30 @@ export function DeliverablesPanel({
         <span className="material-symbols-outlined text-secondary text-[20px]">description</span>
         Deliverables
       </h2>
+
+      {showLeanSuggestion && (
+        <div className="mb-6 bg-surface-container-highest border border-outline-variant rounded-lg p-4 flex items-center justify-between gap-3 flex-wrap">
+          <p className="text-body-md text-on-surface">
+            This bid is estimated at ${estimatedValue!.toLocaleString()}, under the $
+            {leanPackageThreshold.toLocaleString()} lean-package threshold — a lean package (Rate Sheet +
+            Executive Cover + Certificate of Insurance) may be more appropriate than the full deliverable set.
+          </p>
+          <button
+            onClick={() => setLeanMode(true)}
+            className="px-4 py-2 rounded border border-secondary text-secondary text-label-md font-bold hover:bg-surface-container-low transition active:scale-[0.97] shrink-0"
+          >
+            Switch to lean package
+          </button>
+        </div>
+      )}
+      {leanMode && (
+        <div className="mb-6 flex items-center justify-between gap-3">
+          <p className="text-label-md text-on-surface-variant">Using the lean package.</p>
+          <button onClick={() => setLeanMode(false)} className="text-label-md text-secondary hover:underline">
+            Use full package instead
+          </button>
+        </div>
+      )}
 
       <div className="flex flex-col gap-6">
         {DELIVERABLE_TYPES.map((t) => {

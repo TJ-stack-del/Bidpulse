@@ -24,7 +24,13 @@ const DELIVERABLE_LABELS: Record<string, string> = {
   capability_statement: "Capability Statement",
   compliance_matrix: "Compliance Matrix",
   technical_narrative: "Technical Narrative",
+  rate_sheet: "Rate Sheet",
+  executive_cover: "Executive Cover",
+  certificate_of_insurance: "Certificate of Insurance",
 };
+
+const FULL_ORDER = ["capability_statement", "compliance_matrix", "technical_narrative"];
+const LEAN_ORDER = ["rate_sheet", "executive_cover", "certificate_of_insurance"];
 
 // Renders plain text as real bullets and properly spaced paragraphs,
 // instead of one long wrapped block. Recognizes lines starting with
@@ -105,7 +111,15 @@ export function generateDeliverablesPacket(
   y += 5.5;
   y = renderStructuredText(doc, `Scope: ${submission.scope ?? "—"}`, marginX, y);
 
-  for (const type of ["capability_statement", "compliance_matrix", "technical_narrative"]) {
+  // Lean and full deliverable sets are mutually exclusive for a given
+  // submission (DeliverablesPanel only ever shows one set at a time) — pick
+  // whichever one actually has rows, so a lean-package submission doesn't
+  // also get three "Not yet prepared" pages for the full-set types it never
+  // used.
+  const isLean = deliverables.some((d) => LEAN_ORDER.includes(d.deliverable_type));
+  const order = isLean ? LEAN_ORDER : FULL_ORDER;
+
+  for (const type of order) {
     const deliverable = deliverables.find((d) => d.deliverable_type === type);
     doc.addPage();
     y = 20;

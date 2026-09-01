@@ -18,3 +18,21 @@ export function detectAgencyTypes(agency: string): AgencyType[] {
   if (TRANSIT_AGENCY_PATTERN.test(agency)) types.push("transit");
   return types;
 }
+
+// Unlike the agency-name-only patterns above, federal-funding language
+// (a grant program name, or a plain statement that the project is
+// federally funded) shows up in the bid's own scope/RFP text, not the
+// agency's name — a transit/airport authority's name rarely says "FTA" or
+// "FAA" in it even when a specific project is federally funded. Callers
+// should pass scope text here, not the agency name.
+//
+// This distinguishes which set-aside program actually applies: JSEB is
+// Jacksonville's own local certification, while DBE/SDB is the program
+// federal transit/aviation funding requires — they are not interchangeable
+// (lib/compliance/set-aside-eligibility.ts).
+const FEDERAL_FUNDING_PATTERN =
+  /\b(fta|faa|aip|federal transit administration|federal aviation administration|airport improvement program|federally funded|federal funding|federal grant)\b/i;
+
+export function isFederallyFunded(bidText: string): boolean {
+  return FEDERAL_FUNDING_PATTERN.test(bidText);
+}

@@ -15,6 +15,9 @@ const DELIVERABLE_TYPE_LABELS: Record<string, string> = {
   capability_statement: "Capability statement",
   compliance_matrix: "Compliance matrix",
   technical_narrative: "Technical narrative",
+  rate_sheet: "Rate sheet",
+  executive_cover: "Executive cover",
+  certificate_of_insurance: "Certificate of insurance",
 };
 
 function triggerTextDownload(deliverableType: string, content: string) {

@@ -17,6 +17,9 @@ const DELIVERABLE_LABELS: Record<string, string> = {
   capability_statement: "Capability statement",
   compliance_matrix: "Compliance matrix",
   technical_narrative: "Technical narrative",
+  rate_sheet: "Rate sheet",
+  executive_cover: "Executive cover",
+  certificate_of_insurance: "Certificate of insurance",
 };
 
 type ClientInfo = {
@@ -359,6 +362,79 @@ function buildDraft(deliverableType: string, submission: SubmissionInfo, verifie
       ...requirementRows,
       "",
       `Scope reference: ${scope}`,
+    ].join("\n");
+  }
+
+  if (deliverableType === "rate_sheet") {
+    // No pricing/rate data exists anywhere in the schema — this is
+    // deliberately placeholder-only, never a guessed number, same
+    // fabrication rule as every other deliverable here.
+    return [
+      `RATE SHEET — ${agency}${solicitationLine}`,
+      "",
+      "[DRAFT — no pricing data is on file for this bid. Every rate, quantity, and",
+      "extended price below must come from the contractor's real cost basis —",
+      "never invent a number. Add one row per distinct service/line item.]",
+      "",
+      "Item | Unit | Rate | Estimated Quantity | Extended Price",
+      "[Service line item — e.g. \"Janitorial labor, hourly\"] | [unit, e.g. \"hr\"] | [$ rate] | [qty] | [calculate]",
+      "",
+      `Scope reference: ${scope}`,
+      "",
+      "Total estimated price: [sum of extended prices above]",
+    ].join("\n");
+  }
+
+  if (deliverableType === "executive_cover") {
+    const yearsLine =
+      client.years_in_business !== null && client.years_in_business !== undefined
+        ? ` ${company} has been in business for ${client.years_in_business} years.`
+        : "";
+    const differentiatorLine = client.differentiators ? ` ${client.differentiators}` : "";
+
+    return [
+      `EXECUTIVE COVER LETTER — ${agency}${solicitationLine}`,
+      "",
+      "[DRAFT — replace bracketed placeholders; keep this to one page.]",
+      "",
+      "[Date]",
+      "",
+      agency,
+      `Re: ${agency}${solicitationLine}`,
+      "",
+      "Dear Procurement Officer,",
+      "",
+      `${company} is pleased to submit this proposal for ${scope}.${yearsLine}${differentiatorLine}`,
+      "",
+      `[One short paragraph: why ${company} is well-suited for this specific scope]`,
+      "",
+      "We appreciate your consideration and are available to answer any questions through the agency's official channels.",
+      "",
+      "Sincerely,",
+      "[Authorized signer name and title]",
+      company,
+    ].join("\n");
+  }
+
+  if (deliverableType === "certificate_of_insurance") {
+    // A summary of what's on file, NOT a substitute for the real COI
+    // document (ACORD 25 or equivalent) — the actual file gets attached
+    // via "Upload file instead" in DeliverablesPanel, same as any other
+    // deliverable type.
+    return [
+      `CERTIFICATE OF INSURANCE — SUMMARY — ${agency}${solicitationLine}`,
+      "",
+      `[This is a summary of what ${company} has on file — it is NOT the actual`,
+      "Certificate of Insurance (ACORD 25 or equivalent) the agency requires.",
+      "Attach the client's real, current COI document using \"Upload file instead\"",
+      "below before including this in the bid package.]",
+      "",
+      `Insurance provider: ${client.insurance_provider ?? "[NEEDS VERIFICATION]"}`,
+      `Policy number: ${client.insurance_policy_number ?? "[NEEDS VERIFICATION]"}`,
+      `General liability coverage: ${client.general_liability_coverage ?? "[NEEDS VERIFICATION]"}`,
+      `Workers' compensation coverage: ${client.workers_comp_coverage ?? "[NEEDS VERIFICATION]"}`,
+      "",
+      "[Confirm these coverage amounts meet the agency's minimum requirements before submission]",
     ].join("\n");
   }
 

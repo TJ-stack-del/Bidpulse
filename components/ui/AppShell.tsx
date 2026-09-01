@@ -20,6 +20,7 @@ const NAV_LINKS: Record<Role, { href: string; label: string; icon: string }[]> =
     { href: "/admin/inbox", label: "Inbox", icon: "inbox" },
     { href: "/admin/matches", label: "Matches", icon: "insights" },
     { href: "/admin/messages", label: "Messages", icon: "mail" },
+    { href: "/admin/settings", label: "Settings", icon: "settings" },
   ],
   client: [
     { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
