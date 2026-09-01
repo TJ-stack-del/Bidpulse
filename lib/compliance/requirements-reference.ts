@@ -50,6 +50,15 @@ export const ALWAYS_MANDATORY: RequirementDefinition[] = [
     label: "Local Business Tax Receipt / Occupational License",
     verificationNote: "[Confirm the business tax receipt is current and covers the jurisdiction where work will be performed]",
   },
+  // Distinct from the item above: this is the state-level corporate filing
+  // (Sunbiz Document Number in Florida), not the trade/occupational license —
+  // a bid can require proof of both, and a client can genuinely have one
+  // without the other.
+  {
+    id: "business-registration",
+    label: "Business Registration (Sunbiz / State Filing)",
+    verificationNote: "[Confirm the business's state registration (e.g. Florida Sunbiz Document Number) is active and current before submission]",
+  },
   {
     id: "signed-bid-form",
     label: "Signed Bid/Proposal Form",

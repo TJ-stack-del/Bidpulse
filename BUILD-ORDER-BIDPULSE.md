@@ -42,6 +42,17 @@ to already be correct — audited and confirmed with a real isolated test,
 no code change needed. See `PROJECT-STATUS.md`'s "Confirmed Working" for
 the evidence behind each.
 
+Also closed: document upload/extraction (all 4 gaps from the brief) — a
+real, substantial build, not a small fix. Worth knowing before reading
+`PROJECT-STATUS.md`'s entry: the brief's premise that a company-profile
+extraction capability already partially existed was wrong (the existing
+route only ever extracted bid/RFP fields), and its claim that
+`requirements-reference.ts` already distinguished Business Registration
+from Trade Licensing was also wrong — both gaps turned out bigger than
+described, closed anyway per your call on each. No mock test package was
+available in this environment; built a synthetic one matching the
+brief's exact expected fields/values instead.
+
 Nothing is currently mid-flight. The items below are the real remaining
 backlog, in suggested order.
 
@@ -232,6 +243,81 @@ text, edited and sent, real DB read-back confirmed the checklist_items
 row, the audit_log entry, and that the item is visible via the exact
 query the client dashboard already uses (zero changes needed there — it
 already reads checklist_items for its own submissions).
+
+### Document upload/extraction: expand file types, fix real extraction gaps — RESOLVED
+All 4 gaps closed, but two of the brief's own premises turned out wrong —
+worth knowing since it changed the actual shape of the work:
+
+- **The brief assumed a company-profile extraction capability already
+  existed and just needed 3 fixes.** It didn't exist at all — the only
+  extraction route in the app (`extract-from-document`) only ever
+  extracted bid/RFP fields (agency, due date, scope, NAICS, etc.), never
+  company-profile fields (company name, license, insurance,
+  certifications). Built a new, separate route,
+  `app/api/extract-company-profile/route.ts`, rather than treating this
+  as small fixes to an existing one.
+- **The brief claimed `requirements-reference.ts` already treated
+  Business Registration and Trade Licensing as two separate mandatory
+  items.** It didn't — checked before building on that assumption, found
+  only one "Local Business Tax Receipt / Occupational License" item, no
+  Business Registration concept anywhere. Per your call on this, added
+  both the missing `clients.business_registration_number` column *and* a
+  real new mandatory compliance-matrix item for it, rather than just the
+  column.
+
+**Gap 1 (file types):** Both extraction routes now accept PDF/DOCX/TXT
+via a new shared `lib/document-parsing.ts` helper (also used to
+retrofit the existing bid-extraction route, which had never gotten
+`.txt` support). Legacy binary `.doc` (not `.docx`) is deliberately not
+supported — no safe parser exists without a new dependency, and it's
+rare enough in practice not to be worth the risk. Separately: discovered
+the existing bid-extraction route (`extract-from-document`) has **no
+frontend caller anywhere in the app at all** — built but never wired to
+any UI. Out of scope for this brief; flagged, not fixed.
+
+**Gap 2 (Sunbiz vs. trade license):** New `business_registration_number`
+column (tracked migration), new "Business Registration (Sunbiz / State
+Filing)" mandatory compliance-matrix item. The extraction prompt is
+explicit that these are two different things — verified with a test
+fixture containing only a Sunbiz number and no trade license: extraction
+correctly returned `licenseNumber: null` rather than filling it with the
+Sunbiz number.
+
+**Gap 3 (Commercial Auto):** New `commercial_auto_coverage` column,
+same pattern as the existing GL/workers-comp columns.
+
+**Gap 4 (multi-certification):** Extraction returns an array; inserted
+as separate `client_certifications` rows. Caught a real convention
+mismatch before wiring the UI: the schema comment's stated `cert_type`
+vocabulary (six federal SBA program types + Other) doesn't match what
+`CertificationsSection.tsx` actually uses — `JSEB` and `DBE/SDB` are
+real first-class values there. Extraction matches the *actual* UI
+convention, not the stale schema comment.
+
+**Scope (intake vs. Company Profile):** Built once, shared, per your
+call. Company Profile page (`CompanyProfileClient.tsx`) — upload
+prefills the form via remount, nothing saved until the existing "Save
+company info" button is clicked; certifications insert immediately
+(separate table, own existing flow). Intake wizard — new optional
+micro-step ("Want to save some typing?") shown right after account
+creation, not before: the extraction route requires a real session,
+which doesn't exist yet while an anonymous visitor is still filling in
+step 0's own fields. Skipping it leaves step 0 exactly as minimal as it
+already was.
+
+**Found along the way:** `/dashboard/*` had no `ToastProvider` at all
+(only `/admin/*` got one earlier this session) — crashed the whole
+Company Profile page the moment `useToast()` ran. Fixed with a real
+`app/dashboard/layout.tsx`, not a one-off workaround.
+
+**Verification:** no real mock test package was available in this
+environment (checked the repo and the uploads directory) — built a
+synthetic one matching the brief's exact expected fields and values
+instead. Verified both surfaces end-to-end with real Playwright sessions
+and real DB read-backs: every field correct, all 4 certifications
+inserted as separate rows, `licenseNumber` correctly null in both
+places, Company Profile confirmed via a fresh reload after clicking
+Save, intake confirmed via direct query.
 
 ## Also closed this session (folded in from earlier same-day work)
 - Homepage trade list (tagline + "Trades we work with" cards) — generated

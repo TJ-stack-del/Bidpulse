@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { AppShell } from "@/components/ui/AppShell";
 import { CertificationsSection } from "./CertificationsSection";
-import { CompanyInfoForm } from "./CompanyInfoForm";
+import { CompanyProfileClient } from "./CompanyProfileClient";
 import { signRfpDocumentUrls } from "@/lib/storage";
 
 // Same cookies()-forces-dynamic reasoning as app/dashboard/page.tsx.
@@ -19,7 +19,7 @@ export default async function CompanyProfilePage() {
   const { data: client } = await supabase
     .from("clients")
     .select(
-      "id, company_name, contact_name, email, phone, license_number, years_in_business, business_address, business_phone, insurance_provider, insurance_policy_number, general_liability_coverage, workers_comp_coverage, differentiators, naics_codes, small_business_statuses, set_asides"
+      "id, company_name, contact_name, email, phone, license_number, business_registration_number, years_in_business, business_address, business_phone, insurance_provider, insurance_policy_number, general_liability_coverage, workers_comp_coverage, commercial_auto_coverage, differentiators, naics_codes, small_business_statuses, set_asides"
     )
     .eq("auth_user_id", user.id)
     .maybeSingle();
@@ -49,10 +49,11 @@ export default async function CompanyProfilePage() {
           Fill this in once — we reuse it as real facts in every capability statement and readiness check we
           prepare for you, so you don&apos;t have to re-enter it on every bid.
         </p>
-        <CompanyInfoForm
+        <CompanyProfileClient
           clientId={client.id}
           initialInfo={{
             license_number: client.license_number,
+            business_registration_number: client.business_registration_number,
             years_in_business: client.years_in_business,
             business_address: client.business_address,
             business_phone: client.business_phone,
@@ -60,6 +61,7 @@ export default async function CompanyProfilePage() {
             insurance_policy_number: client.insurance_policy_number,
             general_liability_coverage: client.general_liability_coverage,
             workers_comp_coverage: client.workers_comp_coverage,
+            commercial_auto_coverage: client.commercial_auto_coverage,
             differentiators: client.differentiators,
             naics_codes: client.naics_codes ?? [],
             small_business_statuses: client.small_business_statuses ?? [],

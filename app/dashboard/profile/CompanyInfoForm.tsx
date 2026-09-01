@@ -9,6 +9,7 @@ import { SMALL_BUSINESS_STATUSES, COMMON_SET_ASIDES, COMMON_NAICS_CODES } from "
 
 type CompanyInfo = {
   license_number: string | null;
+  business_registration_number: string | null;
   years_in_business: number | null;
   business_address: string | null;
   business_phone: string | null;
@@ -16,6 +17,7 @@ type CompanyInfo = {
   insurance_policy_number: string | null;
   general_liability_coverage: string | null;
   workers_comp_coverage: string | null;
+  commercial_auto_coverage: string | null;
   differentiators: string | null;
   naics_codes: string[];
   small_business_statuses: string[];
@@ -34,7 +36,8 @@ function splitKnown(values: string[], known: readonly string[]): { checked: stri
 }
 
 const FIELDS: { key: keyof CompanyInfo; label: string; type?: string; area?: boolean }[] = [
-  { key: "license_number", label: "License number" },
+  { key: "license_number", label: "Trade/occupational license number" },
+  { key: "business_registration_number", label: "Business registration number (e.g. Sunbiz Doc#)" },
   { key: "years_in_business", label: "Years in business", type: "number" },
   { key: "business_address", label: "Business address" },
   { key: "business_phone", label: "Business phone" },
@@ -42,6 +45,7 @@ const FIELDS: { key: keyof CompanyInfo; label: string; type?: string; area?: boo
   { key: "insurance_policy_number", label: "Insurance policy number" },
   { key: "general_liability_coverage", label: "General liability coverage (e.g. $1M/$2M)" },
   { key: "workers_comp_coverage", label: "Workers' comp coverage" },
+  { key: "commercial_auto_coverage", label: "Commercial auto coverage" },
 ];
 
 // Filled in once, reused as facts across every future bid (app/api/

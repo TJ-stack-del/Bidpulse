@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
-import mammoth from "mammoth";
 import { createClient } from "@/lib/supabase/server";
 import { SMALL_BUSINESS_STATUSES, COMMON_SET_ASIDES, COMMON_NAICS_CODES } from "@/lib/business-options";
+import { detectDocumentKind, buildDocumentContent, UNSUPPORTED_FILE_TYPE_MESSAGE } from "@/lib/document-parsing";
 
 export const runtime = "nodejs";
 
@@ -47,18 +47,6 @@ type ExtractedFields = {
   setAsides: string[];
   setAsideOther: string | null;
 };
-
-function detectKind(mimeType: string, fileName: string): "pdf" | "docx" | null {
-  const lower = fileName.toLowerCase();
-  if (mimeType === "application/pdf" || lower.endsWith(".pdf")) return "pdf";
-  if (
-    mimeType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
-    lower.endsWith(".docx")
-  ) {
-    return "docx";
-  }
-  return null;
-}
 
 function coerceFields(parsed: unknown): ExtractedFields {
   const obj = (parsed ?? {}) as Record<string, unknown>;
@@ -111,34 +99,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "File is too large (20MB max)." }, { status: 400 });
   }
 
-  const kind = detectKind(file.type, file.name);
+  const kind = detectDocumentKind(file.type, file.name);
   if (!kind) {
-    return NextResponse.json(
-      { error: "Unsupported file type — upload a PDF or Word (.docx) document." },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: UNSUPPORTED_FILE_TYPE_MESSAGE }, { status: 400 });
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
-  let userContent: Anthropic.MessageParam["content"];
-
-  if (kind === "pdf") {
-    userContent = [
-      {
-        type: "document",
-        source: { type: "base64", media_type: "application/pdf", data: buffer.toString("base64") },
-      },
-      { type: "text", text: "Extract the fields described in the system prompt from this document." },
-    ];
-  } else {
-    const { value: text } = await mammoth.extractRawText({ buffer });
-    if (!text.trim()) {
-      return NextResponse.json({ error: "Couldn't read any text from that document." }, { status: 400 });
-    }
-    userContent = [
-      { type: "text", text: `${text.trim()}\n\nExtract the fields described in the system prompt from the document above.` },
-    ];
+  const built = await buildDocumentContent(kind, buffer, "Extract the fields described in the system prompt from this document.");
+  if ("error" in built) {
+    return NextResponse.json({ error: built.error }, { status: 400 });
   }
+  const userContent = built.content;
 
   const anthropic = new Anthropic();
   let message: Anthropic.Message;
