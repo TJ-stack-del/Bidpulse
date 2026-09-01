@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ensureOrgAndMembership } from "@/lib/auth/ensure-org";
 import { MarketingShell } from "@/components/ui/MarketingShell";
+import { KNOWN_TRADES } from "@/lib/compliance/known-trades";
 
 export const metadata: Metadata = {
   description: "We help you win local government contracts. Send us the bid papers — our team handles the paperwork so you can send in a strong bid.",
@@ -78,6 +79,22 @@ const HOW_IT_WORKS = [
   },
 ];
 
+// "HVAC", "IT / Computer Support" -> "HVAC" / "IT / computer support": lowercases
+// each word except ones already fully uppercase (acronyms), so labels read
+// naturally mid-sentence instead of as a title-cased list.
+function toSentenceCase(label: string): string {
+  return label
+    .split(" ")
+    .map((word) => (word === word.toUpperCase() ? word : word.toLowerCase()))
+    .join(" ");
+}
+
+// Sourced from known-trades.ts (the trade-coverage safety net's source of
+// truth) so this copy can't go stale again the next time a vertical is added.
+const SUPPORTED_TRADES_LIST = new Intl.ListFormat("en", { style: "long", type: "conjunction" }).format(
+  KNOWN_TRADES.map((trade) => toSentenceCase(trade.label))
+);
+
 const TRADES = [
   {
     icon: "hvac",
@@ -143,7 +160,7 @@ function Home() {
             {
               icon: "storefront",
               title: "Built for small trades",
-              body: "Not a big consulting firm — made for HVAC, janitorial, and landscaping contractors.",
+              body: `Not a big consulting firm — made for ${SUPPORTED_TRADES_LIST} contractors.`,
             },
           ].map((item) => (
             <div key={item.title} className="flex flex-col items-center text-center gap-2 p-gutter">
