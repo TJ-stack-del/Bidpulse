@@ -48,15 +48,21 @@ export function AppShell({
   return (
     <div className="min-h-screen flex flex-col bg-surface">
       <header className="fixed top-0 w-full z-40 flex items-center justify-between px-margin-mobile md:px-margin-desktop py-3 bg-surface/95 backdrop-blur border-b border-outline-variant">
-        <Image src="/logo.png" alt="BidPulse" width={134} height={40} className="h-9 w-auto shrink-0 dark:hidden" priority />
-        <Image
-          src="/logo-dark.png"
-          alt="BidPulse"
-          width={134}
-          height={40}
-          className="hidden h-9 w-auto shrink-0 dark:block"
-          priority
-        />
+        {/* "/" always bounces a signed-in user straight back into the app
+            (see app/page.tsx's root routing), so this can't link there like
+            the marketing nav's logo does — /pricing is a real public page
+            that actually gets them out to the marketing site. */}
+        <Link href="/pricing" className="shrink-0 flex items-center">
+          <Image src="/logo.png" alt="BidPulse" width={134} height={40} className="h-9 w-auto dark:hidden" priority />
+          <Image
+            src="/logo-dark.png"
+            alt="BidPulse"
+            width={134}
+            height={40}
+            className="hidden h-9 w-auto dark:block"
+            priority
+          />
+        </Link>
         <nav className="hidden md:flex gap-6">
           {links.map((link) => (
             <Link
