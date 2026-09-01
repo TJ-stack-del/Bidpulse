@@ -25,7 +25,7 @@ export async function sendEmail({
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: "BidPulse <onboarding@resend.dev>", // Resend's shared test domain
+      from: "BidPulse <notifications@bidpulse.co>", // bidpulse.co is now a verified sending domain,
       to: to.trim().toLowerCase(),
       subject,
       html,
