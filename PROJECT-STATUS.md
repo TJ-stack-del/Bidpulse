@@ -14,10 +14,14 @@ using AI-assisted drafting, then the client pays and downloads the package.
 (Postgres + Auth + Storage), Vercel (now deployed at bidpulse-nine.vercel.app).
 GitHub Codespaces for development.
 
-**Deploy status (2026-09-01):** `origin/main` is at `e83f77a`, pushed and
-should be live on Vercel. One more commit is staged but not yet pushed as of
-this writing — the forgot-password flow (see Confirmed Working below); ask
-before assuming it's live. All schema migrations through
+**Deploy status (2026-09-01):** `origin/main` is at `bebb5b6`, pushed and
+should be live on Vercel shortly. This includes the forgot-password flow
+(`46c999f`) and the AppShell logo-link fix (`20d2b57`) — both had been
+sitting committed-but-unpushed for a while; see the note below about what
+that gap actually caused. One uncommitted change remains, not mine — Mike's
+own edit to `lib/email/send.ts`, pointing the sending address at the
+verified `bidpulse.co` domain instead of Resend's shared test domain.
+All schema migrations through
 `20260831233428_add_estimated_value_and_lean_package_threshold.sql` are
 applied to the live Supabase project. No new migrations this session — the
 "no guarantee of winning" acknowledgment reused the existing `audit_log`
@@ -234,8 +238,11 @@ directly.
   couldn't be tested (this project's PKCE flow needs the same browser that
   requests the reset to hold the matching code-verifier when it completes
   the exchange, and there's no real inbox to check in this environment) —
-  every other real code path this touches was verified instead. **Not yet
-  committed as of this writing.**
+  every other real code path this touches was verified instead. Committed
+  (`46c999f`) — **but this commit sat unpushed for a while after landing,
+  which caused a real, confusing production symptom: see the note below
+  under Known Issues about "Forgot password?" appearing to send the wrong
+  email.** Now actually pushed (`bebb5b6`).
 - "No guarantee of winning" disclaimer — closes the loop on the fit-check
   system's existing no-win-probability-claims stance for the client-facing
   side. `components/ui/BidFileStep.tsx` (the real final-submit step, shared
@@ -251,8 +258,69 @@ directly.
   submit button is genuinely disabled unchecked, enables once checked, and
   a real DB read-back after submitting showed the audit_log row with the
   correct text and timestamp. Test accounts cleaned up afterward.
+- **Signed-in users had no way back to the marketing site — a real bug,
+  distinct from the earlier login-page exit-link fix.** The login-page fix
+  (`822de01`) only ever covered an anonymous visitor sitting on `/login`.
+  Once actually signed in, both admin and client accounts hit a real dead
+  end: `components/ui/AppShell.tsx` (the header shared by every `/admin/*`
+  and `/dashboard/*` page) had its logo as a plain, unlinked `<Image>` —
+  not wrapped in a `Link` at all — and its nav items only point to in-app
+  routes. Even a link to `/` wouldn't have helped: `app/page.tsx`'s root
+  routing deliberately bounces any signed-in user straight back into the
+  app, so `/` can never show the marketing homepage to someone logged in.
+  The only way out was signing out entirely — confirmed by reproducing
+  with real admin and client test accounts (sign in, land on
+  `/admin/inbox` or `/dashboard`, navigate directly to `/`: bounced right
+  back both times). Fixed by linking AppShell's logo to `/pricing` instead
+  of `/` — a real public page that doesn't get overridden by the
+  signed-in redirect. Verified for both roles with real test accounts:
+  admin and client each land on `/pricing` after clicking the logo, zero
+  console errors either time.
+- A separate console error a real browser session surfaced
+  (`A tree hydrated but some attributes of the server rendered HTML
+  didn't match...`, with `RedirectBoundary`/`HTTPAccessFallbackBoundary`/
+  `NotAllowedRootHTTPFallbackError` in the component stack) turned out to
+  be a Chrome DevTools artifact, not a real bug — confirmed from the
+  screenshot itself, which showed the Responsive device-emulation toolbar
+  active. DevTools injects a `zoom` style onto `<body>` in that mode,
+  which is exactly the mismatched attribute React flagged; it's unrelated
+  to any actual page. Worth remembering for next time: those boundary
+  component names are normal Next.js 15 App Router scaffolding present on
+  *every* route regardless of whether a redirect/not-found is actually
+  firing — seeing them in a stack trace isn't itself evidence of anything
+  broken. Re-tested outside Responsive mode and the warning didn't recur.
+- `tsconfig.json`: removed the deprecated `baseUrl` option (TS flagged it
+  as going away in TypeScript 7.0). It was redundant under
+  `moduleResolution: "bundler"` — `paths` resolves relative to the
+  tsconfig file's own directory without it. Confirmed via both
+  `tsc --noEmit` and a real `next build` that every `@/*` import still
+  resolves correctly.
 
 ## Known Issues / Recently Fixed
+- **"Forgot password?" appeared to send a sign-in link instead of a
+  password-reset link — root cause was a deployment gap, not a code
+  bug.** Real evidence: emails received while testing on the live site
+  were titled "Your sign-in link" (Supabase's magic-link template), not
+  "Reset your password" (the recovery template) — four arrived within a
+  ~3 hour window, consistent with repeated attempts. Investigated by
+  checking the actual deployed commit: `origin/main` was still at
+  `e83f77a` when this was reported — the forgot-password commit
+  (`46c999f`) had been committed locally but never pushed, so production
+  had no "Forgot password?" feature at all yet, only the pre-existing
+  "Sign in without a password" magic-link option. That's the one that got
+  clicked/tested, and it correctly sent exactly the sign-in-link email
+  it's supposed to. Confirmed the actual code is correct (grepped every
+  call site — the "forgot" mode's form really does call
+  `resetPasswordForEmail`, not `signInWithOtp`) and confirmed via the
+  Supabase Management API that the recovery and magic-link mailer
+  templates are genuinely distinct on the project (`mailer_subjects_recovery
+  = "Reset your password"` vs. `mailer_subjects_magic_link = "Your
+  sign-in link"`) — so there was nothing to fix in either the app code or
+  the Supabase project config. Pushed the previously-stranded commits
+  (`bebb5b6` now on `origin/main`) so this stops recurring. **Needs a real
+  retest against the live site now that it's actually deployed** — I
+  can't personally trigger and check a real inbox, so this needs an
+  actual click-through confirmation before treating it as fully closed.
 - Fixed twice: RLS blocking `clients` insert during signup. Most recent
   instance was Vercel-only (didn't reproduce in Codespace) — suspected timing
   issue between `signUp()` resolving and the session being ready for the
