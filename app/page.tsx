@@ -97,21 +97,44 @@ const SUPPORTED_TRADES_LIST = new Intl.ListFormat("en", { style: "long", type: "
 
 const TRADES = [
   {
+    id: "hvac",
     icon: "hvac",
     title: "HVAC",
     body: "Installation, maintenance, and repair contracts for public buildings.",
   },
   {
+    id: "janitorial",
     icon: "cleaning_services",
     title: "Janitorial",
     body: "Cleaning and facility-upkeep contracts for schools, offices, and public spaces.",
   },
   {
+    id: "landscaping",
     icon: "yard",
     title: "Landscaping",
     body: "Grounds maintenance and lawn care contracts for cities, parks, and school districts.",
   },
+  {
+    id: "it-computer-support",
+    icon: "computer",
+    title: "IT / Computer Support",
+    body: "Help desk, network support, and technical-service contracts for schools, agencies, and public offices.",
+  },
 ];
+
+// Each id here must match a KNOWN_TRADES id — this section needs a real
+// authored icon + description per trade, so it can't be generated from
+// known-trades.ts the way the tagline above is. Instead this fails the
+// build/render loudly the moment a new trade ships there without a
+// matching card, rather than silently drifting until a screenshot catches it.
+const MISSING_TRADE_CARDS = KNOWN_TRADES.filter(
+  (trade) => !TRADES.some((card) => card.id === trade.id)
+);
+if (MISSING_TRADE_CARDS.length > 0) {
+  throw new Error(
+    `"Trades we work with" section (app/page.tsx) is missing a card for: ${MISSING_TRADE_CARDS.map((t) => t.id).join(", ")}. Add a matching entry to TRADES.`
+  );
+}
 
 function Home() {
   return (
@@ -202,7 +225,7 @@ function Home() {
             We're set up for the kind of bids small trade businesses actually deal with.
           </p>
         </div>
-        <ul className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {TRADES.map((trade) => (
             <li
               key={trade.title}
