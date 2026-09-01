@@ -106,6 +106,10 @@ export default function PricingPage() {
           Start a bid
         </Link>
       </section>
+
+      <p className="text-label-sm text-on-surface-variant text-center">
+        BidPulse helps you prepare a strong, compliant bid — but we can't guarantee you'll win. That decision is up to the agency.
+      </p>
     </MarketingShell>
   );
 }

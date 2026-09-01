@@ -143,6 +143,7 @@ export default async function AdminSubmissionDetailPage({
     deliverable_prepared: "Deliverable prepared",
     confirmation_email_sent: "Confirmation email sent",
     submission_locked: "Submitted by client",
+    no_guarantee_acknowledged: "Client acknowledged no guarantee of winning",
     submission_created_from_match: "Created from matched opportunity",
     payment_marked_paid: "Marked as paid",
     payment_marked_unpaid: "Marked as unpaid",
