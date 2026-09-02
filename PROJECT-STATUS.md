@@ -454,6 +454,18 @@ directly.
   **"We need some info for your Verify Agency bid"** — the real
   `getInfoRequestEmail()` template, not a sign-in-link-style mixup.
   Confirmed working end-to-end.
+- **Document upload/extraction's remaining items (file types beyond PDF,
+  multi-certification, Commercial Auto) were re-requested as "still
+  needed" but were already built and verified in the same-day work
+  above** — a stale build order, not new scope. Re-confirmed directly
+  against the current code (`detectDocumentKind` on both extraction
+  routes, `certifications: ExtractedCertification[]` as a real array,
+  `commercial_auto_coverage` in `schema.sql`) rather than trusting either
+  claim. Closed the one genuinely untested angle: generated a real
+  `.docx` file (not just `.txt`, which was already tested) from the same
+  mock content and ran it through the actual extraction route — every
+  field came back correct, including all 4 certifications and the
+  Commercial Auto coverage.
 
 ## Known Issues / Recently Fixed
 - **Due-date alerting was reported as broken but is actually already

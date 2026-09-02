@@ -348,6 +348,17 @@ null since its correct value already lived in workers_comp_coverage) —
 not a broader sweep. Verified with a direct before/after read of the
 real record.
 
+**Follow-up (2026-09-02): the same brief's remaining items (file types
+beyond PDF, multi-certification, Commercial Auto) were re-listed as
+"still needed" — they were already built and verified above the same
+day; a stale build order, not new scope.** Re-confirmed directly against
+the current code rather than trusting either claim (`detectDocumentKind`
+on both routes, `certifications` as a real array, `commercial_auto_coverage`
+in `schema.sql`). Closed the one genuinely untested angle: generated a
+real `.docx` file (not just the `.txt` already tested) from the same
+mock content and ran it through the actual route — every field came
+back correct, all 4 certifications, Commercial Auto included.
+
 ## Also closed this session (folded in from earlier same-day work)
 - Homepage trade list (tagline + "Trades we work with" cards) — generated
   from `known-trades.ts` now, with a build-time drift check on the card
