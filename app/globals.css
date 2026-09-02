@@ -32,10 +32,10 @@
   --color-primary-container: 16 26 48;
   --color-on-primary-container: 147 164 194;
   --color-inverse-primary: 185 199 228;
-  --color-secondary: 15 110 122;
+  --color-secondary: 19 76 118;
   --color-on-secondary: 255 255 255;
-  --color-secondary-container: 169 236 232;
-  --color-on-secondary-container: 5 78 86;
+  --color-secondary-container: 164 208 241;
+  --color-on-secondary-container: 13 50 78;
   --color-tertiary: 168 77 15;
   --color-on-tertiary: 255 255 255;
   --color-tertiary-container: 255 221 184;
@@ -70,10 +70,10 @@
   --color-primary-container: 41 52 74;
   --color-on-primary-container: 215 224 245;
   --color-inverse-primary: 12 21 36;
-  --color-secondary: 15 110 122;
+  --color-secondary: 19 76 118;
   --color-on-secondary: 255 255 255;
-  --color-secondary-container: 10 61 67;
-  --color-on-secondary-container: 169 236 232;
+  --color-secondary-container: 11 42 66;
+  --color-on-secondary-container: 164 208 241;
   --color-tertiary: 168 77 15;
   --color-on-tertiary: 255 255 255;
   --color-tertiary-container: 92 44 0;
