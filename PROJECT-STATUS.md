@@ -464,6 +464,13 @@ directly.
   Commercial Auto coverage.
 
 ## Known Issues / Recently Fixed
+- **Favicon vs. nav/login logo mismatch — decided, no code change.**
+  The logo audit (2026-09-01) confirmed every location already uses its
+  correctly *intended* asset (no code-level mismatch); the open question
+  was purely whether to redesign the favicon to visually match the
+  plain heartbeat nav/login mark, or keep its bolder "BP" monogram
+  deliberately. Mike's call 2026-09-02: keep it as-is, for small-size
+  legibility. Closed.
 - **Due-date alerting was reported as broken but is actually already
   correct — audited, not fixed.** The report claimed the daily digest
   (`app/api/daily-digest/route.ts`) only fires on staleness, so a
@@ -562,17 +569,6 @@ directly.
   restriction. Sessions still never expire from inactivity in the
   meantime. Needs either upgrading the Supabase plan, or accepting the
   indefinite-session default for now — Mike's call once he sees this.
-- Favicon doesn't visually match the nav/login logo mark. The logo audit
-  (2026-09-01) confirmed every location uses its correctly *intended* asset
-  (no code-level mismatch), but the three source PNGs weren't drawn as a
-  matched set: the favicon (`app/icon.png`) is a flat navy "BP" monogram
-  with heavier strokes, while the nav/login mark is a plain heartbeat-only
-  shield with a lighter gradient and thinner strokes. Not something a code
-  fix can resolve — needs a design decision (redesign the favicon to match,
-  or leave the bolder "BP" monogram as deliberate for small-size
-  legibility), and per the Business/Naming Note below, further
-  logo/branding work is already paused pending the trademark question — put
-  this in the same bucket rather than deciding it standalone.
 - Theme color tokens vs. the new logo's real palette — not yet looked at.
   Flagged in the 2026-09-01 build order as likely fallout from the
   shield/heartbeat logo swap; needs pulling the actual colors from the logo
