@@ -71,18 +71,34 @@ backlog, in suggested order.
 
 ## Next up
 
-### 1. Split dev and production Supabase projects
-Blocked on Mike: step 1 (creating the new production Supabase project)
-needs his dashboard account — I can't do this part. Once that project
-exists, my part is: replay every tracked migration against it
-(`supabase/migrations/` via the CLI), verify the resulting schema
-matches `schema.sql`, confirm it's genuinely empty (zero rows, every
-table), then update Vercel's *production* env vars to point at it —
-current project becomes dev-only, untouched. See the full brief
-(BUILDORDER1.md, 2026-09-02) for the complete step list and the reasoning
-for why this avoids trying to purge test data out of the current project
-instead (the Dar Mano `is_test` mis-flag already showed flag-based
-cleanup can't be fully trusted here).
+### 1. Split dev and production Supabase projects — steps 1-2 done, blocked on Mike for the rest
+Mike created the new production Supabase project (`rixsgnbivayeaxbdseij`)
+and gave me its URL + DB password 2026-09-02. Ran every migration in
+`supabase/migrations/` against it via `npx supabase db push` (all 10
+applied cleanly on a genuinely fresh project — confirmed via `migration
+list` beforehand that none were already applied). Verified two ways, not
+just "the push succeeded": `npx supabase db dump --schema public`
+diffed against the tracked `schema.sql` came back byte-identical, and
+`npx supabase db dump --data-only --schema public` confirmed zero
+INSERT/COPY rows in any table — genuinely empty, not just "looks empty."
+Re-linked the CLI back to the dev project (`hvrwxcyqgjobrgpcequj`)
+immediately afterward so no future migration command in this
+environment accidentally targets production by default.
+
+**Still needed, all on Mike's side (Vercel dashboard, not code):**
+1. Update Vercel's **production** environment variables
+   (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`,
+   `SUPABASE_SERVICE_ROLE_KEY`) to the new project's values.
+2. Decide whether Vercel Preview deployments share the dev project or
+   need their own — default recommendation: share the dev project,
+   revisit only if that causes real friction.
+3. Confirm Resend stays in test-mode (delivers only to
+   michaeltcoleman@gmail.com) in both environments until the custom
+   domain is verified.
+4. Once env vars are updated: a real end-to-end test against the live
+   production URL (signup → intake → admin inbox) confirming it writes
+   to the *new* project, not the old one — this still needs to happen
+   after the Vercel change, not before.
 
 ### 2. "Message admin" UI tied to a specific bid — in progress elsewhere
 This brief marks it "sent to Claude Code, awaiting results" — a separate,
