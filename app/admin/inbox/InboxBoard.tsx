@@ -167,11 +167,15 @@ export function InboxBoard({
     return (
       <div>
         {controls}
-        <div className="flex gap-4 overflow-x-auto pb-2">
+        {/* Stacked full-width columns below sm (horizontal scroll reads worse
+            than a normal scrolling page on a ~380px phone); side-by-side with
+            horizontal scroll from sm up, where reaching a column is a single
+            swipe/scroll instead of the whole page's only scroll direction. */}
+        <div className="flex flex-col sm:flex-row gap-4 sm:overflow-x-auto pb-2">
           {visibleStages.map((stage) => {
             const cards = filtered.filter((s) => s.stage === stage);
             return (
-              <div key={stage} className="flex-none w-72 bg-surface-container-low border border-outline-variant rounded-xl">
+              <div key={stage} className="w-full sm:flex-none sm:w-72 bg-surface-container-low border border-outline-variant rounded-xl">
                 <div className="px-3 py-2.5 border-b border-outline-variant flex items-center justify-between">
                   <span className="text-label-lg font-semibold text-on-surface">{stageLabels[stage] ?? stage}</span>
                   <span className="text-label-sm text-on-surface-variant">{cards.length}</span>

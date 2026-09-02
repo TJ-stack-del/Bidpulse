@@ -513,6 +513,15 @@ directly.
   real production build succeeds.
 
 ## Known Issues / Recently Fixed
+- **Admin inbox Board view had horizontal-only scroll, unusable on
+  mobile — fixed.** Columns were a fixed `flex` row at every width,
+  meaning reaching later-stage columns on a ~380px phone required
+  horizontal scrolling. Added a `sm` breakpoint: columns stack full-width
+  vertically below `sm`, side-by-side (original layout, unchanged) from
+  `sm` up. Verified with real screenshots at 380px (stacked, correct
+  Submitted→Closed top-to-bottom order) and 1440px (pixel-identical to
+  before), both against the real `submissions` table via a disposable
+  test admin account.
 - **Admin inbox was a flat list with no way to group by stage or filter/
   sort — fixed with a Board/List toggle.** The reported complaint (the
   same client scattered across multiple non-adjacent rows, no way to
@@ -677,8 +686,19 @@ directly.
   read of the record.
 
 ## Open — Needs Attention
-Nothing currently open — see Known Issues / Recently Fixed for the
-session-timeout workaround below.
+- **Split dev and production Supabase projects — blocked on Mike.** Real
+  ask 2026-09-02: one Supabase project currently serves both dev and
+  production, and every row in it is test/mock data. Recommended
+  approach (chosen to avoid deletion risk): a genuinely new, empty
+  production project with every tracked migration replayed against it,
+  rather than trying to purge test data out of the current project
+  (`is_test` was already found wrong on one real-looking row — Dar Mano
+  Consulting — so flag-based cleanup can't be fully trusted). Step 1
+  (creating the new project) needs Mike's Supabase dashboard account —
+  everything after that (replaying migrations, verifying the schema,
+  pointing Vercel's production env vars at it) is real work still to do
+  once the project exists. See `BUILD-ORDER-BIDPULSE.md`'s "Next up" for
+  the full step list.
 
 ## Deliberately Deferred (remaining items)
 Items #1, #2, and #4 from the original list (static bid-process warnings,

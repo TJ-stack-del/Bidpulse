@@ -71,12 +71,57 @@ backlog, in suggested order.
 
 ## Next up
 
-### 1. Retainer package usage tracking
+### 1. Split dev and production Supabase projects
+Blocked on Mike: step 1 (creating the new production Supabase project)
+needs his dashboard account — I can't do this part. Once that project
+exists, my part is: replay every tracked migration against it
+(`supabase/migrations/` via the CLI), verify the resulting schema
+matches `schema.sql`, confirm it's genuinely empty (zero rows, every
+table), then update Vercel's *production* env vars to point at it —
+current project becomes dev-only, untouched. See the full brief
+(BUILDORDER1.md, 2026-09-02) for the complete step list and the reasoning
+for why this avoids trying to purge test data out of the current project
+instead (the Dar Mano `is_test` mis-flag already showed flag-based
+cleanup can't be fully trusted here).
+
+### 2. "Message admin" UI tied to a specific bid — in progress elsewhere
+This brief marks it "sent to Claude Code, awaiting results" — a separate,
+already-dispatched task with its own decided schema/RLS/UI approach (see
+BUILDORDER1.md for the full spec if picking this up here instead). Not
+duplicating this work in this session; only relevant if that other
+attempt didn't land or needs a second pass.
+
+### 3. Retainer package usage tracking
 Track how many bids a retainer client has used this month against the
 "up to 2/month" promise. No schema yet — needs a usage-count field or
 derived query against `submissions`/`packages`, plus a decision on how
 resets are timed (calendar month vs. rolling 30 days). Explicitly
 deferred until there's a real retainer client to test against.
+
+### 4. Law enforcement/detention integration check (opportunistic, not standalone)
+Confirm whether `TRADE_SPECIFIC_CERTIFICATIONS`'s existing
+background-check/bloodborne-pathogen keyword detection is also wired
+into `lib/agency-type.ts`'s own keyword system alongside
+airport/school/transit/`va`. Deliberately not worth a standalone pass —
+do it the next time `agency-type.ts` is touched for an unrelated reason.
+
+## Closed since the last update (2026-09-02)
+
+### Admin inbox Board view: vertical scroll on mobile — RESOLVED
+Real gap, confirmed before fixing: `InboxBoard.tsx`'s columns were a
+fixed `flex` row at every viewport width, meaning reaching "In review"/
+"Deliverables ready" etc. on a ~380px phone required horizontal
+scrolling — worse than a normal scrolling page. Fixed with a `sm`
+breakpoint: `flex-col` (full-width stacked columns) below `sm`,
+`sm:flex-row` (the original side-by-side, horizontally-scrollable
+layout) from `sm` up, so desktop and tablet are visually unchanged.
+Column top-to-bottom order matches the original left-to-right order
+(driven by the same `STAGE_ORDER`/`visibleStages` array, just a
+different flex direction). Verified with real screenshots at 380px
+(stacked, correct order, filters/toggle still above the columns) and
+1440px (pixel-identical to the pre-fix layout) against the real 9-row
+`submissions` table, using the same disposable-test-admin pattern as the
+Kanban board's own verification (created and deleted for this test).
 
 ## Closed since the last update (2026-09-01)
 
