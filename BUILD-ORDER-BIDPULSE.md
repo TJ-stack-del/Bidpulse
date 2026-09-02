@@ -94,25 +94,18 @@ derived query against `submissions`/`packages`, plus a decision on how
 resets are timed (calendar month vs. rolling 30 days). Explicitly
 deferred until there's a real retainer client to test against.
 
-### 4. Favicon vs. nav/login logo mismatch
-Not a code bug — confirmed during the logo consistency audit that every
-location already renders its correctly *intended* asset. The three
-source PNGs themselves just weren't drawn as a matched set: the favicon
-is a flat navy "BP" monogram with heavier strokes, while the nav/login
-mark is a plain heartbeat-only shield with a lighter gradient and
-thinner strokes. Needs a design decision (redesign the favicon to match,
-or keep the bolder monogram deliberately for small-size legibility), not
-an engineering fix — and per the Business/Naming Note, sits in the same
-paused bucket as other logo/branding work pending the trademark question.
-
-### 5. Theme color tokens vs. the new logo's palette
+### 4. Theme color tokens vs. the new logo's palette
 Not yet looked at. Flagged as likely fallout from the shield/heartbeat
 logo swap — needs pulling the actual colors from the logo assets and
-comparing against the current Tailwind/design tokens. Worth doing
-alongside item #4 above, since both are visual/design-token passes on the
-same brand assets.
+comparing against the current Tailwind/design tokens.
 
 ## Closed since the last update (2026-09-01)
+
+### Favicon vs. nav/login logo mismatch — RESOLVED (decided, no code change)
+Mike's call 2026-09-02: keep the favicon's bolder "BP" monogram
+deliberately, for small-size legibility — don't redesign it to match
+the plain heartbeat nav/login mark. No code change; this was purely a
+design decision between the two options the logo audit surfaced.
 
 ### Manual verification: Dar Mano Consulting VA/CUI exposure — RESOLVED (was test data)
 Mike confirmed 2026-09-02 this submission is test data, not a real
