@@ -718,19 +718,19 @@ directly.
   read of the record.
 
 ## Open — Needs Attention
-- **Split dev and production Supabase projects — blocked on Mike.** Real
-  ask 2026-09-02: one Supabase project currently serves both dev and
-  production, and every row in it is test/mock data. Recommended
-  approach (chosen to avoid deletion risk): a genuinely new, empty
-  production project with every tracked migration replayed against it,
-  rather than trying to purge test data out of the current project
-  (`is_test` was already found wrong on one real-looking row — Dar Mano
-  Consulting — so flag-based cleanup can't be fully trusted). Step 1
-  (creating the new project) needs Mike's Supabase dashboard account —
-  everything after that (replaying migrations, verifying the schema,
-  pointing Vercel's production env vars at it) is real work still to do
-  once the project exists. See `BUILD-ORDER-BIDPULSE.md`'s "Next up" for
-  the full step list.
+- **Split dev and production Supabase projects — new project created,
+  migrations applied and verified, blocked on Mike for the Vercel side.**
+  Mike created the new production project (`rixsgnbivayeaxbdseij`)
+  2026-09-02. All 10 tracked migrations applied cleanly via
+  `npx supabase db push`; verified the resulting schema is byte-identical
+  to `schema.sql` (real diff, not assumed) and genuinely empty (a
+  data-only dump confirmed zero rows in every table). CLI re-linked back
+  to the dev project immediately after, so no future migration
+  accidentally targets production by default. Still needed, all on
+  Mike's side: point Vercel's production env vars at the new project,
+  decide on Preview deployments, confirm Resend test-mode, then a real
+  end-to-end test against the live URL once those env vars are updated.
+  See `BUILD-ORDER-BIDPULSE.md`'s "Next up" for the full remaining list.
 - **Inbound bid email pipeline — code built and verified, blocked on
   Mike's IONOS/Gmail/Apps Script setup before it's actually live.** See
   `scripts/README.md` for the exact steps (forwarding, label/filter, Apps
