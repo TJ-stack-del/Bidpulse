@@ -479,6 +479,23 @@ directly.
   `--color-surface-tint` alone — confirmed via grep it's defined but
   never actually used as a class anywhere. Verified with real
   screenshots in both themes, homepage and login.
+- 14-day inactivity sign-out, built at the app level since Supabase's
+  native `sessions_inactivity_timeout` setting is real but gated behind
+  a Pro-plan paywall this project isn't on (confirmed via the Management
+  API — see Known Issues). `middleware.ts` now tracks a plain
+  `bp_last_active` cookie (httpOnly, 14-day maxAge) as a sliding window,
+  renewed on every authenticated request. Once a signed-in visitor goes
+  14 days without a single request, the next one they make calls
+  `supabase.auth.signOut()` server-side and redirects to
+  `/login?reason=inactive`, which shows a real message ("You were
+  signed out after 14 days of inactivity") instead of an unexplained
+  bounce. Anonymous visitors never get the cookie at all. Verified
+  end-to-end with a real signed-in session: normal continued activity
+  never falsely signs out; backdating the cookie to 15 days old
+  triggers the sign-out on the very next request; a second request
+  afterward confirms the session was actually cleared server-side (lands
+  on plain `/login`, not just a one-time redirect) rather than silently
+  refreshing forever, which is what happened before this existed.
 
 ## Known Issues / Recently Fixed
 - **Favicon vs. nav/login logo mismatch — decided, no code change.**
@@ -576,20 +593,8 @@ directly.
   read of the record.
 
 ## Open — Needs Attention
-- **Session timeout: Mike chose 14 days, but it can't actually be set —
-  Supabase blocks it on the current plan tier.** Attempted via the
-  Management API 2026-09-02: `PATCH .../config/auth` with
-  `sessions_inactivity_timeout: 1209600` (14 days in seconds) returned
-  `"User sessions can only be configured on Pro Plans and up."` This is
-  a real, hard paywall, not a bug or a wrong API call — the Supabase
-  Dashboard's own Authentication → Sessions UI will show the same
-  restriction. Sessions still never expire from inactivity in the
-  meantime. Needs either upgrading the Supabase plan, or accepting the
-  indefinite-session default for now — Mike's call once he sees this.
-- Theme color tokens vs. the new logo's real palette — not yet looked at.
-  Flagged in the 2026-09-01 build order as likely fallout from the
-  shield/heartbeat logo swap; needs pulling the actual colors from the logo
-  assets and comparing against the current Tailwind/design tokens.
+Nothing currently open — see Known Issues / Recently Fixed for the
+session-timeout workaround below.
 
 ## Deliberately Deferred (remaining items)
 Items #1, #2, and #4 from the original list (static bid-process warnings,

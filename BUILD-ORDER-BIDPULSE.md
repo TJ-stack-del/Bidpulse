@@ -71,15 +71,7 @@ backlog, in suggested order.
 
 ## Next up
 
-### 1. Session timeout — blocked on Supabase plan tier, not a decision anymore
-Mike chose 14 days. Tried to set it via the Management API
-(`sessions_inactivity_timeout: 1209600`) 2026-09-02 — Supabase rejected
-it: `"User sessions can only be configured on Pro Plans and up."` This
-project is below that tier. Not fixable in code or via API/Dashboard as-is.
-Needs Mike to either upgrade the Supabase plan or accept the indefinite-
-session default for now. See `PROJECT-STATUS.md` Open — Needs Attention.
-
-### 2. Retainer package usage tracking
+### 1. Retainer package usage tracking
 Track how many bids a retainer client has used this month against the
 "up to 2/month" promise. No schema yet — needs a usage-count field or
 derived query against `submissions`/`packages`, plus a decision on how
@@ -87,6 +79,23 @@ resets are timed (calendar month vs. rolling 30 days). Explicitly
 deferred until there's a real retainer client to test against.
 
 ## Closed since the last update (2026-09-01)
+
+### Session timeout — RESOLVED (app-level workaround, since Pro-plan feature is paywalled)
+Supabase's native `sessions_inactivity_timeout` setting was confirmed
+blocked behind a Pro-plan paywall this project isn't on — real API
+error: `"User sessions can only be configured on Pro Plans and up."`
+Not fixable via the Dashboard either (same restriction). Rather than
+leave sessions never expiring, built the same 14-day behavior at the
+app level: `middleware.ts` tracks a plain `bp_last_active` cookie
+(httpOnly, sliding 14-day window, renewed on every authenticated
+request). Once a signed-in visitor goes 14 days without a single
+request, the next one triggers a real server-side `signOut()` and
+redirects to `/login?reason=inactive`, which shows a real "signed out
+after 14 days of inactivity" message. Anonymous visitors never get the
+cookie. Verified end-to-end with a real session: normal activity never
+falsely signs out; a cookie backdated to 15 days triggers sign-out on
+the next request; a second request afterward confirms the session was
+genuinely cleared server-side, not just a one-time redirect.
 
 ### Theme color tokens vs. the new logo's palette — RESOLVED
 Pulled the actual dominant colors from `public/logo.png` (sampling
