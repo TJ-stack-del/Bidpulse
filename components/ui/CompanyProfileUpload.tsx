@@ -47,16 +47,32 @@ export function CompanyProfileUpload({
       const formData = new FormData();
       formData.append("file", file);
       const res = await fetch("/api/extract-company-profile", { method: "POST", body: formData });
-      const data = await res.json();
+
+      // A killed serverless function (e.g. a slow extraction call outrunning
+      // the platform's execution limit) returns a platform error page, not
+      // JSON — distinguishing that from a real server-returned error means
+      // a genuine timeout doesn't get reported as the same vague message as
+      // "this file has no readable text."
+      let data: { error?: string };
+      try {
+        data = await res.json();
+      } catch {
+        setError(
+          res.status === 504
+            ? "That document took too long to process — try a smaller or simpler file."
+            : `Something went wrong reading that document (server error ${res.status}). Try again in a moment.`
+        );
+        return;
+      }
 
       if (!res.ok) {
         setError(data.error ?? "Couldn't read that document.");
         return;
       }
 
-      onExtracted(data, file);
+      onExtracted(data as ExtractedCompanyProfile, file);
     } catch {
-      setError("Couldn't read that document.");
+      setError("Couldn't reach the server — check your connection and try again.");
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = "";

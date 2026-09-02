@@ -80,6 +80,52 @@ deferred until there's a real retainer client to test against.
 
 ## Closed since the last update (2026-09-01)
 
+### Intake document upload fails: "Couldn't read that document" — RESOLVED (serverless timeout, not a parsing bug)
+No real test fixture was actually attached to the brief (checked the
+uploads directory) despite the "real fixture is now available" framing
+— built two synthetic PDFs instead: a simple one (jsPDF) and a
+realistic one (Chromium's `page.pdf()` against real formatted HTML —
+tables, real embedded fonts, genuinely different internal PDF structure
+than a bare text dump). Both extracted every field correctly on the
+first try, both at the API level and through the real browser
+file-picker on both surfaces (Company Profile and the intake
+micro-step, tested with a fresh anonymous session so intake's own
+"already logged in" skip-step-0 logic didn't interfere) — the parsing/
+extraction pipeline itself checks out clean.
+
+The real, most likely root cause: neither extraction route had a
+`maxDuration` override, so both ran on Vercel's default serverless
+timeout (10s). Real Claude extraction calls were already observed
+taking 15–25 seconds even for tiny test files in this same session —
+a larger real-world document (a real capability statement with a
+logo/letterhead, more pages) would very plausibly exceed that, get
+killed mid-request, and Vercel returns a platform error page instead
+of JSON — which breaks `res.json()` client-side and surfaces as the
+exact same generic message this brief describes, with zero indication
+it was actually a timeout. This class of failure can never reproduce
+against `npm run dev` (no such limit locally), which matches why
+nothing here failed despite thorough local testing.
+
+Added `export const maxDuration = 60;` to both
+`extract-from-document/route.ts` and `extract-company-profile/route.ts`
+(confirmed via grep that `generate-draft` and `generate-fit-check`
+don't actually call an LLM at all — template/heuristic logic only, so
+they're not vulnerable to this class of bug and didn't need the same
+fix). Also hardened `CompanyProfileUpload.tsx`'s error handling: a
+non-JSON response (the timeout/crash-page case) now shows a distinct,
+specific message instead of being silently absorbed into the same
+generic string as "this file has no readable text" or "no network
+connection" — so if this recurs, whoever sees it can actually tell
+which failure mode it was.
+
+Saved both synthetic PDFs into the repo as real checked-in fixtures
+(`test-fixtures/`, with a README) per the brief's own request, so
+future test runs don't need to rebuild or re-upload them. Verified:
+`tsc --noEmit` clean, real production build succeeds, and a final
+re-run using the fixture from its actual saved repo path (not a
+scratchpad copy) confirmed correct extraction through the real UI on
+both surfaces.
+
 ### Gallery page missing the IT/Computer Support trade — RESOLVED
 Confirmed: Gallery's sample-deliverable cards (`EXAMPLES` in
 `app/gallery/page.tsx`) were a completely separate hardcoded array from

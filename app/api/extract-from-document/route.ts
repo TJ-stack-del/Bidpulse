@@ -5,6 +5,13 @@ import { SMALL_BUSINESS_STATUSES, COMMON_SET_ASIDES, COMMON_NAICS_CODES } from "
 import { detectDocumentKind, buildDocumentContent, UNSUPPORTED_FILE_TYPE_MESSAGE } from "@/lib/document-parsing";
 
 export const runtime = "nodejs";
+// Vercel's default serverless timeout (10s) is real and was silently
+// clipping this route for larger/more complex real-world PDFs -- extraction
+// calls to Claude routinely take well past 10s even for small test files.
+// A killed function returns a platform error page instead of JSON, which
+// breaks the client's res.json() and surfaces as a generic "Couldn't read
+// that document" with no indication it was actually a timeout.
+export const maxDuration = 60;
 
 // Called from the intake wizard's "About the bid" step: a client uploads the
 // agency's RFP/solicitation file and we prefill agency/solicitationNumber/
