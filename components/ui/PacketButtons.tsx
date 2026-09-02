@@ -188,6 +188,29 @@ export function PacketButtons({
               className="absolute bottom-4 right-4 h-6 w-auto opacity-10 pointer-events-none select-none"
             />
 
+            {/* Repeating diagonal text watermark, dynamic per client/date
+                rather than generic — a light deterrent/traceability
+                element if this modal is ever screenshotted despite
+                select-none. overflow-hidden on this container clips the
+                rotated grid at its edges; pointer-events-none keeps the
+                real content (including the Close button) fully clickable
+                underneath. Positioned relative to the OUTER modal box, not
+                the scrollable content div below, so it stays put while
+                that content scrolls — same as a real document watermark. */}
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 overflow-hidden pointer-events-none select-none z-0"
+            >
+              <div className="absolute inset-0 flex flex-wrap content-center justify-center gap-x-10 gap-y-6 rotate-[-30deg] scale-150 opacity-[0.07]">
+                {Array.from({ length: 24 }).map((_, i) => (
+                  <span key={i} className="text-on-surface text-label-sm font-bold whitespace-nowrap">
+                    PREVIEW — {previewData.submission.clients?.company_name ?? "BidPulse"} —{" "}
+                    {new Date().toLocaleDateString()}
+                  </span>
+                ))}
+              </div>
+            </div>
+
             <div className="max-h-[80vh] overflow-y-auto p-8">
               <button
                 onClick={() => setPreviewData(null)}
