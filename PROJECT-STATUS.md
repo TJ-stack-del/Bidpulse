@@ -14,18 +14,14 @@ using AI-assisted drafting, then the client pays and downloads the package.
 (Postgres + Auth + Storage), Vercel (now deployed at bidpulse-nine.vercel.app).
 GitHub Codespaces for development.
 
-**Deploy status (2026-09-01):** `origin/main` is at `bebb5b6`, pushed and
-should be live on Vercel shortly. This includes the forgot-password flow
-(`46c999f`) and the AppShell logo-link fix (`20d2b57`) — both had been
-sitting committed-but-unpushed for a while; see the note below about what
-that gap actually caused. One uncommitted change remains, not mine — Mike's
-own edit to `lib/email/send.ts`, pointing the sending address at the
-verified `bidpulse.co` domain instead of Resend's shared test domain.
-All schema migrations through
-`20260831233428_add_estimated_value_and_lean_package_threshold.sql` are
-applied to the live Supabase project. No new migrations this session — the
-"no guarantee of winning" acknowledgment reused the existing `audit_log`
-table instead of adding a column.
+**Deploy status (2026-09-02):** `origin/main` is at `f1e4545`, pushed and
+live on Vercel. Working tree is clean — nothing outstanding. All schema
+migrations through
+`20260901230450_add_business_registration_and_commercial_auto.sql` are
+applied to the live Supabase project (adds `clients.business_registration_number`
+and `clients.commercial_auto_coverage` — the "no guarantee of winning"
+acknowledgment itself needed no migration, reusing the existing
+`audit_log` table instead).
 
 ## How schema changes get made now
 As of 2026-08-31, all schema changes go through Supabase CLI migrations —

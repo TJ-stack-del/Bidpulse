@@ -3,7 +3,7 @@
 Read `PROJECT-STATUS.md` first for full context, evidence, and history.
 This file tracks what's actually queued to work on next.
 
-## Status as of 2026-09-01
+## Status as of 2026-09-02
 The original self-serve → done-for-you migration (`MIGRATION-NOTES.md`) is
 long complete, and the full post-migration priority list — school regex
 fix, JSEB/DBE-SDB funding-source hardening, tracked Supabase CLI
@@ -42,6 +42,10 @@ to already be correct — audited and confirmed with a real isolated test,
 no code change needed. See `PROJECT-STATUS.md`'s "Confirmed Working" for
 the evidence behind each.
 
+Also closed the same day: mobile nav menu items now render as real
+tappable buttons (mobile-only; desktop's plain-text nav links were
+already fine).
+
 Also closed: document upload/extraction (all 4 gaps from the brief) — a
 real, substantial build, not a small fix. Worth knowing before reading
 `PROJECT-STATUS.md`'s entry: the brief's premise that a company-profile
@@ -51,7 +55,16 @@ route only ever extracted bid/RFP fields), and its claim that
 from Trade Licensing was also wrong — both gaps turned out bigger than
 described, closed anyway per your call on each. No mock test package was
 available in this environment; built a synthetic one matching the
-brief's exact expected fields/values instead.
+brief's exact expected fields/values instead. Two follow-up rounds after
+that: a "systemic field-mapping bug" report didn't hold up against the
+shipped code (re-verified, no change needed) but did surface one real
+live bad record (hand-typed into the old form before it had the right
+fields) — backfilled that specific record. A later re-ask for
+"still-needed" items (file types, multi-certification, Commercial Auto)
+turned out to already be built and verified; closed the one genuinely
+untested angle (a real `.docx` file) to be sure. Also fully verified the
+info-request feature's actual email delivery via a real, publicly-checkable
+inbox, not just a successful API response.
 
 Nothing is currently mid-flight. The items below are the real remaining
 backlog, in suggested order.
