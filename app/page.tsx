@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ensureOrgAndMembership } from "@/lib/auth/ensure-org";
 import { MarketingShell } from "@/components/ui/MarketingShell";
-import { KNOWN_TRADES } from "@/lib/compliance/known-trades";
+import { KNOWN_TRADES, assertNoMissingTradeCards } from "@/lib/compliance/known-trades";
 
 export const metadata: Metadata = {
   description: "We help you win local government contracts. Send us the bid papers — our team handles the paperwork so you can send in a strong bid.",
@@ -126,15 +126,13 @@ const TRADES = [
 // authored icon + description per trade, so it can't be generated from
 // known-trades.ts the way the tagline above is. Instead this fails the
 // build/render loudly the moment a new trade ships there without a
-// matching card, rather than silently drifting until a screenshot catches it.
-const MISSING_TRADE_CARDS = KNOWN_TRADES.filter(
-  (trade) => !TRADES.some((card) => card.id === trade.id)
+// matching card, rather than silently drifting until a screenshot catches
+// it (which is exactly how Gallery's separate card list drifted before
+// this check existed for it too — see app/gallery/page.tsx).
+assertNoMissingTradeCards(
+  TRADES.map((t) => t.id),
+  '"Trades we work with" section (app/page.tsx)'
 );
-if (MISSING_TRADE_CARDS.length > 0) {
-  throw new Error(
-    `"Trades we work with" section (app/page.tsx) is missing a card for: ${MISSING_TRADE_CARDS.map((t) => t.id).join(", ")}. Add a matching entry to TRADES.`
-  );
-}
 
 function Home() {
   return (

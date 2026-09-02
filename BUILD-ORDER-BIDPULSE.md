@@ -80,6 +80,26 @@ deferred until there's a real retainer client to test against.
 
 ## Closed since the last update (2026-09-01)
 
+### Gallery page missing the IT/Computer Support trade — RESOLVED
+Confirmed: Gallery's sample-deliverable cards (`EXAMPLES` in
+`app/gallery/page.tsx`) were a completely separate hardcoded array from
+`known-trades.ts`, so the build-time drift check added earlier for the
+homepage's "Trades we work with" grid never covered this page — exactly
+how it fell out of sync when IT/Computer Support shipped. Fixed both
+halves: added a real synthetic IT/Computer Support example card
+("Help Desk & Network Support," matching the tone/length of the other
+three), and extracted the drift-check itself into a shared
+`assertNoMissingTradeCards()` helper in `known-trades.ts` so one
+mechanism now covers both surfaces instead of two separate ad hoc
+checks. Also fixed the same 3→4-card grid-orphan layout issue the
+homepage grid hit earlier (`sm:grid-cols-2 lg:grid-cols-4`). Verified:
+real screenshot showing all four cards correctly laid out; confirmed
+the shared drift-check actually fires for *both* pages by temporarily
+adding a 5th fake trade with no card (both `/` and `/gallery` returned
+real 500s with the exact missing-card error), then reverted and
+confirmed both pages render clean 200s again; real production build
+succeeds.
+
 ### Session timeout — RESOLVED (app-level workaround, since Pro-plan feature is paywalled)
 Supabase's native `sessions_inactivity_timeout` setting was confirmed
 blocked behind a Pro-plan paywall this project isn't on — real API
