@@ -4,11 +4,10 @@ export const SUBMISSION_STAGES = [
   "in_review",
   "deliverables_ready",
   "client_review",
-  "confirmed_submitted",
   "closed",
 ] as const;
 
-const STAGES = ["Submitted", "In Review", "Deliverables Ready", "Client Review", "Confirmed Submitted", "Closed"];
+const STAGES = ["Submitted", "In Review", "Deliverables Ready", "Client Review", "Closed"];
 
 // Converts a submissions.stage value into the 1-indexed number this
 // component expects (stage 1 = Submitted).

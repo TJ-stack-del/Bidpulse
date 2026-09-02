@@ -122,7 +122,6 @@ export default async function AdminSubmissionDetailPage({
     in_review: "In review",
     deliverables_ready: "Deliverables ready",
     client_review: "Client review",
-    confirmed_submitted: "Confirmed submitted",
     closed: "Closed",
   };
 
@@ -151,6 +150,7 @@ export default async function AdminSubmissionDetailPage({
     payment_marked_unpaid: "Marked as unpaid",
     package_linked: "Package linked",
     stage_change_email_sent: "Client notified by email",
+    stage_auto_advanced: "Stage auto-advanced",
     client_reported_submitted: "Client reported submitted",
     client_viewed_packet: "Client viewed packet",
     client_downloaded_packet: "Client downloaded packet",

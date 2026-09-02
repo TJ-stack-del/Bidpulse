@@ -53,7 +53,6 @@ CREATE TYPE "public"."submission_stage" AS ENUM (
     'in_review',
     'deliverables_ready',
     'client_review',
-    'confirmed_submitted',
     'closed'
 );
 

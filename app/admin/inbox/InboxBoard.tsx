@@ -21,14 +21,13 @@ const STAGE_ORDER = [
   "in_review",
   "deliverables_ready",
   "client_review",
-  "confirmed_submitted",
   "closed",
 ] as const;
 
-// Confirmed/closed work is done — showing those columns by default would
-// make every board mostly finished work instead of what actually needs
-// attention today. Reachable via the "Show closed & confirmed" toggle
-// instead of an always-on 6-column board.
+// Closed work is done — showing that column by default would clutter the
+// board with finished work instead of what actually needs attention today.
+// Reachable via the "Show closed" toggle instead of an always-on 5-column
+// board.
 const ACTIVE_STAGES = new Set<string>(["submitted", "in_review", "deliverables_ready", "client_review"]);
 
 function initials(name: string) {
@@ -53,7 +52,7 @@ export function InboxBoard({
   const [needsAttentionOnly, setNeedsAttentionOnly] = useState(false);
   const [sortBy, setSortBy] = useState<"fifo" | "due">("fifo");
   const [includeTest, setIncludeTest] = useState(true);
-  const [showClosedColumns, setShowClosedColumns] = useState(false);
+  const [showClosed, setShowClosed] = useState(false);
 
   const filtered = useMemo(() => {
     let rows = submissions;
@@ -79,7 +78,7 @@ export function InboxBoard({
     return sorted;
   }, [submissions, includeTest, needsAttentionOnly, sortBy]);
 
-  const visibleStages = STAGE_ORDER.filter((s) => showClosedColumns || ACTIVE_STAGES.has(s));
+  const visibleStages = STAGE_ORDER.filter((s) => showClosed || ACTIVE_STAGES.has(s));
 
   const controls = (
     <div className="flex flex-wrap items-center gap-3 mt-4 mb-2">
@@ -123,11 +122,11 @@ export function InboxBoard({
         <label className="inline-flex items-center gap-2 text-label-md text-on-surface-variant cursor-pointer">
           <input
             type="checkbox"
-            checked={showClosedColumns}
-            onChange={(e) => setShowClosedColumns(e.target.checked)}
+            checked={showClosed}
+            onChange={(e) => setShowClosed(e.target.checked)}
             className="rounded"
           />
-          Show closed &amp; confirmed
+          Show closed
         </label>
       )}
 

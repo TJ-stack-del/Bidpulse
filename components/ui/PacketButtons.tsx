@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { generateDeliverablesPacket } from "@/lib/pdf/deliverables-packet";
@@ -42,6 +43,7 @@ export function PacketButtons({
     deliverables: any[];
   } | null>(null);
   const supabase = createClient();
+  const router = useRouter();
 
   // Admin viewing their own work-in-progress isn't a signal worth
   // recording — only the client's own view/download tells the admin
@@ -87,6 +89,25 @@ export function PacketButtons({
     return !!pkg && (pkg.paid || pkg.package_type === "pilot");
   }
 
+  // Only ever called when viewerRole === "client" — an admin previewing
+  // the same shared component for QA never reaches this call at all, which
+  // is what actually enforces "don't advance on an admin's own preview."
+  // The route re-verifies ownership + current stage itself regardless of
+  // what this component believes.
+  async function maybeAdvanceOnPreview() {
+    try {
+      const res = await fetch("/api/advance-on-client-preview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ submissionId }),
+      });
+      const data = await res.json().catch(() => null);
+      if (data?.advanced) router.refresh();
+    } catch {
+      // Best-effort — a failed auto-advance shouldn't block the preview.
+    }
+  }
+
   async function handlePreview() {
     setGenerating("preview");
     setError(null);
@@ -94,6 +115,7 @@ export function PacketButtons({
       const { submission, deliverables } = await buildDoc();
       setPreviewData({ submission, deliverables });
       await logClientEvent("client_viewed_packet");
+      if (viewerRole === "client") await maybeAdvanceOnPreview();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't load the preview.");
     } finally {

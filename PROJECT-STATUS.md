@@ -35,6 +35,22 @@ regenerate it after every migration and commit the diff, never edit it
 directly.
 
 ## Confirmed Working (tested with real evidence, not just "reported done")
+- **5-stage submission pipeline** (`submitted → in_review → deliverables_ready
+  → client_review → closed`) — `confirmed_submitted` removed 2026-09-02 via a
+  real tracked migration (Postgres has no `DROP VALUE` for an enum, so this
+  swapped in a new `submission_stage` type); confirmed zero rows sat in that
+  stage beforehand, and row counts matched exactly before/after (16 total).
+  Two auto-triggers replace what used to require a manual "Move to stage"
+  click: `in_review → deliverables_ready` fires the moment all three full
+  deliverables have real content/a file (`app/api/advance-if-deliverables-complete`),
+  and `deliverables_ready → client_review` fires when the *client* (not an
+  admin doing QA) clicks Preview on their own dashboard
+  (`app/api/advance-on-client-preview`). Verified with a real disposable
+  admin + client account: partial deliverable saves correctly don't advance,
+  a complete set does; an admin's own Preview click does NOT advance the
+  stage, a client's does. Every stage-label map, the Kanban board, the
+  "Move to stage" button set, and the client-facing stepper all confirmed
+  showing 5 stages via real screenshots, not just code review.
 - Client signup, login (password + magic link), intake wizard (simplified to
   4 fields in step 1; skips "About the bid" when created from an assigned match)
 - Scraper pulls real JAA listings from flyjacksonville.com/bids.aspx
@@ -712,6 +728,16 @@ directly.
   `scripts/README.md` for the exact steps (forwarding, label/filter, Apps
   Script project + trigger, `INBOUND_BID_EMAIL_SECRET` on Vercel). Until
   that's done, no real emails ever reach the route — it just sits ready.
+- **"I've submitted this" (`ReportSubmittedButton.tsx`) — kept, but worth
+  Mike's confirmation.** Removing `confirmed_submitted` (2026-09-02) means
+  this button's old copy pointing at that stage was corrected, but the
+  brief's own file list didn't mention this component or
+  `client_reported_submitted_at` at all — a judgment call to keep the
+  feature rather than remove it, since it's still a real, useful signal
+  independent of the stage enum. The brief's stated philosophy ("handle it
+  as an informal admin_notes entry instead") could mean removing this
+  feature entirely instead — flagging rather than guessing which one Mike
+  actually wants.
 
 ## Deliberately Deferred (remaining items)
 Items #1, #2, and #4 from the original list (static bid-process warnings,

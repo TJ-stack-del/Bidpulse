@@ -72,7 +72,6 @@ export default async function AdminInboxPage() {
     in_review: "In review",
     deliverables_ready: "Deliverables ready",
     client_review: "Client review",
-    confirmed_submitted: "Confirmed submitted",
     closed: "Closed",
   };
 
@@ -81,7 +80,6 @@ export default async function AdminInboxPage() {
     in_review: "bg-surface-container-high text-on-surface-variant",
     deliverables_ready: "bg-secondary-container text-on-secondary-container",
     client_review: "bg-secondary-container text-on-secondary-container",
-    confirmed_submitted: "bg-secondary text-on-secondary",
     closed: "bg-surface-variant text-on-surface-variant",
   };
 
