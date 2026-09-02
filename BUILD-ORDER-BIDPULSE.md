@@ -107,6 +107,34 @@ do it the next time `agency-type.ts` is touched for an unrelated reason.
 
 ## Closed since the last update (2026-09-02)
 
+### Watermark on the Preview modal — RESOLVED
+Real ask, scoped deliberately to the existing in-app text preview
+(`PacketButtons.tsx`'s modal), not a real PDF — confirmed the reasoning
+holds: Preview never generates a real file specifically because a real
+PDF opens in the browser's own viewer with its own save/print controls,
+which would bypass the paywall entirely, so a watermark on a real PDF
+would just be a watermarked bypass rather than fix anything.
+
+Added a repeating diagonal text overlay — dynamic, not generic static
+text: "PREVIEW — [Client Company Name] — [today's date]," tiled across
+the whole modal at ~7% opacity, `pointer-events: none` so it never blocks
+reading or clicking the real content (including the Close button)
+underneath. Company name comes from the same
+`previewData.submission.clients?.company_name` the modal already
+renders — no new data fetch. Positioned relative to the outer modal box
+(not the scrollable content div), so it stays in place while the content
+scrolls, same as a real document watermark would.
+
+Verified with a real screenshot using a disposable test client with a
+deliberately extreme company name ("Extraordinarily Long Commercial
+Janitorial and Facility Services Company Name, LLC") specifically to
+stress-test wrapping/overflow: renders cleanly, no overflow, real content
+still fully legible underneath, coexists correctly with the existing
+"Preview only — not for distribution" label and the small logo
+watermark. `select-none` is inherited from the wrapper, so the
+watermark text itself isn't selectable either — confirmed nothing
+regressed on the existing content's own `select-none` behavior.
+
 ### Pipeline redesign: auto-trigger client_review, remove confirmed_submitted — RESOLVED
 Real, carefully-scoped ask, applied in full. Confirmed zero rows sat in
 `confirmed_submitted` (a direct query, not an assumption) before touching

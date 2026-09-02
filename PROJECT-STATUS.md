@@ -35,6 +35,14 @@ regenerate it after every migration and commit the diff, never edit it
 directly.
 
 ## Confirmed Working (tested with real evidence, not just "reported done")
+- **Dynamic diagonal watermark on the Preview modal** (`PacketButtons.tsx`)
+  — "PREVIEW — [client company name] — [today's date]" tiled across the
+  modal, ~7% opacity, `pointer-events: none`. Deliberately scoped to the
+  existing text-only preview, not a real PDF (Preview never generates a
+  real file for exactly this reason — a real PDF's native browser viewer
+  would bypass the payment gate). Verified 2026-09-02 with a real
+  screenshot using a deliberately extreme company name to stress-test
+  wrapping — renders cleanly, content underneath stays fully legible.
 - **5-stage submission pipeline** (`submitted → in_review → deliverables_ready
   → client_review → closed`) — `confirmed_submitted` removed 2026-09-02 via a
   real tracked migration (Postgres has no `DROP VALUE` for an enum, so this
