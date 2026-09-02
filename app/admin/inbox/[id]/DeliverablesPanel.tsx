@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
 import { FadeMessage } from "@/components/ui/FadeMessage";
@@ -81,6 +82,38 @@ export function DeliverablesPanel({
   const [savedTypes, setSavedTypes] = useState<Record<string, boolean>>({});
   const supabase = createClient();
   const { showToast } = useToast();
+  const router = useRouter();
+
+  // Mirrors advance-if-deliverables-complete's own REQUIRED_TYPES check —
+  // duplicated rather than imported so this file doesn't need a shared
+  // constants module for three strings, but the route itself is the one
+  // that actually re-verifies against the DB before touching stage. This
+  // call is just "hey, go check" — a best-effort ping, not something whose
+  // success this component depends on.
+  async function maybeAutoAdvance(updatedByType: Record<string, Deliverable | undefined>) {
+    const required = ["capability_statement", "compliance_matrix", "technical_narrative"];
+    const complete = required.every((t) => {
+      const d = updatedByType[t];
+      return !!d && (!!d.file_url || !!d.content?.trim());
+    });
+    if (!complete) return;
+
+    try {
+      const res = await fetch("/api/advance-if-deliverables-complete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ submissionId }),
+      });
+      const data = await res.json().catch(() => null);
+      if (data?.advanced) {
+        showToast("All three deliverables are ready — stage moved to Deliverables ready.", "success");
+        router.refresh();
+      }
+    } catch {
+      // Best-effort — a failed auto-advance check shouldn't surface as a
+      // save error, since the save itself already succeeded.
+    }
+  }
 
   async function logPrepared(type: string, mode: "file" | "text") {
     await supabase.from("audit_log").insert({
@@ -127,9 +160,11 @@ export function DeliverablesPanel({
     setSavedTypes((s) => ({ ...s, [type]: false }));
     try {
       const saved = await upsert(type, { content: drafts[type] ?? "" });
+      const updated = { ...byType, [type]: saved };
       setByType((b) => ({ ...b, [type]: saved }));
       await logPrepared(type, "text");
       setSavedTypes((s) => ({ ...s, [type]: true }));
+      await maybeAutoAdvance(updated);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Couldn't save.";
       showToast(`${deliverableLabel(type)}: ${message}`, "error");
@@ -189,10 +224,12 @@ export function DeliverablesPanel({
       // signed URL expires.
       const saved = await upsert(type, { file_url: path });
       const signedUrl = await signRfpDocumentUrl(supabase, path);
+      const updated = { ...byType, [type]: saved };
       setByType((b) => ({ ...b, [type]: { ...saved, file_url: signedUrl } }));
       setDrafts((d) => ({ ...d, [type]: "" }));
       await logPrepared(type, "file");
       setSavedTypes((s) => ({ ...s, [type]: true }));
+      await maybeAutoAdvance(updated);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Upload failed.";
       showToast(`${deliverableLabel(type)}: ${message}`, "error");

@@ -5,11 +5,13 @@ import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
 
 // A claim, not a fact: clicking this never moves the submission's stage
-// itself — it just puts a clearly-flagged note in front of the admin
-// (client_reported_submitted_at + an audit_log row) so a human still
-// decides when to actually move the stage to confirmed_submitted. An
-// unverified client click is a signal worth surfacing, not something to
-// trust as final on its own.
+// itself (there's deliberately no dedicated pipeline stage for "client says
+// they submitted" — see the removal of confirmed_submitted) — it just puts
+// a clearly-flagged note in front of the admin (client_reported_submitted_at
+// + an audit_log row) so a human decides what to do with it, e.g. an
+// admin_notes entry or moving the stage to closed. An unverified client
+// click is a signal worth surfacing, not something to trust as final on its
+// own.
 export function ReportSubmittedButton({
   submissionId,
   orgId,

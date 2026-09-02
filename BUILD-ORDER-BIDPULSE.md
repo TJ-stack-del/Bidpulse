@@ -107,6 +107,105 @@ do it the next time `agency-type.ts` is touched for an unrelated reason.
 
 ## Closed since the last update (2026-09-02)
 
+### Pipeline redesign: auto-trigger client_review, remove confirmed_submitted — RESOLVED
+Real, carefully-scoped ask, applied in full. Confirmed zero rows sat in
+`confirmed_submitted` (a direct query, not an assumption) before touching
+anything, so the migration's remap concern never actually applied — but
+the migration is still written to fail loudly rather than silently
+mis-map if that were ever untrue.
+
+**Migration** (`supabase/migrations/20260902133529_remove_confirmed_submitted_stage.sql`,
+applied via `npx supabase db push`, confirmed with the user first since
+it's a real schema change against the live database): swapped
+`submission_stage` for a new enum type without `confirmed_submitted`
+(Postgres has no `ALTER TYPE ... DROP VALUE`). Verified: row counts
+identical before/after (16 total, same per-stage distribution), and a
+direct insert attempt with the old value now genuinely fails
+(`invalid input value for enum submission_stage: "confirmed_submitted"`).
+`schema.sql` regenerated via `npx supabase db dump --schema public` and
+diffed — only the one enum value line changed.
+
+**Auto-trigger 1: `in_review` → `deliverables_ready`.** New
+`app/api/advance-if-deliverables-complete/route.ts` (admin-authenticated,
+same pattern as `notify-stage-change`) — re-verifies against the DB
+itself (never trusts the client component's own belief that a save
+succeeded) that all three full deliverables
+(`capability_statement`/`compliance_matrix`/`technical_narrative`) have
+real content or a file, then advances the stage and sends the existing
+`deliverables_ready` client email. Wired into `DeliverablesPanel.tsx`
+right after every deliverable save (text or file) — a best-effort ping,
+not something the save itself depends on. Verified with a real
+disposable test submission: saving 1 of 3 and 2 of 3 correctly left the
+stage at `in_review`; saving the 3rd correctly advanced it to
+`deliverables_ready`, with a real `stage_auto_advanced` audit_log row and
+the admin's own page reflecting the new stage (`router.refresh()`) within
+seconds.
+
+**Auto-trigger 2: `deliverables_ready` → `client_review`.** New
+`app/api/advance-on-client-preview/route.ts`. `PacketButtons.tsx` is
+shared between the admin detail page and the client dashboard — the "must
+check viewing context/role" requirement is satisfied structurally, not by
+trusting a flag: this new route is only ever called from the `viewerRole
+=== "client"` branch of `handlePreview()`, so an admin previewing the
+same submission for QA never calls it at all. The route re-verifies
+ownership (submission's `client_id` matches the caller's own session)
+regardless. **Verified the negative case explicitly, not just the happy
+path:** a real disposable admin account clicking Preview on the test
+submission left it at `deliverables_ready` (confirmed via direct DB
+read); a real disposable client account (separate account, its own
+password login) clicking Preview on the same submission then correctly
+advanced it to `client_review`, with its own `stage_auto_advanced`
+audit_log row.
+
+**Every reference updated to 5 stages, verified individually, not just
+grepped-and-assumed:**
+- `LifecycleStepper.tsx` — `SUBMISSION_STAGES`/`STAGES` arrays, now 5 entries.
+- `InboxBoard.tsx` — `STAGE_ORDER` drops `confirmed_submitted`; the
+  "Show closed & confirmed" toggle is now just "Show closed" (only one
+  stage is hidden-by-default now, not two). Verified via real screenshot:
+  4 active columns by default, 5 with the toggle checked.
+- `AdminSubmissionActions.tsx` — `STAGES` button set now 5 buttons
+  (verified via real screenshot); the "Client reports this was submitted"
+  banner no longer references a stage that doesn't exist (reworded, and
+  its visibility condition dropped the now-meaningless
+  `stage !== "confirmed_submitted"` check).
+- `app/admin/inbox/page.tsx` and `app/admin/inbox/[id]/page.tsx` —
+  `stageLabels`/`STAGE_LABELS`/`stagePillStyle` maps, entry dropped.
+- `app/dashboard/page.tsx` — `STAGE_LABELS` entry dropped; its own
+  "6-stage" comment corrected to "5-stage."
+- `lib/email/templates.ts` — `confirmed_submitted` template entry
+  removed from `getStageChangeEmail()`'s map.
+- `app/dashboard/ReportSubmittedButton.tsx` — kept as-is (still a real,
+  useful unverified-claim signal on its own), just its comment corrected
+  — it no longer points at a stage that doesn't exist.
+
+**Two of the brief's own claims turned out wrong on inspection — verified
+before acting, not fixed on faith:**
+- **Daily digest's stale-detection query never actually excluded
+  `confirmed_submitted`** — checked `app/api/daily-digest/route.ts`
+  directly: the query only ever had `.neq("stage", "closed")`, nothing
+  else. No code change was needed here; the brief's premise about this
+  file was incorrect.
+- **No marketing copy anywhere actually says "6-stage"** — grepped
+  `pricing`/`faq` pages directly (not from memory): zero hits. The only
+  actual "6-stage" mention in the whole repo was an internal code comment
+  in `app/dashboard/page.tsx`, now fixed.
+
+**One scope judgment call, flagged rather than guessed:** the brief's
+explicit file list didn't mention `ReportSubmittedButton.tsx` or the
+`client_reported_submitted_at` column at all, even though removing
+`confirmed_submitted` makes its banner's old wording point at a stage
+that no longer exists. Rather than deleting the whole "I've submitted
+this" feature (a bigger removal than what was actually asked, and it's
+still a legitimate unverified-signal-to-admin pattern independent of the
+stage enum), only its wording was corrected. Worth confirming with Mike
+if the feature itself should go away entirely, per the brief's stated
+"handle it as an informal admin_notes entry instead" philosophy.
+
+Full verification: `tsc --noEmit` and a real production build both clean
+throughout, all test data (disposable admin/client accounts, the
+disposable submission) deleted afterward.
+
 ### Inbound bid email pipeline — BUILT (real end-to-end, needs Mike's setup to go live)
 Real ask (a snippet pasted directly, not a full brief upload): a second
 opportunity-ingestion path alongside the JAA scraper, for agencies/services

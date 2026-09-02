@@ -22,11 +22,6 @@ const STAGE_MESSAGES: Record<string, { subject: string; body: (agency: string) =
     body: (agency) =>
       `We'd like you to take a look at the paperwork we prepared for your ${agency} bid, whenever you get a chance.`,
   },
-  confirmed_submitted: {
-    subject: "Your bid has been submitted",
-    body: (agency) =>
-      `Good news — we've submitted your bid to ${agency}. We'll follow up when we hear anything back.`,
-  },
   closed: {
     subject: "Your bid is closed out",
     body: (agency) => `Your ${agency} bid has been closed out. Thanks for working with us.`,

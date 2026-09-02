@@ -18,7 +18,7 @@ export const dynamic = "force-dynamic";
 
 // Converted per BUILD-ORDER-BIDPULSE.md Step 5: a read-only status view
 // for a client — package info, pending-info checklist (status only, no
-// editing — that's admin-only per schema.sql's RLS policies), the 6-stage
+// editing — that's admin-only per schema.sql's RLS policies), the 5-stage
 // pilot timeline, and deliverables once the submission reaches
 // deliverables_ready or later.
 
@@ -27,7 +27,6 @@ const STAGE_LABELS: Record<string, string> = {
   in_review: "In review",
   deliverables_ready: "Deliverables ready",
   client_review: "Client review",
-  confirmed_submitted: "Confirmed submitted",
   closed: "Closed",
 };
 

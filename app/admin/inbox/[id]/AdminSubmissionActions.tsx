@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
 import { FadeMessage } from "@/components/ui/FadeMessage";
@@ -14,7 +14,6 @@ const STAGES = [
   "in_review",
   "deliverables_ready",
   "client_review",
-  "confirmed_submitted",
   "closed",
 ];
 
@@ -44,6 +43,15 @@ export function AdminSubmissionActions({
   clientReportedSubmittedAt: string | null;
 }) {
   const [stage, setStage] = useState(currentStage);
+  // Stage can now also change from outside this component's own button
+  // clicks — DeliverablesPanel's auto-advance (in_review → deliverables_ready)
+  // updates the DB directly and calls router.refresh(), which re-renders this
+  // component with a new currentStage prop. useState's initial value only
+  // applies on mount, so without this the "Move to stage" highlight and the
+  // banner below would silently go stale after an auto-advance.
+  useEffect(() => {
+    setStage(currentStage);
+  }, [currentStage]);
   const [noteText, setNoteText] = useState("");
   const [localNotes, setLocalNotes] = useState(notes);
   const [localChecklist, setLocalChecklist] = useState(checklist);
@@ -149,15 +157,16 @@ export function AdminSubmissionActions({
 
   return (
     <div className="flex flex-col gap-6">
-      {clientReportedSubmittedAt && stage !== "confirmed_submitted" && stage !== "closed" && (
+      {clientReportedSubmittedAt && stage !== "closed" && (
         <div className="bg-secondary-container border border-secondary/30 rounded-xl p-6">
           <h2 className="text-title-lg text-on-secondary-container mb-1 flex items-center gap-2">
             <span className="material-symbols-outlined text-[20px]">flag</span>
             Client reports this was submitted
           </h2>
           <p className="text-body-md text-on-secondary-container">
-            On {new Date(clientReportedSubmittedAt).toLocaleString()} — confirm below by moving the stage to
-            &quot;confirmed submitted&quot; once you&apos;ve verified it.
+            On {new Date(clientReportedSubmittedAt).toLocaleString()} — an unverified claim, not a pipeline
+            stage on its own. Add a note below if it's worth recording, or move the stage to
+            &quot;closed&quot; once you've verified it and wrapped up.
           </p>
         </div>
       )}
