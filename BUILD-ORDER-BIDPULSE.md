@@ -1,4 +1,4 @@
-# BidPulse — Build Order
+c# BidPulse — Build Order
 
 Read `PROJECT-STATUS.md` first for full context, evidence, and history.
 This file tracks what's actually queued to work on next.
@@ -106,6 +106,66 @@ airport/school/transit/`va`. Deliberately not worth a standalone pass —
 do it the next time `agency-type.ts` is touched for an unrelated reason.
 
 ## Closed since the last update (2026-09-02)
+
+### Inbound bid email pipeline — BUILT (real end-to-end, needs Mike's setup to go live)
+Real ask (a snippet pasted directly, not a full brief upload): a second
+opportunity-ingestion path alongside the JAA scraper, for agencies/services
+(DemandStar, PublicPurchase, JTA) that only offer email notifications, not
+a scrapable listings page. Same destination as the scraper —
+`matched_opportunities`, `assigned_client_id` left null, reviewed in the
+existing `/admin/matches` queue — so no new admin UI was needed.
+
+Built `app/api/inbound-bid-email/route.ts`: a webhook authenticated via a
+shared-secret bearer token (`INBOUND_BID_EMAIL_SECRET`, same pattern as
+`CRON_SECRET` on the scraper route, since this is also called by something
+that isn't a logged-in browser). Takes `{from, subject, body}`, sends
+subject+body to Claude with the same "return null if not actually
+present, never invent" discipline every other extraction route in this
+app uses, and inserts one row (title, agency, solicitation number, due
+date, scope). Falls back to the raw subject line / a flagged "Unspecified
+agency (see scope)" placeholder for the two NOT NULL columns
+(`source_title`/`source_agency`) when extraction can't confidently fill
+them — this route runs unattended (an Apps Script trigger, no admin
+present), unlike intake's own upload UI where a client can fill a gap
+themselves — so silently dropping an under-described email isn't an
+option. Same duplicate guard as the scraper (skip if a row with the same
+title+agency already exists for the org).
+
+The email side can't be built from this repo: added
+`scripts/gmail-inbound-bid-trigger.gs` (a Google Apps Script, time-driven
+trigger polling a Gmail label since Apps Script has no real "new email"
+push event) + `scripts/README.md` with the full walkthrough of what Mike
+still needs to do outside this repo — point IONOS's forwarding for
+`bids@bidpulse.co` at a real Gmail inbox, create the label/filter, paste
+the script into script.google.com, set its two script properties
+(`WEBHOOK_URL`, `WEBHOOK_SECRET`), add the time-driven trigger, and add
+`INBOUND_BID_EMAIL_SECRET` to Vercel's production env vars (without it,
+every request gets a real 401 — there's no unauthenticated fallback).
+
+**Verified for real, not just "the route compiles":** confirmed 401 on a
+missing/wrong secret, confirmed a real Claude extraction call against a
+realistic DemandStar-style notification email correctly separated title
+("Janitorial Services at City Hall") from agency ("City of Example,
+Procurement Division") from solicitation number ("JAN-2026-014") from due
+date (2026-11-01), confirmed via a direct DB read-back of the actual
+inserted row — not just a 200 response. Confirmed the duplicate guard
+skips a second POST of the same email. Confirmed the fallback path with a
+deliberately vague, real-world-style notification email ("New Bid
+Posted" — no real title/agency stated): extraction correctly returned
+null rather than fabricating a title from the generic subject, and the
+row still landed with the subject-line/placeholder fallback rather than
+being silently dropped. All test-inserted rows deleted afterward so the
+real `/admin/matches` queue isn't polluted with synthetic data.
+
+**Caught and fixed during this work, unrelated to the feature itself:** a
+scratchpad `>>` append to `.env.local` landed on the same line as the
+existing `SUPABASE_DB_PASSWORD` entry with no newline in between,
+concatenating the two values into one corrupted line. Caught immediately
+by the next test failing unexpectedly (a correct secret still returned
+401), diagnosed by inspecting the raw file bytes, and fixed by splitting
+the merged string back into its original two values (recoverable exactly,
+since the appended secret has a fixed, distinctive 48-hex-character
+shape) — confirmed both env vars work correctly afterward.
 
 ### Admin inbox Board view: vertical scroll on mobile — RESOLVED
 Real gap, confirmed before fixing: `InboxBoard.tsx`'s columns were a
@@ -595,28 +655,5 @@ back correct, all 4 certifications, Commercial Auto included.
   question (see `PROJECT-STATUS.md`'s Business/Naming Note); the favicon
   vs. nav/login style question from the logo audit above falls in this
   same bucket
-- Email-based opportunity ingestion (DemandStar/PublicPurchase/JTA
-  notification emails, alongside the existing JAA/JEA scrapers). Real
-  feature, deliberately deferred, not a quick add. Mechanical plan for
-  when it's picked up:
-  1. Dedicated inbox address (e.g. `bids@yourdomain.com`), separate from
-     personal email — point DemandStar/PublicPurchase/JTA notification
-     preferences there, or forward via a Gmail filter rule in the
-     meantime.
-  2. Inbound email via webhook, not IMAP polling — an inbound-email
-     service (Resend inbound, since outbound is already on Resend;
-     Postmark and Mailgun are alternatives) turns "email arrives" into an
-     HTTP POST with parsed subject/body/sender as JSON.
-  3. New API route, same shape as the PDF-extraction route
-     (`route (2).ts`) — hand the email body to Claude with an extraction
-     prompt asking for the same fields, same "return null if not actually
-     present, never invent" discipline already used elsewhere.
-  4. Insert into `matched_opportunities` with `assigned_client_id = null`,
-     same as the scraper flow — shows up in the existing admin review
-     screen, no new UI needed.
-  Why it waits: needs a live DemandStar/PublicPurchase registration
-  actually receiving real notification emails first, since the extraction
-  prompt needs to be built and tested against real template samples, not
-  a guess at the format. Also a nice-to-have, not a blocker — it moves
-  the manual step from "type into Supabase" to "glance and correct,"
-  doesn't remove it entirely.
+- ~~Email-based opportunity ingestion~~ — built 2026-09-02, see "Closed"
+  below. No longer deferred.
