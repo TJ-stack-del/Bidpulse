@@ -496,6 +496,21 @@ directly.
   afterward confirms the session was actually cleared server-side (lands
   on plain `/login`, not just a one-time redirect) rather than silently
   refreshing forever, which is what happened before this existed.
+- Gallery page's sample-deliverable cards (`app/gallery/page.tsx`) were
+  a completely separate hardcoded array from `known-trades.ts` — the
+  homepage's "Trades we work with" build-time drift check never
+  covered this page, exactly how it fell out of sync when IT/Computer
+  Support shipped (Gallery still only showed 3 of 4 trades). Added a
+  real synthetic IT/Computer Support example card ("Help Desk & Network
+  Support," matching the other three's tone/length), extracted the
+  drift-check into a shared `assertNoMissingTradeCards()` helper in
+  `known-trades.ts` so one mechanism now covers both the homepage and
+  Gallery instead of two separate checks, and fixed the same 3→4-card
+  grid-orphan layout issue the homepage hit earlier. Verified: real
+  screenshot showing all four cards; confirmed the shared check fires
+  for *both* pages via a temporary 5th fake trade (both `/` and
+  `/gallery` returned real 500s), reverted and confirmed clean 200s;
+  real production build succeeds.
 
 ## Known Issues / Recently Fixed
 - **Favicon vs. nav/login logo mismatch — decided, no code change.**

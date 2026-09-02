@@ -70,3 +70,20 @@ export function isKnownTrade(input: { naicsCodes: string[]; scopeText: string })
       trade.keywords.some((keyword) => text.includes(keyword))
   );
 }
+
+// Shared by every marketing-site surface that needs a real authored card
+// per trade (icon, title, sample copy) rather than something generatable
+// straight from KNOWN_TRADES — the homepage's "Trades we work with" grid
+// and the Gallery page's sample-deliverable cards both use this so a new
+// trade added here can't silently fall out of sync with either one again
+// (that's exactly how Gallery drifted: the homepage grid got its own
+// build-time check when IT/Computer Support shipped, but Gallery's
+// separate hardcoded card list didn't).
+export function assertNoMissingTradeCards(cardIds: string[], sourceDescription: string): void {
+  const missing = KNOWN_TRADES.filter((trade) => !cardIds.includes(trade.id));
+  if (missing.length > 0) {
+    throw new Error(
+      `${sourceDescription} is missing a card for: ${missing.map((t) => t.id).join(", ")}. Add a matching entry.`
+    );
+  }
+}
