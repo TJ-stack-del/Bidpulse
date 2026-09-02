@@ -462,6 +462,23 @@ directly.
   mock content and ran it through the actual extraction route — every
   field came back correct, including all 4 certifications and the
   Commercial Auto coverage.
+- Theme color tokens recolored to match the new logo's actual palette.
+  Sampled `public/logo.png`'s dominant pixel colors directly (navy
+  wordmark `#102858`, cobalt shield blue `#2080c8`) rather than eyeballing
+  it, then compared against `app/globals.css`'s design tokens.
+  `--color-primary` was already close (deliberately matched to the logo
+  during the earlier dark-mode-contrast fix), but `--color-secondary`
+  (a teal, driving every button/link/badge app-wide) was a genuinely
+  different hue family. Confirmed with Mike before touching it, since
+  it's an app-wide visual change. Recolored `--color-secondary` and its
+  container/on-* variants (light and dark mode) to the logo's blue,
+  preserving each token's exact original HSL lightness — same contrast
+  characteristics, different hue. Verified WCAG contrast ratios
+  before/after: every pair improved (e.g. white-on-secondary button
+  text 5.95:1 → 9.04:1), no accessibility regression. Left
+  `--color-surface-tint` alone — confirmed via grep it's defined but
+  never actually used as a class anywhere. Verified with real
+  screenshots in both themes, homepage and login.
 
 ## Known Issues / Recently Fixed
 - **Favicon vs. nav/login logo mismatch — decided, no code change.**

@@ -86,12 +86,30 @@ derived query against `submissions`/`packages`, plus a decision on how
 resets are timed (calendar month vs. rolling 30 days). Explicitly
 deferred until there's a real retainer client to test against.
 
-### 3. Theme color tokens vs. the new logo's palette
-Not yet looked at. Flagged as likely fallout from the shield/heartbeat
-logo swap — needs pulling the actual colors from the logo assets and
-comparing against the current Tailwind/design tokens.
-
 ## Closed since the last update (2026-09-01)
+
+### Theme color tokens vs. the new logo's palette — RESOLVED
+Pulled the actual dominant colors from `public/logo.png` (sampling
+non-transparent pixels): a navy wordmark (`#102858`) and a brighter
+cobalt shield blue (`#2080c8`). Compared against the design tokens in
+`app/globals.css` — `--color-primary` (dark navy-black) was already
+close, since it was deliberately matched to the logo when fixing
+dark-mode contrast earlier, but `--color-secondary` (a teal,
+`#0f6e7a`) — which drives every button, link, and badge app-wide — was
+a genuinely different hue family from the logo entirely. Confirmed
+with Mike before touching it, since it's an app-wide visual change.
+Recolored `--color-secondary` and its `-container`/`on-*` variants
+(both light and dark mode) to the logo's blue hue, preserving each
+token's original HSL lightness exactly — same relative contrast
+characteristics, just a different hue. Verified WCAG contrast ratios
+before/after: every pair actually *improved* (e.g. white-on-secondary
+button text went from 5.95:1 to 9.04:1), no accessibility regression.
+Left `--color-surface-tint` untouched — grepped for it first and
+confirmed it's defined in `tailwind.config.ts` but never actually used
+as a class anywhere, so recoloring it would have no visible effect.
+Verified with real screenshots in both light and dark mode, homepage
+and login — every button/link/badge now reads as the logo's blue,
+consistently across both themes.
 
 ### Law enforcement/detention agency-type integration check — AUDITED, no build needed
 Confirmed via code: detention/law enforcement is not a distinct
