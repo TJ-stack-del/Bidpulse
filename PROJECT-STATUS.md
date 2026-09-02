@@ -38,6 +38,14 @@ directly.
 - Client signup, login (password + magic link), intake wizard (simplified to
   4 fields in step 1; skips "About the bid" when created from an assigned match)
 - Scraper pulls real JAA listings from flyjacksonville.com/bids.aspx
+- Inbound bid email pipeline (`app/api/inbound-bid-email/route.ts`) — a
+  second producer into `matched_opportunities` alongside the scraper, for
+  DemandStar/PublicPurchase/JTA notification emails forwarded via a Gmail
+  Apps Script trigger (`scripts/gmail-inbound-bid-trigger.gs`). Verified
+  2026-09-02 with real extraction calls and direct DB read-backs — not
+  yet live in production, since it needs Mike's IONOS/Gmail/Apps Script
+  setup first (see `scripts/README.md`) and the real
+  `INBOUND_BID_EMAIL_SECRET` added to Vercel
 - Admin can log/assign opportunities manually, with fit-check firing automatically
 - Auto-draft (capability statement, compliance matrix, technical narrative) —
   fabrication bugs found and fixed twice; current behavior correctly uses
@@ -699,6 +707,11 @@ directly.
   pointing Vercel's production env vars at it) is real work still to do
   once the project exists. See `BUILD-ORDER-BIDPULSE.md`'s "Next up" for
   the full step list.
+- **Inbound bid email pipeline — code built and verified, blocked on
+  Mike's IONOS/Gmail/Apps Script setup before it's actually live.** See
+  `scripts/README.md` for the exact steps (forwarding, label/filter, Apps
+  Script project + trigger, `INBOUND_BID_EMAIL_SECRET` on Vercel). Until
+  that's done, no real emails ever reach the route — it just sits ready.
 
 ## Deliberately Deferred (remaining items)
 Items #1, #2, and #4 from the original list (static bid-process warnings,
