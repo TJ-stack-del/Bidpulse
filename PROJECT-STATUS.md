@@ -513,6 +513,36 @@ directly.
   real production build succeeds.
 
 ## Known Issues / Recently Fixed
+- **Intake/Company Profile document upload failing with "Couldn't read
+  that document" — fixed, but root cause is inferred, not directly
+  reproduced.** Could not reproduce the failure with two synthetic PDF
+  fixtures (a bare jsPDF text dump, and a realistic Chromium-rendered
+  PDF with real tables/fonts) — both extracted every field correctly
+  through the real API and the real browser upload flow on both
+  surfaces (Company Profile page and intake wizard). No real fixture
+  was actually attached to the brief that reported this despite its
+  wording, so the exact failing document was never available to test
+  directly. Most probable cause based on strong circumstantial
+  evidence: neither `extract-from-document/route.ts` nor
+  `extract-company-profile/route.ts` had a `maxDuration` override, so
+  both ran on Vercel's default ~10s serverless timeout — and real
+  Claude extraction calls were already observed taking 15–25s even for
+  tiny test files in this session, so a larger real-world document
+  would plausibly get killed mid-request. A killed function returns a
+  non-JSON platform error page, which breaks `res.json()` client-side
+  and surfaces as exactly this generic message with no indication it
+  was a timeout — and this class of failure can't reproduce locally
+  (`npm run dev` has no such limit), consistent with nothing failing
+  despite thorough local testing. Fixed by adding
+  `export const maxDuration = 60;` to both routes, and by hardening
+  `CompanyProfileUpload.tsx` to show a distinct message for a non-JSON
+  (crashed/timed-out) response instead of folding it into the same
+  string as "no readable text" or "no network connection." Saved both
+  synthetic fixtures into the repo (`test-fixtures/`, with a README) so
+  future verification doesn't need to rebuild them from scratch. This
+  is flagged honestly as the most probable cause, not a confirmed one —
+  a real deployed Vercel timeout can't be directly tested from local
+  dev.
 - **Favicon vs. nav/login logo mismatch — decided, no code change.**
   The logo audit (2026-09-01) confirmed every location already uses its
   correctly *intended* asset (no code-level mismatch); the open question

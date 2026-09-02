@@ -5,6 +5,9 @@ import { COMMON_NAICS_CODES } from "@/lib/business-options";
 import { detectDocumentKind, buildDocumentContent, UNSUPPORTED_FILE_TYPE_MESSAGE } from "@/lib/document-parsing";
 
 export const runtime = "nodejs";
+// See extract-from-document/route.ts's identical comment -- Vercel's
+// default 10s serverless timeout was silently clipping real-world uploads.
+export const maxDuration = 60;
 
 // Called from the Company Profile page and (optionally) the intake wizard's
 // "About you" step — a client uploads a company-profile-type document
