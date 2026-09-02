@@ -79,27 +79,35 @@ project is below that tier. Not fixable in code or via API/Dashboard as-is.
 Needs Mike to either upgrade the Supabase plan or accept the indefinite-
 session default for now. See `PROJECT-STATUS.md` Open — Needs Attention.
 
-### 2. Law enforcement/detention agency-type integration check
-Confirm whether `lib/agency-type.ts`'s keyword-detection system covers
-law enforcement/detention facilities alongside airport/school/transit/`va`,
-or whether that category currently only fires through
-`TRADE_SPECIFIC_CERTIFICATIONS` in isolation. Quick check, not a full
-build — do this the next time `agency-type.ts` is touched for any other
-reason rather than as a standalone brief.
-
-### 3. Retainer package usage tracking
+### 2. Retainer package usage tracking
 Track how many bids a retainer client has used this month against the
 "up to 2/month" promise. No schema yet — needs a usage-count field or
 derived query against `submissions`/`packages`, plus a decision on how
 resets are timed (calendar month vs. rolling 30 days). Explicitly
 deferred until there's a real retainer client to test against.
 
-### 4. Theme color tokens vs. the new logo's palette
+### 3. Theme color tokens vs. the new logo's palette
 Not yet looked at. Flagged as likely fallout from the shield/heartbeat
 logo swap — needs pulling the actual colors from the logo assets and
 comparing against the current Tailwind/design tokens.
 
 ## Closed since the last update (2026-09-01)
+
+### Law enforcement/detention agency-type integration check — AUDITED, no build needed
+Confirmed via code: detention/law enforcement is not a distinct
+`AgencyType` (only `airport`/`school`/`transit`/`va` exist) — it
+currently fires exclusively through `TRADE_SPECIFIC_CERTIFICATIONS`'
+scope-text keyword triggers (`bloodborne-pathogen-training` and
+`prea-compliance`, both keyed on "detention"/"correctional"/"jail"/
+"inmate"), which already correctly generate real compliance-matrix
+rows regardless of agency name. That's the actual compliance coverage,
+working as designed. What it does *not* have, unlike airport/school/
+transit/va, is an agency-name-based detection feeding a softer
+informational fit-check note ("before pursuing this, confirm..."). Per
+the brief's own scoping, this was a check, not a build — reporting the
+finding rather than adding that note unprompted. Worth building if
+Mike wants the same fit-check-note treatment the other four agency
+types get.
 
 ### Favicon vs. nav/login logo mismatch — RESOLVED (decided, no code change)
 Mike's call 2026-09-02: keep the favicon's bolder "BP" monogram
