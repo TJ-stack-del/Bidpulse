@@ -539,34 +539,29 @@ directly.
   using plural "Airports" (e.g. "Metropolitan Washington Airports
   Authority"). Fixed to `\bschools?\b` / `\bairports?\b`; `transit` checked
   and didn't have the same bug.
-- Not a bug, but worth a manual look: the Dar Mano Consulting "Computer
-  support for Veterans" submission (the real bid that prompted the IT
-  vertical and trade-coverage safety net work) correctly shows NO
-  VA-system/CUI flags right now — but that's because the bid's scope text
-  doesn't contain confirmed trigger language, not because we've verified
-  it's actually safe. The system is correctly declining to guess rather
-  than confirming an answer either way (its NAICS code, 238290, is also
-  generic enough — "Other Building Equipment Contractors" — to give no
-  extra signal). Worth reading the actual solicitation by hand for this
-  one specific bid before treating the silence as a clean bill of health.
+- The Dar Mano Consulting "Computer support for Veterans" submission
+  (the one that prompted the IT vertical and trade-coverage safety net
+  work) turned out to be test data, not a real client bid — confirmed
+  by Mike 2026-09-02. It correctly showed NO VA-system/CUI flags because
+  its scope text has no confirmed trigger language (the system declining
+  to guess, same as always), but since it isn't a real bid there's
+  nothing to manually verify against a real solicitation. Corrected its
+  `is_test` flag to `true` (it was `false`, inconsistent with reality —
+  would have counted toward real reporting/revenue and competed for
+  real queue position otherwise). Verified with a direct before/after
+  read of the record.
 
 ## Open — Needs Attention
-- Session timeout is currently unset — Supabase Auth defaults to sessions
-  that never expire from inactivity, silently refreshing forever. This is
-  a project-level setting (applies to both admin and client sessions
-  alike, not settable per-role), configured in the Supabase Dashboard
-  under Authentication → Sessions, not in code. Given client data includes
-  real insurance policy numbers, license numbers, and uploaded RFP files,
-  this shouldn't stay on the indefinite default by accident. Recommendation
-  discussed: set an inactivity timeout in the 14-30 day range; skip a hard
-  time-box for now (more appropriate for stricter compliance needs than
-  BidPulse actually has, and would add re-login friction for admin with no
-  real security gain). Not yet set — needs a deliberate choice, not left
-  as a default.
-- Manually verify the Dar Mano Consulting "Computer support for Veterans"
-  bid's actual VA-system/CUI exposure by reading the real solicitation —
-  see the matching note in Known Issues above. The system correctly stayed
-  quiet, but quiet isn't the same as verified-safe for this one.
+- **Session timeout: Mike chose 14 days, but it can't actually be set —
+  Supabase blocks it on the current plan tier.** Attempted via the
+  Management API 2026-09-02: `PATCH .../config/auth` with
+  `sessions_inactivity_timeout: 1209600` (14 days in seconds) returned
+  `"User sessions can only be configured on Pro Plans and up."` This is
+  a real, hard paywall, not a bug or a wrong API call — the Supabase
+  Dashboard's own Authentication → Sessions UI will show the same
+  restriction. Sessions still never expire from inactivity in the
+  meantime. Needs either upgrading the Supabase plan, or accepting the
+  indefinite-session default for now — Mike's call once he sees this.
 - Favicon doesn't visually match the nav/login logo mark. The logo audit
   (2026-09-01) confirmed every location uses its correctly *intended* asset
   (no code-level mismatch), but the three source PNGs weren't drawn as a
