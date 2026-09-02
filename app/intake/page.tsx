@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { IntakeWizard } from "./IntakeWizard";
 
 // Public route — a client doesn't need an account before starting.
@@ -16,7 +17,13 @@ export default function IntakePage() {
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 bg-surface border-b border-outline-variant">
         <div className="flex items-center px-margin-mobile md:px-margin-desktop py-4 max-w-container-max mx-auto">
-          <span className="text-headline-md font-bold text-primary">BidPulse</span>
+          {/* Links to /pricing, not "/" — root routing bounces a signed-in
+              user (this flow creates an account partway through step 1)
+              straight back into the app, same reason AppShell's logo does
+              the same thing. */}
+          <Link href="/pricing" className="text-headline-md font-bold text-primary">
+            BidPulse
+          </Link>
         </div>
       </header>
       <main className="animate-fade-in max-w-2xl mx-auto px-margin-mobile md:px-margin-desktop py-section-gap">

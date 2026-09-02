@@ -80,6 +80,72 @@ deferred until there's a real retainer client to test against.
 
 ## Closed since the last update (2026-09-01)
 
+### Admin inbox: Kanban-by-stage view + filter/sort controls — RESOLVED
+Re-received brief matched BUILDORDER_8.md almost exactly, with two items
+(doc-upload timeout, Gallery IT/Computer Support card) already closed by
+the prior session — treated as a stale resend for those two, verified the
+remaining two items (this one and the confirmation-page nav fix below)
+directly against the code before building rather than assuming either was
+real: confirmed `app/admin/inbox/page.tsx` was genuinely still a flat list
+with zero filter/sort controls beyond the hardcoded `is_test ASC,
+submitted_at ASC` query order.
+
+Built a new `InboxBoard.tsx` client component (page.tsx keeps doing the
+server-side fetch, now unfiltered — all non-draft submissions — and hands
+the array to the new component instead of rendering JSX directly) with a
+**Board / List toggle** (both views kept, Board is the default — this was
+the ask's core complaint, and the flat list still has real value for
+scanning/printing so it wasn't removed), one column per `submission_stage`
+value. Columns default to the four active stages
+(submitted → client_review); `confirmed_submitted`/`closed` stay hidden
+behind a "Show closed & confirmed" checkbox so the board isn't cluttered
+with finished work by default. Filter/sort controls apply to both views:
+"Needs attention only" (the same `pastPromise`/`isStale` computation the
+list already had, now usable as an actual filter, not just a badge),
+"Include test submissions" (checked by default, preserving current
+behavior; unchecking removes them entirely rather than just sorting them
+last), and a Submission order / Due date sort toggle — `is_test` stays the
+primary sort key in both modes, so a test row still can't jump ahead of a
+real one just because of an earlier due date.
+
+Verified end-to-end with a real DB-backed test: rather than reusing the
+real admin account (didn't want to touch its actual password just to get
+a Playwright session), created a disposable test admin account
+(`team_members` + `auth.users` row), signed in through the real login
+form, drove the actual Board/List UI against the live `submissions` table
+(9 real non-test/test rows across 4 stages), and deleted the disposable
+account afterward — confirmed via a follow-up query that no test rows
+were left behind (one stray row *did* get left by an earlier failed
+attempt at this same script, cleaned up separately). Screenshot evidence:
+the exact scattered-client complaint from the brief (River City Janitorial
+Partners LLC across 3 non-adjacent rows) now reads clearly as 3 cards in 3
+different board columns at a glance. Confirmed columns correctly
+show/hide on the closed-columns toggle, the attention filter correctly
+narrows from 9 to 4 cards, excluding test submissions correctly drops the
+count from 9 to 8, and the due-date sort correctly reorders while keeping
+the one test row last regardless.
+
+### Intake confirmation page ("We've got it") has no navigation — RESOLVED
+Confirmed before touching code: `app/intake/page.tsx`'s header renders the
+"BidPulse" wordmark as a bare `<span>`, not a `Link` — genuinely dead,
+matching the report. This page intentionally isn't wrapped in `AppShell`
+(anonymous visitor, no account yet when the flow starts) or `MarketingShell`
+(so it gets its own header), which is exactly why it fell through both of
+the previous two navigation-dead-end fixes. Audited every other standalone
+page in the app the same way (grepped for both shells' usage across all of
+`app/`): `login` and `reset-password` already correctly link their logo to
+`/`, so `app/intake/page.tsx` was the only remaining real gap — no other
+page needed the same fix.
+
+Linked the wordmark to `/pricing`, not `/` — this flow creates a real
+account partway through step 1, so a signed-in visitor still mid-intake
+would otherwise hit `app/page.tsx`'s root-routing redirect straight back
+into the dashboard instead of actually reaching the marketing site, the
+identical reason `AppShell`'s logo fix used the same target. Verified for
+real in both auth states (a fresh anonymous context, and a real signed-in
+session from a disposable test admin account): both land on `/pricing`
+when clicked, and neither state gets redirected away from it.
+
 ### Intake document upload fails: "Couldn't read that document" — RESOLVED (serverless timeout, not a parsing bug)
 No real test fixture was actually attached to the brief (checked the
 uploads directory) despite the "real fixture is now available" framing

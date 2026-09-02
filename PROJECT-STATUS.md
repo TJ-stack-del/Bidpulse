@@ -513,6 +513,45 @@ directly.
   real production build succeeds.
 
 ## Known Issues / Recently Fixed
+- **Admin inbox was a flat list with no way to group by stage or filter/
+  sort — fixed with a Board/List toggle.** The reported complaint (the
+  same client scattered across multiple non-adjacent rows, no way to
+  filter to "Needs attention," no due-date sort) was real — confirmed
+  directly against the code before building anything: no Kanban/column
+  layout existed anywhere, and the query's only ordering was the fixed
+  `is_test ASC, submitted_at ASC` FIFO. Built a new `InboxBoard.tsx`
+  client component with a Board view (columns per `submission_stage`,
+  active stages shown by default, closed/confirmed reachable via a
+  toggle) and the original List view kept as an alternate (Board is now
+  the default). Added real filter/sort controls on both views: "Needs
+  attention only," "Include test submissions," and a submission-order/
+  due-date sort toggle — `is_test` stays the primary sort key in every
+  mode, so a test row still can't out-rank a real one just from an
+  earlier due date. Verified with a real DB-backed test using a
+  disposable test admin account (created and deleted for this test
+  specifically, rather than touching the real admin's actual password):
+  signed in through the real login form, drove the live UI against the
+  real 9-row `submissions` table, confirmed columns show/hide correctly,
+  the attention filter narrows 9→4, excluding test rows narrows 9→8, and
+  due-date sort reorders correctly with the test row still last. The
+  exact reported symptom (River City Janitorial Partners LLC scattered
+  across 3 rows) now reads as 3 cards in 3 distinct columns, confirmed
+  via screenshot.
+- **Intake confirmation page ("We've got it") had no way back to the
+  marketing site — third instance of the same navigation-dead-end
+  pattern, now fixed.** `app/intake/page.tsx`'s header rendered "BidPulse"
+  as a bare `<span>`, not a link — confirmed before fixing, matching the
+  report. Audited every other standalone page in the app (not using
+  `AppShell` or `MarketingShell`) the same way this bug was found twice
+  before: `login` and `reset-password` already link their logo correctly,
+  so intake was the only remaining gap. Linked it to `/pricing` (not
+  `/`) since this flow creates a real account partway through step 1 —
+  a signed-in visitor mid-intake clicking a link to `/` would hit
+  `app/page.tsx`'s root-routing redirect and get bounced right back into
+  the app, the same reason `AppShell`'s logo fix used `/pricing` instead
+  of `/`. Verified in both auth states with a real anonymous context and
+  a real signed-in session (disposable test admin) — both correctly land
+  on `/pricing`.
 - **Intake/Company Profile document upload failing with "Couldn't read
   that document" — fixed, but root cause is inferred, not directly
   reproduced.** Could not reproduce the failure with two synthetic PDF
