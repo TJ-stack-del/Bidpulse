@@ -71,23 +71,15 @@ backlog, in suggested order.
 
 ## Next up
 
-### 1. Session timeout decision (Open — Needs Attention, not yet a brief)
-Not a Claude Code task — a decision Mike needs to make first. Supabase
-Auth sessions currently never expire from inactivity (project-level
-default). Recommendation on the table: set an inactivity timeout in the
-14–30 day range via the Supabase Dashboard (Authentication → Sessions),
-skip a hard time-box (unnecessary friction for BidPulse's actual risk
-profile). Once decided, this is a one-line dashboard setting, not code —
-log the decision and the value chosen in `PROJECT-STATUS.md` either way.
+### 1. Session timeout — blocked on Supabase plan tier, not a decision anymore
+Mike chose 14 days. Tried to set it via the Management API
+(`sessions_inactivity_timeout: 1209600`) 2026-09-02 — Supabase rejected
+it: `"User sessions can only be configured on Pro Plans and up."` This
+project is below that tier. Not fixable in code or via API/Dashboard as-is.
+Needs Mike to either upgrade the Supabase plan or accept the indefinite-
+session default for now. See `PROJECT-STATUS.md` Open — Needs Attention.
 
-### 2. Manual verification: Dar Mano Consulting VA/CUI exposure
-Not a Claude Code task — a real-world read of the actual solicitation
-document for this one specific bid, to confirm the system's silence
-(no VA-system/CUI trigger language found) reflects genuine safety and
-not just absent keywords. Log the outcome in `PROJECT-STATUS.md`'s Known
-Issues section regardless of what's found.
-
-### 3. Law enforcement/detention agency-type integration check
+### 2. Law enforcement/detention agency-type integration check
 Confirm whether `lib/agency-type.ts`'s keyword-detection system covers
 law enforcement/detention facilities alongside airport/school/transit/`va`,
 or whether that category currently only fires through
@@ -95,14 +87,14 @@ or whether that category currently only fires through
 build — do this the next time `agency-type.ts` is touched for any other
 reason rather than as a standalone brief.
 
-### 4. Retainer package usage tracking
+### 3. Retainer package usage tracking
 Track how many bids a retainer client has used this month against the
 "up to 2/month" promise. No schema yet — needs a usage-count field or
 derived query against `submissions`/`packages`, plus a decision on how
 resets are timed (calendar month vs. rolling 30 days). Explicitly
 deferred until there's a real retainer client to test against.
 
-### 5. Favicon vs. nav/login logo mismatch
+### 4. Favicon vs. nav/login logo mismatch
 Not a code bug — confirmed during the logo consistency audit that every
 location already renders its correctly *intended* asset. The three
 source PNGs themselves just weren't drawn as a matched set: the favicon
@@ -113,14 +105,21 @@ or keep the bolder monogram deliberately for small-size legibility), not
 an engineering fix — and per the Business/Naming Note, sits in the same
 paused bucket as other logo/branding work pending the trademark question.
 
-### 6. Theme color tokens vs. the new logo's palette
+### 5. Theme color tokens vs. the new logo's palette
 Not yet looked at. Flagged as likely fallout from the shield/heartbeat
 logo swap — needs pulling the actual colors from the logo assets and
 comparing against the current Tailwind/design tokens. Worth doing
-alongside item #5 above, since both are visual/design-token passes on the
+alongside item #4 above, since both are visual/design-token passes on the
 same brand assets.
 
 ## Closed since the last update (2026-09-01)
+
+### Manual verification: Dar Mano Consulting VA/CUI exposure — RESOLVED (was test data)
+Mike confirmed 2026-09-02 this submission is test data, not a real
+client bid — so there's no real solicitation to manually verify against.
+Its `is_test` flag was `false` (wrong), which would have counted it
+toward real reporting/revenue and let it compete for real inbox queue
+position. Corrected to `true`, verified with a direct before/after read.
 
 ### Login page bug: can't navigate away, missing reset-password link — RESOLVED
 Both original symptoms confirmed and fixed, with real evidence in
