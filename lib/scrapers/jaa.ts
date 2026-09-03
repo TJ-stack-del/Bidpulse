@@ -8,6 +8,10 @@ export type ScrapedOpportunity = {
   source_agency: string;
   source_url: string | null;
   due_date: string | null;
+  // Optional since JAA's listing page never shows one — added for coj.ts,
+  // which maps to matched_opportunities' dedicated solicitation_number
+  // column (schema.sql), not a text field JAA has any equivalent of.
+  solicitation_number?: string | null;
 };
 
 // flyjacksonville.com/bids.aspx is a plain server-rendered ASP.NET page —
