@@ -32,7 +32,7 @@ export function LifecycleStepper({ currentStage }: { currentStage: number }) {
                   isDone
                     ? "bg-tertiary-fixed text-on-tertiary-fixed"
                     : isActive
-                    ? "bg-secondary text-on-secondary shadow-[0_0_0_2px_#0051d5]"
+                    ? "bg-secondary text-on-secondary shadow-[0_0_0_2px_#EF5B25]"
                     : "bg-surface text-outline border-2 border-outline-variant"
                 }`}
               >
