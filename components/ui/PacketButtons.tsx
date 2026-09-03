@@ -180,10 +180,10 @@ export function PacketButtons({
                 which stays client-branded. Just a visual reminder that this
                 in-app modal is a preview, not the deliverable itself. */}
             <Image
-              src="/logo.png"
+              src="/logo.svg"
               alt=""
               aria-hidden="true"
-              width={134}
+              width={180}
               height={40}
               className="absolute bottom-4 right-4 h-6 w-auto opacity-10 pointer-events-none select-none"
             />
