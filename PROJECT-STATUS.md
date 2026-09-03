@@ -35,6 +35,18 @@ regenerate it after every migration and commit the diff, never edit it
 directly.
 
 ## Confirmed Working (tested with real evidence, not just "reported done")
+- **"Message admin" UI** — a genuine two-way message thread on a
+  submission (`SubmissionMessages.tsx`), separate from "Request info from
+  client." New `support_messages.sent_by_admin_id` column + a rewritten
+  INSERT policy (the old one was `with check (true)`, too permissive for
+  a real thread) covering the anonymous contact form, a client's own
+  message, and an admin's message, plus a new client SELECT policy (none
+  existed before). Verified 2026-09-02 with a real disposable client and
+  admin: client sends → admin sees and replies → client sees the reply,
+  each step confirmed via direct DB reads. Confirmed the anonymous
+  contact-form path still works completely unmodified, and confirmed the
+  RLS negative case — a second client genuinely cannot read the first
+  client's messages (empty result, not an error).
 - **File upload on the new production project** — a real, pre-launch-blocking
   bug found 2026-09-02 during the first genuine end-to-end test against the
   new project, root-caused to two things created out-of-band before tracked
@@ -775,9 +787,7 @@ Working above. Remaining:
    `lib/agency-type.ts` keyword-detection system alongside
    airport/school/transit/`va` — worth a quick check next time agency-type
    is touched).
-2. "Message admin" feature tied to a specific bid (same `support_messages`
-   table already supports this via `submission_id` — just needs the UI).
-3. Retainer package usage tracking (how many bids used this month vs. the
+2. Retainer package usage tracking (how many bids used this month vs. the
    "up to 2/month" promise) — explicitly deferred, no schema yet.
 
 ## Business/Naming Note

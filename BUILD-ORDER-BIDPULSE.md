@@ -87,6 +87,62 @@ do it the next time `agency-type.ts` is touched for an unrelated reason.
 
 ## Closed since the last update (2026-09-02)
 
+### "Message admin" UI tied to a specific bid — RESOLVED
+Marked "sent to Claude Code, awaiting results" across three consecutive
+build orders with zero evidence of any actual progress (grepped the repo
+and git history for `sent_by_admin_id`/`SubmissionMessages` before
+starting — nothing) — built it in this session rather than waiting
+further. Genuine two-way thread on a submission, kept fully separate from
+"Request info from client" (still the right tool for a formal one-way
+request with a checklist item attached).
+
+**Schema:** `support_messages.sent_by_admin_id uuid references
+team_members(id)`, nullable. Direction inferred from which actor field is
+set — no new enum. Reuses `support_messages` rather than a new table,
+same shape the anonymous contact form already used.
+
+**RLS, real tracked migration:** the old `"anyone can submit a support
+message"` policy (`with check (true)`) was genuinely too permissive for a
+real per-submission thread — replaced with one unified INSERT policy
+covering all three real shapes: the anonymous contact form (all three of
+`client_id`/`submission_id`/`sent_by_admin_id` null, unchanged), a
+client's own message (ownership-checked via `is_own_client_record` +
+confirming the submission actually belongs to that client), and an
+admin's message (`is_admin(org_id)`). Added the missing client SELECT
+policy (none existed before this) scoped the same way.
+
+**UI:** new shared `SubmissionMessages.tsx` — chronological, admin
+messages visually distinct (right-aligned, "BidPulse" label) from client
+messages (left-aligned, client's own name) — mounted on both the admin
+submission detail page (next to "Request info from client," not
+replacing it) and the client dashboard. Refresh-on-load, no real-time
+subscription for v1, per the brief's own scoping. New
+`getNewMessageEmail()` template + `app/api/notify-new-message/route.ts`,
+fired only on an *admin* reply (client→admin never emails, since admin
+already has the daily digest and checks the inbox).
+
+**Verified for real, not just the happy path:** a real disposable client
+sent a message, a real disposable admin saw it and replied, the client
+saw the reply — confirmed via direct DB reads at every step, not just UI
+appearance. Confirmed the email-notification route correctly skips a
+`is_test` submission (no `message_email_sent` audit row). **Confirmed the
+existing anonymous contact-form path still works completely unmodified**
+— a real POST to `/api/contact` still succeeds, and the resulting row
+still has all three actor fields null. **Confirmed the new RLS negative
+case, not just the positive one** — a second disposable client, signed in
+for real, got back an empty array (RLS-blocked, not an error) when
+querying the first client's submission's messages directly. Both
+migrations (the column + the RLS rewrite) applied to dev and the new
+production project; `schema.sql` regenerated and diffed.
+
+**Incidental finding while cleaning up test data, not a bug in this
+feature:** `audit_log.actor_id` has a plain FK to `team_members(id)` with
+no `ON DELETE SET NULL`/`CASCADE` (unlike `audit_log.submission_id`,
+which does) — a team_members row can't be deleted while any audit_log
+row still references it as `actor_id`. Not something this session needed
+to fix (no team-member-removal feature exists to trigger it), just worth
+knowing if that's ever built.
+
 ### Admin delete action for submissions/matched opportunities — RESOLVED
 Real ask: direct testing against the now-live new production project
 (the inbound bid email pipeline especially) keeps creating real rows
