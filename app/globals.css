@@ -18,9 +18,10 @@
      exactly how it drifted to three different values before this
      existed. Theme-independent on purpose, so it's not redefined below
      in .dark. Was 22px (matched the intake page's old plain-text
-     wordmark cap-height) -- bumped after a live look showed that read as
-     too small for an actual logo mark, not just text. */
-  --nav-logo-height: 32px;
+     wordmark cap-height), then 32px -- both read as too small against a
+     real page in a live look; 48px is a clearly noticeable step up from
+     every prior per-page size (32/36/40px). */
+  --nav-logo-height: 48px;
   --color-surface: 247 249 251;
   --color-surface-dim: 216 218 220;
   --color-surface-bright: 247 249 251;
