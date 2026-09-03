@@ -21,15 +21,18 @@ This file tracks what's actually queued to work on next.
    predates this checklist. See item #1 below for the full original
    write-up (kept as-is since the underlying description of *why* it
    mattered is still accurate) — just no longer an open item.
-3. **"Request info from client": wrong voice, duplicated pre-fill text**
-   — **confirmed still open, 2026-09-03.** Checked
-   `app/admin/inbox/[id]/page.tsx`: still passes
-   `submission.fit_explanation` straight into `RequestInfoForm`'s
-   `prefillText` prop with zero transformation — still raw, third-person,
-   admin-facing text. (Didn't re-check the "duplicated twice" half of the
-   original report — that needs a real submission with fit-check output
-   to reproduce against, not just a code read.) See item #2 below. Real
-   remaining work.
+3. ~~"Request info from client": wrong voice, duplicated pre-fill text~~
+   — **code shipped 2026-09-03, commit `4235c97`.** New
+   `lib/client-info-request.ts` builds a dedicated second-person draft
+   straight from the same underlying facts (NAICS, scope, license,
+   insurance, verified certs) instead of reusing or rewriting
+   `fit_explanation`'s admin-facing prose — structurally rules out both
+   the wrong-voice complaint and the duplicated-paragraph one (fresh
+   single-pass generation, not a stateful pre-fill effect). Also bumped
+   the undersized fit-alignment badge. **Not yet click-tested by a real
+   admin session** — no browser access this session, so this is
+   typecheck-clean and renders without a server error, but hasn't had a
+   real look. See item #2 below for the original write-up.
 4. ~~File upload broken on the new production project~~ — **done and
    verified, 2026-09-03** (was open when this checklist was written).
    Commit `5a0d963` ("Fix new-project file upload, remove
@@ -41,12 +44,18 @@ This file tracks what's actually queued to work on next.
    documents a real end-to-end verification (disposable test client
    uploaded a real PDF through the real intake UI, confirmed via the UI,
    a direct `submission_documents` read, and a direct Storage listing).
-5. **Certifications: make document upload optional at logging time** —
-   **confirmed still open, 2026-09-03.** Checked
-   `app/dashboard/profile/CertificationsSection.tsx:63` — the exact
-   save-blocking error text from the original report ("Attach the
-   certificate document — that's what our team reviews to verify it.")
-   is still there unchanged. See item #4 below. Real remaining work.
+5. ~~Certifications: make document upload optional at logging time~~ —
+   **code shipped 2026-09-03, commit `8f9627c`.** Save-blocking validation
+   removed from `CertificationsSection.tsx`; the admin verify toggle in
+   `ClientCertifications.tsx` now refuses to mark a cert Verified without
+   `file_url` (disabled button + tooltip), backed by a new DB CHECK
+   constraint (`client_certifications_verified_requires_file`) as a hard
+   backstop. Confirmed `generate-fit-check` and `generate-draft` both
+   already filter on `verified = true`, so nothing downstream needed to
+   change. **Migration not yet applied to `bidpulse-dev`** — the Supabase
+   CLI's login session expired mid-session; needs a fresh `supabase login`
+   (browser flow — needs Mike) before `supabase db push` can run. See
+   item #4 below for the original write-up.
 6. **Inbound bid email pipeline** — unchanged, still blocked on Mike's
    IONOS/Gmail/Apps Script setup, not a code item. See item #5 below.
    Lower urgency; can wait until after launch if needed.
@@ -139,7 +148,8 @@ couldn't, since the button didn't exist. Confirm admin-side preview
 (QA/testing) does *not* trigger this same auto-advance.
 
 ### 2. "Request info from client": wrong voice, duplicated pre-fill text
-**Status: still open, see checklist item #3 above.**
+**Status: code shipped 2026-09-03, needs a real click-through — see
+checklist item #3 above.** Original write-up kept below for context.
 
 Real finding 2026-09-02, real screenshot evidence — the "Request info
 from client" text box pre-fills directly from the Fit Check panel's raw
@@ -205,7 +215,9 @@ end-to-end evidence (disposable test client, real PDF, confirmed in the
 UI, a direct `submission_documents` read, and a direct Storage listing).
 
 ### 4. Certifications: make document upload optional at logging time
-**Status: still open, see checklist item #5 above.**
+**Status: code shipped 2026-09-03, migration not yet applied to
+`bidpulse-dev` — see checklist item #5 above.** Original write-up kept
+below for context.
 
 Real ask 2026-09-02: the Certifications section on Company Profile
 currently blocks *saving a certification claim at all* without a
