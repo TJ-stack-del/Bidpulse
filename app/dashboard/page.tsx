@@ -118,16 +118,10 @@ export default async function DashboardPage({
   const { data: pkg } = activeSubmission.package_id
     ? await supabase
         .from("packages")
-        .select("package_type, price_note, paid")
+        .select("package_type, price_note")
         .eq("id", activeSubmission.package_id)
         .maybeSingle()
     : { data: null };
-
-  // No linked package yet (or the package query came back empty) is treated
-  // as unpaid — downloads stay locked rather than erroring. Pilot packages
-  // are never paywalled — "on us to prove the process" — so they unlock
-  // regardless of the paid flag.
-  const isPaid = (pkg?.paid ?? false) || pkg?.package_type === "pilot";
 
   const { data: checklist } = await supabase
     .from("checklist_items")
@@ -300,7 +294,6 @@ export default async function DashboardPage({
                   submissionId={activeSubmission.id}
                   orgId={client.org_id}
                   deliverables={deliverables}
-                  paid={isPaid}
                 />
               )}
             </div>
