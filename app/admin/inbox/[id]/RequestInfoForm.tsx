@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import { Spinner } from "@/components/ui/Spinner";
 import { useToast } from "@/components/Toast";
 
-// Pre-fills from the Fit Check explanation since that's the one real source
-// of admin-facing "what's missing" text today (a single joined paragraph,
-// not separate structured suggestions) — the admin edits it down to
-// whatever actually needs to go to the client before sending.
+// prefillText comes from lib/client-info-request.ts's buildClientInfoRequestDraft
+// — second-person, client-facing text built directly from the same
+// underlying facts the Fit Check panel uses, not from the Fit Check
+// explanation itself (that's third-person prose written for admin's own
+// reading). Empty when nothing's actually missing; the admin can always
+// edit or replace it before sending.
 export function RequestInfoForm({
   submissionId,
   prefillText,

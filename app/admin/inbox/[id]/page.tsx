@@ -8,6 +8,7 @@ import { ClientCertifications } from "./ClientCertifications";
 import { signRfpDocumentUrls } from "@/lib/storage";
 import { EstimatedValueInput } from "./EstimatedValueInput";
 import { RequestInfoForm } from "./RequestInfoForm";
+import { buildClientInfoRequestDraft } from "@/lib/client-info-request";
 import { DeleteSubmissionButton } from "./DeleteSubmissionButton";
 import { SubmissionMessages } from "@/components/ui/SubmissionMessages";
 import { isKnownTrade } from "@/lib/compliance/known-trades";
@@ -118,6 +119,18 @@ export default async function AdminSubmissionDetailPage({
   // here with the same visual weight as the mandatory-site-visit warning
   // below, not just in the deliverable content itself.
   const tradeKnown = isKnownTrade({ naicsCodes: client?.naics_codes ?? [], scopeText: submission.scope ?? "" });
+
+  // Second-person, client-facing draft built straight from the same
+  // underlying facts the Fit Check panel uses — not from fit_explanation
+  // itself, which is third-person prose written for admin's own reading
+  // and was never meant to be sent to the client it's about.
+  const clientInfoRequestDraft = buildClientInfoRequestDraft({
+    naicsCodes: client?.naics_codes ?? [],
+    scope: submission.scope,
+    hasLicense: !!client?.license_number,
+    hasInsurance: !!(client?.insurance_provider || client?.general_liability_coverage),
+    hasVerifiedCertification: certifications.some((cert) => cert.verified),
+  });
 
   const STAGE_LABELS: Record<string, string> = {
     submitted: "Submitted",
@@ -352,7 +365,7 @@ export default async function AdminSubmissionDetailPage({
             {submission.fit_alignment ? (
               <>
                 <span
-                  className={`inline-flex px-2.5 py-1 rounded-full text-label-sm font-bold ${
+                  className={`inline-flex px-3 py-1 rounded-full text-label-md font-bold ${
                     FIT_STYLE[submission.fit_alignment] ?? "bg-surface-container-highest text-on-surface-variant"
                   }`}
                 >
@@ -403,7 +416,7 @@ export default async function AdminSubmissionDetailPage({
             )}
           </div>
 
-          <RequestInfoForm submissionId={submission.id} prefillText={submission.fit_explanation ?? ""} />
+          <RequestInfoForm submissionId={submission.id} prefillText={clientInfoRequestDraft} />
 
           <SubmissionMessages
             submissionId={submission.id}
