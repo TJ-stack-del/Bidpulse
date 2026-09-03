@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BidPulse</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F7F5F0;
+    --paper-dim: #EFEBE2;
+    --navy: #1B2A4A;
+    --navy-soft: #2E3B4E;
+    --orange: #EF5B25;
+    --orange-dark: #C8481A;
+    --line: #C9C2B4;
+    --green: #0F7A4C;
+    --display: 'Fraunces', serif;
+    --body: 'Inter', sans-serif;
+    --mono: 'IBM Plex Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--navy-soft);
+    font-family: var(--body);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  a:focus-visible,
+  button:focus-visible {
+    outline: 2px solid var(--orange-dark);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .arrow {
+      animation: none !important;
+      opacity: 1 !important;
+    }
+    .stamp {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: rotate(-14deg) scale(1) !important;
+    }
+  }
+
+  /* ---------- NAV ---------- */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 28px 48px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  .logo {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--navy);
+    letter-spacing: -0.01em;
+  }
+
+  .logo span { color: var(--orange); }
+
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--navy-soft);
+  }
+
+  .nav-links a:hover { color: var(--orange); }
+
+  .nav-cta {
+    padding: 10px 20px;
+    background: var(--navy);
+    color: var(--paper) !important;
+    border-radius: 3px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background 0.15s ease;
+  }
+
+  .nav-cta:hover { background: var(--orange); }
+
+  @media (max-width: 860px) {
+    .nav-links { display: none; }
+    nav { padding: 20px 24px; }
+  }
+
+  /* ---------- HERO ---------- */
+  .hero {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 40px 48px 100px;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--orange-dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .eyebrow::before {
+    content: '';
+    width: 20px;
+    height: 1px;
+    background: var(--orange-dark);
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(38px, 5.2vw, 64px);
+    line-height: 1.04;
+    color: var(--navy);
+    letter-spacing: -0.02em;
+    max-width: 780px;
+    margin-bottom: 22px;
+  }
+
+  h1 em {
+    font-style: italic;
+    font-weight: 500;
+    color: var(--orange-dark);
+  }
+
+  .hero-sub {
+    font-size: 18px;
+    color: var(--navy-soft);
+    max-width: 520px;
+    margin-bottom: 36px;
+  }
+
+  .hero-ctas {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 72px;
+  }
+
+  .btn-primary {
+    padding: 15px 28px;
+    background: var(--orange);
+    color: var(--paper);
+    font-weight: 700;
+    font-size: 15px;
+    border-radius: 3px;
+    box-shadow: 3px 3px 0 var(--navy);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+
+  .btn-primary:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0 var(--navy);
+  }
+
+  .btn-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--navy-soft);
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 2px;
+  }
+
+  .btn-text:hover { color: var(--orange-dark); border-color: var(--orange-dark); }
+
+  /* ---------- DOCUMENT TRANSFORM ---------- */
+  .transform-stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    position: relative;
+    padding: 20px 0;
+  }
+
+  .doc {
+    width: 280px;
+    height: 360px;
+    background: #fff;
+    border-radius: 2px;
+    box-shadow: 0 1px 2px rgba(27,42,74,0.08), 0 12px 32px rgba(27,42,74,0.10);
+    padding: 26px 24px;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .doc-messy {
+    transform: rotate(-2.5deg);
+    background: #FDFCF9;
+  }
+
+  .doc-messy .line {
+    height: 6px;
+    background: var(--line);
+    border-radius: 1px;
+    margin-bottom: 9px;
+  }
+
+  .doc-messy .line.short { width: 55%; }
+  .doc-messy .line.tiny { width: 30%; height: 5px; }
+
+  .doc-messy .label-row {
+    display: flex;
+    gap: 6px;
+    margin: 14px 0 16px;
+  }
+
+  .doc-messy .tag {
+    font-family: var(--mono);
+    font-size: 8px;
+    padding: 2px 5px;
+    border: 1px solid var(--line);
+    color: var(--navy-soft);
+    border-radius: 2px;
+  }
+
+  .doc-messy .flag {
+    font-family: var(--mono);
+    font-size: 8px;
+    color: var(--orange-dark);
+    border-color: var(--orange-dark);
+  }
+
+  .doc-messy .table-mock {
+    margin-top: 18px;
+    border: 1px solid var(--line);
+  }
+
+  .doc-messy .table-row {
+    display: flex;
+    border-bottom: 1px solid var(--line);
+    padding: 6px 8px;
+  }
+
+  .doc-messy .table-row:last-child { border-bottom: none; }
+
+  .doc-messy .table-row .cell {
+    height: 5px;
+    background: var(--line);
+    border-radius: 1px;
+    flex: 1;
+    margin-right: 8px;
+    opacity: 0.7;
+  }
+
+  .doc-messy .table-row .cell:last-child { margin-right: 0; }
+
+  .doc-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--navy-soft);
+    text-align: center;
+    margin-top: 16px;
+    opacity: 0.75;
+  }
+
+  .arrow {
+    flex-shrink: 0;
+    color: var(--orange);
+    opacity: 0;
+    animation: fadeArrow 0.6s ease forwards 1.1s;
+  }
+
+  @keyframes fadeArrow {
+    to { opacity: 1; }
+  }
+
+  .doc-clean {
+    transform: rotate(1.5deg);
+  }
+
+  .doc-clean-inner {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .doc-clean-head {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--navy);
+    margin-bottom: 4px;
+  }
+
+  .doc-clean-sub {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--navy-soft);
+    opacity: 0.65;
+    margin-bottom: 18px;
+  }
+
+  .doc-clean .section-bar {
+    height: 4px;
+    width: 34px;
+    background: var(--orange);
+    margin-bottom: 8px;
+    border-radius: 1px;
+  }
+
+  .doc-clean .clean-line {
+    height: 5px;
+    background: #E4E0D5;
+    border-radius: 1px;
+    margin-bottom: 7px;
+  }
+
+  .doc-clean .clean-line.w1 { width: 92%; }
+  .doc-clean .clean-line.w2 { width: 78%; }
+  .doc-clean .clean-line.w3 { width: 85%; margin-bottom: 16px; }
+
+  .doc-clean .check-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 9px;
+  }
+
+  .doc-clean .check-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--green);
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .doc-clean .check-dot::after {
+    content: '';
+    position: absolute;
+    left: 3.5px;
+    top: 2px;
+    width: 3px;
+    height: 6px;
+    border-right: 1.5px solid white;
+    border-bottom: 1.5px solid white;
+    transform: rotate(45deg);
+  }
+
+  .doc-clean .check-text {
+    height: 5px;
+    width: 60%;
+    background: #E4E0D5;
+    border-radius: 1px;
+  }
+
+  .stamp {
+    position: absolute;
+    top: 28px;
+    right: 18px;
+    width: 92px;
+    height: 92px;
+    border: 3px solid var(--orange);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: rotate(-14deg) scale(0);
+    opacity: 0;
+    animation: stampDown 0.4s cubic-bezier(.2,1.4,.4,1) forwards 1.3s;
+  }
+
+  @keyframes stampDown {
+    0% { transform: rotate(-14deg) scale(2.2); opacity: 0; }
+    60% { transform: rotate(-14deg) scale(0.92); opacity: 1; }
+    100% { transform: rotate(-14deg) scale(1); opacity: 1; }
+  }
+
+  .stamp-text {
+    font-family: var(--mono);
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.03em;
+    color: var(--orange);
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  .stamp::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border: 1px solid var(--orange);
+    border-radius: 50%;
+    opacity: 0.5;
+  }
+
+  @media (max-width: 780px) {
+    .transform-stage { flex-direction: column; gap: 20px; }
+    .arrow { transform: rotate(90deg); }
+    .doc { width: 240px; height: 300px; }
+  }
+
+  /* ---------- HOW IT WORKS ---------- */
+  .how {
+    background: var(--navy);
+    padding: 96px 48px;
+  }
+
+  .how-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  .how-eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 16px;
+  }
+
+  .how h2 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(28px, 3.4vw, 42px);
+    color: var(--paper);
+    max-width: 600px;
+    margin-bottom: 64px;
+    letter-spacing: -0.01em;
+  }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    position: relative;
+  }
+
+  .steps::before {
+    content: '';
+    position: absolute;
+    top: 26px;
+    left: 8%;
+    right: 8%;
+    height: 1px;
+    background: rgba(247,245,240,0.18);
+  }
+
+  .step {
+    padding-right: 32px;
+    position: relative;
+  }
+
+  .step-mark {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--navy);
+    background: var(--orange);
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    margin-bottom: 28px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .step h3 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 21px;
+    color: var(--paper);
+    margin-bottom: 10px;
+    letter-spacing: -0.01em;
+  }
+
+  .step p {
+    font-size: 14.5px;
+    color: rgba(247,245,240,0.68);
+    line-height: 1.6;
+    max-width: 300px;
+  }
+
+  @media (max-width: 900px) {
+    .steps { grid-template-columns: 1fr; gap: 40px; }
+    .steps::before { display: none; }
+    .how { padding: 72px 24px; }
+  }
+
+  @media (max-width: 780px) {
+    .hero { padding: 32px 24px 72px; }
+  }
+
+  /* ---------- PRICING (styled as a rate sheet, not a card grid) ---------- */
+  .pricing {
+    background: var(--paper-dim);
+    padding: 96px 48px;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .pricing-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  .pricing-eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--orange-dark);
+    margin-bottom: 16px;
+  }
+
+  .pricing h2 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(28px, 3.4vw, 42px);
+    color: var(--navy);
+    max-width: 600px;
+    letter-spacing: -0.01em;
+    margin-bottom: 12px;
+  }
+
+  .pricing-note {
+    font-size: 15px;
+    color: var(--navy-soft);
+    max-width: 520px;
+    margin-bottom: 48px;
+  }
+
+  .rate-sheet {
+    border-top: 1px solid var(--line);
+  }
+
+  .rate-row {
+    display: grid;
+    grid-template-columns: 200px 1fr 240px;
+    gap: 32px;
+    padding: 36px 0;
+    border-bottom: 1px solid var(--line);
+    align-items: start;
+  }
+
+  .rate-name {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 23px;
+    color: var(--navy);
+    letter-spacing: -0.01em;
+  }
+
+  .rate-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--orange-dark);
+    display: block;
+    margin-top: 8px;
+  }
+
+  .rate-desc {
+    font-size: 15px;
+    color: var(--navy-soft);
+    line-height: 1.6;
+    max-width: 440px;
+  }
+
+  .rate-features {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .rate-feature {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 13.5px;
+    color: var(--navy-soft);
+  }
+
+  .rate-feature::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--green);
+    flex-shrink: 0;
+  }
+
+  .rate-action {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    text-align: right;
+  }
+
+  .rate-terms {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--navy-soft);
+    opacity: 0.7;
+    max-width: 200px;
+  }
+
+  .rate-cta {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--navy);
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 2px;
+    white-space: nowrap;
+  }
+
+  .rate-cta:hover { color: var(--orange-dark); border-color: var(--orange-dark); }
+
+  @media (max-width: 860px) {
+    .pricing { padding: 72px 24px; }
+    .rate-row {
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    .rate-action { align-items: flex-start; text-align: left; }
+  }
+
+  /* ---------- FAQ (folder-tab accordion, native <details>) ---------- */
+  .faq {
+    padding: 96px 48px;
+    background: var(--paper);
+  }
+
+  .faq-inner {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .faq-eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--orange-dark);
+    margin-bottom: 16px;
+  }
+
+  .faq h2 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(28px, 3.4vw, 42px);
+    color: var(--navy);
+    letter-spacing: -0.01em;
+    margin-bottom: 48px;
+  }
+
+  .faq-item {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .faq-item summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    padding: 24px 0;
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 17px;
+    color: var(--navy);
+  }
+
+  .faq-item summary::-webkit-details-marker { display: none; }
+
+  .faq-item summary:focus-visible {
+    outline: 2px solid var(--orange-dark);
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+
+  .faq-icon {
+    width: 18px;
+    height: 18px;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .faq-icon::before,
+  .faq-icon::after {
+    content: '';
+    position: absolute;
+    background: var(--orange-dark);
+    border-radius: 1px;
+  }
+
+  .faq-icon::before { width: 12px; height: 2px; top: 8px; left: 3px; }
+  .faq-icon::after {
+    width: 2px; height: 12px; top: 3px; left: 8px;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+  }
+
+  details[open] .faq-icon::after { transform: rotate(90deg); opacity: 0; }
+
+  .faq-item p {
+    font-size: 15px;
+    color: var(--navy-soft);
+    line-height: 1.7;
+    max-width: 640px;
+    padding-bottom: 28px;
+  }
+
+  @media (max-width: 780px) {
+    .faq { padding: 72px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Bid<span>Pulse</span></div>
+  <div class="nav-links">
+    <a href="#how">How it works</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#faq">FAQ</a>
+  </div>
+  <a href="#start" class="nav-cta">Get started</a>
+</nav>
+
+<section class="hero">
+  <div class="eyebrow">Government bid prep · Jacksonville, FL</div>
+  <h1>You run the crew.<br>We handle <em>the paperwork.</em></h1>
+  <p class="hero-sub">
+    Send us the bid. We turn it into a real capability statement, compliance checklist, and technical narrative — ready for you to review and send. No procurement jargon required.
+  </p>
+  <div class="hero-ctas">
+    <a href="#start" class="btn-primary">Start your bid</a>
+    <a href="#how" class="btn-text">See how it works</a>
+  </div>
+
+  <div class="transform-stage">
+    <div class="doc doc-messy">
+      <div class="label-row">
+        <div class="tag">ITB-C893</div>
+        <div class="tag flag">SET-ASIDE</div>
+      </div>
+      <div class="line"></div>
+      <div class="line short"></div>
+      <div class="line tiny"></div>
+      <div class="line"></div>
+      <div class="line short"></div>
+      <div class="table-mock">
+        <div class="table-row"><div class="cell"></div><div class="cell"></div><div class="cell"></div></div>
+        <div class="table-row"><div class="cell"></div><div class="cell"></div><div class="cell"></div></div>
+        <div class="table-row"><div class="cell"></div><div class="cell"></div><div class="cell"></div></div>
+      </div>
+      <div class="line" style="margin-top:16px"></div>
+      <div class="line short"></div>
+      <div class="doc-label">the RFP</div>
+    </div>
+
+    <svg class="arrow" width="52" height="24" viewBox="0 0 52 24" fill="none">
+      <path d="M0 12H50M50 12L39 1M50 12L39 23" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+
+    <div class="doc doc-clean">
+      <div class="stamp">
+        <div class="stamp-text">READY<br>TO SEND</div>
+      </div>
+      <div class="doc-clean-inner">
+        <div class="doc-clean-head">Coastal HVAC Services</div>
+        <div class="doc-clean-sub">CAPABILITY STATEMENT</div>
+        <div class="section-bar"></div>
+        <div class="clean-line w1"></div>
+        <div class="clean-line w2"></div>
+        <div class="clean-line w3"></div>
+        <div class="check-row"><div class="check-dot"></div><div class="check-text"></div></div>
+        <div class="check-row"><div class="check-dot"></div><div class="check-text"></div></div>
+        <div class="check-row"><div class="check-dot"></div><div class="check-text" style="width:45%"></div></div>
+      </div>
+      <div class="doc-label">what you send</div>
+    </div>
+  </div>
+</section>
+
+<section class="how" id="how">
+  <div class="how-inner">
+    <div class="how-eyebrow">The process</div>
+    <h2>Three steps. You're never the one filling out the form.</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-mark">01</div>
+        <h3>Send us the bid</h3>
+        <p>Tell us about your company once, then forward any bid you're considering. Takes about ten minutes.</p>
+      </div>
+      <div class="step">
+        <div class="step-mark">02</div>
+        <h3>We prepare it</h3>
+        <p>We draft your capability statement, compliance checklist, and technical narrative — grounded only in what you've actually told us. No invented credentials, ever.</p>
+      </div>
+      <div class="step">
+        <div class="step-mark">03</div>
+        <h3>You review and send</h3>
+        <p>Look it over, request changes if something's off, then submit it yourself with confidence — or let us walk you through it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pricing" id="pricing">
+  <div class="pricing-inner">
+    <div class="pricing-eyebrow">Working with us</div>
+    <h2>No subscriptions to sign up for. We invoice after the work's done.</h2>
+    <p class="pricing-note">
+      Every deliverable is free to preview in full before anything's due. Pricing is set per bid based on scope — reach out and we'll tell you exactly what it runs before you commit to anything.
+    </p>
+
+    <div class="rate-sheet">
+      <div class="rate-row">
+        <div>
+          <div class="rate-name">Pilot</div>
+          <span class="rate-tag">First bid, no cost</span>
+        </div>
+        <div class="rate-desc">
+          Send us your first bid and see the finished paperwork — capability statement, compliance checklist, and technical narrative — before you decide whether to keep working with us.
+          <div class="rate-features">
+            <div class="rate-feature">Full deliverable set, free to download</div>
+            <div class="rate-feature">No card on file</div>
+          </div>
+        </div>
+        <div class="rate-action">
+          <div class="rate-terms">No invoice for this one</div>
+          <a href="#start" class="rate-cta">Start your pilot bid</a>
+        </div>
+      </div>
+
+      <div class="rate-row">
+        <div>
+          <div class="rate-name">One-Off</div>
+          <span class="rate-tag">Per bid</span>
+        </div>
+        <div class="rate-desc">
+          One bid, prepared once. Good for an occasional opportunity that's worth pursuing but doesn't justify an ongoing arrangement.
+          <div class="rate-features">
+            <div class="rate-feature">Full deliverable set</div>
+            <div class="rate-feature">Manual invoice after your review</div>
+          </div>
+        </div>
+        <div class="rate-action">
+          <div class="rate-terms">Invoiced per bid, no subscription</div>
+          <a href="#start" class="rate-cta">Get a quote</a>
+        </div>
+      </div>
+
+      <div class="rate-row">
+        <div>
+          <div class="rate-name">Retainer</div>
+          <span class="rate-tag">Up to 2 bids / month</span>
+        </div>
+        <div class="rate-desc">
+          For contractors bidding regularly. We prepare each one as it comes in, up to the monthly limit — no re-signing up or re-explaining your company each time.
+          <div class="rate-features">
+            <div class="rate-feature">Full deliverable set, every bid</div>
+            <div class="rate-feature">Company profile stays on file</div>
+          </div>
+        </div>
+        <div class="rate-action">
+          <div class="rate-terms">Invoiced monthly</div>
+          <a href="#start" class="rate-cta">Ask about availability</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="faq" id="faq">
+  <div class="faq-inner">
+    <div class="faq-eyebrow">Before you send us a bid</div>
+    <h2>Questions contractors actually ask</h2>
+
+    <details class="faq-item" open>
+      <summary>Will you guarantee I win the bid?<span class="faq-icon"></span></summary>
+      <p>No — and we'll never tell you otherwise. We put together a complete, accurate submission on your behalf. The agency makes the award decision, not us.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>What if I don't have a certification a bid requires?<span class="faq-icon"></span></summary>
+      <p>We flag it before you spend more time on that bid, not after. If a solicitation requires a set-aside certification you don't hold, we tell you plainly so you can decide whether it's worth pursuing.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>How fast is turnaround?<span class="faq-icon"></span></summary>
+      <p>We aim to have your paperwork ready within 48 hours of you sending us a bid. If something's running long, you'll hear from us — you shouldn't have to chase a status update.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>Can I look before I pay?<span class="faq-icon"></span></summary>
+      <p>Yes. Every deliverable is free to preview in full. You only pay once you're ready to download the real files.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>What if you don't know something about my business?<span class="faq-icon"></span></summary>
+      <p>We'll never invent a certification, an insurance number, or a past project on your behalf. If we don't have a fact from you, we mark it clearly so you know exactly what to fill in before you submit.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>Which trades do you work with?<span class="faq-icon"></span></summary>
+      <p>We're built especially for HVAC, janitorial, landscaping, and IT/computer-support contractors in the Jacksonville area. If you're in a different trade, reach out — we may still be able to help.</p>
+    </details>
+  </div>
+</section>
+
+</body>
+</html>

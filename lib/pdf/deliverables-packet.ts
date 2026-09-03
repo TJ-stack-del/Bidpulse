@@ -5,6 +5,14 @@ import autoTable from "jspdf-autotable";
 // into one real, downloadable PDF — following actual capability
 // statement conventions (short bullets and real tables, never long
 // flowing paragraphs) instead of dumping everything as wrapped text.
+//
+// Visual identity matches the marketing site's palette exactly (same
+// hex values as mockups-reference/bidpulse_homepage/code.html's :root
+// block) so the deliverable a client hands to a contracting officer
+// looks like it came from the same company as the site that sold them
+// on the service. jsPDF only ships Helvetica/Times/Courier, so those
+// stand in for Inter/Fraunces/IBM Plex Mono respectively — same
+// typographic roles, closest available match.
 
 type Deliverable = {
   deliverable_type: string;
@@ -32,39 +40,92 @@ const DELIVERABLE_LABELS: Record<string, string> = {
 const FULL_ORDER = ["capability_statement", "compliance_matrix", "technical_narrative"];
 const LEAN_ORDER = ["rate_sheet", "executive_cover", "certificate_of_insurance"];
 
+// Same hex values as :root in mockups-reference/bidpulse_homepage/code.html,
+// converted to the RGB triplets jsPDF's color setters expect.
+const COLOR = {
+  navy: [27, 42, 74] as [number, number, number],
+  navySoft: [46, 59, 78] as [number, number, number],
+  orange: [239, 91, 37] as [number, number, number],
+  orangeDark: [200, 72, 26] as [number, number, number],
+  line: [201, 194, 180] as [number, number, number],
+  paperDim: [239, 235, 226] as [number, number, number],
+  green: [15, 122, 76] as [number, number, number],
+};
+
+// Thin orange top bar + "BidPulse — Page N" footer, stamped on every
+// page including the cover. Keeps every page identifiably branded even
+// if a page gets printed or forwarded on its own.
+function stampChrome(doc: jsPDF) {
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+
+  doc.setFillColor(...COLOR.orange);
+  doc.rect(0, 0, pageWidth, 2.5, "F");
+
+  doc.setDrawColor(...COLOR.line);
+  doc.setLineWidth(0.2);
+  doc.line(20, pageHeight - 16, pageWidth - 20, pageHeight - 16);
+
+  doc.setFont("courier", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(...COLOR.navySoft);
+  doc.text("BidPulse", 20, pageHeight - 10);
+  doc.text(`Page ${doc.getNumberOfPages()}`, pageWidth - 20, pageHeight - 10, {
+    align: "right",
+  });
+}
+
+// A short orange rule under a section heading — same visual device as
+// .section-bar on the marketing site.
+function sectionBar(doc: jsPDF, marginX: number, y: number) {
+  doc.setFillColor(...COLOR.orange);
+  doc.rect(marginX, y, 16, 1.4, "F");
+}
+
 // Renders plain text as real bullets and properly spaced paragraphs,
 // instead of one long wrapped block. Recognizes lines starting with
 // "- " or "•" as bullet items; blank lines start a new paragraph.
+// Bullets are drawn as small orange dots (matching .rate-feature on the
+// site) rather than a printed "•" character, so they carry brand color.
 function renderStructuredText(doc: jsPDF, text: string, marginX: number, startY: number): number {
   let y = startY;
+  const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   const lines = (text || "—").split("\n");
 
   function checkPageBreak(needed: number) {
-    if (y + needed > pageHeight - 20) {
+    if (y + needed > pageHeight - 26) {
       doc.addPage();
+      stampChrome(doc);
       y = 20;
     }
   }
 
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10.5);
+  doc.setTextColor(...COLOR.navySoft);
+
   for (const rawLine of lines) {
     const line = rawLine.trim();
     if (!line) {
-      y += 3; // paragraph gap
+      y += 3.5; // paragraph gap
       continue;
     }
 
     const isBullet = line.startsWith("- ") || line.startsWith("• ");
     const text = isBullet ? line.replace(/^[-•]\s*/, "") : line;
-    const indent = isBullet ? marginX + 5 : marginX;
-    const wrapWidth = isBullet ? 165 : 170;
+    const indent = isBullet ? marginX + 6 : marginX;
+    const wrapWidth = pageWidth - indent - marginX;
 
     const wrapped = doc.splitTextToSize(text, wrapWidth);
     for (let i = 0; i < wrapped.length; i++) {
-      checkPageBreak(6);
-      const prefix = isBullet && i === 0 ? "•  " : isBullet ? "   " : "";
-      doc.text(prefix + wrapped[i], indent, y);
-      y += 5.5;
+      checkPageBreak(6.5);
+      if (isBullet && i === 0) {
+        doc.setFillColor(...COLOR.orange);
+        doc.circle(marginX + 1.6, y - 1.3, 0.9, "F");
+      }
+      doc.text(wrapped[i], indent, y);
+      y += 5.8;
     }
   }
   return y;
@@ -76,40 +137,65 @@ export function generateDeliverablesPacket(
 ): jsPDF {
   const doc = new jsPDF();
   const marginX = 20;
-  let y = 20;
+  let y = 30;
+
+  stampChrome(doc);
 
   function sectionHeading(text: string) {
-    doc.setFontSize(13);
-    doc.setFont("helvetica", "bold");
+    doc.setFont("times", "bold");
+    doc.setFontSize(14);
+    doc.setTextColor(...COLOR.navy);
     doc.text(text, marginX, y);
-    y += 7;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
+    y += 4;
+    sectionBar(doc, marginX, y);
+    y += 10;
   }
 
-  // Cover
-  doc.setFontSize(18);
-  doc.setFont("helvetica", "bold");
-  doc.text("Bid Package", marginX, y);
+  // ---------- Cover ----------
+  doc.setFont("courier", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(...COLOR.orangeDark);
+  doc.text("BID PACKAGE", marginX, y);
   y += 10;
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "normal");
+
+  doc.setFont("times", "bold");
+  doc.setFontSize(24);
+  doc.setTextColor(...COLOR.navy);
   doc.text(submission.clients?.company_name ?? "Client", marginX, y);
-  y += 9;
+  y += 14;
+
+  doc.setDrawColor(...COLOR.line);
+  doc.setLineWidth(0.3);
+  doc.line(marginX, y, doc.internal.pageSize.getWidth() - marginX, y);
+  y += 16;
 
   sectionHeading("Bid Details");
-  doc.setFontSize(10);
-  doc.text(`Agency: ${submission.agency}`, marginX, y);
-  y += 5.5;
-  doc.text(`Solicitation #: ${submission.solicitation_number ?? "—"}`, marginX, y);
-  y += 5.5;
-  doc.text(
-    `Due date: ${submission.due_date ? new Date(submission.due_date).toLocaleDateString() : "—"}`,
-    marginX,
-    y
+
+  // Label/value rows, matching the .rate-row label-then-value pattern
+  // on the site rather than plain "Agency: X" lines.
+  function detailRow(label: string, value: string) {
+    doc.setFont("courier", "normal");
+    doc.setFontSize(8.5);
+    doc.setTextColor(...COLOR.navySoft);
+    doc.text(label.toUpperCase(), marginX, y);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    doc.setTextColor(...COLOR.navy);
+    doc.text(value, marginX + 42, y);
+    y += 8;
+  }
+
+  detailRow("Agency", submission.agency);
+  detailRow("Solicitation #", submission.solicitation_number ?? "—");
+  detailRow(
+    "Due date",
+    submission.due_date ? new Date(submission.due_date).toLocaleDateString() : "—"
   );
-  y += 5.5;
-  y = renderStructuredText(doc, `Scope: ${submission.scope ?? "—"}`, marginX, y);
+  y += 6;
+
+  sectionHeading("Scope of Work");
+  y = renderStructuredText(doc, submission.scope ?? "—", marginX, y);
 
   // Lean and full deliverable sets are mutually exclusive for a given
   // submission (DeliverablesPanel only ever shows one set at a time) — pick
@@ -122,10 +208,14 @@ export function generateDeliverablesPacket(
   for (const type of order) {
     const deliverable = deliverables.find((d) => d.deliverable_type === type);
     doc.addPage();
-    y = 20;
+    stampChrome(doc);
+    y = 30;
     sectionHeading(DELIVERABLE_LABELS[type]);
 
     if (!deliverable?.content) {
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(10.5);
+      doc.setTextColor(...COLOR.navySoft);
       doc.text(deliverable?.file_url ? "(Attached as a separate file)" : "Not yet prepared.", marginX, y);
       continue;
     }
@@ -156,9 +246,21 @@ export function generateDeliverablesPacket(
             startY: y,
             head: [["Requirement", "Status", "Methodology & Verification"]],
             body: rows,
-            styles: { fontSize: 9, cellPadding: 3 },
-            headStyles: { fillColor: [30, 30, 30] },
-            margin: { left: marginX, right: marginX },
+            styles: {
+              fontSize: 9,
+              cellPadding: 4,
+              textColor: COLOR.navySoft,
+              lineColor: COLOR.line,
+              lineWidth: 0.2,
+            },
+            headStyles: {
+              fillColor: COLOR.navy,
+              textColor: [247, 245, 240],
+              fontStyle: "bold",
+            },
+            alternateRowStyles: { fillColor: COLOR.paperDim },
+            margin: { left: marginX, right: marginX, bottom: 24 },
+            didDrawPage: () => stampChrome(doc),
           });
           renderedAnyTable = true;
           // jspdf-autotable attaches this at runtime; not in the plugin's
