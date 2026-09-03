@@ -47,36 +47,44 @@ export function AppShell({
 
   return (
     <div className="min-h-screen flex flex-col bg-surface">
-      <header className="fixed top-0 w-full z-40 flex items-center justify-between px-margin-mobile md:px-margin-desktop py-3 bg-surface/95 backdrop-blur border-b border-outline-variant">
-        {/* "/" always bounces a signed-in user straight back into the app
-            (see app/page.tsx's root routing), so this can't link there like
-            the marketing nav's logo does — /pricing is a real public page
-            that actually gets them out to the marketing site. */}
-        <Link href="/pricing" className="shrink-0 flex items-center">
-          <Logo priority />
-        </Link>
-        <nav className="hidden md:flex gap-6">
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`text-label-md px-3 py-2 rounded-lg transition ${
-                activePath === link.href
-                  ? "text-secondary font-bold bg-surface-container-highest"
-                  : "text-on-surface-variant hover:bg-surface-container-high"
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-        <div className="flex items-center gap-3">
-          <p className="hidden sm:block text-label-md text-on-surface-variant whitespace-nowrap">
-            {viewerName} · {role === "admin" ? "Admin" : "Client view"}
-          </p>
-          <ThemeToggle />
-          <div className="flex items-center gap-1">
-            <SignOutButton />
+      <header className="fixed top-0 w-full z-40 bg-surface/95 backdrop-blur border-b border-outline-variant">
+        {/* max-w-container mx-auto matches <main> below (and MarketingShell's
+            own header/main pattern) so the logo lines up with the page
+            content's left edge on wide viewports instead of sitting flush
+            against the true browser edge while <main> is centered under it —
+            that mismatch was why the logo appeared to "jump" position
+            switching between app pages and marketing/intake pages. */}
+        <div className="flex items-center justify-between px-margin-mobile md:px-margin-desktop py-3 max-w-container mx-auto">
+          {/* "/" always bounces a signed-in user straight back into the app
+              (see app/page.tsx's root routing), so this can't link there like
+              the marketing nav's logo does — /pricing is a real public page
+              that actually gets them out to the marketing site. */}
+          <Link href="/pricing" className="shrink-0 flex items-center">
+            <Logo priority />
+          </Link>
+          <nav className="hidden md:flex gap-6">
+            {links.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`text-label-md px-3 py-2 rounded-lg transition ${
+                  activePath === link.href
+                    ? "text-secondary font-bold bg-surface-container-highest"
+                    : "text-on-surface-variant hover:bg-surface-container-high"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+          <div className="flex items-center gap-3">
+            <p className="hidden sm:block text-label-md text-on-surface-variant whitespace-nowrap">
+              {viewerName} · {role === "admin" ? "Admin" : "Client view"}
+            </p>
+            <ThemeToggle />
+            <div className="flex items-center gap-1">
+              <SignOutButton />
+            </div>
           </div>
         </div>
       </header>
