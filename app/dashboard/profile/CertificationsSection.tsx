@@ -59,19 +59,24 @@ export function CertificationsSection({
       setError("Enter the certification name (e.g. MBE, DBE) for \"Other\".");
       return;
     }
-    if (!file) {
-      setError("Attach the certificate document — that's what our team reviews to verify it.");
-      return;
-    }
 
     setSubmitting(true);
 
-    const path = `${clientId}/certifications/${Date.now()}-${file.name}`;
-    const { error: uploadError } = await supabase.storage.from("rfp-documents").upload(path, file);
-    if (uploadError) {
-      setError(uploadError.message);
-      setSubmitting(false);
-      return;
+    // Document is optional at save time — a certification with no file sits
+    // as "Not yet reviewed" indefinitely until one's attached. The document
+    // only becomes required later, at the point an admin marks it Verified
+    // (ClientCertifications.tsx's toggle enforces that, backed by a DB
+    // constraint) — that's the actual gate on being treated as fact
+    // anywhere generated paperwork reads client_certifications.
+    let path: string | null = null;
+    if (file) {
+      path = `${clientId}/certifications/${Date.now()}-${file.name}`;
+      const { error: uploadError } = await supabase.storage.from("rfp-documents").upload(path, file);
+      if (uploadError) {
+        setError(uploadError.message);
+        setSubmitting(false);
+        return;
+      }
     }
 
     // The bucket is private — the DB stores the bare path, and every read
@@ -86,18 +91,18 @@ export function CertificationsSection({
         certification_number: certNumber.trim() || null,
         expiration_date: expirationDate || null,
         file_url: path,
-        file_name: file.name,
+        file_name: file ? file.name : null,
       })
       .select()
       .single();
 
     if (insertError || !newCert) {
-      setError(insertError?.message ?? "Upload saved, but couldn't record the certification.");
+      setError(insertError?.message ?? "Couldn't record the certification.");
       setSubmitting(false);
       return;
     }
 
-    const signedUrl = await signRfpDocumentUrl(supabase, path);
+    const signedUrl = path ? await signRfpDocumentUrl(supabase, path) : null;
     setCertifications((c) => [{ ...newCert, file_url: signedUrl }, ...c]);
     resetForm();
     setSubmitting(false);
@@ -161,7 +166,7 @@ export function CertificationsSection({
         </div>
 
         <div className="flex-1 min-w-[160px]">
-          <label className="text-label-md text-on-surface-variant block mb-1">Certificate document</label>
+          <label className="text-label-md text-on-surface-variant block mb-1">Certificate document (optional)</label>
           <label className="px-4 py-2 rounded border border-secondary text-secondary text-label-md font-bold hover:bg-surface-container-low transition cursor-pointer inline-block">
             {file ? file.name : "Choose file"}
             <input

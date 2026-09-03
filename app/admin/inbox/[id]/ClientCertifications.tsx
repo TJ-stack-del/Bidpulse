@@ -39,8 +39,21 @@ export function ClientCertifications({
   const { showToast } = useToast();
 
   async function handleToggle(cert: Certification) {
-    setSaving(cert.id);
     const nextVerified = !cert.verified;
+
+    // Document upload is optional at logging time (CertificationsSection.tsx),
+    // but a cert can never be marked Verified without one -- that's the
+    // actual gate on being treated as fact anywhere generated paperwork
+    // reads client_certifications. Also enforced at the DB level (see the
+    // client_certifications_verified_requires_file constraint) as a
+    // backstop; this check just gives a clear message instead of a raw
+    // constraint-violation error.
+    if (nextVerified && !cert.file_url) {
+      showToast("Can't verify without a certificate document on file.", "error");
+      return;
+    }
+
+    setSaving(cert.id);
     const nowIso = new Date().toISOString();
 
     const { error } = await supabase
@@ -96,8 +109,9 @@ export function ClientCertifications({
           </div>
           <button
             onClick={() => handleToggle(cert)}
-            disabled={saving === cert.id}
-            className={`px-3 py-1.5 rounded text-label-md font-bold transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2 ${
+            disabled={saving === cert.id || (!cert.verified && !cert.file_url)}
+            title={!cert.verified && !cert.file_url ? "Can't verify without a certificate document on file" : undefined}
+            className={`px-3 py-1.5 rounded text-label-md font-bold transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 disabled:cursor-not-allowed flex items-center gap-2 ${
               cert.verified
                 ? "border border-outline-variant text-on-surface hover:bg-surface-container-high"
                 : "bg-secondary text-on-secondary hover:bg-on-secondary-container"
