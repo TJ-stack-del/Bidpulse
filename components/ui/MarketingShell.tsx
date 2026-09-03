@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { Logo } from "./Logo";
 import { TAGLINE } from "@/lib/brand";
 
 // Shared header/footer for the public marketing site — separate from
@@ -32,15 +32,7 @@ export function MarketingShell({
       <header className="sticky top-0 z-50 bg-surface border-b border-outline-variant">
         <div className="flex items-center justify-between w-full px-margin-mobile md:px-margin-desktop py-4 max-w-container-max mx-auto">
           <Link href="/" onClick={() => setMenuOpen(false)} className="flex flex-col justify-center">
-            <Image src="/logo.svg" alt="BidPulse" width={180} height={40} className="h-10 w-auto dark:hidden" priority />
-            <Image
-              src="/logo-dark.svg"
-              alt="BidPulse"
-              width={180}
-              height={40}
-              className="hidden h-10 w-auto dark:block"
-              priority
-            />
+            <Logo priority />
           </Link>
           <nav className="hidden md:flex items-center gap-6">
             {NAV_LINKS.map((link) => (
@@ -122,14 +114,7 @@ export function MarketingShell({
       <footer className="bg-surface-container-lowest border-t border-outline-variant mt-auto">
         <div className="w-full px-margin-mobile md:px-margin-desktop py-gutter max-w-container-max mx-auto flex flex-col md:flex-row justify-between items-center gap-base">
           <div className="flex items-center gap-2">
-            <Image src="/logo.svg" alt="BidPulse" width={144} height={32} className="h-8 w-auto dark:hidden" />
-            <Image
-              src="/logo-dark.svg"
-              alt="BidPulse"
-              width={144}
-              height={32}
-              className="hidden h-8 w-auto dark:block"
-            />
+            <Logo />
             <div className="flex flex-col">
               <span className="text-label-sm text-on-surface-variant">{TAGLINE}</span>
               <span className="text-body-sm text-on-surface-variant">© {new Date().getFullYear()} BidPulse</span>

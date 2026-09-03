@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Logo } from "@/components/ui/Logo";
 import { IntakeWizard } from "./IntakeWizard";
 
 // Public route — a client doesn't need an account before starting.
@@ -21,8 +22,8 @@ export default function IntakePage() {
               user (this flow creates an account partway through step 1)
               straight back into the app, same reason AppShell's logo does
               the same thing. */}
-          <Link href="/pricing" className="text-headline-md font-bold text-primary">
-            BidPulse
+          <Link href="/pricing" className="flex items-center">
+            <Logo priority />
           </Link>
         </div>
       </header>

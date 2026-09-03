@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
+import { Logo } from "./Logo";
 import { SignOutButton } from "./SignOutButton";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -53,15 +53,7 @@ export function AppShell({
             the marketing nav's logo does — /pricing is a real public page
             that actually gets them out to the marketing site. */}
         <Link href="/pricing" className="shrink-0 flex items-center">
-          <Image src="/logo.svg" alt="BidPulse" width={180} height={40} className="h-9 w-auto dark:hidden" priority />
-          <Image
-            src="/logo-dark.svg"
-            alt="BidPulse"
-            width={180}
-            height={40}
-            className="hidden h-9 w-auto dark:block"
-            priority
-          />
+          <Logo priority />
         </Link>
         <nav className="hidden md:flex gap-6">
           {links.map((link) => (
