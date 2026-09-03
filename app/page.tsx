@@ -264,8 +264,11 @@ function Home() {
             <div className="h-1.5 bg-outline-variant/60 rounded mb-4 w-5/6" />
             {[100, 100, 45].map((width, i) => (
               <div key={i} className="flex items-center gap-2 mb-2">
-                <span className="w-3.5 h-3.5 rounded-full bg-secondary flex items-center justify-center shrink-0">
-                  <span className="material-symbols-outlined text-on-secondary text-[10px]">check</span>
+                {/* Deliberately not bg-secondary/orange -- green reads as
+                    "confirmed" distinctly from the brand accent, so orange
+                    isn't overloaded with two meanings on the same page. */}
+                <span className="w-3.5 h-3.5 rounded-full bg-[#0F7A4C] flex items-center justify-center shrink-0">
+                  <span className="material-symbols-outlined text-white text-[10px]">check</span>
                 </span>
                 <span className="h-1.5 bg-outline-variant/60 rounded" style={{ width: `${width * 0.6}%` }} />
               </div>
