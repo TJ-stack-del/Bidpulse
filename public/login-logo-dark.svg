@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" fill="none">
+  <!-- Stacked Logo Light-Text Edition (Transparent Background, #EF5B25) -->
+  <g transform="translate(156, 68) scale(2.2)">
+    <!-- Crisp White Shield Outline -->
+    <path d="M44 8 L76 22 C76 54 44 76 44 80 C44 76 12 54 12 22 Z" 
+          fill="none" 
+          stroke="#FFFFFF" 
+          stroke-width="5.5" 
+          stroke-linejoin="round" 
+          stroke-linecap="round"/>
+
+    <!-- Subtle Inset Shield Line -->
+    <path d="M44 16 L68 26 C68 50 44 68 44 71 C44 68 20 50 20 26 Z" 
+          fill="none" 
+          stroke="#FFFFFF" 
+          stroke-opacity="0.25" 
+          stroke-width="2" 
+          stroke-linejoin="round"/>
+
+    <!-- Solid Pulse Wave (#EF5B25) -->
+    <path d="M2 44 L24 44 L32 25 L41 63 L49 33 L57 52 L65 44 L86 44" 
+          fill="none" 
+          stroke="#EF5B25" 
+          stroke-width="4.5" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
+  </g>
+
+  <!-- Wordmark 'BidPulse' with 'Bid' in Pure White (#FFFFFF) and 'Pulse' in #EF5B25 -->
+  <text x="256" y="375" 
+        text-anchor="middle" 
+        font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" 
+        font-size="64" 
+        font-weight="800" 
+        letter-spacing="-0.5">
+    <tspan fill="#FFFFFF">Bid</tspan><tspan fill="#EF5B25">Pulse</tspan>
+  </text>
+</svg>

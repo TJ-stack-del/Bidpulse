@@ -17,17 +17,17 @@ export default function ResetPasswordPage() {
         <div className="text-center mb-8">
           <Link href="/" className="block w-fit mx-auto mb-4">
             <Image
-              src="/login-logo.png"
+              src="/login-logo.svg"
               alt="BidPulse"
-              width={142}
+              width={112}
               height={112}
               className="h-28 w-auto mx-auto dark:hidden"
               priority
             />
             <Image
-              src="/login-logo-dark.png"
+              src="/login-logo-dark.svg"
               alt="BidPulse"
-              width={142}
+              width={112}
               height={112}
               className="hidden h-28 w-auto mx-auto dark:block"
               priority

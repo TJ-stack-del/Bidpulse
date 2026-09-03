@@ -53,11 +53,11 @@ export function AppShell({
             the marketing nav's logo does — /pricing is a real public page
             that actually gets them out to the marketing site. */}
         <Link href="/pricing" className="shrink-0 flex items-center">
-          <Image src="/logo.png" alt="BidPulse" width={134} height={40} className="h-9 w-auto dark:hidden" priority />
+          <Image src="/logo.svg" alt="BidPulse" width={180} height={40} className="h-9 w-auto dark:hidden" priority />
           <Image
-            src="/logo-dark.png"
+            src="/logo-dark.svg"
             alt="BidPulse"
-            width={134}
+            width={180}
             height={40}
             className="hidden h-9 w-auto dark:block"
             priority
