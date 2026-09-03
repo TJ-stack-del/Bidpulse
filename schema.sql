@@ -356,7 +356,8 @@ CREATE TABLE IF NOT EXISTS "public"."support_messages" (
     "email" "text" NOT NULL,
     "message" "text" NOT NULL,
     "read" boolean DEFAULT false NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "sent_by_admin_id" "uuid"
 );
 
 
@@ -548,6 +549,11 @@ ALTER TABLE ONLY "public"."support_messages"
 
 
 ALTER TABLE ONLY "public"."support_messages"
+    ADD CONSTRAINT "support_messages_sent_by_admin_id_fkey" FOREIGN KEY ("sent_by_admin_id") REFERENCES "public"."team_members"("id");
+
+
+
+ALTER TABLE ONLY "public"."support_messages"
     ADD CONSTRAINT "support_messages_submission_id_fkey" FOREIGN KEY ("submission_id") REFERENCES "public"."submissions"("id") ON DELETE SET NULL;
 
 
@@ -676,10 +682,6 @@ CREATE POLICY "any authenticated user can create an organization" ON "public"."o
 
 
 
-CREATE POLICY "anyone can submit a support message" ON "public"."support_messages" FOR INSERT WITH CHECK (true);
-
-
-
 CREATE POLICY "anyone signed in can look up the organization id" ON "public"."organizations" FOR SELECT USING (("auth"."uid"() IS NOT NULL));
 
 
@@ -732,6 +734,10 @@ CREATE POLICY "clients read their own record" ON "public"."clients" FOR SELECT U
 
 
 
+CREATE POLICY "clients read their own submission messages" ON "public"."support_messages" FOR SELECT USING ((("client_id" IS NOT NULL) AND ("submission_id" IS NOT NULL) AND "public"."is_own_client_record"("client_id")));
+
+
+
 CREATE POLICY "clients read their own submissions" ON "public"."submissions" FOR SELECT USING ("public"."is_own_client_record"("client_id"));
 
 
@@ -750,6 +756,12 @@ ALTER TABLE "public"."deliverables" ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "insert audit_log" ON "public"."audit_log" FOR INSERT WITH CHECK (("public"."is_admin"("org_id") OR (EXISTS ( SELECT 1
    FROM "public"."submissions" "s"
   WHERE (("s"."id" = "audit_log"."submission_id") AND "public"."is_own_client_record"("s"."client_id"))))));
+
+
+
+CREATE POLICY "insert support_messages" ON "public"."support_messages" FOR INSERT WITH CHECK (((("client_id" IS NULL) AND ("submission_id" IS NULL) AND ("sent_by_admin_id" IS NULL)) OR (("sent_by_admin_id" IS NULL) AND ("client_id" IS NOT NULL) AND ("submission_id" IS NOT NULL) AND "public"."is_own_client_record"("client_id") AND (EXISTS ( SELECT 1
+   FROM "public"."submissions" "s"
+  WHERE (("s"."id" = "support_messages"."submission_id") AND ("s"."client_id" = "support_messages"."client_id"))))) OR (("sent_by_admin_id" IS NOT NULL) AND "public"."is_admin"("org_id"))));
 
 
 

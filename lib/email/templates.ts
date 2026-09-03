@@ -55,6 +55,22 @@ export function getInfoRequestEmail(message: string, agency: string, companyName
   };
 }
 
+// Admin-reply notification on a submission's message thread — deliberately
+// one-directional (client→admin never emails, per the "admin already has
+// the daily digest and checks the inbox regularly" call). Points the
+// client back to the dashboard rather than embedding the message text
+// itself, matching every other stage-change template's convention.
+export function getNewMessageEmail(agency: string, companyName: string) {
+  return {
+    subject: `New message about your ${agency} bid`,
+    html: `
+      <p>Hi ${companyName},</p>
+      <p>We sent you a new message about your ${agency} bid. Log in to your dashboard to view it and reply.</p>
+      <p>— BidPulse</p>
+    `,
+  };
+}
+
 export function getContactMessageEmail(name: string, email: string, message: string) {
   return {
     subject: `New contact form message from ${name}`,

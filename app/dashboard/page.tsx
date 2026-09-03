@@ -7,6 +7,7 @@ import { DeliverablesSection } from "./DeliverablesSection";
 import { CompleteBidFile } from "./CompleteBidFile";
 import { signRfpDocumentUrls } from "@/lib/storage";
 import { BidProcessNotices } from "@/components/ui/BidProcessNotices";
+import { SubmissionMessages } from "@/components/ui/SubmissionMessages";
 import { isKnownTrade } from "@/lib/compliance/known-trades";
 
 // Reads cookies (via lib/supabase/server) which already opts this page out
@@ -50,7 +51,7 @@ export default async function DashboardPage({
 
   const { data: client } = await supabase
     .from("clients")
-    .select("id, org_id, company_name, naics_codes")
+    .select("id, org_id, company_name, contact_name, naics_codes")
     .eq("auth_user_id", user.id)
     .maybeSingle();
 
@@ -250,6 +251,15 @@ export default async function DashboardPage({
                   {STAGE_LABELS[activeSubmission.stage] ?? activeSubmission.stage}
                 </p>
               </div>
+
+              <SubmissionMessages
+                submissionId={activeSubmission.id}
+                orgId={client.org_id}
+                clientId={client.id}
+                viewerRole="client"
+                senderName={client.contact_name ?? client.company_name}
+                senderEmail={user.email ?? ""}
+              />
 
               <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">
                 <div className="px-6 py-4 border-b border-outline-variant bg-surface-container-low">

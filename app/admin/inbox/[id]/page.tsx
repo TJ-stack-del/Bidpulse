@@ -9,6 +9,7 @@ import { signRfpDocumentUrls } from "@/lib/storage";
 import { EstimatedValueInput } from "./EstimatedValueInput";
 import { RequestInfoForm } from "./RequestInfoForm";
 import { DeleteSubmissionButton } from "./DeleteSubmissionButton";
+import { SubmissionMessages } from "@/components/ui/SubmissionMessages";
 import { isKnownTrade } from "@/lib/compliance/known-trades";
 
 // The actual review workspace: full intake info, stage editing, internal
@@ -151,6 +152,7 @@ export default async function AdminSubmissionDetailPage({
     payment_marked_unpaid: "Marked as unpaid",
     package_linked: "Package linked",
     stage_change_email_sent: "Client notified by email",
+    message_email_sent: "Client notified of new message",
     stage_auto_advanced: "Stage auto-advanced",
     client_viewed_packet: "Client viewed packet",
     client_downloaded_packet: "Client downloaded packet",
@@ -402,6 +404,16 @@ export default async function AdminSubmissionDetailPage({
           </div>
 
           <RequestInfoForm submissionId={submission.id} prefillText={submission.fit_explanation ?? ""} />
+
+          <SubmissionMessages
+            submissionId={submission.id}
+            orgId={member.org_id}
+            clientId={submission.client_id}
+            viewerRole="admin"
+            senderName={member.full_name}
+            senderEmail={user.email ?? ""}
+            adminId={member.id}
+          />
         </div>
       </div>
 
