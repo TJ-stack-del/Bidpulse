@@ -12,6 +12,13 @@
    Values here are the same M3-style scheme this app already used, just
    split into light/dark instead of being light-only. */
 :root {
+  /* Single source of truth for the nav wordmark's rendered height
+     (components/ui/Logo.tsx) -- every nav instance shares this instead
+     of each page/shell picking its own h-8/h-9/h-10 by eye, which is
+     exactly how it drifted to three different values before this
+     existed. Theme-independent on purpose, so it's not redefined below
+     in .dark. */
+  --nav-logo-height: 22px;
   --color-surface: 247 249 251;
   --color-surface-dim: 216 218 220;
   --color-surface-bright: 247 249 251;
