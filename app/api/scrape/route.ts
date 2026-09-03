@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { scrapeJaa, type ScrapedOpportunity } from "@/lib/scrapers/jaa";
+import { scrapeCoj } from "@/lib/scrapers/coj";
+
+// coj.ts launches a real headless Chromium (playwright-core +
+// @sparticuz/chromium) since City of Jacksonville's listings are
+// JavaScript-rendered — needs the Node.js runtime (Edge can't run a
+// browser binary) and meaningfully longer than the default 10s function
+// timeout. 60s is this project's existing ceiling for a heavy route (see
+// extract-from-document, inbound-bid-email) and matches what's actually
+// available on Hobby.
+export const runtime = "nodejs";
+export const maxDuration = 60;
 
 // BUILD-ORDER-BIDPULSE.md Step 8: runs the scrapers and inserts whatever
 // they find into matched_opportunities with assigned_client_id left null,
@@ -13,6 +24,7 @@ import { scrapeJaa, type ScrapedOpportunity } from "@/lib/scrapers/jaa";
 // past that. Revisit if JEA ever offers a real feed/API.
 const SCRAPERS: { name: string; run: () => Promise<ScrapedOpportunity[]> }[] = [
   { name: "jaa", run: scrapeJaa },
+  { name: "coj", run: scrapeCoj },
 ];
 
 function isAuthorized(request: NextRequest): boolean {
@@ -79,6 +91,7 @@ export async function GET(request: NextRequest) {
           source_agency: item.source_agency,
           source_url: item.source_url,
           due_date: item.due_date,
+          solicitation_number: item.solicitation_number ?? null,
           status: "new",
         });
 
