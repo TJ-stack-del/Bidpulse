@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import forms from "@tailwindcss/forms";
 
 // Design tokens matched to the BidPulse logo (deep teal #0f6e7a accent,
 // navy #0c1524/#101a30 ink and containers, burnt-orange #a84d0f tertiary
@@ -111,7 +112,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [require("@tailwindcss/forms")],
+  plugins: [forms],
 };
 
 export default config;
