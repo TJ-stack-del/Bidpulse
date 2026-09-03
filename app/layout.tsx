@@ -1,13 +1,20 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  // Required for opengraph-image.tsx's generated image to resolve to an
+  // absolute URL in production rather than falling back to localhost.
+  metadataBase: new URL("https://bidpulse.co"),
   title: {
     default: "BidPulse",
     template: "%s — BidPulse",
   },
   description: "Done-for-you bid prep for small trade contractors — HVAC, janitorial, and landscaping businesses bidding on local government contracts.",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0A182F",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
