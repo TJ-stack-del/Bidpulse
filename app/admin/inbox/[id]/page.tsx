@@ -8,6 +8,7 @@ import { ClientCertifications } from "./ClientCertifications";
 import { signRfpDocumentUrls } from "@/lib/storage";
 import { EstimatedValueInput } from "./EstimatedValueInput";
 import { RequestInfoForm } from "./RequestInfoForm";
+import { DeleteSubmissionButton } from "./DeleteSubmissionButton";
 import { isKnownTrade } from "@/lib/compliance/known-trades";
 
 // The actual review workspace: full intake info, stage editing, internal
@@ -151,11 +152,12 @@ export default async function AdminSubmissionDetailPage({
     package_linked: "Package linked",
     stage_change_email_sent: "Client notified by email",
     stage_auto_advanced: "Stage auto-advanced",
-    client_reported_submitted: "Client reported submitted",
     client_viewed_packet: "Client viewed packet",
     client_downloaded_packet: "Client downloaded packet",
     certification_verified: "Certification verified",
     certification_unverified: "Certification marked unverified",
+    submission_deleted: "Submission deleted",
+    matched_opportunity_deleted: "Matched opportunity deleted",
   };
 
   // Most recent of either type — a download implies a view, so either one
@@ -291,7 +293,6 @@ export default async function AdminSubmissionDetailPage({
             currentStage={submission.stage}
             checklist={checklist ?? []}
             notes={notes ?? []}
-            clientReportedSubmittedAt={submission.client_reported_submitted_at}
           />
 
           <PaymentStatus
@@ -330,6 +331,15 @@ export default async function AdminSubmissionDetailPage({
             {submission.is_test && (
               <p className="text-label-md text-error mt-2">TEST — excluded from revenue reporting</p>
             )}
+            <div className="mt-4 pt-4 border-t border-outline-variant">
+              <DeleteSubmissionButton
+                submissionId={submission.id}
+                orgId={member.org_id}
+                actorId={member.id}
+                agency={submission.agency}
+                companyName={client?.company_name ?? "this client"}
+              />
+            </div>
           </div>
 
           <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
+import { ConfirmDeleteDialog } from "@/components/ui/ConfirmDeleteDialog";
 import { useToast } from "@/components/Toast";
 
 type Match = {
@@ -35,6 +36,8 @@ export function MatchesPanel({
   const [matches, setMatches] = useState(initialMatches);
   const [assignSelections, setAssignSelections] = useState<Record<string, string>>({});
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Match | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const [logging, setLogging] = useState(false);
   const [title, setTitle] = useState("");
@@ -178,6 +181,38 @@ export function MatchesPanel({
     setBusyId(null);
   }
 
+  // Works regardless of assignment status, including the common case of a
+  // bad/test scraper or email-ingestion result that was never assigned —
+  // deleting an already-assigned match here does NOT touch the real
+  // submission it produced, only this matched_opportunities row itself.
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+
+    await supabase.from("audit_log").insert({
+      org_id: orgId,
+      actor_id: actorId,
+      event_type: "matched_opportunity_deleted",
+      event_detail: {
+        matched_opportunity_id: deleteTarget.id,
+        source_title: deleteTarget.source_title,
+        source_agency: deleteTarget.source_agency,
+      },
+    });
+
+    const { error } = await supabase.from("matched_opportunities").delete().eq("id", deleteTarget.id);
+
+    if (error) {
+      showToast(error.message, "error");
+      setDeleting(false);
+      return;
+    }
+
+    setMatches((m) => m.filter((x) => x.id !== deleteTarget.id));
+    setDeleting(false);
+    setDeleteTarget(null);
+  }
+
   return (
     <div className="flex flex-col gap-6 mt-4">
       <form
@@ -288,17 +323,25 @@ export function MatchesPanel({
                   <StatusPill match={m} clientName={clientName} />
                 </td>
                 <td className="px-4 py-3">
-                  {m.status === "new" && (
-                    <AssignControls
-                      match={m}
-                      clients={clients}
-                      selected={assignSelections[m.id] ?? ""}
-                      onSelect={(v) => setAssignSelections((s) => ({ ...s, [m.id]: v }))}
-                      onAssign={() => handleAssign(m.id)}
-                      onDismiss={() => handleDismiss(m.id)}
-                      busy={busyId === m.id}
-                    />
-                  )}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {m.status === "new" && (
+                      <AssignControls
+                        match={m}
+                        clients={clients}
+                        selected={assignSelections[m.id] ?? ""}
+                        onSelect={(v) => setAssignSelections((s) => ({ ...s, [m.id]: v }))}
+                        onAssign={() => handleAssign(m.id)}
+                        onDismiss={() => handleDismiss(m.id)}
+                        busy={busyId === m.id}
+                      />
+                    )}
+                    <button
+                      onClick={() => setDeleteTarget(m)}
+                      className="px-3 py-1.5 rounded border border-error text-error text-label-md hover:bg-error-container/20 transition active:scale-[0.97] shrink-0"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -353,12 +396,32 @@ export function MatchesPanel({
                 stacked
               />
             )}
+            <button
+              onClick={() => setDeleteTarget(m)}
+              className="w-full px-3 py-1.5 rounded border border-error text-error text-label-md hover:bg-error-container/20 transition active:scale-[0.97]"
+            >
+              Delete
+            </button>
           </div>
         ))}
         {matches.length === 0 && (
           <p className="px-4 py-6 text-center text-on-surface-variant">No opportunities logged yet.</p>
         )}
       </div>
+
+      <ConfirmDeleteDialog
+        open={deleteTarget !== null}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
+        confirmText={deleteTarget?.source_title ?? ""}
+        title="Delete this opportunity?"
+        description={
+          deleteTarget?.assigned_client_id
+            ? `This permanently deletes the "${deleteTarget?.source_title}" opportunity record. It's already assigned to ${clientName(deleteTarget?.assigned_client_id ?? null)} — that client's actual submission is NOT affected, only this review-queue entry.`
+            : `This permanently deletes the "${deleteTarget?.source_title}" opportunity record. This cannot be undone.`
+        }
+        busy={deleting}
+      />
     </div>
   );
 }

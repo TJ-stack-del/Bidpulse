@@ -35,6 +35,30 @@ regenerate it after every migration and commit the diff, never edit it
 directly.
 
 ## Confirmed Working (tested with real evidence, not just "reported done")
+- **File upload on the new production project** — a real, pre-launch-blocking
+  bug found 2026-09-02 during the first genuine end-to-end test against the
+  new project, root-caused to two things created out-of-band before tracked
+  migrations existed and invisible to the whole system (they live outside
+  `public` schema): the `rfp-documents` storage bucket was never actually
+  created by any migration (only later changes to it were tracked), and the
+  submission-scoped `storage.objects` RLS policies (`can_access_rfp_object`)
+  were never migrated either — only the client-scoped ones happened to be.
+  Both confirmed directly via raw queries against the new project (zero
+  buckets, 4 of the expected 8 policies) before writing either fix. Fixed
+  with two new migrations, applied to both projects. Verified end-to-end
+  against the *actual new project* (not dev) — a disposable test client
+  uploaded a real PDF through the real intake UI, confirmed via the UI, a
+  direct `submission_documents` read, and a direct Storage listing showing
+  the real object with correct metadata.
+- **Admin delete action** (submissions + matched opportunities) — single-record,
+  admin-only, real type-to-confirm dialog (`ConfirmDeleteDialog.tsx`), never
+  a bulk tool. Verified 2026-09-02 with a real disposable submission carrying
+  a child row in every cascading table (`deliverables`, `checklist_items`,
+  `admin_notes`, `submission_documents`) — confirmed all four are genuinely
+  empty after deletion (checked directly), confirmed the `audit_log` entry
+  for the deletion survives (its `submission_id` goes null via `ON DELETE
+  SET NULL`, but `event_detail` keeps the agency/company name), and
+  confirmed the client account itself stays intact afterward.
 - **Dynamic diagonal watermark on the Preview modal** (`PacketButtons.tsx`)
   — "PREVIEW — [client company name] — [today's date]" tiled across the
   modal, ~7% opacity, `pointer-events: none`. Deliberately scoped to the
@@ -718,34 +742,26 @@ directly.
   read of the record.
 
 ## Open — Needs Attention
-- **Split dev and production Supabase projects — new project created,
-  migrations applied and verified, blocked on Mike for the Vercel side.**
-  Mike created the new production project (`rixsgnbivayeaxbdseij`)
-  2026-09-02. All 10 tracked migrations applied cleanly via
-  `npx supabase db push`; verified the resulting schema is byte-identical
-  to `schema.sql` (real diff, not assumed) and genuinely empty (a
-  data-only dump confirmed zero rows in every table). CLI re-linked back
-  to the dev project immediately after, so no future migration
-  accidentally targets production by default. Still needed, all on
-  Mike's side: point Vercel's production env vars at the new project,
-  decide on Preview deployments, confirm Resend test-mode, then a real
-  end-to-end test against the live URL once those env vars are updated.
-  See `BUILD-ORDER-BIDPULSE.md`'s "Next up" for the full remaining list.
+- **Split dev and production Supabase projects — done and verified.** New
+  production project (`rixsgnbivayeaxbdseij`) live since 2026-09-02: all
+  tracked migrations applied and verified byte-identical to `schema.sql`,
+  Vercel's production env vars pointed at it, a real incognito-window test
+  confirmed a genuinely empty admin inbox on the live site after redeploy.
+  The one real bug this surfaced (file upload) is fixed and verified — see
+  Confirmed Working above.
 - **Inbound bid email pipeline — code built and verified, blocked on
   Mike's IONOS/Gmail/Apps Script setup before it's actually live.** See
   `scripts/README.md` for the exact steps (forwarding, label/filter, Apps
-  Script project + trigger, `INBOUND_BID_EMAIL_SECRET` on Vercel). Until
-  that's done, no real emails ever reach the route — it just sits ready.
-- **"I've submitted this" (`ReportSubmittedButton.tsx`) — kept, but worth
-  Mike's confirmation.** Removing `confirmed_submitted` (2026-09-02) means
-  this button's old copy pointing at that stage was corrected, but the
-  brief's own file list didn't mention this component or
-  `client_reported_submitted_at` at all — a judgment call to keep the
-  feature rather than remove it, since it's still a real, useful signal
-  independent of the stage enum. The brief's stated philosophy ("handle it
-  as an informal admin_notes entry instead") could mean removing this
-  feature entirely instead — flagging rather than guessing which one Mike
-  actually wants.
+  Script project + trigger, `INBOUND_BID_EMAIL_SECRET` on Vercel's
+  **production** environment specifically). Until that's done, no real
+  emails ever reach the route — it just sits ready.
+- **`client_reported_submitted_at` column — kept on `submissions`, by
+  Mike's explicit call 2026-09-02, even though "I've submitted this"
+  (`ReportSubmittedButton.tsx`) itself was removed.** A drop migration was
+  written and verified safe (zero rows anywhere ever used the column) but
+  paused rather than pushed same-session. Nothing in the app reads or
+  writes it anymore either way — purely a schema-tidiness item, not
+  blocking anything. Revisit whenever convenient.
 
 ## Deliberately Deferred (remaining items)
 Items #1, #2, and #4 from the original list (static bid-process warnings,

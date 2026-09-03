@@ -71,50 +71,14 @@ backlog, in suggested order.
 
 ## Next up
 
-### 1. Split dev and production Supabase projects — steps 1-2 done, blocked on Mike for the rest
-Mike created the new production Supabase project (`rixsgnbivayeaxbdseij`)
-and gave me its URL + DB password 2026-09-02. Ran every migration in
-`supabase/migrations/` against it via `npx supabase db push` (all 10
-applied cleanly on a genuinely fresh project — confirmed via `migration
-list` beforehand that none were already applied). Verified two ways, not
-just "the push succeeded": `npx supabase db dump --schema public`
-diffed against the tracked `schema.sql` came back byte-identical, and
-`npx supabase db dump --data-only --schema public` confirmed zero
-INSERT/COPY rows in any table — genuinely empty, not just "looks empty."
-Re-linked the CLI back to the dev project (`hvrwxcyqgjobrgpcequj`)
-immediately afterward so no future migration command in this
-environment accidentally targets production by default.
-
-**Still needed, all on Mike's side (Vercel dashboard, not code):**
-1. Update Vercel's **production** environment variables
-   (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`,
-   `SUPABASE_SERVICE_ROLE_KEY`) to the new project's values.
-2. Decide whether Vercel Preview deployments share the dev project or
-   need their own — default recommendation: share the dev project,
-   revisit only if that causes real friction.
-3. Confirm Resend stays in test-mode (delivers only to
-   michaeltcoleman@gmail.com) in both environments until the custom
-   domain is verified.
-4. Once env vars are updated: a real end-to-end test against the live
-   production URL (signup → intake → admin inbox) confirming it writes
-   to the *new* project, not the old one — this still needs to happen
-   after the Vercel change, not before.
-
-### 2. "Message admin" UI tied to a specific bid — in progress elsewhere
-This brief marks it "sent to Claude Code, awaiting results" — a separate,
-already-dispatched task with its own decided schema/RLS/UI approach (see
-BUILDORDER1.md for the full spec if picking this up here instead). Not
-duplicating this work in this session; only relevant if that other
-attempt didn't land or needs a second pass.
-
-### 3. Retainer package usage tracking
+### 1. Retainer package usage tracking
 Track how many bids a retainer client has used this month against the
 "up to 2/month" promise. No schema yet — needs a usage-count field or
 derived query against `submissions`/`packages`, plus a decision on how
 resets are timed (calendar month vs. rolling 30 days). Explicitly
 deferred until there's a real retainer client to test against.
 
-### 4. Law enforcement/detention integration check (opportunistic, not standalone)
+### 2. Law enforcement/detention integration check (opportunistic, not standalone)
 Confirm whether `TRADE_SPECIFIC_CERTIFICATIONS`'s existing
 background-check/bloodborne-pathogen keyword detection is also wired
 into `lib/agency-type.ts`'s own keyword system alongside
@@ -122,6 +86,115 @@ airport/school/transit/`va`. Deliberately not worth a standalone pass —
 do it the next time `agency-type.ts` is touched for an unrelated reason.
 
 ## Closed since the last update (2026-09-02)
+
+### Admin delete action for submissions/matched opportunities — RESOLVED
+Real ask: direct testing against the now-live new production project
+(the inbound bid email pipeline especially) keeps creating real rows
+that needed manual Table Editor cleanup. Scoped deliberately narrow, per
+the brief's own caution: single-record delete, admin-only, real
+type-to-confirm friction — never a bulk "clean up test data" tool (same
+reasoning as everywhere else `is_test` can't be fully trusted for
+anything automatic).
+
+New shared `ConfirmDeleteDialog.tsx` (types the exact record name to
+enable the delete button) used by both a new "Delete submission" action
+on the submission detail page (`DeleteSubmissionButton.tsx`) and a new
+per-row "Delete" action on the matched-opportunities screen — works
+regardless of assignment status, since the common case is a bad/test
+scraper or email-ingestion result that was never assigned. Both write a
+real `audit_log` entry *before* deleting (`submission_deleted` /
+`matched_opportunity_deleted`, with agency/company/title in
+`event_detail`) — `audit_log.submission_id` is `ON DELETE SET NULL`, not
+CASCADE, specifically so this record survives the submission's own
+deletion instead of vanishing with it.
+
+Verified with a real disposable test submission carrying a real child row
+in every cascading table (`deliverables`, `checklist_items`,
+`admin_notes`, `submission_documents`): confirmed the delete button stays
+disabled with the wrong confirm text and enables with the right one,
+confirmed all four child tables are genuinely empty afterward (checked
+directly, not just that the UI stopped showing the row), confirmed the
+`audit_log` row survives with `submission_id` correctly nulled while
+`event_detail` keeps the identifying info, and confirmed the client
+account itself stays fully intact and unbroken after its submission was
+deleted. Matched-opportunity delete verified the same way with its own
+audit entry.
+
+### Remove "I've submitted this" client-facing button — RESOLVED
+Decided: remove `ReportSubmittedButton.tsx` entirely now that
+`confirmed_submitted` no longer exists as a pipeline stage, rather than
+keep both a formal button *and* the informal `admin_notes` fallback the
+original removal reasoning proposed — one source of truth, not two
+overlapping ones. Confirmed before removing: zero `submissions` rows
+(dev or the new production project) ever had a real
+`client_reported_submitted_at` value, and zero `audit_log` rows exist
+with `event_type = 'client_reported_submitted'` — genuinely unused, not
+just currently empty.
+
+Deleted the component, its mount point on the client dashboard, the
+"Client reports this was submitted" banner + prop on the admin
+submission detail page, and the now-dead `client_reported_submitted_at`
+select/reference everywhere (grepped to confirm zero remaining
+references before considering this done). **The column itself is
+deliberately still on `submissions`** — a migration to drop it was
+written and ready, but paused on Mike's explicit call to hold off for
+now rather than drop it same-session; nothing in the app reads or writes
+it anymore either way. Verified with a real disposable client + admin
+session: confirmed the button renders nowhere on the dashboard and the
+banner renders nowhere on the admin detail page, zero console errors,
+zero stray test data left behind.
+
+### File upload broken on new production project ("Failed to fetch") — RESOLVED
+Real, pre-launch-blocking bug, root-caused precisely rather than
+patched around. The reported "Failed to fetch" turned out to be one
+layer removed from the real error — a raw `pg` connection to the new
+project surfaced the actual Postgres message directly:
+**"new row violates row-level security policy."** Two separate gaps,
+both the same underlying pattern (things created out-of-band on the
+original project before tracked-migration discipline existed, invisible
+to the whole system because they live outside the `public` schema
+`schema.sql` dumps):
+
+1. **The `rfp-documents` storage bucket itself was never created by any
+   migration** — only later *changes* to it were tracked (an `UPDATE
+   storage.buckets SET public = false...`, which silently matched zero
+   rows against a project where the bucket never existed, no error
+   thrown). Confirmed directly via a raw query: `storage.buckets`
+   returned zero rows on the new project. Fixed with a new migration
+   creating it, matching dev's exact real config (`public: false`,
+   `file_size_limit`/`allowed_mime_types` both null) — `on conflict do
+   nothing` so it's also a safe no-op replayed against dev.
+2. **Once the bucket existed, uploads still failed identically** — a
+   second, more precise root cause: `storage.objects` RLS policies came
+   in two families, client-scoped (`can_access_client_object`, keyed on
+   `clients.id`, used by certification/company-profile uploads) and
+   submission-scoped (`can_access_rfp_object`, keyed on `submissions.id`,
+   used by the actual bid-file upload). Only the client-scoped ones were
+   ever captured in a migration (`20260831210857`); the submission-scoped
+   ones were created out-of-band and never migrated at all. Confirmed
+   directly by comparing `pg_policies` on both projects: dev has 8
+   `rfp-documents` policies, the new project only had 4. Fixed with a new
+   migration adding the missing 4, matching dev exactly (`drop policy if
+   exists` + `create policy`, safe to replay against dev too).
+
+Both migrations applied to the new production project (after explicit
+confirmation, since this touches the live database) and to dev
+(idempotent no-ops there, to keep migration history consistent across
+both). **Verified for real, end-to-end, against the actual new project's
+database** (not dev) — pointed a local dev server at the new project's
+real credentials temporarily, signed in as a disposable test client, and
+uploaded the same real PDF fixture used elsewhere this session through
+the actual intake UI: confirmed the file shows as attached in the UI,
+confirmed the `submission_documents` row exists, and confirmed the
+object genuinely exists in Supabase Storage with the correct metadata —
+not just a 200-looking response. `.env.local` was restored to its
+original dev-project values immediately afterward and diffed to confirm
+an exact match; the CLI was re-linked back to dev the same way.
+
+**Also confirmed while investigating, unrelated to the actual bug:** the
+new project rejects `@example.com` signup addresses and has a stricter
+built-in email-confirmation rate limit than dev — real Auth-config
+differences worth knowing if testing against it again, not app bugs.
 
 ### Watermark on the Preview modal — RESOLVED
 Real ask, scoped deliberately to the existing in-app text preview

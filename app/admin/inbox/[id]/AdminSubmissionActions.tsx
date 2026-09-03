@@ -32,7 +32,6 @@ export function AdminSubmissionActions({
   currentStage,
   checklist,
   notes,
-  clientReportedSubmittedAt,
 }: {
   submissionId: string;
   orgId: string;
@@ -40,7 +39,6 @@ export function AdminSubmissionActions({
   currentStage: string;
   checklist: ChecklistItem[];
   notes: Note[];
-  clientReportedSubmittedAt: string | null;
 }) {
   const [stage, setStage] = useState(currentStage);
   // Stage can now also change from outside this component's own button
@@ -157,20 +155,6 @@ export function AdminSubmissionActions({
 
   return (
     <div className="flex flex-col gap-6">
-      {clientReportedSubmittedAt && stage !== "closed" && (
-        <div className="bg-secondary-container border border-secondary/30 rounded-xl p-6">
-          <h2 className="text-title-lg text-on-secondary-container mb-1 flex items-center gap-2">
-            <span className="material-symbols-outlined text-[20px]">flag</span>
-            Client reports this was submitted
-          </h2>
-          <p className="text-body-md text-on-secondary-container">
-            On {new Date(clientReportedSubmittedAt).toLocaleString()} — an unverified claim, not a pipeline
-            stage on its own. Add a note below if it's worth recording, or move the stage to
-            &quot;closed&quot; once you've verified it and wrapped up.
-          </p>
-        </div>
-      )}
-
       <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
         <h2 className="text-title-lg text-primary mb-4 flex items-center gap-2">
           <span className="material-symbols-outlined text-secondary text-[20px]">timeline</span>

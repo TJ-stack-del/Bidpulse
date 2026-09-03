@@ -4,7 +4,6 @@ import { createClient } from "@/lib/supabase/server";
 import { AppShell } from "@/components/ui/AppShell";
 import { LifecycleStepper, stageNumber } from "@/components/ui/LifecycleStepper";
 import { DeliverablesSection } from "./DeliverablesSection";
-import { ReportSubmittedButton } from "./ReportSubmittedButton";
 import { CompleteBidFile } from "./CompleteBidFile";
 import { signRfpDocumentUrls } from "@/lib/storage";
 import { BidProcessNotices } from "@/components/ui/BidProcessNotices";
@@ -68,7 +67,7 @@ export default async function DashboardPage({
   const { data: submissions, error: submissionsError } = await supabase
     .from("submissions")
     .select(
-      "id, agency, solicitation_number, due_date, scope, stage, draft, is_test, package_id, created_at, updated_at, client_reported_submitted_at, mandatory_site_visit_concern, mandatory_site_visit_explanation"
+      "id, agency, solicitation_number, due_date, scope, stage, draft, is_test, package_id, created_at, updated_at, mandatory_site_visit_concern, mandatory_site_visit_explanation"
     )
     .eq("client_id", client.id)
     .order("updated_at", { ascending: false });
@@ -250,13 +249,6 @@ export default async function DashboardPage({
                 <p className="text-body-md text-on-surface">
                   {STAGE_LABELS[activeSubmission.stage] ?? activeSubmission.stage}
                 </p>
-                {stageNumber(activeSubmission.stage) >= stageNumber("client_review") && (
-                  <ReportSubmittedButton
-                    submissionId={activeSubmission.id}
-                    orgId={client.org_id}
-                    initialReportedAt={activeSubmission.client_reported_submitted_at}
-                  />
-                )}
               </div>
 
               <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">
