@@ -17,11 +17,11 @@
           stroke-width="1.8" 
           stroke-linejoin="round"/>
 
-    <!-- Pulse Wave in #EF5B25 -- horizontally rescaled to 90% of the
-         shield's half-width (28 -> 25.2), keeping y untouched. This
+    <!-- Pulse Wave in #EF5B25 — horizontally rescaled to 90% of the
+         shield's half-width (28 to 25.2), keeping y untouched. This
          variant's own pulse path was narrower than the app icon's to
          begin with (x=+-38, not +-40), but the shield here is the same
-         28-half-width one -- still overflowed by 10 units each side, not
+         28-half-width one — still overflowed by 10 units each side, not
          "already fine" as originally assumed. -->
     <path d="M-25.2 0 L-12.6 0 L-7.3 -18 L-2 20 L3.3 -12 L8.6 8 L13.9 0 L25.2 0"
           fill="none" 

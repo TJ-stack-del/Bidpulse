@@ -17,8 +17,8 @@
           stroke-width="2" 
           stroke-linejoin="round"/>
 
-    <!-- Solid Pulse Wave (#EF5B25) -- horizontally rescaled to 90% of the
-         shield's half-width (32 -> 28.8), keeping y untouched. Originally
+    <!-- Solid Pulse Wave (#EF5B25) — horizontally rescaled to 90% of the
+         shield's half-width (32 to 28.8), keeping y untouched. Originally
          extended to x=+-42 against a shield half-width of 32, overshooting
          the silhouette by 10 units each side. -->
     <path d="M15.2 44 L30.3 44 L35.8 25 L41.9 63 L47.4 33 L52.9 52 L58.4 44 L72.8 44"
