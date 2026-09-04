@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
 import { useToast } from "@/components/Toast";
+import { CERT_REVIEWED_TOOLTIP } from "@/lib/brand";
 
 type Certification = {
   id: string;
@@ -110,7 +111,13 @@ export function ClientCertifications({
           <button
             onClick={() => handleToggle(cert)}
             disabled={saving === cert.id || (!cert.verified && !cert.file_url)}
-            title={!cert.verified && !cert.file_url ? "Can't verify without a certificate document on file" : undefined}
+            title={
+              !cert.verified && !cert.file_url
+                ? "Can't mark reviewed without a certificate document on file"
+                : cert.verified
+                ? CERT_REVIEWED_TOOLTIP
+                : undefined
+            }
             className={`px-3 py-1.5 rounded text-label-md font-bold transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 disabled:cursor-not-allowed flex items-center gap-2 ${
               cert.verified
                 ? "border border-outline-variant text-on-surface hover:bg-surface-container-high"
@@ -118,7 +125,7 @@ export function ClientCertifications({
             }`}
           >
             {saving === cert.id && <Spinner />}
-            {cert.verified ? "Verified — mark unverified" : "Not yet reviewed — mark verified"}
+            {cert.verified ? "Document Reviewed — mark unreviewed" : "Not yet reviewed — mark reviewed"}
           </button>
         </li>
       ))}

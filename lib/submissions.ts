@@ -26,14 +26,39 @@ export async function finalizeSubmission(
   // disables the submit button until this is true, so by the time this runs
   // it's already a hard true, but the audit_log row is what makes it provable
   // later rather than only ever having existed in React state.
-  acknowledgedNoGuarantee?: boolean
+  acknowledgedNoGuarantee?: boolean,
+  // The submitting client's own id (BidFileStep's caller already has this —
+  // see clientId prop on IntakeWizard/CompleteBidFile) — needed to set
+  // info_attested_by in the same update that flips draft to false. Passed
+  // in rather than derived here via a separate auth lookup, and re-checked
+  // server-side regardless: the submissions UPDATE RLS policy's WITH CHECK
+  // (supabase/migrations/20260904140124_add_attestation_tracking.sql)
+  // requires info_attested_by to resolve to the caller's own client record
+  // via is_own_client_record() whenever draft is being set to false, so a
+  // client can't spoof this even though they're the one supplying it.
+  clientId?: string,
+  infoAttested?: boolean
 ) {
+  // BidFileStep disables the submit button until this is checked, but that
+  // alone is exactly the "relying on the client-side disable alone" gap
+  // this brief called out — check again here before the write is even
+  // attempted, for a clear error instead of surfacing a raw RLS/constraint
+  // failure. The real backstop is still the DB: the RLS policy itself
+  // rejects any draft->false write missing a valid attestation regardless
+  // of what this function does, so this check is about a better error
+  // message, not the actual security boundary.
+  if (!infoAttested || !clientId) {
+    throw new Error("Please confirm the information in this submission is accurate before sending.");
+  }
+
   const { data: submission, error: submitError } = await supabase
     .from("submissions")
     .update({
       draft: false,
       submitted_at: new Date().toISOString(),
       stage: "submitted",
+      info_attested_at: new Date().toISOString(),
+      info_attested_by: clientId,
     })
     .eq("id", submissionId)
     .select("client_id")
@@ -66,6 +91,13 @@ export async function finalizeSubmission(
       },
     });
   }
+
+  await supabase.from("audit_log").insert({
+    submission_id: submissionId,
+    org_id: client?.org_id,
+    event_type: "info_attested",
+    event_detail: { submission_id: submissionId },
+  });
 
   const fitCheckFetch = fetch("/api/generate-fit-check", {
     method: "POST",

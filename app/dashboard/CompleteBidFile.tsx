@@ -8,7 +8,7 @@ import { BidFileStep } from "@/components/ui/BidFileStep";
 // matched opportunity (agency/scope/due date already on file) rather than
 // something the client typed in themselves. Only the bid file is still
 // missing, so that's all this asks for.
-export function CompleteBidFile({ submissionId }: { submissionId: string }) {
+export function CompleteBidFile({ submissionId, clientId }: { submissionId: string; clientId: string }) {
   const router = useRouter();
 
   return (
@@ -21,7 +21,7 @@ export function CompleteBidFile({ submissionId }: { submissionId: string }) {
         We already have the agency and job details for this one. Add the bid file, if you have it, and send it
         our way — or save it for later.
       </p>
-      <BidFileStep submissionId={submissionId} onSubmitted={() => router.refresh()} />
+      <BidFileStep submissionId={submissionId} clientId={clientId} onSubmitted={() => router.refresh()} />
     </div>
   );
 }

@@ -22,10 +22,12 @@ type Deliverable = {
 export function DeliverablesSection({
   submissionId,
   orgId,
+  clientId,
   deliverables,
 }: {
   submissionId: string;
   orgId: string;
+  clientId: string;
   deliverables: Deliverable[];
 }) {
   return (
@@ -39,7 +41,7 @@ export function DeliverablesSection({
 
       {deliverables.length > 0 ? (
         <div className="px-6 py-4">
-          <PacketButtons submissionId={submissionId} orgId={orgId} viewerRole="client" />
+          <PacketButtons submissionId={submissionId} orgId={orgId} clientId={clientId} viewerRole="client" />
         </div>
       ) : (
         <p className="text-body-md text-on-surface-variant px-6 py-6">Being prepared.</p>

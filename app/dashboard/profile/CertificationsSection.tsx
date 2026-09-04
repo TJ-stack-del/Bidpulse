@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
 import { signRfpDocumentUrl } from "@/lib/storage";
+import { CERT_REVIEWED_TOOLTIP } from "@/lib/brand";
 
 type Certification = {
   id: string;
@@ -217,13 +218,14 @@ export function CertificationsSection({
               </div>
               <div className="flex items-center gap-3">
                 <span
+                  title={cert.verified ? CERT_REVIEWED_TOOLTIP : undefined}
                   className={`text-[10px] px-2 py-0.5 rounded border font-bold uppercase ${
                     cert.verified
                       ? "bg-secondary-container text-on-secondary-container border-secondary/20"
                       : "bg-surface-container-low text-on-surface-variant border-outline-variant"
                   }`}
                 >
-                  {cert.verified ? "Verified" : "Not yet reviewed"}
+                  {cert.verified ? "Document Reviewed" : "Not yet reviewed"}
                 </span>
                 <button onClick={() => handleRemove(cert.id)} className="text-error text-label-md hover:underline">
                   Remove

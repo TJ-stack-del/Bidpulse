@@ -31,10 +31,15 @@ export function PacketButtons({
   submissionId,
   orgId,
   viewerRole,
+  clientId,
 }: {
   submissionId: string;
   orgId: string;
   viewerRole: "admin" | "client";
+  // Only used for the client download-attestation flow below — admin's
+  // own QC download never needs it, so callers on the admin side (e.g.
+  // DeliverablesPanel.tsx) can omit it.
+  clientId?: string;
 }) {
   const [generating, setGenerating] = useState<"preview" | "download" | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -42,6 +47,12 @@ export function PacketButtons({
     submission: any;
     deliverables: any[];
   } | null>(null);
+  // Set once a client's download has passed the payment gate and is
+  // waiting on the attestation checkbox below — the actual file isn't
+  // produced until handleConfirmDownload runs. Never set for
+  // viewerRole === "admin", which skips straight to saveDoc.
+  const [pendingDownload, setPendingDownload] = useState<{ submission: any; deliverables: any[] } | null>(null);
+  const [downloadAttested, setDownloadAttested] = useState(false);
   const supabase = createClient();
   const router = useRouter();
 
@@ -123,6 +134,11 @@ export function PacketButtons({
     }
   }
 
+  function saveDoc(submission: any, deliverables: any[]) {
+    const doc = generateDeliverablesPacket(submission, deliverables);
+    doc.save(`bid-package-${submission.agency.replace(/\s+/g, "-").toLowerCase()}.pdf`);
+  }
+
   async function handleDownload() {
     setGenerating("download");
     setError(null);
@@ -137,13 +153,57 @@ export function PacketButtons({
         setError("Available once payment is confirmed.");
         return;
       }
-      const doc = generateDeliverablesPacket(submission as any, deliverables);
-      doc.save(`bid-package-${submission.agency.replace(/\s+/g, "-").toLowerCase()}.pdf`);
+
+      // Client downloads need one more confirmation (the attestation
+      // checkbox below) before the file is actually produced — see
+      // handleConfirmDownload. Admin's own QC download skips straight
+      // through to saveDoc, same as it already skips the payment gate
+      // above: this attestation is a CLIENT confirming accuracy before
+      // sending a document to an agency, not something that applies to
+      // admin pulling their own work product.
+      if (viewerRole === "client") {
+        setPendingDownload({ submission, deliverables });
+        return;
+      }
+
+      saveDoc(submission, deliverables);
       await logClientEvent("client_downloaded_packet");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't build the download.");
     } finally {
       setGenerating(null);
+    }
+  }
+
+  async function handleConfirmDownload() {
+    if (!pendingDownload || !clientId) return;
+    setGenerating("download");
+    setError(null);
+    try {
+      saveDoc(pendingDownload.submission, pendingDownload.deliverables);
+      await logClientEvent("client_downloaded_packet");
+      // Packet-level, not per-deliverable-type — the combined PDF is one
+      // document a client reviews and downloads as a whole (see
+      // DeliverablesSection.tsx's own simplification to a single
+      // Preview/Download pair). Finer-grained attestation would need a
+      // real per-type download action to attest against, which doesn't
+      // exist.
+      await supabase.from("download_attestations").insert({
+        submission_id: submissionId,
+        deliverable_type: "packet",
+        attested_by: clientId,
+      });
+      await supabase.from("audit_log").insert({
+        submission_id: submissionId,
+        org_id: orgId,
+        event_type: "download_attested",
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't build the download.");
+    } finally {
+      setGenerating(null);
+      setPendingDownload(null);
+      setDownloadAttested(false);
     }
   }
 
@@ -243,6 +303,55 @@ export function PacketButtons({
                   </div>
                 );
               })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {pendingDownload && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-6"
+          onClick={() => {
+            setPendingDownload(null);
+            setDownloadAttested(false);
+            setError(null);
+          }}
+        >
+          <div
+            className="bg-surface-container-lowest rounded-xl max-w-md w-full p-6 flex flex-col gap-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-title-lg text-on-surface font-bold">Before you download</h3>
+            <label className="flex items-start gap-3 text-body-md text-on-surface-variant">
+              <input
+                type="checkbox"
+                checked={downloadAttested}
+                onChange={(e) => setDownloadAttested(e.target.checked)}
+                className="mt-1 h-4 w-4 shrink-0 rounded border-outline-variant text-secondary focus:ring-secondary"
+              />
+              I&apos;ve reviewed this document, resolved any placeholders, and confirm it&apos;s
+              accurate before submitting it to the agency.
+            </label>
+            {error && <p className="text-body-md text-error">{error}</p>}
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => {
+                  setPendingDownload(null);
+                  setDownloadAttested(false);
+                  setError(null);
+                }}
+                disabled={generating !== null}
+                className="px-4 py-2 rounded border border-outline-variant text-on-surface text-label-md font-bold hover:bg-surface-container-high transition-colors disabled:opacity-40"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmDownload}
+                disabled={generating !== null || !downloadAttested}
+                className="px-4 py-2 rounded bg-primary text-on-primary text-label-md font-bold hover:bg-on-background transition-colors disabled:opacity-40"
+              >
+                {generating === "download" ? "Building…" : "Confirm & download"}
+              </button>
             </div>
           </div>
         </div>
