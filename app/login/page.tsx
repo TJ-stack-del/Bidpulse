@@ -55,7 +55,15 @@ export default async function LoginPage({
           </p>
         )}
 
-        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-8">
+        {/* Two-layer elevation matching the mockup reference's shape (a
+            tight near shadow + a soft far shadow) -- tint is the real
+            --color-primary token (rgb(var(...)/alpha), same pattern
+            tailwind.config.ts's color definitions already use), not the
+            mockup's own rgba(27,42,74,...) numbers, since primary is navy
+            in light mode but flips to a light blue in dark mode -- using
+            the token keeps the shadow color correct in both instead of
+            baking in one fixed hue. */}
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-8 shadow-[0_1px_2px_rgb(var(--color-primary)/0.08),0_12px_32px_rgb(var(--color-primary)/0.10)]">
           <LoginForm />
         </div>
 
