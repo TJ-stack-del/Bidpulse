@@ -19,17 +19,17 @@ export default function ResetPasswordPage() {
             <Image
               src="/login-logo.svg"
               alt="BidPulse"
-              width={112}
-              height={112}
-              className="h-28 w-auto mx-auto dark:hidden"
+              width={224}
+              height={224}
+              className="h-[var(--auth-logo-height)] w-auto mx-auto dark:hidden"
               priority
             />
             <Image
               src="/login-logo-dark.svg"
               alt="BidPulse"
-              width={112}
-              height={112}
-              className="hidden h-28 w-auto mx-auto dark:block"
+              width={224}
+              height={224}
+              className="hidden h-[var(--auth-logo-height)] w-auto mx-auto dark:block"
               priority
             />
           </Link>
@@ -37,7 +37,12 @@ export default function ResetPasswordPage() {
           <p className="text-body-md text-on-surface-variant mt-2">Choose a new password below.</p>
         </div>
 
-        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-8">
+        {/* dark:bg-surface-container-low override -- see app/login/page.tsx
+            for the full reasoning (the two themes need opposite container
+            tiers for genuine elevation; -lowest is correct in light mode,
+            -low is correct in dark mode). Kept in sync with the login
+            card's same fix. */}
+        <div className="bg-surface-container-lowest dark:bg-surface-container-low border border-outline-variant rounded-xl p-8">
           <ResetPasswordForm />
         </div>
       </div>
