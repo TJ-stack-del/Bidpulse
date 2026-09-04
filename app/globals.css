@@ -22,6 +22,15 @@
      real page in a live look; 48px is a clearly noticeable step up from
      every prior per-page size (32/36/40px). */
   --nav-logo-height: 48px;
+  /* Separate from --nav-logo-height on purpose -- this is the one-off
+     centered hero logo on the login/reset-password screens specifically,
+     not a persistent nav bar, so it doesn't share the nav's sizing
+     standard. Was a hardcoded h-28 (112px) repeated identically in both
+     app/login/page.tsx and app/reset-password/page.tsx -- centralized
+     here for the same reason --nav-logo-height was: two copies of the
+     same magic number is exactly how nav drifted before. Roughly double
+     112px, landing on a clean Tailwind spacing value (h-56). */
+  --auth-logo-height: 224px;
   --color-surface: 247 249 251;
   --color-surface-dim: 216 218 220;
   --color-surface-bright: 247 249 251;

@@ -31,17 +31,17 @@ export default async function LoginPage({
             <Image
               src="/login-logo.svg"
               alt="BidPulse"
-              width={112}
-              height={112}
-              className="h-28 w-auto mx-auto dark:hidden"
+              width={224}
+              height={224}
+              className="h-[var(--auth-logo-height)] w-auto mx-auto dark:hidden"
               priority
             />
             <Image
               src="/login-logo-dark.svg"
               alt="BidPulse"
-              width={112}
-              height={112}
-              className="hidden h-28 w-auto mx-auto dark:block"
+              width={224}
+              height={224}
+              className="hidden h-[var(--auth-logo-height)] w-auto mx-auto dark:block"
               priority
             />
           </Link>
@@ -55,15 +55,27 @@ export default async function LoginPage({
           </p>
         )}
 
-        {/* Two-layer elevation matching the mockup reference's shape (a
-            tight near shadow + a soft far shadow) -- tint is the real
-            --color-primary token (rgb(var(...)/alpha), same pattern
-            tailwind.config.ts's color definitions already use), not the
-            mockup's own rgba(27,42,74,...) numbers, since primary is navy
-            in light mode but flips to a light blue in dark mode -- using
-            the token keeps the shadow color correct in both instead of
-            baking in one fixed hue. */}
-        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-8 shadow-[0_1px_2px_rgb(var(--color-primary)/0.08),0_12px_32px_rgb(var(--color-primary)/0.10)]">
+        {/* Dropped the shadow approach -- a light-background drop shadow
+            doesn't read on a dark page (no light source to imply, nothing
+            for the shadow to visually cast onto). Dark-theme elevation is
+            surface lightness instead, but the two themes need opposite
+            tokens: surface-container-lowest is pure white in light mode
+            (255 255 255, genuinely lighter than surface's 247 249 251 --
+            correctly elevated) but is actually *darker* than plain surface
+            in dark mode (11 14 16 vs 16 20 22 -- the opposite of
+            "elevated"). surface-container-low inverts that exact same way
+            (242 244 246 in light mode, slightly darker than surface --
+            wrong there; 25 28 30 in dark mode, genuinely lighter --
+            right). So: keep -lowest as the light-mode default (unchanged,
+            already correct), override to -low only in dark mode. Border
+            unchanged (outline-variant already matches this app's existing
+            subtle-border convention for every panel). Note: every other
+            card/modal in this app still uses bare surface-container-lowest
+            (e.g. ConfirmDeleteDialog.tsx) and so still has this same
+            backwards-in-dark-mode elevation -- not fixed here, flagged
+            since this brief was scoped to the login/reset-password cards
+            specifically. */}
+        <div className="bg-surface-container-lowest dark:bg-surface-container-low border border-outline-variant rounded-xl p-8">
           <LoginForm />
         </div>
 
