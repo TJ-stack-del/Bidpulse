@@ -75,7 +75,7 @@ export function PacketButtons({
     const { data: submission, error: subError } = await supabase
       .from("submissions")
       .select(
-        "agency, solicitation_number, due_date, scope, package_id, clients(company_name, contact_name, email, phone, naics_codes, set_asides, license_number, years_in_business, business_address, business_phone, insurance_provider, insurance_policy_number, general_liability_coverage, workers_comp_coverage, client_certifications(cert_type, other_label, verified))"
+        "agency, solicitation_number, due_date, scope, package_id, clients!submissions_client_id_fkey(company_name, contact_name, email, phone, naics_codes, set_asides, license_number, years_in_business, business_address, business_phone, insurance_provider, insurance_policy_number, general_liability_coverage, workers_comp_coverage, client_certifications(cert_type, other_label, verified))"
       )
       .eq("id", submissionId)
       .single();

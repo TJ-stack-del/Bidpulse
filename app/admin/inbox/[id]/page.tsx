@@ -44,7 +44,7 @@ export default async function AdminSubmissionDetailPage({
   const { data: submission } = await supabase
     .from("submissions")
     .select(
-      "*, clients(company_name, contact_name, email, phone, naics_codes, license_number, years_in_business, business_address, business_phone, insurance_provider, insurance_policy_number, general_liability_coverage, workers_comp_coverage, differentiators)"
+      "*, clients!submissions_client_id_fkey(company_name, contact_name, email, phone, naics_codes, license_number, years_in_business, business_address, business_phone, insurance_provider, insurance_policy_number, general_liability_coverage, workers_comp_coverage, differentiators)"
     )
     .eq("id", id)
     .single();

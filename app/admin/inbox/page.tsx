@@ -38,7 +38,7 @@ export default async function AdminInboxPage() {
   const { data: rawSubmissions } = await supabase
     .from("submissions")
     .select(
-      "id, agency, solicitation_number, stage, due_date, is_test, draft, submitted_at, updated_at, created_at, clients(company_name)"
+      "id, agency, solicitation_number, stage, due_date, is_test, draft, submitted_at, updated_at, created_at, clients!submissions_client_id_fkey(company_name)"
     )
     .eq("draft", false)
     .order("is_test", { ascending: true })
