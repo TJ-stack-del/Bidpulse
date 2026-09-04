@@ -543,7 +543,7 @@ export function IntakeWizard() {
         </form>
       )}
 
-      {step === 2 && submissionId && (
+      {step === 2 && submissionId && clientId && (
         <div className="flex flex-col gap-4">
           <h2 className="text-headline-md text-primary">Your bid file</h2>
           <p className="text-body-md text-on-surface-variant">
@@ -552,6 +552,7 @@ export function IntakeWizard() {
           </p>
           <BidFileStep
             submissionId={submissionId}
+            clientId={clientId}
             onSubmitted={() => {
               setSubmitted(true);
               setFitCheckLoading(true);

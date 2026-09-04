@@ -252,7 +252,7 @@ function buildDraft(deliverableType: string, submission: SubmissionInfo, verifie
   const scope = submission.scope ?? "[scope of work — see the RFP]";
   const naics = client.naics_codes && client.naics_codes.length > 0 ? client.naics_codes.join(", ") : "[NAICS codes]";
   const statuses =
-    verifiedCertLabels.length > 0 ? verifiedCertLabels.join(", ") : "[no verified certifications on file yet]";
+    verifiedCertLabels.length > 0 ? verifiedCertLabels.join(", ") : "[no reviewed certifications on file yet]";
   const setAsides = client.set_asides && client.set_asides.length > 0 ? client.set_asides.join(", ") : null;
 
   if (deliverableType === "capability_statement") {

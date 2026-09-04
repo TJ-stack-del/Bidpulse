@@ -189,7 +189,7 @@ export default async function DashboardPage({
         // replaces them with just the one thing still missing.
         <div className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <CompleteBidFile submissionId={activeSubmission.id} />
+            <CompleteBidFile submissionId={activeSubmission.id} clientId={client.id} />
           </div>
           {activeSubmission.scope && (
             <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 h-fit">
@@ -293,6 +293,7 @@ export default async function DashboardPage({
                 <DeliverablesSection
                   submissionId={activeSubmission.id}
                   orgId={client.org_id}
+                  clientId={client.id}
                   deliverables={deliverables}
                 />
               )}

@@ -1,0 +1,23 @@
+-- Real bug found by actually testing 20260904140124's new attestation
+-- check as a genuinely authenticated client (not service_role, which
+-- bypasses RLS entirely and would never have caught this): a client could
+-- still flip draft to false with zero attestation set. Root cause: a much
+-- older, much broader policy already existed on this same table --
+-- "clients manage their own submissions", no FOR clause (applies to every
+-- command: SELECT/INSERT/UPDATE/DELETE) and no WITH CHECK at all. Postgres
+-- OR's multiple permissive policies together for the same command, so
+-- 20260904140124's stricter policy did nothing on its own -- this older,
+-- unrestricted one alone was enough to let the write through regardless.
+--
+-- Confirmed nothing legitimate actually depends on this policy's extra
+-- grants before dropping it: every real client-side write to submissions
+-- is either the insert in IntakeWizard.tsx (covered by "clients insert
+-- their own submissions"), the draft_saved_at save or the final submit in
+-- BidFileStep.tsx/lib/submissions.ts (both covered by "clients update
+-- their own draft submissions"), or a read (covered by "clients read
+-- their own submissions") -- and no client-side code deletes a submission
+-- at all (the only delete() call on this table is admin-only,
+-- DeleteSubmissionButton.tsx, built specifically because nothing else
+-- could do this). Dropping outright rather than narrowing it, since the
+-- three specific policies already fully replace it.
+drop policy if exists "clients manage their own submissions" on "public"."submissions";

@@ -78,7 +78,7 @@ export default async function CompanyProfilePage() {
         <p className="text-body-md text-on-surface-variant mb-4">
           Add each small-business or socioeconomic certification you hold, with its certificate document. Our
           team reviews the document before a certification is used in anything we prepare for you — you&apos;ll
-          see its status change to &quot;Verified&quot; here once that happens.
+          see its status change to &quot;Document Reviewed&quot; here once that happens.
         </p>
         <CertificationsSection clientId={client.id} initialCertifications={certifications} />
       </div>
