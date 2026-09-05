@@ -108,6 +108,28 @@ export function CompanyInfoForm({
       setError(updateError.message);
     } else {
       setSaved(true);
+      // Fit Check is a stored snapshot (submissions.fit_alignment/
+      // fit_explanation), only ever (re)computed at intake final-submit or
+      // admin "Assign" — nothing previously re-ran it when a client filled
+      // in their profile afterward, so it silently went stale citing
+      // missing license/insurance/certs that had since been added. Excludes
+      // drafts (nothing to check yet) and closed submissions (already
+      // delivered — recomputing wouldn't change anything client-facing).
+      // Fire-and-forget, same pattern as MatchesPanel.tsx's own trigger —
+      // a failed refresh here shouldn't block the profile save succeeding.
+      const { data: activeSubmissions } = await supabase
+        .from("submissions")
+        .select("id")
+        .eq("client_id", clientId)
+        .eq("draft", false)
+        .neq("stage", "closed");
+      for (const s of activeSubmissions ?? []) {
+        fetch("/api/generate-fit-check", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ submissionId: s.id }),
+        }).catch(() => {});
+      }
     }
     setSaving(false);
   }
