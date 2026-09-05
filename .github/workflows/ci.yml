@@ -1,0 +1,59 @@
+name: CI
+
+# Runs on every push to main and every PR targeting main — catches build
+# and type errors before they ever reach production, closing the gap
+# that let the ambiguous-FK bug and other issues slip through silently.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check + build
+        run: npm run build
+        env:
+          # Use the DEV project's values here, never production's —
+          # this is just a build/type check, not a real deploy, and CI
+          # secrets are a real attack surface if they hold live keys.
+          # Add each of these as a Repository Secret under
+          # Settings -> Secrets and variables -> Actions in GitHub.
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+          NEXT_PUBLIC_SUPABASE_JWKS_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_JWKS_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          ADMIN_DIGEST_EMAIL: ${{ secrets.ADMIN_DIGEST_EMAIL }}
+
+# Setup steps for Mike, one-time:
+# 1. Create this file at .github/workflows/ci.yml in the repo (commit + push).
+# 2. In GitHub: repo Settings -> Secrets and variables -> Actions ->
+#    "New repository secret" for each env var above, using DEV project
+#    values only.
+# 3. That's it — every future push to main, and every PR, will now
+#    automatically fail loudly (a red X in GitHub) if the build breaks,
+#    instead of silently sitting broken until someone notices manually.
+#
+# Not included, deliberately: a real migration dry-run against a scratch
+# Supabase branch. That's a genuine next step but requires Supabase's
+# branching feature, which may not be available on the current plan tier
+# — worth checking, but not a blocker for getting this first layer in
+# place today.
