@@ -1,3 +1,4 @@
+// (Deploy pipeline check, 2026-09-05: harmless comment-only touch.)
 // Replaces the earlier fit_alignment-based "fit" badge concept entirely
 // (see BUILD-ORDER-BIDPULSE.md item #10). Real reasoning for the reversal:
 // what fit_alignment actually measures is almost always "has this client
