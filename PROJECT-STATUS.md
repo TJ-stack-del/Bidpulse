@@ -782,27 +782,44 @@ directly.
   override) since that was in scope for a specific brief; every other
   card/modal (e.g. `ConfirmDeleteDialog.tsx`) still has the same
   backwards-in-dark-mode issue. Worth a broader pass someday, not urgent.
-- **Contradiction to resolve: client dashboard Preview/Download —
-  closed 2026-09-05, code confirmed correct, no bug found.** The concern
-  was a live production check finding a submission with deliverables
-  prepared showing no Preview/Download UI, contradicting this doc's
-  earlier "verified" claim. Investigated directly against both local and
-  `origin/main` code (not just re-reading the claim): `PacketButtons`
-  with `viewerRole="client"` is genuinely mounted in
-  `DeliverablesSection.tsx` and has been live since commit `386e1df` —
-  confirmed via `git show origin/main:...`, not missing from production.
-  The "Being prepared." fallback only shows when the `deliverables` query
-  comes back empty, which only happens before `stage` reaches
-  `deliverables_ready`, which itself only auto-advances once **all
-  three** deliverable types have real content (confirmed in
-  `advance-if-deliverables-complete/route.ts`, called after every admin
-  save). Most likely explanation for the original observation: the
-  checked submission looked human-ready but wasn't yet machine-complete
-  across all three types, so `in_review` was the correct stage, not a
-  bug. **Caveat:** not confirmed against that exact submission's real
-  `stage`/`deliverables` rows on production — no production credentials
-  available in this environment. See `BUILD-ORDER-BIDPULSE.md` item #2
-  for the full writeup.
+- **Client dashboard Preview/Download UI is fine; the
+  `deliverables_ready → client_review` auto-trigger was real, silently
+  broken — root-caused and fixed 2026-09-05.** An earlier pass on this
+  same day closed this out as "code confirmed correct, no bug found"
+  based on static code reading alone (grepping for the mount point,
+  reading `git show origin/main:...`) — that conclusion was wrong,
+  caught by a later session's actual dev testing (real client account,
+  real Preview click, real DB reload) and confirmed here with a direct
+  reproduction, not just re-reading code. **Lesson reinforced: reading
+  code that looks correct is not the same as running it** — see
+  `CLAUDE.md`'s existing note on testing the exact real path.
+  `PacketButtons`/`DeliverablesSection.tsx` are genuinely fine — Preview
+  and Download both render and work correctly once a submission reaches
+  `deliverables_ready`. The actual bug: `app/api/advance-on-client-
+  preview/route.ts`'s stage-flip `UPDATE` ran under the client's own
+  RLS-scoped session, and `close_submissions_broad_client_policy_gap.sql`
+  (applied to dev this same week, for an unrelated, legitimate reason —
+  closing a real attestation-bypass gap) had removed the only policy
+  broad enough to allow it. The one remaining client UPDATE policy on
+  `submissions` only permits writes while `draft = true`, and
+  `deliverables_ready` is inherently non-draft — so the write always
+  silently no-opped: confirmed directly with a real disposable client
+  session against the actual dev database (`status: 200`,
+  `updateData: []`, `updateError: null` — PostgREST's signature for "RLS
+  filtered this row out," no error surfaced anywhere, exactly matching
+  the silent failure a prior session had already observed live). Fixed
+  the same way `generate-fit-check/route.ts` already handles the
+  identical constraint elsewhere in this codebase: the ownership/stage
+  check still runs under the caller's own session (that's the real
+  authorization boundary — already fully re-verified server-side), but
+  the actual write now goes through the service role. Verified the fix
+  directly, same reproduction: the RLS-scoped ownership check still
+  passes correctly, and the service-role write now genuinely flips
+  `stage` to `client_review` where it silently failed before. **Not yet
+  on production** — this fix lives on top of the already-unpushed
+  six-commit/three-migration set (see below); the underlying RLS gap
+  this exposed doesn't even exist on production yet since that migration
+  hasn't shipped there either.
 - **Admin inbox "zero submissions" bug — root cause found, but scope
   turned out narrower than first suspected; production still genuinely
   unverified.** The org_id/RLS theory from 2026-09-02 was directly
