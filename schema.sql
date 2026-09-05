@@ -206,7 +206,8 @@ CREATE TABLE IF NOT EXISTS "public"."client_certifications" (
     "verified" boolean DEFAULT false NOT NULL,
     "verified_at" timestamp with time zone,
     "verified_by" "uuid",
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    CONSTRAINT "client_certifications_verified_requires_file" CHECK (((NOT "verified") OR ("file_url" IS NOT NULL)))
 );
 
 
@@ -256,6 +257,18 @@ CREATE TABLE IF NOT EXISTS "public"."deliverables" (
 
 
 ALTER TABLE "public"."deliverables" OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."download_attestations" (
+    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+    "submission_id" "uuid" NOT NULL,
+    "deliverable_type" "text" NOT NULL,
+    "attested_by" "uuid" NOT NULL,
+    "attested_at" timestamp with time zone DEFAULT "now"() NOT NULL
+);
+
+
+ALTER TABLE "public"."download_attestations" OWNER TO "postgres";
 
 
 CREATE TABLE IF NOT EXISTS "public"."matched_opportunities" (
@@ -340,7 +353,9 @@ CREATE TABLE IF NOT EXISTS "public"."submissions" (
     "wage_risk_explanation" "text",
     "mandatory_site_visit_concern" boolean,
     "mandatory_site_visit_explanation" "text",
-    "estimated_value" numeric
+    "estimated_value" numeric,
+    "info_attested_at" timestamp with time zone,
+    "info_attested_by" "uuid"
 );
 
 
@@ -405,6 +420,11 @@ ALTER TABLE ONLY "public"."clients"
 
 ALTER TABLE ONLY "public"."deliverables"
     ADD CONSTRAINT "deliverables_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."download_attestations"
+    ADD CONSTRAINT "download_attestations_pkey" PRIMARY KEY ("id");
 
 
 
@@ -508,6 +528,16 @@ ALTER TABLE ONLY "public"."deliverables"
 
 
 
+ALTER TABLE ONLY "public"."download_attestations"
+    ADD CONSTRAINT "download_attestations_attested_by_fkey" FOREIGN KEY ("attested_by") REFERENCES "public"."clients"("id");
+
+
+
+ALTER TABLE ONLY "public"."download_attestations"
+    ADD CONSTRAINT "download_attestations_submission_id_fkey" FOREIGN KEY ("submission_id") REFERENCES "public"."submissions"("id") ON DELETE CASCADE;
+
+
+
 ALTER TABLE ONLY "public"."matched_opportunities"
     ADD CONSTRAINT "matched_opportunities_assigned_client_id_fkey" FOREIGN KEY ("assigned_client_id") REFERENCES "public"."clients"("id") ON DELETE SET NULL;
 
@@ -530,6 +560,11 @@ ALTER TABLE ONLY "public"."submission_documents"
 
 ALTER TABLE ONLY "public"."submissions"
     ADD CONSTRAINT "submissions_client_id_fkey" FOREIGN KEY ("client_id") REFERENCES "public"."clients"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."submissions"
+    ADD CONSTRAINT "submissions_info_attested_by_fkey" FOREIGN KEY ("info_attested_by") REFERENCES "public"."clients"("id");
 
 
 
@@ -670,6 +705,13 @@ CREATE POLICY "admins read audit_log" ON "public"."audit_log" FOR SELECT USING (
 
 
 
+CREATE POLICY "admins read download_attestations" ON "public"."download_attestations" FOR SELECT USING ((EXISTS ( SELECT 1
+   FROM ("public"."submissions" "s"
+     JOIN "public"."clients" "c" ON (("c"."id" = "s"."client_id")))
+  WHERE (("s"."id" = "download_attestations"."submission_id") AND "public"."is_admin"("c"."org_id")))));
+
+
+
 CREATE POLICY "admins read support messages in their org" ON "public"."support_messages" FOR SELECT USING ("public"."is_admin"("org_id"));
 
 
@@ -710,7 +752,11 @@ CREATE POLICY "clients manage their own certifications" ON "public"."client_cert
 
 
 
-CREATE POLICY "clients manage their own submissions" ON "public"."submissions" USING ("public"."is_own_client_record"("client_id"));
+CREATE POLICY "clients manage their own download_attestations" ON "public"."download_attestations" USING ((EXISTS ( SELECT 1
+   FROM "public"."submissions" "s"
+  WHERE (("s"."id" = "download_attestations"."submission_id") AND "public"."is_own_client_record"("s"."client_id"))))) WITH CHECK (((EXISTS ( SELECT 1
+   FROM "public"."submissions" "s"
+  WHERE (("s"."id" = "download_attestations"."submission_id") AND "public"."is_own_client_record"("s"."client_id")))) AND "public"."is_own_client_record"("attested_by")));
 
 
 
@@ -742,7 +788,7 @@ CREATE POLICY "clients read their own submissions" ON "public"."submissions" FOR
 
 
 
-CREATE POLICY "clients update their own draft submissions" ON "public"."submissions" FOR UPDATE USING (("public"."is_own_client_record"("client_id") AND ("draft" = true))) WITH CHECK ("public"."is_own_client_record"("client_id"));
+CREATE POLICY "clients update their own draft submissions" ON "public"."submissions" FOR UPDATE USING (("public"."is_own_client_record"("client_id") AND ("draft" = true))) WITH CHECK (("public"."is_own_client_record"("client_id") AND (("draft" = true) OR (("info_attested_at" IS NOT NULL) AND "public"."is_own_client_record"("info_attested_by")))));
 
 
 
@@ -751,6 +797,9 @@ CREATE POLICY "clients update their own record" ON "public"."clients" FOR UPDATE
 
 
 ALTER TABLE "public"."deliverables" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."download_attestations" ENABLE ROW LEVEL SECURITY;
 
 
 CREATE POLICY "insert audit_log" ON "public"."audit_log" FOR INSERT WITH CHECK (("public"."is_admin"("org_id") OR (EXISTS ( SELECT 1
@@ -862,6 +911,12 @@ GRANT ALL ON TABLE "public"."clients" TO "service_role";
 GRANT ALL ON TABLE "public"."deliverables" TO "anon";
 GRANT ALL ON TABLE "public"."deliverables" TO "authenticated";
 GRANT ALL ON TABLE "public"."deliverables" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."download_attestations" TO "anon";
+GRANT ALL ON TABLE "public"."download_attestations" TO "authenticated";
+GRANT ALL ON TABLE "public"."download_attestations" TO "service_role";
 
 
 
