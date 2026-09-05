@@ -12,6 +12,8 @@ import { buildClientInfoRequestDraft } from "@/lib/client-info-request";
 import { DeleteSubmissionButton } from "./DeleteSubmissionButton";
 import { SubmissionMessages } from "@/components/ui/SubmissionMessages";
 import { isKnownTrade } from "@/lib/compliance/known-trades";
+import { sendEmail } from "@/lib/email/send";
+import { getStageChangeEmail } from "@/lib/email/templates";
 
 // The actual review workspace: full intake info, stage editing, internal
 // notes, checklist, deliverables. This is where the "admin does the real
@@ -55,6 +57,54 @@ export default async function AdminSubmissionDetailPage({
         <p className="text-body-md text-error mt-6">Submission not found.</p>
       </AppShell>
     );
+  }
+
+  // Auto-trigger: submitted -> in_review the moment an admin first opens
+  // this page, completing the pipeline automation (the other two
+  // transitions already auto-advance; this was the one remaining
+  // manual-only step). Gated purely on the current stage, so it can only
+  // ever fire once per submission regardless of how many times the page is
+  // viewed afterward -- first_viewed_by_admin_at is a record of when it
+  // happened, not itself the gate. Applies to is_test submissions too
+  // (deliberately, per the brief -- no reason to exclude test data from
+  // pipeline mechanics the way revenue reporting excludes it), same as the
+  // other two auto-triggers, mirroring their inline sendEmail +
+  // getStageChangeEmail pattern rather than calling notify-stage-change.
+  if (submission.stage === "submitted") {
+    const nowIso = new Date().toISOString();
+    await supabase
+      .from("submissions")
+      .update({ stage: "in_review", first_viewed_by_admin_at: nowIso, updated_at: nowIso })
+      .eq("id", id);
+
+    await supabase.from("audit_log").insert({
+      submission_id: id,
+      org_id: member.org_id,
+      actor_id: member.id,
+      event_type: "stage_auto_advanced",
+      event_detail: { from: "submitted", to: "in_review", trigger: "admin_first_view" },
+    });
+
+    submission.stage = "in_review";
+
+    if (!submission.is_test) {
+      const client = submission.clients as unknown as { company_name: string; email: string } | null;
+      const email = client?.email ? getStageChangeEmail("in_review", submission.agency, client.company_name) : null;
+      if (email) {
+        try {
+          await sendEmail({ to: client!.email, subject: email.subject, html: email.html });
+          await supabase.from("audit_log").insert({
+            submission_id: id,
+            org_id: member.org_id,
+            actor_id: member.id,
+            event_type: "stage_change_email_sent",
+            event_detail: { stage: "in_review", auto: true },
+          });
+        } catch (err) {
+          console.error("[admin-first-view auto-advance] send failed", err);
+        }
+      }
+    }
   }
 
   const { data: notes } = await supabase
