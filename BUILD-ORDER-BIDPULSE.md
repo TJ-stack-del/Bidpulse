@@ -17,9 +17,8 @@ This file tracks what's actually queued to work on next.
    urgent action right now — everything from the 2026-09-03→04 session
    (attestation tracking, the ambiguous-FK admin-inbox fix, logo/dark-mode
    fixes) is sitting local-only, nowhere near production.
-7. **Contradiction to resolve — client dashboard Preview/Download.** See
-   item #2 below. Still unresolved; this session's handoff doesn't
-   address it.
+7. ~~Contradiction to resolve — client dashboard Preview/Download~~ —
+   **code confirmed correct 2026-09-05, no bug found.** See item #2 below.
 8. **Production's actual admin-inbox health — still genuinely
    unverified.** See item #3 below. The org_id theory was ruled out in
    dev; the original 2026-09-02 production report was never directly
@@ -95,48 +94,42 @@ way it was verified in dev (5 real reloads showing correct admin-inbox
 data).
 
 ### 2. Contradiction to resolve: client dashboard Preview/Download
-Still unresolved — the 2026-09-03→04 session handoff doesn't address
-this at all, so treat it as exactly as open as before.
+**Status: code confirmed correct 2026-09-05 — no bug found, closing this
+out.** Original write-up kept below for context on why it was raised.
 
-`PROJECT-STATUS.md`'s Confirmed Working section (from the pipeline
-redesign work) states the `deliverables_ready → client_review`
-auto-trigger was verified with a real disposable client account clicking
-Preview successfully, and that an admin's own Preview click correctly
-does *not* advance the stage.
+The concern was that a live check against production found a real
+submission with deliverables prepared showing no Preview/Download UI at
+all — just "Being prepared." — contradicting this doc's earlier claim
+that the client-side auto-trigger was verified working.
 
-But a live check against the actual production site found the opposite:
-a real submission with real deliverables prepared shows **no
-Preview/Download UI at all** on the client dashboard's "Your
-deliverables" section — just static text ("Being prepared."), regardless
-of readiness.
+**Investigated directly against the actual code, both locally and on
+`origin/main` (what's actually deployed):**
+- `app/dashboard/DeliverablesSection.tsx` genuinely mounts
+  `PacketButtons` with `viewerRole="client"` — confirmed via
+  `git show origin/main:app/dashboard/DeliverablesSection.tsx`, so this
+  has been live since commit `386e1df`, not missing from production.
+- The gate that decides whether "Being prepared." shows instead: 
+  `app/dashboard/page.tsx` only fetches `deliverables` rows at all once
+  `stage >= "deliverables_ready"`; `DeliverablesSection` then falls back
+  to "Being prepared." only if that array comes back empty.
+- The `in_review → deliverables_ready` auto-trigger
+  (`app/api/advance-if-deliverables-complete/route.ts`) requires **all
+  three** deliverable types (capability statement, compliance matrix,
+  technical narrative) to have real content or a file before it flips
+  the stage — confirmed it's called after every single admin save
+  (`DeliverablesPanel.tsx` line 102).
 
-**Leading theory, given this project's repeated history of exactly this
-pattern** (the forgot-password confusion, and now the six-commits-local
-situation in item #1 above): the auto-trigger and its UI may have been
-verified in dev or via a disposable test account, without the actual UI
-component being deployed to production at the time of verification.
-
-**First diagnostic step:**
-1. Confirm whether the commit that mounts `PacketButtons.tsx` (or
-   equivalent) on the **client** dashboard is actually present on
-   `origin/main`.
-2. Confirm that commit is part of the deployment currently live on
-   `bidpulse.co`.
-3. If present and deployed, investigate a conditional-rendering or
-   stage-specific bug directly against production.
-4. If missing or undeployed, push/deploy it, then re-verify against
-   production specifically, not dev.
-
-**Why this matters beyond the missing button itself:** if it genuinely
-doesn't exist in production, the `deliverables_ready → client_review`
-automation can never fire from a real client action — the only path to
-that stage is an admin's manual override, defeating the purpose of the
-automation.
-
-**Verification required:** real client login against **production**
-specifically, a submission with real deliverables prepared, confirm
-Preview and Download both render and work, confirm clicking Preview
-actually advances the stage, confirm an admin's own preview does not.
+**Conclusion:** the code path is correct and has been live the whole
+time. The most likely explanation for the original observation is that
+the specific submission checked looked "prepared" to a human eye but
+didn't yet have all three deliverable types machine-complete, so it was
+correctly still sitting in `in_review` — "Being prepared." was the right
+thing to show, not a bug. **Not fully closed with database-level
+certainty** — that would require checking that exact submission's actual
+`stage` and `deliverables` rows on production directly, which needs
+production Supabase credentials not available in this environment. If a
+similar report recurs, check the specific submission's `stage` and
+`deliverables` row count first before assuming a code regression.
 
 ### 3. Production's actual admin-inbox health — still genuinely unverified
 **Correction from the previous sync:** the org_id/RLS theory for the

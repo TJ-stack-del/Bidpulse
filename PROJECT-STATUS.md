@@ -782,24 +782,27 @@ directly.
   override) since that was in scope for a specific brief; every other
   card/modal (e.g. `ConfirmDeleteDialog.tsx`) still has the same
   backwards-in-dark-mode issue. Worth a broader pass someday, not urgent.
-- **Contradiction to resolve: client dashboard Preview/Download.** This
-  doc's Confirmed Working section claims the `deliverables_ready →
-  client_review` auto-trigger was verified with a real client account
-  clicking Preview successfully. But a real live check against the
-  actual production site (2026-09-02, after this doc was last updated)
-  found the opposite: a submission with real deliverables prepared shows
-  no Preview/Download UI at all on the client dashboard — just static
-  text ("Being prepared."). Leading theory, given this project's history
-  of exactly this pattern (the forgot-password confusion earlier today
-  was caused by a real fix that was verified but never actually pushed/
-  deployed): **the verification here may have been done locally/via a
-  disposable test account in dev, or by calling the API route directly,
-  without the actual UI component (`PacketButtons.tsx` or equivalent)
-  being deployed to production.** Needs a direct check: is the
-  commit that mounts Preview/Download on the client dashboard actually
-  on `origin/main` and actually live on `bidpulse.co`? Don't take either
-  claim (this doc's "verified" or the live observation) as fully
-  resolved until that's checked directly.
+- **Contradiction to resolve: client dashboard Preview/Download —
+  closed 2026-09-05, code confirmed correct, no bug found.** The concern
+  was a live production check finding a submission with deliverables
+  prepared showing no Preview/Download UI, contradicting this doc's
+  earlier "verified" claim. Investigated directly against both local and
+  `origin/main` code (not just re-reading the claim): `PacketButtons`
+  with `viewerRole="client"` is genuinely mounted in
+  `DeliverablesSection.tsx` and has been live since commit `386e1df` —
+  confirmed via `git show origin/main:...`, not missing from production.
+  The "Being prepared." fallback only shows when the `deliverables` query
+  comes back empty, which only happens before `stage` reaches
+  `deliverables_ready`, which itself only auto-advances once **all
+  three** deliverable types have real content (confirmed in
+  `advance-if-deliverables-complete/route.ts`, called after every admin
+  save). Most likely explanation for the original observation: the
+  checked submission looked human-ready but wasn't yet machine-complete
+  across all three types, so `in_review` was the correct stage, not a
+  bug. **Caveat:** not confirmed against that exact submission's real
+  `stage`/`deliverables` rows on production — no production credentials
+  available in this environment. See `BUILD-ORDER-BIDPULSE.md` item #2
+  for the full writeup.
 - **Admin inbox "zero submissions" bug — root cause found, but scope
   turned out narrower than first suspected; production still genuinely
   unverified.** The org_id/RLS theory from 2026-09-02 was directly
