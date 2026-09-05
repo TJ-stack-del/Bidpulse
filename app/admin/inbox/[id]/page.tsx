@@ -14,6 +14,7 @@ import { SubmissionMessages } from "@/components/ui/SubmissionMessages";
 import { isKnownTrade } from "@/lib/compliance/known-trades";
 import { sendEmail } from "@/lib/email/send";
 import { getStageChangeEmail } from "@/lib/email/templates";
+import { computePreflightSummary } from "@/lib/compliance/preflight-summary";
 
 // The actual review workspace: full intake info, stage editing, internal
 // notes, checklist, deliverables. This is where the "admin does the real
@@ -130,6 +131,8 @@ export default async function AdminSubmissionDetailPage({
     .eq("client_id", submission.client_id)
     .order("created_at", { ascending: false });
   const certifications = await signRfpDocumentUrls(supabase, certificationsRaw ?? []);
+
+  const preflightChecks = computePreflightSummary({ deliverables, certifications });
 
   const { data: pkg } = submission.package_id
     ? await supabase
@@ -259,6 +262,28 @@ export default async function AdminSubmissionDetailPage({
         <span className="inline-flex px-3 py-1 rounded-full text-label-md font-medium bg-secondary-container text-on-secondary-container">
           {STAGE_LABELS[submission.stage] ?? submission.stage}
         </span>
+      </div>
+
+      {/* Mechanical pre-flight checks -- never an LLM judgment call, same
+          reasoning as every other compliance detector in this codebase.
+          Surfaces what the software already knows (deliverable content
+          present, certification verified status, leftover bracketed
+          placeholders) so review attention goes straight to what's
+          actually ambiguous, per Admin-Review-Rubric.md. */}
+      <div className="mt-4 flex flex-wrap gap-2">
+        {preflightChecks.map((check) => (
+          <span
+            key={check.key}
+            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-label-sm font-medium ${
+              check.ok
+                ? "bg-secondary-container text-on-secondary-container"
+                : "bg-tertiary-container text-on-tertiary-container"
+            }`}
+          >
+            <span className="material-symbols-outlined text-[16px]">{check.ok ? "check_circle" : "warning"}</span>
+            {check.label}
+          </span>
+        ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
