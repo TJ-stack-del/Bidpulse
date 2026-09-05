@@ -37,13 +37,19 @@ const CHECKLIST_STATUS_LABELS: Record<string, string> = {
   waived: "Waived",
 };
 
-// Same labels/colors already used client-facing on the intake confirmation
-// screen (IntakeWizard.tsx) -- badge only, no explanatory text, matching
-// the decision to keep Fit Check's raw admin-facing prose and the sharper
+// Same labels already used client-facing on the intake confirmation screen
+// (IntakeWizard.tsx) -- badge only, no explanatory text, matching the
+// decision to keep Fit Check's raw admin-facing prose and the sharper
 // eligibility-concern flag out of the client's ongoing view. "weak" never
-// gets a red/error treatment -- it's deliberately as neutral as moderate,
-// since this is a readiness read for our own prep process, never a
-// chance-of-winning or disqualification claim.
+// gets a red/error treatment -- it's deliberately non-alarming, since this
+// is a readiness read for our own prep process, never a chance-of-winning
+// or disqualification claim. Colors found broken on real inspection and
+// fixed here (then backported to IntakeWizard.tsx, which had the same two
+// bugs from sharing this exact object): "moderate" was the same gray as
+// "weak," which reads as neutral/nothing rather than an actual signal --
+// now a distinct amber (tertiary-container) instead, while "weak" stays
+// deliberately muted rather than becoming a second, different color that
+// would read as more alarming than it should.
 const FIT_LABELS: Record<string, string> = {
   strong: "Strong fit",
   moderate: "Moderate fit",
@@ -51,7 +57,7 @@ const FIT_LABELS: Record<string, string> = {
 };
 const FIT_STYLE: Record<string, string> = {
   strong: "bg-secondary-container text-on-secondary-container",
-  moderate: "bg-surface-container-highest text-on-surface-variant",
+  moderate: "bg-tertiary-container text-on-tertiary-container",
   weak: "bg-surface-container-highest text-on-surface-variant",
 };
 
@@ -265,7 +271,7 @@ export default async function DashboardPage({
                   </p>
                   {activeSubmission.fit_alignment && (
                     <span
-                      className={`inline-flex px-2.5 py-1 rounded-full text-label-sm font-bold ${
+                      className={`inline-flex px-3 py-1 rounded-full text-label-md font-bold ${
                         FIT_STYLE[activeSubmission.fit_alignment] ?? "bg-surface-container-highest text-on-surface-variant"
                       }`}
                     >
