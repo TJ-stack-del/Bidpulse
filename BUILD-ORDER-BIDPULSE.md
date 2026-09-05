@@ -262,6 +262,25 @@ server for all three alignment states with disposable client accounts
 and real session cookies — correct label/style every time, and confirmed
 `fit_explanation` itself does not leak onto the dashboard page.
 
+**Two real bugs found on inspection right after shipping, now fixed:**
+"moderate" used the exact same gray as "weak" (`bg-surface-container-
+highest`), reading as neutral/nothing rather than an actual signal —
+defeats the point of a color-coded badge. Fixed to a distinct amber
+(`bg-tertiary-container`/`text-on-tertiary-container`, a token already
+defined in `globals.css` and unused elsewhere for anything conflicting).
+"weak" stays deliberately muted rather than getting its own color, since
+it should read as neutral/informative, not an implicit disqualification
+— confirmed this is genuinely the render for all three states now:
+strong = warm secondary-container, moderate = amber tertiary-container,
+weak = neutral gray. Also bumped the badge's size to match the admin
+page's own already-fixed reference (`px-3 py-1 text-label-md`, was
+`px-2.5 py-1 text-label-sm`). Both bugs existed in the exact same
+`FIT_STYLE`/badge-size object already duplicated on the intake
+confirmation screen (`IntakeWizard.tsx`) — backported both fixes there
+too. Verified against the real running dev server in the "moderate"
+state specifically — confirmed both the new color class and the larger
+size actually render.
+
 **Found along the way, not fixed (out of scope for this brief):** the
 intake confirmation screen shows this same badge *plus* the raw
 `fit_explanation` text underneath it — inconsistent with the "badge
