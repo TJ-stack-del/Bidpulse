@@ -355,7 +355,8 @@ CREATE TABLE IF NOT EXISTS "public"."submissions" (
     "mandatory_site_visit_explanation" "text",
     "estimated_value" numeric,
     "info_attested_at" timestamp with time zone,
-    "info_attested_by" "uuid"
+    "info_attested_by" "uuid",
+    "first_viewed_by_admin_at" timestamp with time zone
 );
 
 
