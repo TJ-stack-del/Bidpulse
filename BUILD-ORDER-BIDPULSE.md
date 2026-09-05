@@ -254,6 +254,19 @@ derived query against `submissions`/`packages`, plus a decision on how
 resets are timed (calendar month vs. rolling 30 days). Explicitly
 deferred until there's a real retainer client to test against.
 
+### 9. No admin UI toggle for `is_test` — found 2026-09-05, not building yet
+While setting up a disposable test client to re-verify a fix on
+production, checked whether there's an admin-facing way to mark a
+client/submission `is_test = true`. There isn't — the column is real and
+actively used (admin inbox ordering, digest emails, reporting all filter
+on it), but nothing in the app ever writes `is_test: true` anywhere,
+including the intake wizard. The only times it's been set have been
+direct database edits (see the Dar Mano Consulting correction in
+`PROJECT-STATUS.md`). For one-off disposable testing, the admin Delete
+action is the actual answer — remove the test data afterward instead of
+flagging it. Worth a real toggle someday if disposable test accounts
+become a recurring need, but not scoped or built now.
+
 ## Not building yet (still explicitly deferred)
 - Stripe checkout — manual invoicing continues
 - Automated recurring bid matching/shortlist delivery — admin-curated
