@@ -272,61 +272,59 @@ rule, label/filter, and Apps Script trigger set up per
 `scripts/README.md`, plus the real `INBOUND_BID_EMAIL_SECRET` added to
 Vercel's **production** environment specifically.
 
-### 9. Client-facing fit badge (color-coded, no text) — built and verified 2026-09-05
-Real ask, resolving a design question from the same conversation that
-surfaced the "Request info from client" voice bug: should Fit Check be
-visible to clients at all? **Decided: not the raw panel text** — it's
-written in third person for admin's own reading, and includes
-eligibility-concern language deliberately hedged for someone who
-understands the nuance ("worth confirming," never "you don't qualify") —
-a client reading it cold, unmediated, risks drawing a harder conclusion
-than the text supports.
+### 9. Client-facing fit badge — REPLACED entirely with a profile-completeness percentage, 2026-09-05
+**The badge concept itself is retired, not repaired.** It was built,
+then had two real color/size bugs found and fixed the same day — all of
+that work is moot now, not wrong. Real reasoning for the reversal:
+looking at what `fit_alignment` actually measures, "Weak" almost always
+just means the client hasn't filled out NAICS codes, certifications, or
+company profile fields yet — a **data-completeness signal wearing a
+competitive-sounding label.** Government bid outcomes hinge on price,
+competitors, and agency discretion, none of which this score touches,
+but the word "fit" reads as a competitive judgment no matter how it's
+worded or colored — a "Weak" badge risks disproportionate anxiety over
+something easy and fixable, with no equivalent upside from a "Strong"
+badge.
 
-**Decided approach: a simple color-coded badge, no explanatory text.**
-Shows the existing Strong/Moderate/Weak alignment signal only — **not**
-the eligibility concern, which stays admin-only for now.
+**Built and verified 2026-09-05:** `lib/compliance/profile-
+completeness.ts` — a deterministic, equally-weighted presence check
+across 6 fields (NAICS codes, license number, insurance provider/
+coverage, business address, business phone, at least one certification
+on file), no LLM judgment call, same reasoning as every other compliance
+detector in this codebase. Replaces the badge in the dashboard's Status
+card entirely — `fit_alignment` removed from the query and rendering.
+Shows "Profile N% complete," never red at any level, since there's
+nothing alarming here to soften. Verified against the real running dev
+server and database: a client with only NAICS codes set (1 of 6 fields)
+shows exactly 17%, and shows 100% on a fresh reload after filling in the
+rest — confirms it actually updates live, the same staleness risk item
+#3 already found and fixed for Fit Check itself.
 
-**Built and verified 2026-09-05.** Turned out the wording/color problem
-was already solved: the exact same badge (with "Worth a second look"
-instead of a bare "Weak," neither weak nor moderate ever red) already
-ships client-facing at the intake confirmation screen
-(`IntakeWizard.tsx`) — reused that identical `FIT_LABELS`/`FIT_STYLE`
-mapping rather than re-litigating the wording, added `fit_alignment` to
-the dashboard's submissions query, and rendered the badge in the Status
-card next to the stage label. Verified against the real running dev
-server for all three alignment states with disposable client accounts
-and real session cookies — correct label/style every time, and confirmed
-`fit_explanation` itself does not leak onto the dashboard page.
+**`fit_eligibility_concern` and the admin-side Fit Check panel are
+untouched** — this only replaces the client-facing signal.
 
-**Two real bugs found on inspection right after shipping, now fixed:**
-"moderate" used the exact same gray as "weak" (`bg-surface-container-
-highest`), reading as neutral/nothing rather than an actual signal —
-defeats the point of a color-coded badge. Fixed to a distinct amber
-(`bg-tertiary-container`/`text-on-tertiary-container`, a token already
-defined in `globals.css` and unused elsewhere for anything conflicting).
-"weak" stays deliberately muted rather than getting its own color, since
-it should read as neutral/informative, not an implicit disqualification
-— confirmed this is genuinely the render for all three states now:
-strong = warm secondary-container, moderate = amber tertiary-container,
-weak = neutral gray. Also bumped the badge's size to match the admin
-page's own already-fixed reference (`px-3 py-1 text-label-md`, was
-`px-2.5 py-1 text-label-sm`). Both bugs existed in the exact same
-`FIT_STYLE`/badge-size object already duplicated on the intake
-confirmation screen (`IntakeWizard.tsx`) — backported both fixes there
-too. Verified against the real running dev server in the "moderate"
-state specifically — confirmed both the new color class and the larger
-size actually render.
+**Left as-is, out of scope:** the intake confirmation screen
+(`IntakeWizard.tsx`) still shows the old fit badge (with its two color/
+size bugs already fixed) plus the raw `fit_explanation` text. This
+item's ask was specifically the dashboard; the intake screen is a
+separate, one-time moment with its own pre-existing inconsistency
+(flagged previously) — worth a real look, and worth deciding whether it
+should get the same completeness treatment, next time that screen is
+touched.
 
-**Found along the way, not fixed (out of scope for this brief):** the
-intake confirmation screen shows this same badge *plus* the raw
-`fit_explanation` text underneath it — inconsistent with the "badge
-only, no explanatory text" decision this item itself makes. Worth a
-look next time that screen is touched.
-
-**Still pending, doesn't depend on the badge:** auto-populate the
-compliance checklist from Fit Check's actionable missing-info signals
-(NAICS codes, certifications), written in proper client-facing voice —
-the other half of the original ask, can ship independently.
+**Not built yet, explicitly flagged rather than rushed:**
+auto-populating the compliance checklist from these same missing-field
+signals, which this item's own brief asked to merge with the badge
+replacement ("avoids them drifting out of sync"). `checklist_items` has
+no column to distinguish an auto-generated item from an admin-created
+one (e.g. from "Request info from client"), so a safe merge needs its
+own schema migration — deliberately not built now since **one migration
+is already stuck pending on production from earlier this session** (see
+item #0) and stacking a second, or faking the distinction with fragile
+label-text matching against real admin-created checklist items, isn't
+worth the risk. Needs a real design pass: a `source`/`auto_generated`
+column, and rules for when an auto-item should be marked done or removed
+once the client fills the corresponding field.
 
 ### 10. Law enforcement/detention agency-type integration check — confirmed 2026-09-05, not building
 **Checked: not integrated.** `TRADE_SPECIFIC_CERTIFICATIONS`'
