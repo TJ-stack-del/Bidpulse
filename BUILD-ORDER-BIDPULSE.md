@@ -363,6 +363,122 @@ action is the actual answer — remove the test data afterward instead of
 flagging it. Worth a real toggle someday if disposable test accounts
 become a recurring need, but not scoped or built now.
 
+## Process / Infrastructure Recommendations — 2026-09-05
+
+### A. CI safety net — done
+`.github/workflows/ci.yml` added: type check + build on every push to
+`main` and every PR, using dev-project secrets only. **Still needs Mike**
+to add the listed secrets under repo Settings → Secrets and variables →
+Actions before it actually runs.
+
+### B. Regression-test script — done, but the provided file had two real bugs, fixed before committing
+`scripts/regression-check.mjs` added — **not just copy-pasted**. Ran it
+before committing and both tests failed, for a real reason: they checked
+the *original broken* code paths, not the *fixed* ones, so they'd fail
+forever regardless of whether the app is actually broken. Test 1 used a
+bare `clients(...)` embed — permanently ambiguous now that
+`info_attested_by` is a real second FK by design (the actual fix was
+disambiguating every real call site, not preventing the second FK from
+existing). Test 2 attempted a raw client-session `UPDATE` directly,
+which the real fix deliberately makes fail forever (the fix moved the
+write server-side through the service role, keeping client RLS
+restrictive on purpose). Rewrote both to check the actual fixed
+mechanisms instead — the disambiguated embed syntax, and the ownership-
+check-then-service-role-write pattern the real route uses. Also fixed a
+silent session-propagation bug in the sign-in flow (plain
+`signInWithPassword()` on a bare Node client doesn't reliably attach the
+session to later queries with no browser storage to persist it from).
+**Verified against the real dev database — both tests genuinely pass
+now.**
+
+### C. Consolidate admin communication surfaces — done and verified
+`RequestInfoForm.tsx` now shows a picker of the submission's open
+checklist items (plus "Other" for anything not tracked yet); selecting
+one pre-fills a second-person request built from that item's own label,
+sends the notification tied to it, and marks it `in_progress` instead of
+creating a duplicate row. "Other" still creates a new checklist item
+exactly as before. Verified against the real dev server and database:
+the existing-item path updates in place (1 row, `in_progress`), the
+"Other" path still creates a genuinely new row.
+
+### D. Golden-set regression check for the "never invent facts" guarantee — NOT built, needs real design time
+Deliberately not rushed. The real complexity: LLM outputs are
+non-deterministic, so a literal diff-against-expected-text script would
+be fragile and fail on harmless wording variation, not just genuine
+fabrication. A correct version needs to check *structural* presence/
+absence (does an expected fact appear, does an expected null/placeholder
+stay a placeholder, does anything appear that wasn't in the source
+input) rather than exact-text matching — a real script-design decision,
+plus real API cost to run repeatedly (each fixture run calls the actual
+Anthropic API). Existing fixtures in `test-fixtures/` (Sunrise Janitorial
+Solutions, Coastal Clean) are a reasonable starting point rather than
+building new ones from scratch. Next concrete step, not done yet.
+
+### E. Backup/disaster-recovery plan — Mike's own check, not a code task
+Log into the Supabase dashboard for `bidpulse-production` → Settings →
+Add-ons or Database → Backups, confirm what's actually available on the
+current plan tier, decide whether to upgrade given real client data now
+exists. Nothing to build; report back what's found.
+
+### F. Rate limiting on public, cost-incurring routes — premise checked, doesn't hold as stated
+**Investigated before building, per this project's own established
+pattern of checking a brief's premise against reality first.** The brief
+describes "public, no-auth-required routes that call the Anthropic API"
+as currently unprotected. Checked every route in `app/api` that
+instantiates the Anthropic client: `extract-from-document` and
+`extract-company-profile` both already require a real authenticated
+Supabase session (`auth.getUser()`, 401 if absent); `inbound-bid-email`
+already requires a shared-secret header
+(`INBOUND_BID_EMAIL_SECRET`). **There is no genuinely public,
+unauthenticated, cost-incurring AI route in this codebase right now.**
+
+This doesn't mean there's zero risk — a real signed-up (or disposable)
+account could still hammer an extraction endpoint — but it's a
+materially different, lower-priority shape of problem than anonymous
+public abuse, and IP-based Edge Middleware (what the brief specifically
+asked for) isn't even the right tool for it: the real defense for an
+*authenticated* abuse pattern is a per-account/per-`client_id` limit
+using the auth context these routes already have, not raw IP. Not built
+now — worth a real per-account rate limit if abuse actually becomes a
+concern, not a defensive build against a risk that doesn't currently
+exist as described.
+
+### G. Error monitoring and alerting — needs Mike to create an account first
+Sign up for Sentry (or similar), get a DSN key, hand it to a future
+session to wire in `@sentry/nextjs`. Can't proceed without the DSN — not
+a code task until then.
+
+## Admin Review Bottleneck — Mitigations — 2026-09-05
+
+### 1. Reduce what needs review by improving inputs
+Not new work — the profile-completeness indicator (item #9) and the
+phone-number fix (item #4) already reduce how many bracketed
+placeholders/gaps a draft needs, which directly reduces review time.
+
+### 2. Structured review checklist — done
+`Admin-Review-Rubric.md` added to the repo — a concrete per-deliverable-
+type checklist replacing freeform "read the whole thing carefully"
+review. Process document, ready to use immediately, no code involved.
+
+### 3. Batch similar review work
+Process habit, not a code task — no artifact needed.
+
+### 4. Surface mechanical checks before full review — done and verified
+New `lib/compliance/preflight-summary.ts`: three deterministic checks
+(deliverable content present, certification verified/unverified counts,
+leftover bracketed placeholders in deliverable content — a direct
+mechanical version of the rubric's own first checklist line), rendered
+as status chips at the top of the admin submission detail page. Verified
+against the real dev server and database across both an incomplete
+state (1/3 deliverables, unverified cert, active placeholder) and a
+fully-complete state — all three checks correctly flip.
+
+### 5. Pricing as a deliberate throttle — Mike's decision
+Business decision, not implementable.
+
+### 6. Hire a part-time first-pass reviewer — Mike's decision
+Business/hiring decision, not implementable now.
+
 ## Not building yet (still explicitly deferred)
 - Stripe checkout — manual invoicing continues
 - Automated recurring bid matching/shortlist delivery — admin-curated
@@ -373,3 +489,8 @@ become a recurring need, but not scoped or built now.
 - Intake flow document-upload reorder (item #2) — real architectural
   constraint found, not worth the schema-change or security tradeoff
   required to fully honor the original ask.
+- Golden-set regression fixture (item D above) — needs real script-design
+  time given LLM output non-determinism, not a quick add.
+- IP-based rate limiting (item F above) — premise doesn't hold; the
+  routes in question already require auth. Revisit as per-account
+  limiting if real abuse ever appears.
