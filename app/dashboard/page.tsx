@@ -37,6 +37,24 @@ const CHECKLIST_STATUS_LABELS: Record<string, string> = {
   waived: "Waived",
 };
 
+// Same labels/colors already used client-facing on the intake confirmation
+// screen (IntakeWizard.tsx) -- badge only, no explanatory text, matching
+// the decision to keep Fit Check's raw admin-facing prose and the sharper
+// eligibility-concern flag out of the client's ongoing view. "weak" never
+// gets a red/error treatment -- it's deliberately as neutral as moderate,
+// since this is a readiness read for our own prep process, never a
+// chance-of-winning or disqualification claim.
+const FIT_LABELS: Record<string, string> = {
+  strong: "Strong fit",
+  moderate: "Moderate fit",
+  weak: "Worth a second look",
+};
+const FIT_STYLE: Record<string, string> = {
+  strong: "bg-secondary-container text-on-secondary-container",
+  moderate: "bg-surface-container-highest text-on-surface-variant",
+  weak: "bg-surface-container-highest text-on-surface-variant",
+};
+
 export default async function DashboardPage({
   searchParams,
 }: {
@@ -68,7 +86,7 @@ export default async function DashboardPage({
   const { data: submissions, error: submissionsError } = await supabase
     .from("submissions")
     .select(
-      "id, agency, solicitation_number, due_date, scope, stage, draft, is_test, package_id, created_at, updated_at, mandatory_site_visit_concern, mandatory_site_visit_explanation"
+      "id, agency, solicitation_number, due_date, scope, stage, draft, is_test, package_id, created_at, updated_at, mandatory_site_visit_concern, mandatory_site_visit_explanation, fit_alignment"
     )
     .eq("client_id", client.id)
     .order("updated_at", { ascending: false });
@@ -241,9 +259,20 @@ export default async function DashboardPage({
                   <span className="material-symbols-outlined text-secondary text-[20px]">timeline</span>
                   Status
                 </h2>
-                <p className="text-body-md text-on-surface">
-                  {STAGE_LABELS[activeSubmission.stage] ?? activeSubmission.stage}
-                </p>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <p className="text-body-md text-on-surface">
+                    {STAGE_LABELS[activeSubmission.stage] ?? activeSubmission.stage}
+                  </p>
+                  {activeSubmission.fit_alignment && (
+                    <span
+                      className={`inline-flex px-2.5 py-1 rounded-full text-label-sm font-bold ${
+                        FIT_STYLE[activeSubmission.fit_alignment] ?? "bg-surface-container-highest text-on-surface-variant"
+                      }`}
+                    >
+                      {FIT_LABELS[activeSubmission.fit_alignment] ?? activeSubmission.fit_alignment}
+                    </span>
+                  )}
+                </div>
               </div>
 
               <SubmissionMessages
