@@ -53,6 +53,11 @@ async function withRetry<T>(
 
 // Framed as readiness for OUR prep process, never as odds of winning —
 // "Worth a second look" reads as neutral/informative, not a rejection.
+// Colors found broken on real inspection of the same object duplicated on
+// the dashboard (app/dashboard/page.tsx): "moderate" was the same gray as
+// "weak," reading as neutral/nothing rather than an actual signal — now a
+// distinct amber (tertiary-container), while "weak" stays deliberately
+// muted rather than a color that would read as more alarming than it should.
 const FIT_LABELS: Record<string, string> = {
   strong: "Strong fit",
   moderate: "Moderate fit",
@@ -60,7 +65,7 @@ const FIT_LABELS: Record<string, string> = {
 };
 const FIT_STYLE: Record<string, string> = {
   strong: "bg-secondary-container text-on-secondary-container",
-  moderate: "bg-surface-container-highest text-on-surface-variant",
+  moderate: "bg-tertiary-container text-on-tertiary-container",
   weak: "bg-surface-container-highest text-on-surface-variant",
 };
 
@@ -371,7 +376,7 @@ export function IntakeWizard() {
         {fitCheck && (
           <div className="mt-6 max-w-md mx-auto bg-surface-container-low border border-outline-variant rounded-xl p-5 text-left">
             <span
-              className={`inline-flex px-2.5 py-1 rounded-full text-label-sm font-bold ${
+              className={`inline-flex px-3 py-1 rounded-full text-label-md font-bold ${
                 FIT_STYLE[fitCheck.alignment] ?? "bg-surface-container-highest text-on-surface-variant"
               }`}
             >
