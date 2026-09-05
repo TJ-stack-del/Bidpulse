@@ -477,7 +477,11 @@ export default async function AdminSubmissionDetailPage({
             )}
           </div>
 
-          <RequestInfoForm submissionId={submission.id} prefillText={clientInfoRequestDraft} />
+          <RequestInfoForm
+            submissionId={submission.id}
+            prefillText={clientInfoRequestDraft}
+            checklist={(checklist ?? []).map((item) => ({ id: item.id, label: item.label, status: item.status }))}
+          />
 
           <SubmissionMessages
             submissionId={submission.id}

@@ -44,3 +44,15 @@ export function buildClientInfoRequestDraft(input: {
 
   return ["To keep moving on this bid, could you send us a few things:", ...asks.map((ask) => `- ${ask}`)].join("\n");
 }
+
+// Same second-person, plain-language framing as the multi-item draft
+// above, scoped to one already-tracked checklist item instead of
+// re-deriving asks from Fit Check facts. Used when the admin picks an
+// existing checklist item from RequestInfoForm's picker rather than
+// writing a freeform request from scratch — see BUILD-ORDER-BIDPULSE.md's
+// "consolidate admin communication surfaces" item for why this exists:
+// the checklist is meant to be the single source of truth for what's
+// outstanding, with requests operating on it rather than duplicating it.
+export function buildSingleItemRequestDraft(label: string): string {
+  return `To keep moving on this bid, could you help with this:\n- ${label}`;
+}

@@ -3,15 +3,20 @@ import { createClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email/send";
 import { getInfoRequestEmail } from "@/lib/email/templates";
 
-// Admin's "Request info from client" action — creates a real checklist_items
-// row (so it's visibly tracked on both admin and client sides via existing
-// RLS: clients read-only, admins manage) and emails the client, same shape
-// as notify-stage-change/route.ts. Called from RequestInfoForm.tsx on the
-// submission detail page.
+// Admin's "Request info from client" action. Two paths, per
+// BUILD-ORDER-BIDPULSE.md's "consolidate admin communication surfaces"
+// item: picking an existing checklist item marks it in_progress and
+// sends a notification tied to it (the checklist is the single source of
+// truth for what's outstanding; this operates on it rather than creating
+// parallel tracking), while "Other" still creates a new checklist_items
+// row exactly as before, for anything not already tracked. Same email/
+// audit-log shape either way, same as notify-stage-change/route.ts.
+// Called from RequestInfoForm.tsx on the submission detail page.
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const submissionId = body?.submissionId;
   const message = typeof body?.message === "string" ? body.message.trim() : "";
+  const checklistItemId = typeof body?.checklistItemId === "string" ? body.checklistItemId : null;
 
   if (typeof submissionId !== "string" || !message) {
     return NextResponse.json({ error: "Invalid submissionId or message." }, { status: 400 });
@@ -44,11 +49,34 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Submission not found." }, { status: 404 });
   }
 
-  const { error: checklistError } = await supabase
-    .from("checklist_items")
-    .insert({ submission_id: submissionId, label: message });
-  if (checklistError) {
-    return NextResponse.json({ error: checklistError.message }, { status: 500 });
+  if (checklistItemId) {
+    // Re-verify the item actually belongs to this submission rather than
+    // trusting the id the client sent -- same reasoning as every other
+    // route in this app that re-checks ownership server-side regardless
+    // of what the UI believes.
+    const { data: existingItem } = await supabase
+      .from("checklist_items")
+      .select("id")
+      .eq("id", checklistItemId)
+      .eq("submission_id", submissionId)
+      .maybeSingle();
+    if (!existingItem) {
+      return NextResponse.json({ error: "Checklist item not found on this submission." }, { status: 404 });
+    }
+    const { error: updateError } = await supabase
+      .from("checklist_items")
+      .update({ status: "in_progress" })
+      .eq("id", checklistItemId);
+    if (updateError) {
+      return NextResponse.json({ error: updateError.message }, { status: 500 });
+    }
+  } else {
+    const { error: checklistError } = await supabase
+      .from("checklist_items")
+      .insert({ submission_id: submissionId, label: message });
+    if (checklistError) {
+      return NextResponse.json({ error: checklistError.message }, { status: 500 });
+    }
   }
 
   // Test/rehearsal submissions never email a real inbox — matches
@@ -82,7 +110,7 @@ export async function POST(request: Request) {
     org_id: member.org_id,
     actor_id: member.id,
     event_type: "info_requested",
-    event_detail: { message, to: client.email },
+    event_detail: { message, to: client.email, ...(checklistItemId ? { checklistItemId } : {}) },
   });
 
   return NextResponse.json({ sent: true });
