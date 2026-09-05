@@ -253,7 +253,18 @@ export default async function AdminSubmissionDetailPage({
               </div>
               <div>
                 <span className="text-label-md text-on-surface-variant block">Phone</span>
-                {client?.phone ?? "—"}
+                {/* client.phone is the account's login/SMS-auth number --
+                    only ever set if the client signed up with a phone
+                    number instead of email, and extraction deliberately
+                    never writes to it (see CompanyProfileClient.tsx). This
+                    is a display-only fallback to business_phone, not a
+                    data change -- recurring admin complaint that no phone
+                    number showed at all for the (common) email-signup
+                    case, when a business phone was in fact on file. */}
+                {client?.phone ?? client?.business_phone ?? "—"}
+                {!client?.phone && client?.business_phone && (
+                  <span className="text-label-sm text-on-surface-variant"> (business)</span>
+                )}
               </div>
               <div>
                 <span className="text-label-md text-on-surface-variant block">NAICS codes</span>
