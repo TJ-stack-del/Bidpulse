@@ -9,6 +9,7 @@ import { signRfpDocumentUrls } from "@/lib/storage";
 import { BidProcessNotices } from "@/components/ui/BidProcessNotices";
 import { SubmissionMessages } from "@/components/ui/SubmissionMessages";
 import { isKnownTrade } from "@/lib/compliance/known-trades";
+import { computeProfileCompleteness } from "@/lib/compliance/profile-completeness";
 
 // Reads cookies (via lib/supabase/server) which already opts this page out
 // of static rendering — confirmed via `Cache-Control: no-store` on the
@@ -37,30 +38,6 @@ const CHECKLIST_STATUS_LABELS: Record<string, string> = {
   waived: "Waived",
 };
 
-// Same labels already used client-facing on the intake confirmation screen
-// (IntakeWizard.tsx) -- badge only, no explanatory text, matching the
-// decision to keep Fit Check's raw admin-facing prose and the sharper
-// eligibility-concern flag out of the client's ongoing view. "weak" never
-// gets a red/error treatment -- it's deliberately non-alarming, since this
-// is a readiness read for our own prep process, never a chance-of-winning
-// or disqualification claim. Colors found broken on real inspection and
-// fixed here (then backported to IntakeWizard.tsx, which had the same two
-// bugs from sharing this exact object): "moderate" was the same gray as
-// "weak," which reads as neutral/nothing rather than an actual signal --
-// now a distinct amber (tertiary-container) instead, while "weak" stays
-// deliberately muted rather than becoming a second, different color that
-// would read as more alarming than it should.
-const FIT_LABELS: Record<string, string> = {
-  strong: "Strong fit",
-  moderate: "Moderate fit",
-  weak: "Worth a second look",
-};
-const FIT_STYLE: Record<string, string> = {
-  strong: "bg-secondary-container text-on-secondary-container",
-  moderate: "bg-tertiary-container text-on-tertiary-container",
-  weak: "bg-surface-container-highest text-on-surface-variant",
-};
-
 export default async function DashboardPage({
   searchParams,
 }: {
@@ -75,13 +52,34 @@ export default async function DashboardPage({
 
   const { data: client } = await supabase
     .from("clients")
-    .select("id, org_id, company_name, contact_name, naics_codes")
+    .select(
+      "id, org_id, company_name, contact_name, naics_codes, license_number, insurance_provider, general_liability_coverage, business_address, business_phone"
+    )
     .eq("auth_user_id", user.id)
     .maybeSingle();
 
   // Not a client account (e.g. an admin landed here directly) — the root
   // page already knows how to route each account type correctly.
   if (!client) redirect("/");
+
+  // Live count, not a stored flag -- always reflects whatever the client
+  // has on file right now, same "must actually update when the profile
+  // changes" requirement that applied to Fit Check's own staleness bug
+  // (see BUILD-ORDER-BIDPULSE.md item #3).
+  const { count: certCount } = await supabase
+    .from("client_certifications")
+    .select("id", { count: "exact", head: true })
+    .eq("client_id", client.id);
+
+  const completeness = computeProfileCompleteness({
+    naicsCodes: client.naics_codes,
+    licenseNumber: client.license_number,
+    insuranceProvider: client.insurance_provider,
+    generalLiabilityCoverage: client.general_liability_coverage,
+    businessAddress: client.business_address,
+    businessPhone: client.business_phone,
+    hasCertification: (certCount ?? 0) > 0,
+  });
 
   // Ordered by updated_at (bumped on every stage change), not created_at —
   // the default tab should be whichever bid most recently had something
@@ -92,7 +90,7 @@ export default async function DashboardPage({
   const { data: submissions, error: submissionsError } = await supabase
     .from("submissions")
     .select(
-      "id, agency, solicitation_number, due_date, scope, stage, draft, is_test, package_id, created_at, updated_at, mandatory_site_visit_concern, mandatory_site_visit_explanation, fit_alignment"
+      "id, agency, solicitation_number, due_date, scope, stage, draft, is_test, package_id, created_at, updated_at, mandatory_site_visit_concern, mandatory_site_visit_explanation"
     )
     .eq("client_id", client.id)
     .order("updated_at", { ascending: false });
@@ -269,15 +267,21 @@ export default async function DashboardPage({
                   <p className="text-body-md text-on-surface">
                     {STAGE_LABELS[activeSubmission.stage] ?? activeSubmission.stage}
                   </p>
-                  {activeSubmission.fit_alignment && (
-                    <span
-                      className={`inline-flex px-3 py-1 rounded-full text-label-md font-bold ${
-                        FIT_STYLE[activeSubmission.fit_alignment] ?? "bg-surface-container-highest text-on-surface-variant"
-                      }`}
-                    >
-                      {FIT_LABELS[activeSubmission.fit_alignment] ?? activeSubmission.fit_alignment}
-                    </span>
-                  )}
+                  {/* Replaces the earlier fit_alignment "fit" badge entirely
+                      (see BUILD-ORDER-BIDPULSE.md item #10) -- that concept
+                      measured profile completeness while reading as a
+                      competitive judgment ("Weak fit"). A percentage has
+                      nothing alarming to soften: it's concrete and fixable,
+                      and stays informational (never red) at every level. */}
+                  <span
+                    className={`inline-flex px-3 py-1 rounded-full text-label-md font-bold ${
+                      completeness.percent === 100
+                        ? "bg-secondary-container text-on-secondary-container"
+                        : "bg-tertiary-container text-on-tertiary-container"
+                    }`}
+                  >
+                    Profile {completeness.percent}% complete
+                  </span>
                 </div>
               </div>
 
