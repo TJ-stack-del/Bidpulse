@@ -35,6 +35,10 @@ regenerate it after every migration and commit the diff, never edit it
 directly.
 
 ## Confirmed Working (tested with real evidence, not just "reported done")
+- **Request-info voice/duplication fix, and certifications optional
+  upload** — both confirmed done and **pushed to `origin/main`**
+  (`acea384`), per the 2026-09-03→04 session handoff. Not just committed
+  locally this time — reconciled and on the main branch.
 - **"Message admin" UI** — a genuine two-way message thread on a
   submission (`SubmissionMessages.tsx`), separate from "Request info from
   client." New `support_messages.sent_by_admin_id` column + a rewritten
@@ -754,6 +758,72 @@ directly.
   read of the record.
 
 ## Open — Needs Attention
+- **Six commits + three migrations sitting local-only, nowhere near
+  production (2026-09-03→04 session).** `ed394bc..a83b366` on top of the
+  already-pushed `acea384` — none of this is on `origin/main`, let alone
+  deployed. Includes: attestation tracking (client attests intake info
+  before final submit, and before downloading the packet — new
+  `submissions.info_attested_at/by` + `download_attestations` table),
+  softened "Verified" → "Document Reviewed" copy everywhere it's client/
+  agency-facing, the ambiguous-FK fix described above, logo SVG
+  containment + a self-inflicted XML-comment bug (found and fixed same
+  session), a real dark-mode elevation bug on the login/reset-password
+  cards, and an auth-page logo size increase. Three migrations
+  (`certification_verified_requires_document`, `add_attestation_tracking`,
+  `close_submissions_broad_client_policy_gap`) are applied to
+  `bidpulse-dev` only — **if any of this ships, they need to go to
+  production first, in order, or the code will error against missing
+  columns/tables exactly like dev did before they existed.**
+- **Systemic dark-mode elevation bug, flagged not fixed.**
+  `surface-container-lowest` — the token used by every card/modal in the
+  app — is *darker* than plain `surface` in dark mode, the opposite of
+  "elevated." Fixed narrowly for the login/reset-password cards only
+  (`dark:bg-surface-container-lowest dark:bg-surface-container-low`
+  override) since that was in scope for a specific brief; every other
+  card/modal (e.g. `ConfirmDeleteDialog.tsx`) still has the same
+  backwards-in-dark-mode issue. Worth a broader pass someday, not urgent.
+- **Contradiction to resolve: client dashboard Preview/Download.** This
+  doc's Confirmed Working section claims the `deliverables_ready →
+  client_review` auto-trigger was verified with a real client account
+  clicking Preview successfully. But a real live check against the
+  actual production site (2026-09-02, after this doc was last updated)
+  found the opposite: a submission with real deliverables prepared shows
+  no Preview/Download UI at all on the client dashboard — just static
+  text ("Being prepared."). Leading theory, given this project's history
+  of exactly this pattern (the forgot-password confusion earlier today
+  was caused by a real fix that was verified but never actually pushed/
+  deployed): **the verification here may have been done locally/via a
+  disposable test account in dev, or by calling the API route directly,
+  without the actual UI component (`PacketButtons.tsx` or equivalent)
+  being deployed to production.** Needs a direct check: is the
+  commit that mounts Preview/Download on the client dashboard actually
+  on `origin/main` and actually live on `bidpulse.co`? Don't take either
+  claim (this doc's "verified" or the live observation) as fully
+  resolved until that's checked directly.
+- **Admin inbox "zero submissions" bug — root cause found, but scope
+  turned out narrower than first suspected; production still genuinely
+  unverified.** The org_id/RLS theory from 2026-09-02 was directly
+  investigated this session (2026-09-03→04) "with a real authenticated
+  session, not just service_role" and found **fully healthy** — that
+  theory is retracted. The actual bug reproduced in dev was different
+  and self-inflicted this same session: a new migration
+  (`info_attested_by` on `submissions`) created a *second* foreign key
+  from `submissions` to `clients`, which broke PostgREST's ability to
+  infer which relationship to use in any query embedding `clients(...)`
+  — silently, at request time, with TypeScript catching none of it.
+  Found via a temporary server-side `console.log` on the real page
+  component after RLS, hydration warnings, browser-extension noise, and
+  tunnel caching were each ruled out in turn. Fixed across all 9 affected
+  files; audited the whole schema for other 2+-FK pairs (none found).
+  Documented in a new `CLAUDE.md` file, read automatically by future
+  Claude Code sessions, specifically so this class of bug doesn't
+  recur unnoticed.
+  **Caveat, stated directly in the handoff doc:** the *original*
+  2026-09-02 production report was never re-verified directly against
+  `bidpulse-production` — no production credentials were available this
+  session. It's reasonable to suspect the same root cause, but that's
+  not confirmed. This fix, along with everything else from this session,
+  is **not yet on production** — see the unpushed-work note below.
 - **Split dev and production Supabase projects — done and verified.** New
   production project (`rixsgnbivayeaxbdseij`) live since 2026-09-02: all
   tracked migrations applied and verified byte-identical to `schema.sql`,
