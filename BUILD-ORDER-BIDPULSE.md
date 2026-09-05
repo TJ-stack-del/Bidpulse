@@ -17,8 +17,10 @@ This file tracks what's actually queued to work on next.
    urgent action right now — everything from the 2026-09-03→04 session
    (attestation tracking, the ambiguous-FK admin-inbox fix, logo/dark-mode
    fixes) is sitting local-only, nowhere near production.
-7. ~~Contradiction to resolve — client dashboard Preview/Download~~ —
-   **code confirmed correct 2026-09-05, no bug found.** See item #2 below.
+7. ~~Client-side auto-trigger doesn't fire~~ — **real RLS bug found and
+   fixed 2026-09-05** (an earlier same-day pass wrongly closed this as
+   "no bug found" from static reading alone — corrected). See item #2
+   below.
 8. **Production's actual admin-inbox health — still genuinely
    unverified.** See item #3 below. The org_id theory was ruled out in
    dev; the original 2026-09-02 production report was never directly
@@ -93,43 +95,52 @@ appearance. Confirm the ambiguous-FK fix holds on production the same
 way it was verified in dev (5 real reloads showing correct admin-inbox
 data).
 
-### 2. Contradiction to resolve: client dashboard Preview/Download
-**Status: code confirmed correct 2026-09-05 — no bug found, closing this
-out.** Original write-up kept below for context on why it was raised.
+### 2. Client-side auto-trigger (deliverables_ready → client_review) — root-caused and fixed 2026-09-05
+**Status: real bug, found and fixed.** An earlier pass the same day
+closed this as "code confirmed correct, no bug found" based on static
+code reading only — that was wrong, caught by a later session's actual
+dev testing (real client account, real Preview click, real DB reload
+showing `stage` never advanced) and confirmed here with a direct
+reproduction against the real dev database, not another code read.
 
-The concern was that a live check against production found a real
-submission with deliverables prepared showing no Preview/Download UI at
-all — just "Being prepared." — contradicting this doc's earlier claim
-that the client-side auto-trigger was verified working.
+**Root cause:** `app/api/advance-on-client-preview/route.ts` re-verifies
+ownership and current stage correctly, but performed the actual
+`stage` UPDATE under the client's own RLS-scoped session. Migration
+`20260904142743_close_submissions_broad_client_policy_gap.sql` (applied
+to dev this same week, for a real, unrelated, legitimate reason — an
+attestation-bypass gap) dropped the one broad policy that used to allow
+this. The only client UPDATE policy left on `submissions`
+(`clients update their own draft submissions`) only permits writes while
+`draft = true` — and `deliverables_ready` is inherently non-draft, so
+the write silently no-opped on every single call, for every client, on
+every submission, unconditionally.
 
-**Investigated directly against the actual code, both locally and on
-`origin/main` (what's actually deployed):**
-- `app/dashboard/DeliverablesSection.tsx` genuinely mounts
-  `PacketButtons` with `viewerRole="client"` — confirmed via
-  `git show origin/main:app/dashboard/DeliverablesSection.tsx`, so this
-  has been live since commit `386e1df`, not missing from production.
-- The gate that decides whether "Being prepared." shows instead: 
-  `app/dashboard/page.tsx` only fetches `deliverables` rows at all once
-  `stage >= "deliverables_ready"`; `DeliverablesSection` then falls back
-  to "Being prepared." only if that array comes back empty.
-- The `in_review → deliverables_ready` auto-trigger
-  (`app/api/advance-if-deliverables-complete/route.ts`) requires **all
-  three** deliverable types (capability statement, compliance matrix,
-  technical narrative) to have real content or a file before it flips
-  the stage — confirmed it's called after every single admin save
-  (`DeliverablesPanel.tsx` line 102).
+**Confirmed directly**, not inferred: created a real disposable client +
+submission at `deliverables_ready`/`draft=false` against the actual dev
+database, signed in as that client for a real JWT, and issued the exact
+same `UPDATE` the route performs — result: `status: 200`,
+`updateData: []`, `updateError: null`. That's PostgREST's signature for
+"RLS silently filtered this row out of the write" — no error surfaces
+anywhere, which is exactly why `PacketButtons.tsx`'s
+`maybeAdvanceOnPreview()` (which also doesn't check `res.ok` before
+reading `data?.advanced`) had nothing to show for it either.
 
-**Conclusion:** the code path is correct and has been live the whole
-time. The most likely explanation for the original observation is that
-the specific submission checked looked "prepared" to a human eye but
-didn't yet have all three deliverable types machine-complete, so it was
-correctly still sitting in `in_review` — "Being prepared." was the right
-thing to show, not a bug. **Not fully closed with database-level
-certainty** — that would require checking that exact submission's actual
-`stage` and `deliverables` rows on production directly, which needs
-production Supabase credentials not available in this environment. If a
-similar report recurs, check the specific submission's `stage` and
-`deliverables` row count first before assuming a code regression.
+**Fix:** same pattern already used elsewhere in this codebase for the
+identical constraint (`generate-fit-check/route.ts`, which persists
+fit-check results after a client's own final submit already flipped
+`draft` to `false`) — keep the ownership/stage check on the caller's own
+session (that's the real authorization boundary, already fully
+re-verified server-side), but perform the already-validated write
+through the service role instead. Verified the fix with the same
+reproduction: the RLS-scoped ownership check still correctly passes,
+and the service-role write now genuinely flips `stage` to
+`client_review` where it silently failed before.
+
+**Still not on production** — this fix sits on top of the already-
+unpushed six-commit/three-migration set in item #1; the RLS gap this
+depends on doesn't even exist on production yet since that migration
+hasn't shipped there. Once item #1 ships, re-run this exact test against
+production before considering this fully closed there too.
 
 ### 3. Production's actual admin-inbox health — still genuinely unverified
 **Correction from the previous sync:** the org_id/RLS theory for the

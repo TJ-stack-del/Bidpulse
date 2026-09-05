@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email/send";
 import { getStageChangeEmail } from "@/lib/email/templates";
@@ -49,7 +50,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ advanced: false, reason: "wrong_stage" });
   }
 
-  const { error: updateError } = await supabase
+  // The ownership + stage checks above already ran under the caller's own
+  // RLS-scoped session, which is what actually authorizes this write — but
+  // performing the write itself through that same session silently no-ops:
+  // "clients update their own draft submissions" only permits UPDATE while
+  // draft = true, and a deliverables_ready submission is always non-draft.
+  // Confirmed directly (real client session, real PGRST-level test): the
+  // request returns 200 with zero rows affected, no error at all, so this
+  // failed completely silently in production with nothing to show for it.
+  // Same fix as generate-fit-check/route.ts's identical draft=false
+  // constraint — use the service role for the already-validated write.
+  const service = createServiceClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+  const { error: updateError } = await service
     .from("submissions")
     .update({ stage: "client_review", updated_at: new Date().toISOString() })
     .eq("id", submissionId);
