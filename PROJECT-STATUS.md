@@ -35,6 +35,148 @@ regenerate it after every migration and commit the diff, never edit it
 directly.
 
 ## Confirmed Working (tested with real evidence, not just "reported done")
+- **Push/deploy fully reconciled across two same-day sessions,
+  2026-09-05 — corrected commit count and final verified state.** Real
+  count: 12 commits pushed to `origin/main` (`acea384..abdfa9f`, plus a
+  later `is_test`-investigation commit), not 8 as an earlier same-day
+  checkpoint reported — the 8-count was accurate at the moment it was
+  taken, but a second session added 4 more (the CI workflow, the
+  regression-check script, the request-info consolidation, the
+  pre-flight summary) before the final push. All pending migrations
+  applied to `bidpulse-production` and verified via `supabase migration
+  list` (local == remote for every one), `schema.sql` regenerated to
+  match. Vercel auto-deploy from Git confirmed genuinely working via a
+  real empirical test (a harmless commit produced an automatic
+  deployment, no manual `vercel --prod` needed) — see the Git-
+  integration correction below for the full story of how that got
+  settled.
+- **Intake document-upload reorder — investigated, real architectural
+  reason found, decided not to build.** The ask (show the upload prompt
+  right after company name, before any other field) runs into a genuine
+  constraint: the extraction route's auth requirement (a deliberate
+  anti-abuse gate on a paid AI endpoint) means an account must exist
+  first, which requires `signUp()` (email/phone + password) and the
+  `clients` row insert (`company_name` + `contact_name`, both `NOT
+  NULL`) — meaning today's 4 fields are already the practical minimum
+  before the upload gate can exist at all. Honoring the literal ask
+  would require either a schema change (nullable `contact_name`) or
+  reopening the anti-abuse gate — neither judged worth it. Mike's call:
+  leave the flow as-is. Closed, not a bug, not deferred — a real decision
+  with a real reason.
+- **Admin page + Fit Check stale-data investigation — root-caused, only
+  half of it was actually a bug.** The admin page's "Client info" panel
+  was never actually stale — confirmed a genuinely live join, no
+  snapshot, no caching directive, and Next.js 15 defaults to no fetch
+  caching. Fit Check, however, genuinely was stale: `fit_alignment`/
+  `fit_explanation` only ever got computed at intake final-submit and
+  admin "Assign," with nothing re-triggering it when a client updated
+  their profile afterward — confirmed via a full-codebase `grep`. Fixed:
+  `CompanyInfoForm.tsx` now re-triggers Fit Check for the client's own
+  active (non-draft, non-closed) submissions after a successful profile
+  save. Verified against the real dev database with a disposable client
+  and three submissions in different states — correctly targets only
+  the active one.
+- **Phone number not appearing on admin page — fixed, third occurrence
+  resolved.** Kept `phone` (the auth-linked login/SMS field) separate
+  from `business_phone` by design, as before — extraction still never
+  writes to an auth-linked field from a guessed document value. Fixed
+  via a display-layer fallback instead: the admin page's "Phone" row now
+  shows `business_phone` labeled "(business)" when `phone` is empty,
+  rather than showing nothing. Verified against the real dev server with
+  a disposable account and a real session — both the number and the
+  label render correctly.
+- **Client-facing fit badge fully replaced with a profile-completeness
+  percentage — on the dashboard.** `lib/compliance/profile-
+  completeness.ts`: a deterministic, equally-weighted presence check
+  across 6 real fields (NAICS codes, license number, insurance provider/
+  coverage, business address, business phone, at least one certification
+  on file) — no LLM judgment call. Replaces the badge in the dashboard
+  Status card entirely. Shows "Profile N% complete," never red at any
+  level. Verified against the real dev server and database: a client
+  with 1 of 6 fields set shows exactly 17%, and 100% on a fresh reload
+  after filling in the rest — confirms it updates live. `fit_
+  eligibility_concern` and the admin-side Fit Check panel are untouched.
+  **The intake confirmation screen was explicitly left out of this
+  item's scope and still shows the old badge + raw text** — see Open
+  items below.
+- **Law enforcement/detention agency-type gap — precisely scoped, not
+  the broad gap first suspected.** Checked directly via `grep`:
+  `TRADE_SPECIFIC_CERTIFICATIONS`' bloodborne-pathogen/PREA rows already
+  trigger correctly off scope text, not agency name, so compliance-
+  matrix behavior for these bids is already correct. The actual, narrow
+  gap: `lib/agency-type.ts` has no detention/law-enforcement
+  `AgencyType`, so this bid type never gets the equivalent softer
+  fit-check note the other agency types get. Confirmed zero matches for
+  detention/jail/correctional/sheriff/police in that file. Still
+  deferred per original scope — a quick addition next time that file is
+  touched for another reason, not a standalone project.
+- **Full pipeline automation trio + admin-inbox health, all verified
+  directly against production, 2026-09-05 — real requests, real DB
+  reads, not inference.**
+  - `deliverables_ready → client_review`: real HTTP POST to
+    `https://bidpulse.co/api/advance-on-client-preview` with a real
+    client session. Response:
+    `{"advanced":true,"sent":false,"reason":"test_submission"}` (the
+    notification logic correctly recognized test data and skipped
+    sending a real email). DB read after: `stage` changed to
+    `"client_review"`.
+  - Negative case: the same route called with a real **admin** session
+    against a different submission correctly returned
+    `403 {"error":"Client access required."}`, stage unchanged —
+    confirms the client-vs-admin distinction is genuinely enforced.
+  - `submitted → in_review`: a real admin session, never having viewed
+    the submission before, loaded the detail page for the first time.
+    Before: `stage: "submitted"`, `first_viewed_by_admin_at: null`.
+    After: `stage: "in_review"`,
+    `first_viewed_by_admin_at: "2026-09-05T21:25:48.422+00:00"`.
+  - Admin-inbox health: a genuinely new client + submission (simulating
+    a just-finished intake) appeared correctly in
+    `https://bidpulse.co/admin/inbox` on the very first request — no
+    cache, no manual refresh. Closes the original 2026-09-02 "zero
+    submissions" report for real, on production, not by theory.
+  - `scripts/regression-check.mjs` run unmodified against production's
+    own database — all checks pass there too, not just in dev.
+  - All disposable test data created for this pass (3 admin accounts, 4
+    clients, 5 submissions) deleted afterward and confirmed gone via a
+    follow-up query — production left clean.
+- **Client dashboard Preview/Download auto-trigger — root cause found
+  and fixed in dev, 2026-09-05.** Worth recording the investigation's
+  own wrong-then-right sequence, since it's a real lesson: a first pass
+  investigated by reading the code only — confirmed `PacketButtons` is
+  mounted with `viewerRole="client"` and live on `origin/main`, confirmed
+  the auto-trigger's gating logic reads correctly — and closed this as
+  "code confirmed correct, no bug found." **That was wrong.** Reading
+  code that looks correct isn't the same as running it; nothing in that
+  pass was actually executed against a live session. Real dev testing
+  (a genuine client account, a real Preview click, a real DB reload)
+  caught the actual bug: the UI is completely fine — Preview renders
+  real content with the watermark intact, Download correctly gates on
+  the attestation modal — but `stage` never advanced from
+  `deliverables_ready` to `client_review` on a real client click.
+  Investigated for real this time: built a disposable client +
+  submission against the actual dev database, signed in for a real JWT,
+  issued the exact `UPDATE` the route performs. Result: `status 200,
+  updateData: [], updateError: null` — PostgREST's specific signature
+  for "RLS silently filtered this row out of the write," no error
+  surfaced anywhere. **Root cause:**
+  `close_submissions_broad_client_policy_gap.sql` (applied to dev this
+  same week, for a real and unrelated reason — closing an
+  attestation-bypass gap) dropped the only client `submissions` UPDATE
+  policy broad enough to allow this write; the one remaining policy only
+  permits UPDATE while `draft = true`, and `deliverables_ready` is
+  inherently non-draft. A legitimate fix for one problem silently broke
+  a different feature. **Fixed** using the exact pattern already
+  established elsewhere in this codebase for the identical constraint
+  (`generate-fit-check/route.ts`): keep the ownership/stage check on the
+  caller's own RLS-scoped session (so real authorization still applies),
+  perform the already-validated write through the service role instead.
+  **Verified** with the same reproduction — the ownership check still
+  correctly passes under the client's own session, and the write now
+  genuinely succeeds. **Still entirely untested against production** —
+  this fix and its migration are both dev-only; production doesn't have
+  the bug *or* the fix yet, since neither the migration that caused it
+  nor the code fix has shipped there. Needs full re-verification once
+  pushed (see Open items below).
 - **Request-info voice/duplication fix, and certifications optional
   upload** — both confirmed done and **pushed to `origin/main`**
   (`acea384`), per the 2026-09-03→04 session handoff. Not just committed
@@ -758,127 +900,69 @@ directly.
   read of the record.
 
 ## Open — Needs Attention
-- **Six commits + three migrations sitting local-only, nowhere near
-  production (2026-09-03→04 session).** `ed394bc..a83b366` on top of the
-  already-pushed `acea384` — none of this is on `origin/main`, let alone
-  deployed. Includes: attestation tracking (client attests intake info
-  before final submit, and before downloading the packet — new
-  `submissions.info_attested_at/by` + `download_attestations` table),
-  softened "Verified" → "Document Reviewed" copy everywhere it's client/
-  agency-facing, the ambiguous-FK fix described above, logo SVG
-  containment + a self-inflicted XML-comment bug (found and fixed same
-  session), a real dark-mode elevation bug on the login/reset-password
-  cards, and an auth-page logo size increase. Three migrations
-  (`certification_verified_requires_document`, `add_attestation_tracking`,
-  `close_submissions_broad_client_policy_gap`) are applied to
-  `bidpulse-dev` only — **if any of this ships, they need to go to
-  production first, in order, or the code will error against missing
-  columns/tables exactly like dev did before they existed.**
+- **Intake confirmation screen still shows the old fit badge + raw
+  `fit_explanation` text — explicitly out of scope of the completeness
+  work, real screenshot evidence confirms it's still there.** The
+  dashboard's fit badge was fully replaced by a deterministic
+  profile-completeness percentage (see Confirmed Working), but the
+  intake confirmation screen (`IntakeWizard.tsx`) was deliberately left
+  untouched by that item's scope. Worth the same treatment next time
+  that screen is touched — see `BUILD-ORDER-BIDPULSE.md` item #7.
+- **Same screen doesn't adapt to desktop width** — sits in a narrow,
+  fixed-width column with large unused margins even on a clearly
+  desktop-width viewport. Worth checking other post-action confirmation
+  screens for the same issue while this one's being fixed.
 - **Systemic dark-mode elevation bug, flagged not fixed.**
   `surface-container-lowest` — the token used by every card/modal in the
   app — is *darker* than plain `surface` in dark mode, the opposite of
-  "elevated." Fixed narrowly for the login/reset-password cards only
-  (`dark:bg-surface-container-lowest dark:bg-surface-container-low`
-  override) since that was in scope for a specific brief; every other
-  card/modal (e.g. `ConfirmDeleteDialog.tsx`) still has the same
-  backwards-in-dark-mode issue. Worth a broader pass someday, not urgent.
-- **Client dashboard Preview/Download UI is fine; the
-  `deliverables_ready → client_review` auto-trigger was real, silently
-  broken — root-caused and fixed 2026-09-05.** An earlier pass on this
-  same day closed this out as "code confirmed correct, no bug found"
-  based on static code reading alone (grepping for the mount point,
-  reading `git show origin/main:...`) — that conclusion was wrong,
-  caught by a later session's actual dev testing (real client account,
-  real Preview click, real DB reload) and confirmed here with a direct
-  reproduction, not just re-reading code. **Lesson reinforced: reading
-  code that looks correct is not the same as running it** — see
-  `CLAUDE.md`'s existing note on testing the exact real path.
-  `PacketButtons`/`DeliverablesSection.tsx` are genuinely fine — Preview
-  and Download both render and work correctly once a submission reaches
-  `deliverables_ready`. The actual bug: `app/api/advance-on-client-
-  preview/route.ts`'s stage-flip `UPDATE` ran under the client's own
-  RLS-scoped session, and `close_submissions_broad_client_policy_gap.sql`
-  (applied to dev this same week, for an unrelated, legitimate reason —
-  closing a real attestation-bypass gap) had removed the only policy
-  broad enough to allow it. The one remaining client UPDATE policy on
-  `submissions` only permits writes while `draft = true`, and
-  `deliverables_ready` is inherently non-draft — so the write always
-  silently no-opped: confirmed directly with a real disposable client
-  session against the actual dev database (`status: 200`,
-  `updateData: []`, `updateError: null` — PostgREST's signature for "RLS
-  filtered this row out," no error surfaced anywhere, exactly matching
-  the silent failure a prior session had already observed live). Fixed
-  the same way `generate-fit-check/route.ts` already handles the
-  identical constraint elsewhere in this codebase: the ownership/stage
-  check still runs under the caller's own session (that's the real
-  authorization boundary — already fully re-verified server-side), but
-  the actual write now goes through the service role. Verified the fix
-  directly, same reproduction: the RLS-scoped ownership check still
-  passes correctly, and the service-role write now genuinely flips
-  `stage` to `client_review` where it silently failed before. **Not yet
-  on production** — this fix lives on top of the already-unpushed
-  six-commit/three-migration set (see below); the underlying RLS gap
-  this exposed doesn't even exist on production yet since that migration
-  hasn't shipped there either.
-- **Admin inbox "zero submissions" bug — root cause found, but scope
-  turned out narrower than first suspected; production still genuinely
-  unverified.** The org_id/RLS theory from 2026-09-02 was directly
-  investigated this session (2026-09-03→04) "with a real authenticated
-  session, not just service_role" and found **fully healthy** — that
-  theory is retracted. The actual bug reproduced in dev was different
-  and self-inflicted this same session: a new migration
-  (`info_attested_by` on `submissions`) created a *second* foreign key
-  from `submissions` to `clients`, which broke PostgREST's ability to
-  infer which relationship to use in any query embedding `clients(...)`
-  — silently, at request time, with TypeScript catching none of it.
-  Found via a temporary server-side `console.log` on the real page
-  component after RLS, hydration warnings, browser-extension noise, and
-  tunnel caching were each ruled out in turn. Fixed across all 9 affected
-  files; audited the whole schema for other 2+-FK pairs (none found).
-  Documented in a new `CLAUDE.md` file, read automatically by future
-  Claude Code sessions, specifically so this class of bug doesn't
-  recur unnoticed.
-  **Caveat, stated directly in the handoff doc:** the *original*
-  2026-09-02 production report was never re-verified directly against
-  `bidpulse-production` — no production credentials were available this
-  session. It's reasonable to suspect the same root cause, but that's
-  not confirmed. This fix, along with everything else from this session,
-  is **not yet on production** — see the unpushed-work note below.
-- **Split dev and production Supabase projects — done and verified.** New
-  production project (`rixsgnbivayeaxbdseij`) live since 2026-09-02: all
-  tracked migrations applied and verified byte-identical to `schema.sql`,
-  Vercel's production env vars pointed at it, a real incognito-window test
-  confirmed a genuinely empty admin inbox on the live site after redeploy.
-  The one real bug this surfaced (file upload) is fixed and verified — see
-  Confirmed Working above.
+  "elevated." Fixed narrowly for the login/reset-password cards only;
+  every other card/modal (e.g. `ConfirmDeleteDialog.tsx`) still has the
+  same backwards-in-dark-mode issue. Worth a broader pass someday, not
+  urgent.
 - **Inbound bid email pipeline — code built and verified, blocked on
   Mike's IONOS/Gmail/Apps Script setup before it's actually live.** See
-  `scripts/README.md` for the exact steps (forwarding, label/filter, Apps
-  Script project + trigger, `INBOUND_BID_EMAIL_SECRET` on Vercel's
-  **production** environment specifically). Until that's done, no real
+  `scripts/README.md` for the exact steps. Until that's done, no real
   emails ever reach the route — it just sits ready.
 - **`client_reported_submitted_at` column — kept on `submissions`, by
-  Mike's explicit call 2026-09-02, even though "I've submitted this"
-  (`ReportSubmittedButton.tsx`) itself was removed.** A drop migration was
-  written and verified safe (zero rows anywhere ever used the column) but
-  paused rather than pushed same-session. Nothing in the app reads or
-  writes it anymore either way — purely a schema-tidiness item, not
-  blocking anything. Revisit whenever convenient.
+  Mike's explicit call, even though "I've submitted this"
+  (`ReportSubmittedButton.tsx`) itself was removed.** A drop migration
+  was written and verified safe but paused rather than pushed
+  same-session. Nothing in the app reads or writes it anymore either
+  way — purely a schema-tidiness item, not blocking anything.
+- **No admin UI toggle for `is_test`.** Real, actively-used column
+  (inbox ordering, digest emails, reporting all filter on it), but
+  nothing in the app ever writes `is_test: true` — every instance so far
+  has been a direct database edit. The admin Delete action is the actual
+  working answer for disposable testing today. Worth a real toggle if
+  this becomes a recurring need, not scoped now.
+- **Compliance checklist auto-population from completeness signals —
+  deliberately not built.** Needs its own schema migration (a `source`
+  column on `checklist_items` to distinguish auto-generated from
+  admin-created items) — deliberately not stacked behind other pending
+  migrations during a session with real migration-permission friction.
 
-## Deliberately Deferred (remaining items)
-Items #1, #2, and #4 from the original list (static bid-process warnings,
-bid-specific wage/site-visit/cash-flow/mobilization detection, and the
-dollar-threshold lean package) were completed 2026-09-01 — see Confirmed
-Working above. Remaining:
-1. Law enforcement/detention facility category for agency-aware compliance
-   (background checks, bloodborne pathogen cert — covered by
-   TRADE_SPECIFIC_CERTIFICATIONS and confirmed working via keyword
-   detection, but not yet confirmed whether it's integrated into the
-   `lib/agency-type.ts` keyword-detection system alongside
-   airport/school/transit/`va` — worth a quick check next time agency-type
-   is touched).
-2. Retainer package usage tracking (how many bids used this month vs. the
-   "up to 2/month" promise) — explicitly deferred, no schema yet.
+## Deferred (remaining items)
+1. Law enforcement/detention facility category — **checked directly,
+   confirmed narrow.** `TRADE_SPECIFIC_CERTIFICATIONS`' bloodborne-
+   pathogen/PREA rows already trigger correctly off scope text, not
+   agency name, so compliance-matrix behavior is unaffected. What's
+   actually missing: `lib/agency-type.ts` has no detention/law
+   enforcement `AgencyType`, so this bid type never gets the equivalent
+   softer fit-check note the other agency types get. Confirmed via
+   `grep` — zero matches. Still not building standalone; do this next
+   time `agency-type.ts` is touched for another reason.
+2. Retainer package usage tracking — explicitly deferred, no schema yet,
+   waiting on a real retainer client to test against.
+3. Golden-set regression fixture for the "never invent facts" guarantee
+   — needs real script-design time given LLM output non-determinism,
+   not a quick add. Existing test fixtures are a reasonable starting
+   point.
+4. Backup/disaster-recovery plan — Mike's own check against Supabase's
+   current plan tier, not a code task. A free DIY option (scheduled
+   `supabase db dump` via GitHub Actions) remains available regardless
+   of what's found.
+5. Error monitoring (Sentry) — blocked on Mike creating the account and
+   handing over a DSN key; not a code task until then.
 
 ## Business/Naming Note
 A different company (ad-tech, Boston, bidpulse.io) already uses the name
