@@ -22,9 +22,7 @@ regenerated to match. Vercel auto-deploy from Git confirmed genuinely
 working via a real empirical test (a harmless commit produced an
 automatic deployment, no manual `vercel --prod` needed) — see Confirmed
 Working for the full story, including an earlier false "no Git
-integration" finding that was later corrected. A further, still-local,
-uncommitted round of work (this session) closed three previously-open
-items — see Confirmed Working's newest three entries.
+integration" finding that was later corrected.
 
 ## How schema changes get made now
 As of 2026-08-31, all schema changes go through Supabase CLI migrations —
@@ -37,55 +35,208 @@ reference now (`npx supabase db dump --schema public`), not hand-maintained —
 regenerate it after every migration and commit the diff, never edit it
 directly.
 
+## Currently Open — Needs Action
+Everything below is genuinely unresolved. Anything not listed here is
+either fully closed (see Confirmed Working) or a deliberate, decided
+non-action (see Known Issues / Recently Fixed, which includes real
+"investigated and decided not to build" entries, not just bug fixes).
+
+1. **Landing page's "Trades we work with" grid reads as a harder
+   boundary than the product actually has — copy fix, not a functional
+   change.** Real concern: someone whose trade isn't one of the four
+   listed (HVAC, Janitorial, Landscaping, IT/Computer Support) may
+   assume they don't qualify and leave, when the product doesn't
+   actually work that way. The intake flow already has a real, working
+   "trade-coverage safety net" (`lib/compliance/known-trades.ts`) that
+   accepts *any* trade, showing an honest heads-up rather than a
+   rejection when it's outside the four with deep compliance-matrix
+   coverage — same philosophy the Fit-Score Quiz already uses (never a
+   hard "you don't qualify," always a "we can still help" branch). The
+   landing page is currently **less honest than the product itself** —
+   it implies a stricter gate than what genuinely happens.
+
+   **Decided approach, revised:** don't route people to a contact
+   form as the primary fix. A contact form means waiting on a reply at
+   the exact moment someone's deciding whether BidPulse is worth their
+   time — the worst possible moment to introduce delay, and it doesn't
+   actually need to exist, since the product already answers the
+   question for free via the existing safety net. **Point directly at
+   the "Start your bid" intake CTA instead** — copy near/below the trade
+   grid along the lines of: "We're deepest in these four — but if you're
+   in a related trade, go ahead and start your bid. You'll get an honest
+   heads-up right away if something's outside our sweet spot." Keep a
+   small, secondary contact link too, for someone who genuinely wants an
+   answer before committing to intake at all — just not as the primary
+   path.
+
+   **Do not** silently broaden the trade grid itself or bypass the
+   existing `assertNoMissingTradeCards()` drift check, which correctly
+   guards card/trade-list integrity for the four that *are* explicitly
+   listed — this is additive copy and CTA routing, not a change to that
+   mechanism.
+
+   **Real tradeoff worth keeping honest in the copy:** don't imply equal
+   depth for every trade — a trade outside the four genuinely gets less
+   tailored compliance-matrix content (no trade-specific certifications
+   like FDACS pesticide licensing), and the copy should reflect that
+   honestly (a real caveat, not a blanket "we do everything").
+
+   **New, since this now carries more weight:** review the actual
+   wording of the existing intake-time trade-coverage heads-up message
+   itself (not yet personally reviewed) — confirm it reads as a warm,
+   honest caveat, not a warning label, since it's now doing more of the
+   real "first honest answer" work than before.
+
+   **Verification required:** real screenshot of the updated landing-
+   page section and its CTA routing. Confirm the drift check still fires
+   correctly if a trade is ever added to `known-trades.ts` without a
+   matching card (unrelated to this change, just confirming it wasn't
+   accidentally weakened). Confirm the secondary contact link still
+   works. Confirm the actual intake-time heads-up message reads warm and
+   clear when triggered by a real out-of-scope trade.
+
+2. **New feature: extract bid fields from an uploaded RFP document.**
+   Real ask, confirmed in scope — currently step 2 ("About the bid")
+   requires manually typing agency, solicitation number, due date, and
+   scope; step 3 only stores the raw RFP with no extraction. Real
+   technical risk worth taking seriously: real solicitations run 30+
+   pages and often list multiple dates (site-visit, Q&A deadline,
+   pre-bid conference, actual submission due date) — the extraction must
+   correctly identify the real due date, not just the first date-like
+   string found; a wrong-date extraction here is a genuinely serious
+   failure mode. UX presentation (upload-first, matching the company-
+   info pattern) is a recommendation, not a locked decision — confirm
+   before building. Verification must use a real, actual solicitation
+   document, not the short synthetic specimens used for company-profile
+   testing.
+
+3. **Intake confirmation screen fit badge + desktop width — built,
+   needs one final real click-through.** Fixed with the same
+   completeness treatment as the dashboard: the confirmation screen
+   fetches the client's own row + certification count client-side once
+   the submission locks, renders the same "Profile N% complete" badge
+   via the shared `computeProfileCompleteness()`. A real codebase-wide
+   search (grep for `fit_alignment`, `fit_explanation`,
+   `fit_eligibility` across every client-facing component) confirmed
+   there wasn't a third location. Desktop-width issue also fixed on this
+   same screen (`max-w-2xl` → `md:max-w-3xl` on the page container,
+   `max-w-md` → `md:max-w-lg` on the confirmation cards, mobile sizing
+   unchanged). `tsc --noEmit` and `next build` both clean, including
+   confirmation the build-time trade-card drift check wasn't weakened.
+   **Not yet verified:** an actual browser click-through — real signup →
+   submit → see the percentage render correctly, real screenshots at a
+   genuine desktop viewport confirming the width fix, and confirming
+   mobile still looks right afterward.
+
+4. **Compliance checklist auto-population from completeness signals —
+   deliberately not built yet.** Needs its own schema migration (a
+   `source` column on `checklist_items`, to distinguish an auto-
+   generated item from an admin-created one) — deliberately not stacked
+   behind other pending migrations during a session with real
+   migration-permission friction. Needs a real design pass: rules for
+   when an auto-item should be marked done or removed once the client
+   fills the corresponding field.
+
+5. **Law enforcement/detention agency-type gap — CLOSED, built and
+   verified.** Confirmed directly before building:
+   `TRADE_SPECIFIC_CERTIFICATIONS`' bloodborne-pathogen/PREA rows already
+   trigger correctly off scope text, so compliance-matrix behavior was
+   already fine — deliberately left untouched. What was actually
+   missing: a `detention` `AgencyType` in `lib/agency-type.ts` (matches
+   sheriff's office/correctional/jail/detention/police department in the
+   agency name — "police" alone deliberately excluded to avoid over-
+   matching routine city-agency mentions), plus the equivalent softer
+   fit-check note matching the existing airport/school/transit/VA
+   pattern. Verified with 5 real test cases including two negative
+   controls (confirmed no over-matching); `tsc --noEmit` and
+   `next build` both clean.
+
+6. **Retainer package usage tracking.** No schema yet — needs a
+   usage-count field or derived query against `submissions`/`packages`,
+   plus a decision on how resets are timed (calendar month vs. rolling
+   30 days). Explicitly deferred until there's a real retainer client to
+   test against.
+
+7. **Inbound bid email pipeline — code built and verified, blocked on
+   Mike's own setup.** `app/api/inbound-bid-email/route.ts` is done and
+   verified (real extraction calls, direct DB read-backs). Not yet live
+   — needs Mike's IONOS/Gmail forwarding rule, label/filter, and Apps
+   Script trigger set up per `scripts/README.md`, plus the real
+   `INBOUND_BID_EMAIL_SECRET` in Vercel's **production** environment.
+
+8. **Systemic dark-mode elevation bug, flagged not fixed.**
+   `surface-container-lowest` — the token used by every card/modal in
+   the app — is *darker* than plain `surface` in dark mode, the opposite
+   of "elevated." Fixed narrowly for the login/reset-password cards
+   only; every other card/modal (e.g. `ConfirmDeleteDialog.tsx`) still
+   has the same backwards-in-dark-mode issue. Not urgent — a broader
+   design-token pass someday, not a one-off patch each time it's
+   separately noticed.
+
+9. **Golden-set regression check for the "never invent facts"
+   guarantee — needs real design time, not a quick add.** LLM outputs
+   are non-deterministic, so a literal diff-against-expected-text script
+   would be fragile and fail on harmless wording variation, not just
+   genuine fabrication. Needs a *structural* check instead (does an
+   expected fact appear, does an expected null/placeholder stay a
+   placeholder, does anything appear that wasn't in the source input),
+   which is a real script-design decision plus real API cost to run
+   repeatedly. Existing fixtures in `test-fixtures/` are a reasonable
+   starting point.
+
+10. **Backup/disaster-recovery plan — Mike's own check, not a code
+   task.** Log into the Supabase dashboard for `bidpulse-production` →
+   Settings → Backups, confirm what's actually available on the current
+   plan tier, decide whether to upgrade given real client data now
+   exists. If manual-only, a free DIY option remains available (a
+   scheduled GitHub Action running `supabase db dump`, storing the
+   result in a private repo) without requiring a plan upgrade.
+
+11. **Error monitoring and alerting — needs Mike to create a Sentry
+    account first.** Sign up at sentry.io, choose Next.js, get a DSN
+    key, hand it to a future session to wire in `@sentry/nextjs`. Not a
+    code task until the DSN exists.
+
+12. **`client_reported_submitted_at` column — minor schema-tidiness
+    item, not blocking anything.** Kept on `submissions` by Mike's
+    explicit call even though the client-facing "I've submitted this"
+    button itself was removed. A drop migration was written and
+    verified safe but paused rather than pushed same-session. Nothing
+    in the app reads or writes it either way.
+
+13. **Admin UI toggle for `is_test` — built, one click-through
+    verification still needed.** Real finding while setting up a
+    disposable test client to verify a production fix: nothing in the
+    app ever wrote `is_test: true` anywhere, including the intake
+    wizard — every instance had been a direct database edit. Built a new
+    toggle on the admin submission detail page's Status panel (same
+    pattern as the existing estimated-value control), writing directly
+    to `submissions.is_test` — already covered by existing RLS, no
+    migration needed. Replaces the old read-only "TEST" label in the
+    same spot. `tsc --noEmit` and `next build` both clean. **Not yet
+    verified:** an actual admin click-through (real login, click the
+    toggle, confirm the DB write) — worth doing before calling this
+    fully closed.
+
+### Business decisions (Mike's, not code tasks)
+- **Pricing as a deliberate throttle** — raising prices to intentionally
+  slow growth while building capacity is a legitimate strategy some
+  service businesses use on purpose. Not implementable; just worth
+  having as a real, considered option.
+- **Hiring a part-time first-pass reviewer** — the real long-term fix
+  for the admin review bottleneck once volume justifies it: someone else
+  runs `Admin-Review-Rubric.md` as a first pass, escalating only
+  ambiguous or judgment-heavy cases. Not a code task; a hiring decision
+  to make when the numbers justify it.
+
+### Process habits (no artifact needed)
+- **Batch similar review work** — reviewing several capability
+  statements back-to-back is faster per-document than context-switching
+  between clients and deliverable types all day. Free, no code required,
+  just a habit worth deliberately trying.
+
+
 ## Confirmed Working (tested with real evidence, not just "reported done")
-- **Intake confirmation screen now shows the profile-completeness
-  percentage instead of the old fit badge, and the desktop-width issue
-  is fixed — built this session, real evidence not yet a live
-  click-through.** `IntakeWizard.tsx`'s confirmation screen ("We've got
-  it") previously rendered the raw `fit_alignment` badge + full
-  `fit_explanation` paragraph — the same third-person voice problem
-  fixed elsewhere, worse here since it's the full text on the first
-  screen every client sees. Replaced with the same deterministic
-  `computeProfileCompleteness()` percentage the dashboard's Status card
-  already uses (client-side fetch of the client's own row + cert count,
-  fired once the submission locks) — the mandatory-site-visit warning is
-  untouched, since that's a distinct safety flag, not the badge issue.
-  Also widened the intake page container (`max-w-2xl` → `md:max-w-3xl`)
-  and the confirmation screen's inner cards (`max-w-md` → `md:max-w-lg`
-  on desktop) for the flagged narrow-column issue, leaving mobile sizing
-  unchanged. A full-codebase grep for `fit_alignment`/`fit_explanation`/
-  `fit_eligibility` confirmed no third client-facing location exists
-  beyond the admin-only page (deliberately untouched). Verified:
-  `tsc --noEmit` clean, full `next build` succeeds (including the
-  build-time trade-card drift check). **Not yet verified:** an actual
-  browser click-through (real signup → submit → see the percentage
-  render) — worth doing before calling this fully closed.
-- **Detention/law-enforcement agency-type note — built this session.**
-  Added a `detention` `AgencyType` to `lib/agency-type.ts` (matches
-  sheriff's office / correctional / jail / detention / police department
-  in the agency name — "police" alone deliberately excluded to avoid
-  over-matching routine city-agency mentions) and a corresponding softer
-  fit-check note in `generate-fit-check/route.ts` (PREA/bloodborne-
-  pathogen/background-check language), matching the existing
-  airport/school/transit/VA pattern. Deliberately did **not** touch
-  `generate-draft`'s compliance-matrix rows — per this project's own
-  prior finding, that behavior already fires correctly off scope text,
-  not agency name. Verified directly: 5 real test cases including two
-  negative controls ("City of Jacksonville" alone, the airport
-  authority) confirmed no over-matching; `tsc --noEmit` and `next build`
-  both clean.
-- **Admin `is_test` toggle — built this session.** New
-  `IsTestToggle.tsx` on the admin submission detail page's Status panel
-  (same pattern as the existing `EstimatedValueInput.tsx` admin
-  control), writing directly to `submissions.is_test` — already covered
-  by the existing "admins manage submissions" RLS policy, no migration
-  needed. Replaces the old read-only "TEST" label in the same spot.
-  Closes the real gap found investigating this earlier: nothing in the
-  app ever wrote `is_test: true`, only direct database edits ever had.
-  Verified: `tsc --noEmit` and `next build` both clean. **Not yet
-  verified:** an actual admin click-through (real login, click the
-  toggle, confirm the DB write) — worth doing before calling this fully
-  closed.
 - **Push/deploy fully reconciled across two same-day sessions,
   2026-09-05 — corrected commit count and final verified state.** Real
   count: 12 commits pushed to `origin/main` (`acea384..abdfa9f`, plus a
@@ -148,18 +299,19 @@ directly.
   after filling in the rest — confirms it updates live. `fit_
   eligibility_concern` and the admin-side Fit Check panel are untouched.
   **The intake confirmation screen was explicitly left out of this
-  item's original scope** — since fixed with the same treatment, see
-  the newer entry above.
+  item's scope and still shows the old badge + raw text** — see Open
+  items below.
 - **Law enforcement/detention agency-type gap — precisely scoped, not
   the broad gap first suspected.** Checked directly via `grep`:
   `TRADE_SPECIFIC_CERTIFICATIONS`' bloodborne-pathogen/PREA rows already
   trigger correctly off scope text, not agency name, so compliance-
   matrix behavior for these bids is already correct. The actual, narrow
-  gap: `lib/agency-type.ts` had no detention/law-enforcement
-  `AgencyType`, so this bid type never got the equivalent softer
+  gap: `lib/agency-type.ts` has no detention/law-enforcement
+  `AgencyType`, so this bid type never gets the equivalent softer
   fit-check note the other agency types get. Confirmed zero matches for
-  detention/jail/correctional/sheriff/police in that file at the time —
-  since built, see the newer entry above.
+  detention/jail/correctional/sheriff/police in that file. Still
+  deferred per original scope — a quick addition next time that file is
+  touched for another reason, not a standalone project.
 - **Full pipeline automation trio + admin-inbox health, all verified
   directly against production, 2026-09-05 — real requests, real DB
   reads, not inference.**
@@ -949,159 +1101,6 @@ directly.
   real queue position otherwise). Verified with a direct before/after
   read of the record.
 
-## Currently Open — Needs Action
-Everything below is genuinely unresolved. Anything not listed here is
-either fully closed (see Confirmed Working) or a deliberate, decided
-non-action (see Known Issues / Recently Fixed, which includes real
-"investigated and decided not to build" entries, not just bug fixes).
-
-1. **Landing page's "Trades we work with" grid reads as a harder
-   boundary than the product actually has — copy fix, not a functional
-   change.** Real concern: someone whose trade isn't one of the four
-   listed (HVAC, Janitorial, Landscaping, IT/Computer Support) may
-   assume they don't qualify and leave, when the product doesn't
-   actually work that way. The intake flow already has a real, working
-   "trade-coverage safety net" (`lib/compliance/known-trades.ts`) that
-   accepts *any* trade, showing an honest heads-up rather than a
-   rejection when it's outside the four with deep compliance-matrix
-   coverage — same philosophy the Fit-Score Quiz already uses (never a
-   hard "you don't qualify," always a "we can still help" branch). The
-   landing page is currently **less honest than the product itself** —
-   it implies a stricter gate than what genuinely happens.
-
-   **Decided approach, revised:** don't route people to a contact
-   form as the primary fix. A contact form means waiting on a reply at
-   the exact moment someone's deciding whether BidPulse is worth their
-   time — the worst possible moment to introduce delay, and it doesn't
-   actually need to exist, since the product already answers the
-   question for free via the existing safety net. **Point directly at
-   the "Start your bid" intake CTA instead** — copy near/below the trade
-   grid along the lines of: "We're deepest in these four — but if you're
-   in a related trade, go ahead and start your bid. You'll get an honest
-   heads-up right away if something's outside our sweet spot." Keep a
-   small, secondary contact link too, for someone who genuinely wants an
-   answer before committing to intake at all — just not as the primary
-   path.
-
-   **Do not** silently broaden the trade grid itself or bypass the
-   existing `assertNoMissingTradeCards()` drift check, which correctly
-   guards card/trade-list integrity for the four that *are* explicitly
-   listed — this is additive copy and CTA routing, not a change to that
-   mechanism.
-
-   **Real tradeoff worth keeping honest in the copy:** don't imply equal
-   depth for every trade — a trade outside the four genuinely gets less
-   tailored compliance-matrix content (no trade-specific certifications
-   like FDACS pesticide licensing), and the copy should reflect that
-   honestly (a real caveat, not a blanket "we do everything").
-
-   **New, since this now carries more weight:** review the actual
-   wording of the existing intake-time trade-coverage heads-up message
-   itself (not yet personally reviewed) — confirm it reads as a warm,
-   honest caveat, not a warning label, since it's now doing more of the
-   real "first honest answer" work than before.
-
-   **Verification required:** real screenshot of the updated landing-
-   page section and its CTA routing. Confirm the drift check still fires
-   correctly if a trade is ever added to `known-trades.ts` without a
-   matching card (unrelated to this change, just confirming it wasn't
-   accidentally weakened). Confirm the secondary contact link still
-   works. Confirm the actual intake-time heads-up message reads warm and
-   clear when triggered by a real out-of-scope trade.
-
-2. **New feature: extract bid fields from an uploaded RFP document.**
-   Real ask, confirmed in scope — currently step 2 ("About the bid")
-   requires manually typing agency, solicitation number, due date, and
-   scope; step 3 only stores the raw RFP with no extraction. Real
-   technical risk worth taking seriously: real solicitations run 30+
-   pages and often list multiple dates (site-visit, Q&A deadline,
-   pre-bid conference, actual submission due date) — the extraction must
-   correctly identify the real due date, not just the first date-like
-   string found; a wrong-date extraction here is a genuinely serious
-   failure mode. UX presentation (upload-first, matching the company-
-   info pattern) is a recommendation, not a locked decision — confirm
-   before building. Verification must use a real, actual solicitation
-   document, not the short synthetic specimens used for company-profile
-   testing.
-
-3. **Compliance checklist auto-population from completeness signals —
-   deliberately not built yet.** Needs its own schema migration (a
-   `source` column on `checklist_items`, to distinguish an auto-
-   generated item from an admin-created one) — deliberately not stacked
-   behind other pending migrations during a session with real
-   migration-permission friction. Needs a real design pass: rules for
-   when an auto-item should be marked done or removed once the client
-   fills the corresponding field.
-
-4. **Retainer package usage tracking.** No schema yet — needs a
-   usage-count field or derived query against `submissions`/`packages`,
-   plus a decision on how resets are timed (calendar month vs. rolling
-   30 days). Explicitly deferred until there's a real retainer client to
-   test against.
-
-5. **Inbound bid email pipeline — code built and verified, blocked on
-   Mike's own setup.** `app/api/inbound-bid-email/route.ts` is done and
-   verified (real extraction calls, direct DB read-backs). Not yet live
-   — needs Mike's IONOS/Gmail forwarding rule, label/filter, and Apps
-   Script trigger set up per `scripts/README.md`, plus the real
-   `INBOUND_BID_EMAIL_SECRET` in Vercel's **production** environment.
-
-6. **Systemic dark-mode elevation bug, flagged not fixed.**
-   `surface-container-lowest` — the token used by every card/modal in
-   the app — is *darker* than plain `surface` in dark mode, the opposite
-   of "elevated." Fixed narrowly for the login/reset-password cards
-   only; every other card/modal (e.g. `ConfirmDeleteDialog.tsx`) still
-   has the same backwards-in-dark-mode issue. Not urgent — a broader
-   design-token pass someday, not a one-off patch each time it's
-   separately noticed.
-
-7. **Golden-set regression check for the "never invent facts"
-   guarantee — needs real design time, not a quick add.** LLM outputs
-   are non-deterministic, so a literal diff-against-expected-text script
-   would be fragile and fail on harmless wording variation, not just
-   genuine fabrication. Needs a *structural* check instead (does an
-   expected fact appear, does an expected null/placeholder stay a
-   placeholder, does anything appear that wasn't in the source input),
-   which is a real script-design decision plus real API cost to run
-   repeatedly. Existing fixtures in `test-fixtures/` are a reasonable
-   starting point.
-
-8. **Backup/disaster-recovery plan — Mike's own check, not a code
-   task.** Log into the Supabase dashboard for `bidpulse-production` →
-   Settings → Backups, confirm what's actually available on the current
-   plan tier, decide whether to upgrade given real client data now
-   exists. If manual-only, a free DIY option remains available (a
-   scheduled GitHub Action running `supabase db dump`, storing the
-   result in a private repo) without requiring a plan upgrade.
-
-9. **Error monitoring and alerting — needs Mike to create a Sentry
-   account first.** Sign up at sentry.io, choose Next.js, get a DSN
-   key, hand it to a future session to wire in `@sentry/nextjs`. Not a
-   code task until the DSN exists.
-
-10. **`client_reported_submitted_at` column — minor schema-tidiness
-    item, not blocking anything.** Kept on `submissions` by Mike's
-    explicit call even though the client-facing "I've submitted this"
-    button itself was removed. A drop migration was written and
-    verified safe but paused rather than pushed same-session. Nothing
-    in the app reads or writes it either way.
-
-### Business decisions (Mike's, not code tasks)
-- **Pricing as a deliberate throttle** — raising prices to intentionally
-  slow growth while building capacity is a legitimate strategy some
-  service businesses use on purpose. Not implementable; just worth
-  having as a real, considered option.
-- **Hiring a part-time first-pass reviewer** — the real long-term fix
-  for the admin review bottleneck once volume justifies it: someone else
-  runs `Admin-Review-Rubric.md` as a first pass, escalating only
-  ambiguous or judgment-heavy cases. Not a code task; a hiring decision
-  to make when the numbers justify it.
-
-### Process habits (no artifact needed)
-- **Batch similar review work** — reviewing several capability
-  statements back-to-back is faster per-document than context-switching
-  between clients and deliverable types all day. Free, no code required,
-  just a habit worth deliberately trying.
 
 ## Business/Naming Note
 A different company (ad-tech, Boston, bidpulse.io) already uses the name
