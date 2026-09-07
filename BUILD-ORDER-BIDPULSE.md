@@ -198,7 +198,7 @@ rule, label/filter, and Apps Script trigger set up per
 `scripts/README.md`, plus the real `INBOUND_BID_EMAIL_SECRET` added to
 Vercel's **production** environment specifically.
 
-### 7. Client-facing profile-completeness indicator — dashboard done, intake screen still open
+### 7. Client-facing profile-completeness indicator — dashboard done, intake screen now done too
 **Built and verified on the dashboard:** `lib/compliance/profile-
 completeness.ts` — a deterministic, equally-weighted presence check
 across 6 fields (NAICS codes, license number, insurance provider/
@@ -216,25 +216,34 @@ rest — confirms it actually updates live, the same staleness risk item
 untouched** — this only ever replaced the client-facing dashboard
 signal.
 
-**Still genuinely open: the intake confirmation screen
-(`IntakeWizard.tsx`) was explicitly left out of scope, and real
-screenshot evidence since then confirms it still shows the old badge
-plus the raw `fit_explanation` text** — the same third-person voice
-problem caught elsewhere, and worse here since it's the full paragraph,
-not just a label, on the very first screen a client sees after
-submitting. This needs the same completeness treatment as the
-dashboard, applied to this second location. **Real codebase search
-required first** (grep for `fit_alignment`, `fit_explanation`,
-`fit_eligibility` across every client-facing component) to confirm
-there isn't a third location neither of us has spotted yet.
+**Now also done: the intake confirmation screen.** `IntakeWizard.tsx`
+was explicitly left out of the original scope, and real screenshot
+evidence confirmed it still showed the old badge plus the raw
+`fit_explanation` text — the same third-person voice problem caught
+elsewhere, and worse there since it's the full paragraph, not just a
+label, on the very first screen a client sees after submitting. Fixed
+with the same completeness treatment as the dashboard: the confirmation
+screen now fetches the client's own row + certification count
+client-side once the submission locks and renders the same "Profile N%
+complete" badge, computed via the same `computeProfileCompleteness()`.
+**A real codebase-wide search** (grep for `fit_alignment`,
+`fit_explanation`, `fit_eligibility` across every client-facing
+component) confirmed there wasn't a third location.
 
-**Separately, also flagged on this same screen:** it doesn't adapt to
-desktop width — sits in a narrow, fixed-width column with large unused
-margins even on a clearly desktop-width viewport, reading like a
-mobile-width container that never picked up a proper desktop layout.
-Worth checking a few other post-action confirmation screens for the
-same issue while this one's being fixed, rather than finding it
-elsewhere later.
+**Also fixed on this same screen:** the desktop-width issue — it sat in
+a narrow, fixed-width column with large unused margins even on a
+clearly desktop-width viewport, reading like a mobile-width container
+that never picked up a proper desktop layout. Widened the intake page
+container (`max-w-2xl` → `md:max-w-3xl`) and the confirmation screen's
+inner cards (`max-w-md` → `md:max-w-lg` on desktop), leaving mobile
+sizing unchanged.
+
+**Verified:** `tsc --noEmit` clean, full `next build` succeeds
+(including the build-time trade-card drift check, confirming it wasn't
+accidentally weakened). **Not yet verified:** an actual browser
+click-through (real signup → submit → see the percentage render, real
+screenshots at a genuine desktop viewport) — worth doing before calling
+this fully closed.
 
 **Not built yet, deliberately, real reason:** auto-populating the
 compliance checklist from these same missing-field signals — this
@@ -248,28 +257,34 @@ pass: a `source`/`auto_generated` column, and rules for when an
 auto-item should be marked done or removed once the client fills the
 corresponding field.
 
-**Verification required:** first, the codebase-wide search above. Then:
-a client with a mostly-empty profile shows a low completeness number and
-a populated checklist of what's missing on **both** the intake
+**Still needed for the completeness percentage itself (both
+locations):** a real browser click-through — a client with a
+mostly-empty profile shows a low completeness number on both the intake
 confirmation page and the dashboard; after filling in several fields,
-both update on a fresh reload, in both locations. Also verify the
-desktop-width fix with real screenshots at a genuine desktop viewport,
-confirming mobile still looks correct afterward.
+both update on a fresh reload. Also real screenshots of the
+desktop-width fix at a genuine desktop viewport, confirming mobile
+still looks correct afterward. The itemized checklist mentioned above
+is a separate, not-yet-built piece — see the schema-migration note
+above; nothing to verify there yet.
 
-### 8. Law enforcement/detention agency-type integration check — confirmed narrow, not building standalone
-**Checked directly, not assumed.** `TRADE_SPECIFIC_CERTIFICATIONS`'
-bloodborne-pathogen/PREA rows are fine as-is — they trigger off
-`submission.scope` text directly, not agency name, so compliance-matrix
-behavior for a detention/correctional bid is already correct and
-unaffected by this gap. **What's actually missing:**
-`lib/agency-type.ts` has no `detention`/`law_enforcement` `AgencyType`
-alongside airport/school/transit/`va`, so a detention-facility bid
-never gets the equivalent softer fit-check note (e.g. "confirm your
-team can pass background checks and complete PREA/bloodborne pathogen
-training before pursuing this"). Confirmed via `grep` — zero matches for
-detention/jail/correctional/sheriff/police in `agency-type.ts`. Still
-not building standalone, per this item's original scope — do this the
-next time `agency-type.ts` is touched for another reason.
+### 8. Law enforcement/detention agency-type integration check — built
+**Checked directly, not assumed, before building.**
+`TRADE_SPECIFIC_CERTIFICATIONS`' bloodborne-pathogen/PREA rows are fine
+as-is — they trigger off `submission.scope` text directly, not agency
+name, so compliance-matrix behavior for a detention/correctional bid is
+already correct and unaffected by this gap; deliberately left
+`generate-draft`'s compliance-matrix rows untouched. **What was
+actually missing, now built:** a `detention` `AgencyType` in
+`lib/agency-type.ts` (matches sheriff's office / correctional / jail /
+detention / police department in the agency name — "police" alone
+deliberately excluded to avoid over-matching routine city-agency
+mentions), plus the equivalent softer fit-check note in
+`generate-fit-check/route.ts` (confirm background checks and PREA/
+bloodborne pathogen training) matching the existing
+airport/school/transit/VA pattern. Verified directly: 5 real test cases
+including two negative controls ("City of Jacksonville" alone, the
+airport authority) confirmed no over-matching; `tsc --noEmit` and
+`next build` both clean.
 
 ### 9. Retainer package usage tracking
 Track how many bids a retainer client has used this month against the
@@ -278,19 +293,23 @@ derived query against `submissions`/`packages`, plus a decision on how
 resets are timed (calendar month vs. rolling 30 days). Explicitly
 deferred until there's a real retainer client to test against.
 
-### 10. No admin UI toggle for `is_test` — found, not building yet
-**Real, genuinely new finding.** While setting up a disposable test
-client to verify a production fix, checked whether there's any
-admin-facing way to mark a client/submission `is_test = true`. There
-isn't — the column is real and actively used throughout the app (admin
-inbox ordering, digest emails, reporting all filter on it), but
-**nothing in the app ever writes `is_test: true` anywhere, including the
-intake wizard.** The only times it's ever been set have been direct
-database edits (see the Dar Mano Consulting correction in
-`PROJECT-STATUS.md`). For one-off disposable testing, the admin Delete
-action is the actual working answer — remove the test data afterward
-instead of flagging it. Worth a real toggle someday if disposable test
-accounts become a recurring need, but not scoped or built now.
+### 10. No admin UI toggle for `is_test` — built
+**Real finding, then built.** While setting up a disposable test client
+to verify a production fix, checked whether there's any admin-facing
+way to mark a client/submission `is_test = true`. There wasn't — the
+column is real and actively used throughout the app (admin inbox
+ordering, digest emails, reporting all filter on it), but nothing in
+the app ever wrote `is_test: true` anywhere, including the intake
+wizard; every instance had been a direct database edit. **Built:** a
+new `IsTestToggle.tsx` on the admin submission detail page's Status
+panel (same pattern as the existing `EstimatedValueInput.tsx` admin
+control), writing directly to `submissions.is_test` — already covered
+by the existing "admins manage submissions" RLS policy, no migration
+needed. Replaces the old read-only "TEST" label in the same spot.
+Verified: `tsc --noEmit` and `next build` both clean. **Not yet
+verified:** an actual admin click-through (real login, click the
+toggle, confirm the DB write) — worth doing before calling this fully
+closed.
 
 ## Process / Infrastructure Recommendations
 These aren't things a client would ever notice missing — they're
@@ -421,6 +440,3 @@ Business/hiring decision, not implementable now.
   signals — needs its own schema migration (a `source` column on
   `checklist_items`), deliberately not stacked behind other pending
   migrations this session.
-- Admin UI toggle for `is_test` — the admin Delete action already
-  covers the real disposable-testing need; revisit only if that stops
-  being sufficient.
