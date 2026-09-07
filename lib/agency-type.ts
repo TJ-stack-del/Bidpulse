@@ -19,7 +19,17 @@ const TRANSIT_AGENCY_PATTERN = /\b(transit|transportation authority|jta)\b/i;
 // DoD or other federal IT contract is bound by.
 const VA_AGENCY_PATTERN = /\b(veterans affairs|veterans health administration|va medical center|vamc|va health care system|visn)\b/i;
 
-export type AgencyType = "airport" | "school" | "transit" | "va";
+// Compliance-matrix behavior for these bids (background-check/bloodborne-
+// pathogen/PREA rows in TRADE_SPECIFIC_CERTIFICATIONS) already triggers off
+// scope text, not agency name, so this only ever adds the same softer
+// fit-check note the other agency types get below — it doesn't gate or
+// duplicate anything already working. "Police" alone would over-match
+// (routine city-agency mentions, records requests), so it's paired with a
+// facility-type word rather than standing alone.
+const DETENTION_AGENCY_PATTERN =
+  /\b(detention|jail|correctional|corrections|county sheriff|sheriff'?s office|police department)\b/i;
+
+export type AgencyType = "airport" | "school" | "transit" | "va" | "detention";
 
 export function detectAgencyTypes(agency: string): AgencyType[] {
   const types: AgencyType[] = [];
@@ -27,6 +37,7 @@ export function detectAgencyTypes(agency: string): AgencyType[] {
   if (SCHOOL_AGENCY_PATTERN.test(agency)) types.push("school");
   if (TRANSIT_AGENCY_PATTERN.test(agency)) types.push("transit");
   if (VA_AGENCY_PATTERN.test(agency)) types.push("va");
+  if (DETENTION_AGENCY_PATTERN.test(agency)) types.push("detention");
   return types;
 }
 

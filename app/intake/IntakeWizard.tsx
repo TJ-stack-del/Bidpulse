@@ -10,6 +10,7 @@ import { BidProcessNotices } from "@/components/ui/BidProcessNotices";
 import { CompanyProfileUpload, type ExtractedCompanyProfile } from "@/components/ui/CompanyProfileUpload";
 import { isEmail, normalizePhone } from "@/lib/phone";
 import type { FitCheckResult } from "@/lib/submissions";
+import { computeProfileCompleteness } from "@/lib/compliance/profile-completeness";
 
 // NAICS codes, small business status, and set-asides used to be collected
 // here too — moved to Company Profile (app/dashboard/profile) instead, so a
@@ -51,24 +52,6 @@ async function withRetry<T>(
   return last;
 }
 
-// Framed as readiness for OUR prep process, never as odds of winning —
-// "Worth a second look" reads as neutral/informative, not a rejection.
-// Colors found broken on real inspection of the same object duplicated on
-// the dashboard (app/dashboard/page.tsx): "moderate" was the same gray as
-// "weak," reading as neutral/nothing rather than an actual signal — now a
-// distinct amber (tertiary-container), while "weak" stays deliberately
-// muted rather than a color that would read as more alarming than it should.
-const FIT_LABELS: Record<string, string> = {
-  strong: "Strong fit",
-  moderate: "Moderate fit",
-  weak: "Worth a second look",
-};
-const FIT_STYLE: Record<string, string> = {
-  strong: "bg-secondary-container text-on-secondary-container",
-  moderate: "bg-tertiary-container text-on-tertiary-container",
-  weak: "bg-surface-container-highest text-on-surface-variant",
-};
-
 export function IntakeWizard() {
   const [step, setStep] = useState(0);
   const [clientId, setClientId] = useState<string | null>(null);
@@ -78,6 +61,12 @@ export function IntakeWizard() {
   const [submitted, setSubmitted] = useState(false);
   const [fitCheck, setFitCheck] = useState<FitCheckResult | null>(null);
   const [fitCheckLoading, setFitCheckLoading] = useState(false);
+  // Same deterministic completeness percentage as the dashboard's Status
+  // card (lib/compliance/profile-completeness.ts) — replaces the old
+  // fit_alignment badge + raw fit_explanation paragraph that used to render
+  // here (see BUILD-ORDER-BIDPULSE.md item #7). Fetched client-side once the
+  // submission locks, same trigger point as the fit-check fetch above.
+  const [completenessPercent, setCompletenessPercent] = useState<number | null>(null);
   // Blocks rendering step 0 until this resolves — without it, a client who's
   // already logged in (e.g. starting a second bid) would briefly see the
   // signup form and could submit it, calling signUp() a second time for an
@@ -373,20 +362,27 @@ export function IntakeWizard() {
             <Spinner /> Taking a quick look…
           </p>
         )}
-        {fitCheck && (
-          <div className="mt-6 max-w-md mx-auto bg-surface-container-low border border-outline-variant rounded-xl p-5 text-left">
+        {completenessPercent !== null && (
+          <div className="mt-6 max-w-md md:max-w-lg mx-auto bg-surface-container-low border border-outline-variant rounded-xl p-5 text-left">
             <span
               className={`inline-flex px-3 py-1 rounded-full text-label-md font-bold ${
-                FIT_STYLE[fitCheck.alignment] ?? "bg-surface-container-highest text-on-surface-variant"
+                completenessPercent === 100
+                  ? "bg-secondary-container text-on-secondary-container"
+                  : "bg-tertiary-container text-on-tertiary-container"
               }`}
             >
-              {FIT_LABELS[fitCheck.alignment] ?? fitCheck.alignment}
+              Profile {completenessPercent}% complete
             </span>
-            <p className="text-body-md text-on-surface-variant mt-2">{fitCheck.explanation}</p>
+            {completenessPercent < 100 && (
+              <p className="text-body-md text-on-surface-variant mt-2">
+                A more complete Company Profile means less back-and-forth
+                before your bid is ready to go out.
+              </p>
+            )}
           </div>
         )}
         {fitCheck?.mandatorySiteVisitConcern && (
-          <div className="mt-4 max-w-md mx-auto bg-error-container/20 border border-error/30 rounded-xl p-5 text-left flex gap-3">
+          <div className="mt-4 max-w-md md:max-w-lg mx-auto bg-error-container/20 border border-error/30 rounded-xl p-5 text-left flex gap-3">
             <span className="material-symbols-outlined text-error text-[20px] shrink-0">warning</span>
             <div>
               <p className="text-label-md text-error font-bold uppercase tracking-wide mb-1">
@@ -415,7 +411,7 @@ export function IntakeWizard() {
           </Link>
         </div>
 
-        <div className="mt-8 max-w-md mx-auto bg-surface-container-low border border-outline-variant rounded-xl p-5 text-left">
+        <div className="mt-8 max-w-md md:max-w-lg mx-auto bg-surface-container-low border border-outline-variant rounded-xl p-5 text-left">
           <p className="text-label-md text-on-surface-variant uppercase tracking-wide mb-3">
             A couple things to know
           </p>
@@ -561,6 +557,38 @@ export function IntakeWizard() {
             onSubmitted={() => {
               setSubmitted(true);
               setFitCheckLoading(true);
+              // Fire-and-forget, same as the fit-check fetch — clientId is
+              // already known at this point (BidFileStep requires it), and
+              // RLS already lets a client read their own clients row and
+              // certification count.
+              (async () => {
+                const [{ data: clientRow }, { count: certCount }] = await Promise.all([
+                  supabase
+                    .from("clients")
+                    .select(
+                      "naics_codes, license_number, insurance_provider, general_liability_coverage, business_address, business_phone"
+                    )
+                    .eq("id", clientId)
+                    .maybeSingle(),
+                  supabase
+                    .from("client_certifications")
+                    .select("id", { count: "exact", head: true })
+                    .eq("client_id", clientId),
+                ]);
+                if (clientRow) {
+                  setCompletenessPercent(
+                    computeProfileCompleteness({
+                      naicsCodes: clientRow.naics_codes,
+                      licenseNumber: clientRow.license_number,
+                      insuranceProvider: clientRow.insurance_provider,
+                      generalLiabilityCoverage: clientRow.general_liability_coverage,
+                      businessAddress: clientRow.business_address,
+                      businessPhone: clientRow.business_phone,
+                      hasCertification: (certCount ?? 0) > 0,
+                    }).percent
+                  );
+                }
+              })().catch(() => {});
             }}
             onFitCheck={(result) => {
               setFitCheck(result);

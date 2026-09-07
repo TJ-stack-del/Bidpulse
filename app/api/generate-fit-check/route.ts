@@ -43,6 +43,11 @@ function agencyTypeFitNotes(agencyTypes: AgencyType[], companyName: string): str
       `This job is with the VA. Before pursuing this, confirm whether ${companyName}'s team will need access to VA information systems or VA sensitive data (VA Handbook 6500.6), whether a Section 508 accessibility checklist is required for any software/digital deliverable, and whether the scope touches Controlled Unclassified Information (CUI/NIST 800-171/CMMC) — that last one is a serious, high-cost compliance requirement if it applies, likely requiring specialist cybersecurity compliance help beyond what BidPulse provides.`
     );
   }
+  if (agencyTypes.includes("detention")) {
+    notes.push(
+      `This job is at a detention or law-enforcement facility. Before pursuing this, confirm ${companyName}'s team can pass the required background checks and complete PREA and bloodborne pathogen training the facility will require.`
+    );
+  }
   return notes;
 }
 

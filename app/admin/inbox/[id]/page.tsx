@@ -10,6 +10,7 @@ import { EstimatedValueInput } from "./EstimatedValueInput";
 import { RequestInfoForm } from "./RequestInfoForm";
 import { buildClientInfoRequestDraft } from "@/lib/client-info-request";
 import { DeleteSubmissionButton } from "./DeleteSubmissionButton";
+import { IsTestToggle } from "./IsTestToggle";
 import { SubmissionMessages } from "@/components/ui/SubmissionMessages";
 import { isKnownTrade } from "@/lib/compliance/known-trades";
 import { sendEmail } from "@/lib/email/send";
@@ -429,9 +430,7 @@ export default async function AdminSubmissionDetailPage({
             <p className="text-body-md text-on-surface-variant">
               Stage: <span className="font-bold text-on-surface">{STAGE_LABELS[submission.stage] ?? submission.stage}</span>
             </p>
-            {submission.is_test && (
-              <p className="text-label-md text-error mt-2">TEST — excluded from revenue reporting</p>
-            )}
+            <IsTestToggle submissionId={submission.id} initialValue={submission.is_test} />
             <div className="mt-4 pt-4 border-t border-outline-variant">
               <DeleteSubmissionButton
                 submissionId={submission.id}
