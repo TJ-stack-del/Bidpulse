@@ -38,6 +38,17 @@ function deliverableLabel(type: string) {
   return [...FULL_DELIVERABLE_TYPES, ...LEAN_DELIVERABLE_TYPES].find((d) => d.value === type)?.label ?? type;
 }
 
+// A fixed rows={3} box hid most of a real capability statement or technical
+// narrative (both can run several hundred words) behind an internal
+// scrollbar -- same complaint as the compliance matrix's old fixed-height
+// boxes, just without that one's row structure to build a form out of, so
+// this stays a plain textarea sized to roughly fit its own content instead.
+function estimateRows(text: string): number {
+  const lineBreaks = (text.match(/\n/g) ?? []).length + 1;
+  const wrapped = Math.ceil(text.length / 90);
+  return Math.max(6, Math.min(24, Math.max(lineBreaks, wrapped)));
+}
+
 // Step 7 — admin prepares each deliverable either by pasting text or
 // uploading a file; either counts as "prepared" per BUILD-ORDER-BIDPULSE.md
 // ("start simple"). One row per deliverable_type: saving replaces whichever
@@ -339,7 +350,7 @@ export function DeliverablesPanel({
                       setDrafts((d) => ({ ...d, [t.value]: e.target.value }));
                       setSavedTypes((s) => ({ ...s, [t.value]: false }));
                     }}
-                    rows={3}
+                    rows={estimateRows(drafts[t.value] ?? "")}
                     placeholder="Paste or write the content directly…"
                     className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none mb-2"
                   />
