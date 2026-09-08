@@ -28,6 +28,7 @@ type ClientInfo = {
   naics_codes: string[] | null;
   set_asides: string[] | null;
   license_number: string | null;
+  business_registration_number: string | null;
   years_in_business: number | null;
   business_address: string | null;
   business_phone: string | null;
@@ -158,9 +159,19 @@ function deriveRequirementLabels(scopeText: string): string[] {
   const labels: string[] = [];
   for (const segment of scopeSegments(scopeText)) {
     const colonIdx = segment.indexOf(":");
-    const lead = colonIdx > 0 && colonIdx <= 60 ? segment.slice(0, colonIdx) : segment;
-    const label = lead
-      .split(" ")
+    const hasColonLeadIn = colonIdx > 0 && colonIdx <= 60;
+    const lead = hasColonLeadIn ? segment.slice(0, colonIdx) : segment;
+    const words = lead.split(" ").filter(Boolean);
+    // A colon lead-in ("Day porter operations: ...") is the client's own
+    // chosen name for that line item, so it's always safe to use. Without
+    // one, only use the segment as a label when it's already short enough
+    // to stand alone -- truncating a long run-on sentence to its first few
+    // words produces a mid-sentence fragment ("The City Of Jacksonville
+    // Seeks A") that reads as a fabricated, meaningless "requirement," not
+    // a real one reorganized from the scope. Skip it instead and let the
+    // existing zero-labels fallback below take over.
+    if (!hasColonLeadIn && words.length > MAX_LABEL_WORDS) continue;
+    const label = words
       .slice(0, MAX_LABEL_WORDS)
       .join(" ")
       .replace(/[.,;:]+$/, "")
@@ -203,7 +214,7 @@ export async function POST(request: Request) {
   const { data: submission } = await supabase
     .from("submissions")
     .select(
-      "id, agency, solicitation_number, scope, client_id, clients!submissions_client_id_fkey(company_name, naics_codes, set_asides, license_number, years_in_business, business_address, business_phone, insurance_provider, insurance_policy_number, general_liability_coverage, workers_comp_coverage, differentiators)"
+      "id, agency, solicitation_number, scope, client_id, clients!submissions_client_id_fkey(company_name, naics_codes, set_asides, license_number, business_registration_number, years_in_business, business_address, business_phone, insurance_provider, insurance_policy_number, general_liability_coverage, workers_comp_coverage, differentiators)"
     )
     .eq("id", submissionId)
     .maybeSingle();
@@ -223,20 +234,45 @@ export async function POST(request: Request) {
     .eq("client_id", submission.client_id)
     .eq("verified", true);
 
+  // Self-reported, used as-is — see client_past_performance's own migration
+  // comment for why this doesn't need the same admin-verification gate a
+  // certification file does. Capped at 3: a capability statement lists a
+  // few representative projects, not a full history.
+  const { data: pastPerformance } = await supabase
+    .from("client_past_performance")
+    .select("reference_client_name, scope_of_work, contract_value, outcome")
+    .eq("client_id", submission.client_id)
+    .order("created_at", { ascending: false })
+    .limit(3);
+
   const content = buildDraft(
     deliverableType,
     submission as unknown as SubmissionInfo,
-    (verifiedCerts ?? []).map(certificationLabel)
+    (verifiedCerts ?? []).map(certificationLabel),
+    pastPerformance ?? []
   );
   return NextResponse.json({ content });
 }
 
-function buildDraft(deliverableType: string, submission: SubmissionInfo, verifiedCertLabels: string[]): string {
+type PastPerformanceEntry = {
+  reference_client_name: string;
+  scope_of_work: string;
+  contract_value: string | null;
+  outcome: string | null;
+};
+
+function buildDraft(
+  deliverableType: string,
+  submission: SubmissionInfo,
+  verifiedCertLabels: string[],
+  pastPerformanceEntries: PastPerformanceEntry[]
+): string {
   const client = submission.clients ?? {
     company_name: null,
     naics_codes: null,
     set_asides: null,
     license_number: null,
+    business_registration_number: null,
     years_in_business: null,
     business_address: null,
     business_phone: null,
@@ -257,9 +293,10 @@ function buildDraft(deliverableType: string, submission: SubmissionInfo, verifie
 
   if (deliverableType === "capability_statement") {
     const licenseNumber = client.license_number ?? "[license #]";
+    const registrationNumber = client.business_registration_number ?? "[registration #]";
     const entityLine = isFederalAgency(agency)
-      ? `Entity Identifiers: UEI: [UEI] | CAGE Code: [CAGE code] | State registration: [registration #]`
-      : `Entity Identifiers: State registration: [registration #] | Local business license: ${licenseNumber}`;
+      ? `Entity Identifiers: UEI: [UEI] | CAGE Code: [CAGE code] | State registration: ${registrationNumber}`
+      : `Entity Identifiers: State registration: ${registrationNumber} | Local business license: ${licenseNumber}`;
 
     const yearsInBusiness =
       client.years_in_business !== null && client.years_in_business !== undefined
@@ -281,6 +318,24 @@ function buildDraft(deliverableType: string, submission: SubmissionInfo, verifie
     const differentiators =
       client.differentiators?.trim() ||
       `[What sets ${company} apart for this agency and scope — certifications, track record, capacity.]`;
+
+    // Real capability statement convention — one line per project, not a
+    // paragraph: client, scope, dollar value, outcome. Real entries from
+    // Company Profile (client_past_performance) are used as-is, never
+    // invented; only falls back to placeholder rows when the client
+    // hasn't added any past projects yet.
+    const pastPerformanceLines =
+      pastPerformanceEntries.length > 0
+        ? pastPerformanceEntries.map(
+            (p) =>
+              `- ${p.reference_client_name} — ${p.scope_of_work}${
+                p.contract_value ? ` — ${p.contract_value}` : ""
+              }${p.outcome ? ` — ${p.outcome}` : ""}`
+          )
+        : [
+            "- [Client name] — [scope of work] — $[contract value] — [outcome/result]",
+            "- [Client name] — [scope of work] — $[contract value] — [outcome/result]",
+          ];
 
     return [
       `CAPABILITY STATEMENT: ${company.toUpperCase()}`,
@@ -304,13 +359,7 @@ function buildDraft(deliverableType: string, submission: SubmissionInfo, verifie
       "- [Add one short bullet per additional core service line — no paragraphs]",
       "",
       "Past Performance:",
-      // Real capability statement convention — one line per project, not a
-      // paragraph: client, scope, dollar value, outcome. Never invent a
-      // client name, contract value, or result; this app doesn't collect
-      // past-project data anywhere yet, so every field here stays an
-      // explicit placeholder for the admin/client to fill in with real work.
-      "- [Client name] — [scope of work] — $[contract value] — [outcome/result]",
-      "- [Client name] — [scope of work] — $[contract value] — [outcome/result]",
+      ...pastPerformanceLines,
       "",
       "Differentiators:",
       differentiators,

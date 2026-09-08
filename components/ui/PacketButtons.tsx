@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { generateDeliverablesPacket } from "@/lib/pdf/deliverables-packet";
+import { hasUnresolvedPlaceholders } from "@/lib/pdf/placeholder-check";
 
 const DELIVERABLE_LABELS: Record<string, string> = {
   capability_statement: "Capability Statement",
@@ -152,6 +153,22 @@ export function PacketButtons({
       if (!canDownload) {
         setError("Available once payment is confirmed.");
         return;
+      }
+
+      // A client must never receive a PDF that's still an unedited
+      // auto-draft scaffold -- see placeholder-check.ts's header comment.
+      // Admin's own QC download is deliberately exempt (same reasoning as
+      // the payment-gate bypass above): staff need to pull the real,
+      // in-progress state to see what still needs fixing, brackets
+      // included -- that's the actual point of their download.
+      if (viewerRole === "client") {
+        const unresolved = deliverables.find(
+          (d: any) => !d.file_url && hasUnresolvedPlaceholders(d.content)
+        );
+        if (unresolved) {
+          setError("This packet isn't ready yet — please check back soon or contact us if it's been a while.");
+          return;
+        }
       }
 
       // Client downloads need one more confirmation (the attestation

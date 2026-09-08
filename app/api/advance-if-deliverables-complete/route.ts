@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email/send";
 import { getStageChangeEmail } from "@/lib/email/templates";
+import { hasUnresolvedPlaceholders } from "@/lib/pdf/placeholder-check";
 
 // Called by DeliverablesPanel right after every deliverable save (text or
 // file) — checks a fact the system can verify directly (all three full
@@ -61,6 +62,20 @@ export async function POST(request: Request) {
 
   if (!complete) {
     return NextResponse.json({ advanced: false, reason: "incomplete" });
+  }
+
+  // A file-uploaded deliverable skips this check entirely -- its content
+  // isn't text this app generated, so there's nothing to have left
+  // unresolved. A text deliverable that still has an auto-draft's
+  // [bracketed placeholder] in it is NOT actually complete, even though it
+  // has non-empty content -- see placeholder-check.ts's header comment.
+  const hasPlaceholders = REQUIRED_TYPES.some((type) => {
+    const d = (deliverables ?? []).find((x) => x.deliverable_type === type);
+    return !d?.file_url && hasUnresolvedPlaceholders(d?.content);
+  });
+
+  if (hasPlaceholders) {
+    return NextResponse.json({ advanced: false, reason: "has_placeholders" });
   }
 
   const { error: updateError } = await supabase

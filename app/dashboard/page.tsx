@@ -86,7 +86,7 @@ export default async function DashboardPage() {
   const { data: client } = await supabase
     .from("clients")
     .select(
-      "id, org_id, company_name, contact_name, naics_codes, license_number, years_in_business, insurance_provider, general_liability_coverage, workers_comp_coverage, business_address, business_phone"
+      "id, org_id, company_name, contact_name, naics_codes, license_number, business_registration_number, years_in_business, insurance_provider, general_liability_coverage, workers_comp_coverage, business_address, business_phone"
     )
     .eq("auth_user_id", user.id)
     .maybeSingle();
@@ -104,8 +104,10 @@ export default async function DashboardPage() {
   const completeness = computeProfileCompleteness({
     naicsCodes: client.naics_codes,
     licenseNumber: client.license_number,
+    businessRegistrationNumber: client.business_registration_number,
     insuranceProvider: client.insurance_provider,
     generalLiabilityCoverage: client.general_liability_coverage,
+    workersCompCoverage: client.workers_comp_coverage,
     businessAddress: client.business_address,
     businessPhone: client.business_phone,
     hasCertification: (certifications?.length ?? 0) > 0,

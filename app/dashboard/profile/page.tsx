@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { AppShell } from "@/components/ui/AppShell";
 import { CertificationsSection } from "./CertificationsSection";
+import { PastPerformanceSection } from "./PastPerformanceSection";
 import { CompanyProfileClient } from "./CompanyProfileClient";
 import { signRfpDocumentUrls } from "@/lib/storage";
 
@@ -32,6 +33,12 @@ export default async function CompanyProfilePage() {
     .eq("client_id", client.id)
     .order("created_at", { ascending: false });
   const certifications = await signRfpDocumentUrls(supabase, certificationsRaw ?? []);
+
+  const { data: pastPerformance } = await supabase
+    .from("client_past_performance")
+    .select("id, reference_client_name, scope_of_work, contract_value, outcome, created_at")
+    .eq("client_id", client.id)
+    .order("created_at", { ascending: false });
 
   return (
     <AppShell activePath="/dashboard/profile" role="client" viewerName={client.company_name}>
@@ -81,6 +88,18 @@ export default async function CompanyProfilePage() {
           see its status change to &quot;Document Reviewed&quot; here once that happens.
         </p>
         <CertificationsSection clientId={client.id} initialCertifications={certifications} />
+      </div>
+
+      <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 mt-4">
+        <h2 className="text-title-lg text-primary mb-4 flex items-center gap-2">
+          <span className="material-symbols-outlined text-primary text-[20px]">work_history</span>
+          Past Performance
+        </h2>
+        <p className="text-body-md text-on-surface-variant mb-4">
+          Add a few past projects — client/agency name, scope, contract value, and outcome. We use these as real
+          references in your capability statement instead of leaving that section blank.
+        </p>
+        <PastPerformanceSection clientId={client.id} initialEntries={pastPerformance ?? []} />
       </div>
     </AppShell>
   );

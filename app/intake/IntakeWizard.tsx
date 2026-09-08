@@ -104,23 +104,45 @@ export function IntakeWizard() {
   // returned to this page) already has an account and a clients row — step
   // 0 exists only to create both for a brand-new visitor, so it must never
   // run for them. Skip straight to "About the bid" instead.
+  //
+  // getUser() is a real round-trip to Supabase's auth server (not a local
+  // cache read), so on a real user's real network it can transiently fail
+  // in a way a same-machine test never reproduces. A single failed attempt
+  // here used to be indistinguishable from "not logged in" and would drop
+  // an existing client straight onto the signup form for a session that
+  // was actually fine. Retry a real error before concluding logged-out —
+  // but an error-free "no user"/"no matching clients row" is a genuine,
+  // immediate answer and must not be delayed by retrying it.
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      let user: { id: string } | null = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const { data, error } = await supabase.auth.getUser();
+        if (data.user) {
+          user = data.user;
+          break;
+        }
+        if (!error) break;
+        if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 400 * (attempt + 1)));
+      }
 
       if (!user) {
         if (!cancelled) setCheckingSession(false);
         return;
       }
 
-      const { data: client } = await supabase
-        .from("clients")
-        .select("id")
-        .eq("auth_user_id", user.id)
-        .maybeSingle();
+      let client: { id: string } | null = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const { data, error } = await supabase
+          .from("clients")
+          .select("id")
+          .eq("auth_user_id", user.id)
+          .maybeSingle();
+        client = data;
+        if (data || !error) break;
+        if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 400 * (attempt + 1)));
+      }
 
       if (cancelled) return;
       if (client) {
@@ -650,7 +672,7 @@ export function IntakeWizard() {
                   supabase
                     .from("clients")
                     .select(
-                      "naics_codes, license_number, insurance_provider, general_liability_coverage, business_address, business_phone"
+                      "naics_codes, license_number, business_registration_number, insurance_provider, general_liability_coverage, workers_comp_coverage, business_address, business_phone"
                     )
                     .eq("id", clientId)
                     .maybeSingle(),
@@ -664,8 +686,10 @@ export function IntakeWizard() {
                     computeProfileCompleteness({
                       naicsCodes: clientRow.naics_codes,
                       licenseNumber: clientRow.license_number,
+                      businessRegistrationNumber: clientRow.business_registration_number,
                       insuranceProvider: clientRow.insurance_provider,
                       generalLiabilityCoverage: clientRow.general_liability_coverage,
+                      workersCompCoverage: clientRow.workers_comp_coverage,
                       businessAddress: clientRow.business_address,
                       businessPhone: clientRow.business_phone,
                       hasCertification: (certCount ?? 0) > 0,

@@ -19,7 +19,14 @@ const LEAN_ORDER = ["rate_sheet", "executive_cover", "certificate_of_insurance"]
 // deliberately requires at least one character inside the brackets so it
 // doesn't false-positive on stray "[]" text, and only looks inside actual
 // deliverable content, never scope/agency text a client wrote themselves.
-const PLACEHOLDER_PATTERN = /\[[^\[\]]+\]/g;
+//
+// No "g" flag: this same pattern object is reused across every deliverable
+// via .test() below, and a global regex's .test() is stateful (it advances
+// lastIndex on a match and resumes from there on the next call instead of
+// starting at 0) -- across several different strings in a row that silently
+// makes real matches come back false. Cost a real submission's admin badge
+// an accurate count (2 shown, 3 actually had placeholders) before this fix.
+const PLACEHOLDER_PATTERN = /\[[^\[\]]+\]/;
 
 export type PreflightCheck = {
   key: string;

@@ -108,6 +108,11 @@ export function DeliverablesPanel({
       if (data?.advanced) {
         showToast("All three deliverables are ready — stage moved to Deliverables ready.", "success");
         router.refresh();
+      } else if (data?.reason === "has_placeholders") {
+        showToast(
+          "Still has [bracketed placeholders] to fill in — won't move to Deliverables ready until they're replaced with real content.",
+          "error"
+        );
       }
     } catch {
       // Best-effort — a failed auto-advance check shouldn't surface as a

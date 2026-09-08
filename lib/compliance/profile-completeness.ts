@@ -24,8 +24,10 @@ export type CompletenessField = {
 export function computeProfileCompleteness(input: {
   naicsCodes: string[] | null;
   licenseNumber: string | null;
+  businessRegistrationNumber: string | null;
   insuranceProvider: string | null;
   generalLiabilityCoverage: string | null;
+  workersCompCoverage: string | null;
   businessAddress: string | null;
   businessPhone: string | null;
   hasCertification: boolean;
@@ -34,9 +36,19 @@ export function computeProfileCompleteness(input: {
     { key: "naics_codes", label: "NAICS codes", complete: (input.naicsCodes?.length ?? 0) > 0 },
     { key: "license_number", label: "Trade/occupational license number", complete: !!input.licenseNumber },
     {
+      key: "business_registration_number",
+      label: "Business registration number (e.g. Sunbiz Doc#)",
+      complete: !!input.businessRegistrationNumber,
+    },
+    {
       key: "insurance",
       label: "Insurance provider or coverage details",
       complete: !!(input.insuranceProvider || input.generalLiabilityCoverage),
+    },
+    {
+      key: "workers_comp",
+      label: "Workers' comp coverage",
+      complete: !!input.workersCompCoverage,
     },
     { key: "business_address", label: "Business address", complete: !!input.businessAddress },
     { key: "business_phone", label: "Business phone", complete: !!input.businessPhone },
