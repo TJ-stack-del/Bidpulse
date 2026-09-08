@@ -13,6 +13,7 @@ import { buildClientInfoRequestDraft } from "@/lib/client-info-request";
 import { DeleteSubmissionButton } from "./DeleteSubmissionButton";
 import { IsTestToggle } from "./IsTestToggle";
 import { SubmissionMessages } from "@/components/ui/SubmissionMessages";
+import { SubmissionDocuments } from "@/components/ui/SubmissionDocuments";
 import { isKnownTrade } from "@/lib/compliance/known-trades";
 import { sendEmail } from "@/lib/email/send";
 import { getStageChangeEmail } from "@/lib/email/templates";
@@ -317,6 +318,17 @@ export default async function AdminSubmissionDetailPage({
                 {submission.scope ?? "—"}
               </div>
             </div>
+
+            {/* The RFP-specific compliance matrix rows (wage determination,
+                addenda acknowledgment, the agency's own bid form, reference
+                format) can only be confirmed against the actual solicitation
+                document -- this is the client's real uploaded copy of it,
+                not a summary. Without this, an admin working the compliance
+                matrix had no way to open it from here at all. */}
+            <h3 className="text-label-md text-on-surface-variant uppercase tracking-wider mt-6 mb-2">
+              RFP documents
+            </h3>
+            <SubmissionDocuments submissionId={submission.id} />
           </div>
 
           <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
