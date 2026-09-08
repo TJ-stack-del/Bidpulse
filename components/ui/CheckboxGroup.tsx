@@ -31,7 +31,7 @@ export function CheckboxGroup({
               type="checkbox"
               checked={selected.includes(opt.value)}
               onChange={() => toggle(opt.value)}
-              className="rounded border-outline-variant text-secondary focus:ring-secondary focus:ring-offset-0"
+              className="rounded border-outline-variant text-primary focus:ring-primary focus:ring-offset-0"
             />
             {opt.label}
           </label>

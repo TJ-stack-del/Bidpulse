@@ -31,85 +31,96 @@
      same magic number is exactly how nav drifted before. Roughly double
      112px, landing on a clean Tailwind spacing value (h-56). */
   --auth-logo-height: 224px;
-  --color-surface: 247 249 251;
-  --color-surface-dim: 216 218 220;
-  --color-surface-bright: 247 249 251;
+  /* "Industrial Precision Light" — the companion light-mode design system
+     authored alongside the dark "Industrial Precision" system in the
+     Stitch project (assets/969209daeee94fb5bb6f8c3b04c218ae), not a
+     derived/guessed palette. Same amber/emerald/cyan hue family as dark,
+     tuned for daylight/high-glare legibility (WCAG AAA per its own
+     styleGuidelines). */
+  --color-surface: 248 249 255;
+  --color-surface-dim: 203 219 245;
+  --color-surface-bright: 248 249 255;
   --color-surface-container-lowest: 255 255 255;
-  --color-surface-container-low: 242 244 246;
-  --color-surface-container: 236 238 240;
-  --color-surface-container-high: 230 232 234;
-  --color-surface-container-highest: 224 227 229;
-  --color-on-surface: 25 28 30;
-  --color-on-surface-variant: 68 71 77;
-  --color-inverse-surface: 45 49 51;
-  --color-inverse-on-surface: 239 241 243;
-  --color-outline: 117 119 126;
-  --color-outline-variant: 197 198 205;
-  --color-surface-tint: 63 110 116;
-  --color-primary: 12 21 36;
+  --color-surface-container-low: 239 244 255;
+  --color-surface-container: 229 238 255;
+  --color-surface-container-high: 220 233 255;
+  --color-surface-container-highest: 211 228 254;
+  --color-on-surface: 11 28 48;
+  --color-on-surface-variant: 85 67 54;
+  --color-inverse-surface: 33 49 69;
+  --color-inverse-on-surface: 234 241 255;
+  --color-outline: 136 115 100;
+  --color-outline-variant: 219 194 176;
+  --color-surface-tint: 144 77 0;
+  --color-primary: 141 75 0;
   --color-on-primary: 255 255 255;
-  --color-primary-container: 16 26 48;
-  --color-on-primary-container: 147 164 194;
-  --color-inverse-primary: 185 199 228;
-  /* Brand accent, was blue (#134C76) under the old shield-heartbeat logo --
-     recolored to the new mark's orange (#EF5B25). Container/on-container
-     tones recomputed for the new hue, following the same lightness
-     relationship the old blue pair had (and that tertiary's existing
-     orange-family container already uses) rather than reusing the old
-     blue-derived numbers. */
-  --color-secondary: 239 91 37;
+  --color-primary-container: 177 95 0;
+  --color-on-primary-container: 255 251 255;
+  --color-inverse-primary: 255 183 125;
+  --color-secondary: 0 108 74;
   --color-on-secondary: 255 255 255;
-  --color-secondary-container: 255 219 199;
-  --color-on-secondary-container: 122 46 10;
-  --color-tertiary: 168 77 15;
+  --color-secondary-container: 130 245 193;
+  --color-on-secondary-container: 0 113 78;
+  --color-tertiary: 0 97 148;
   --color-on-tertiary: 255 255 255;
-  --color-tertiary-container: 255 221 184;
-  --color-on-tertiary-container: 122 60 0;
+  --color-tertiary-container: 0 123 185;
+  --color-on-tertiary-container: 253 252 255;
   --color-error: 186 26 26;
   --color-on-error: 255 255 255;
   --color-error-container: 255 218 214;
   --color-on-error-container: 147 0 10;
-  --color-background: 247 249 251;
-  --color-on-background: 25 28 30;
-  --color-surface-variant: 224 227 229;
+  --color-background: 248 249 255;
+  --color-on-background: 11 28 48;
+  --color-surface-variant: 211 228 254;
 }
 
 .dark {
-  --color-surface: 16 20 22;
-  --color-surface-dim: 16 20 22;
-  --color-surface-bright: 54 58 60;
-  --color-surface-container-lowest: 11 14 16;
-  --color-surface-container-low: 25 28 30;
-  --color-surface-container: 29 32 34;
-  --color-surface-container-high: 40 42 45;
-  --color-surface-container-highest: 51 53 55;
-  --color-on-surface: 226 226 230;
-  --color-on-surface-variant: 196 198 208;
-  --color-inverse-surface: 226 226 230;
-  --color-inverse-on-surface: 47 48 51;
-  --color-outline: 142 144 153;
-  --color-outline-variant: 67 71 78;
-  --color-surface-tint: 142 205 214;
-  --color-primary: 185 199 228;
-  --color-on-primary: 12 21 36;
-  --color-primary-container: 41 52 74;
-  --color-on-primary-container: 215 224 245;
-  --color-inverse-primary: 12 21 36;
-  --color-secondary: 239 91 37;
-  --color-on-secondary: 255 255 255;
-  --color-secondary-container: 74 34 16;
-  --color-on-secondary-container: 255 201 168;
-  --color-tertiary: 168 77 15;
-  --color-on-tertiary: 255 255 255;
-  --color-tertiary-container: 92 44 0;
-  --color-on-tertiary-container: 255 221 184;
+  /* "Industrial Precision" — the dark design system from the Stitch
+     project (assets/7f0094d24ac44e9e885c0d324b7805a5). Base token values
+     (surface/background, secondary-container) are the exact
+     overrideNeutralColor (#0f172a) / overrideSecondaryColor (#10b981)
+     brand seed hexes from the design system record, per explicit user
+     choice — these differ slightly from the M3-tonal-expanded values
+     actually baked into each generated screen's own Tailwind config
+     (#0b1326 / #00a572), which is what every earlier screenshot in this
+     project was matched against. The surrounding surface-container-*
+     tonal ramp is untouched (still the M3-expanded ramp) since Stitch
+     never published a ramp regenerated from this exact seed. */
+  --color-surface: 15 23 42;
+  --color-surface-dim: 15 23 42;
+  --color-surface-bright: 49 57 77;
+  --color-surface-container-lowest: 6 14 32;
+  --color-surface-container-low: 19 27 46;
+  --color-surface-container: 23 31 51;
+  --color-surface-container-high: 34 42 61;
+  --color-surface-container-highest: 45 52 73;
+  --color-on-surface: 218 226 253;
+  --color-on-surface-variant: 216 195 173;
+  --color-inverse-surface: 218 226 253;
+  --color-inverse-on-surface: 40 48 68;
+  --color-outline: 160 142 122;
+  --color-outline-variant: 83 68 52;
+  --color-surface-tint: 255 185 95;
+  --color-primary: 255 193 116;
+  --color-on-primary: 71 42 0;
+  --color-primary-container: 245 158 11;
+  --color-on-primary-container: 97 59 0;
+  --color-inverse-primary: 133 83 0;
+  --color-secondary: 78 222 163;
+  --color-on-secondary: 0 56 36;
+  --color-secondary-container: 16 185 129;
+  --color-on-secondary-container: 0 49 31;
+  --color-tertiary: 142 213 255;
+  --color-on-tertiary: 0 53 74;
+  --color-tertiary-container: 56 189 248;
+  --color-on-tertiary-container: 0 73 101;
   --color-error: 255 180 171;
   --color-on-error: 105 0 5;
   --color-error-container: 147 0 10;
   --color-on-error-container: 255 218 214;
-  --color-background: 16 20 22;
-  --color-on-background: 226 226 230;
-  --color-surface-variant: 67 71 78;
+  --color-background: 15 23 42;
+  --color-on-background: 218 226 253;
+  --color-surface-variant: 45 52 73;
 }
 
 .material-symbols-outlined {
@@ -148,4 +159,28 @@ body {
 }
 .animate-fade-in {
   animation: fade-in 0.25s ease-out;
+}
+
+/* Per-tier font family for the named type scale (tailwind.config.ts
+   fontSize) — see the comment there: Tailwind's text-* utility can't carry
+   a fontFamily itself, so every display/headline/title text-* class gets
+   Chivo and every metric/label text-* class gets JetBrains Mono here
+   instead, covering every existing call site with no per-usage change.
+   Body text (body-lg/md/sm) intentionally has no override — it inherits
+   font-sans (Hanken Grotesk) from `body`'s own @apply below. */
+.text-display-lg,
+.text-display-lg-mobile,
+.text-headline-lg,
+.text-headline-lg-mobile,
+.text-headline-md,
+.text-title-lg {
+  font-family: theme("fontFamily.headline");
+}
+.text-metric-xl,
+.text-metric-lg,
+.text-label-md,
+.text-label-sm,
+.text-label-md-mobile,
+.text-code-sm {
+  font-family: theme("fontFamily.code");
 }

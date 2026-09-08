@@ -89,7 +89,7 @@ export function RequestInfoForm({
   return (
     <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
       <h3 className="text-title-lg text-primary mb-4 flex items-center gap-2">
-        <span className="material-symbols-outlined text-secondary text-[20px]">mail</span>
+        <span className="material-symbols-outlined text-primary text-[20px]">mail</span>
         Request info from client
       </h3>
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
@@ -99,7 +99,7 @@ export function RequestInfoForm({
             <select
               value={selected}
               onChange={(e) => handleSelect(e.target.value)}
-              className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+              className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
             >
               {openItems.map((item) => (
                 <option key={item.id} value={item.id}>
@@ -115,7 +115,7 @@ export function RequestInfoForm({
           onChange={(e) => setMessage(e.target.value)}
           rows={4}
           placeholder="What do you need from the client?"
-          className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+          className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
         />
         <p className="text-label-md text-on-surface-variant">
           {selected === OTHER_VALUE
@@ -125,7 +125,7 @@ export function RequestInfoForm({
         <button
           type="submit"
           disabled={submitting || !message.trim()}
-          className="self-start py-2.5 px-5 bg-secondary text-on-secondary rounded text-label-md font-semibold hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="self-start py-2.5 px-5 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 transition active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {submitting && <Spinner />}
           {submitting ? "Sending…" : "Send request"}

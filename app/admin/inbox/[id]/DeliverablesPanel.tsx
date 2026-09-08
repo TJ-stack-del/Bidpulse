@@ -242,7 +242,7 @@ export function DeliverablesPanel({
   return (
     <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
       <h2 className="text-title-lg text-primary mb-4 flex items-center gap-2">
-        <span className="material-symbols-outlined text-secondary text-[20px]">description</span>
+        <span className="material-symbols-outlined text-primary text-[20px]">description</span>
         Deliverables
       </h2>
 
@@ -255,7 +255,7 @@ export function DeliverablesPanel({
           </p>
           <button
             onClick={() => setLeanMode(true)}
-            className="px-4 py-2 rounded border border-secondary text-secondary text-label-md font-bold hover:bg-surface-container-low transition active:scale-[0.97] shrink-0"
+            className="px-4 py-2 rounded border border-primary text-primary text-label-md font-bold hover:bg-surface-container-low transition active:scale-[0.97] shrink-0"
           >
             Switch to lean package
           </button>
@@ -264,7 +264,7 @@ export function DeliverablesPanel({
       {leanMode && (
         <div className="mb-6 flex items-center justify-between gap-3">
           <p className="text-label-md text-on-surface-variant">Using the lean package.</p>
-          <button onClick={() => setLeanMode(false)} className="text-label-md text-secondary hover:underline">
+          <button onClick={() => setLeanMode(false)} className="text-label-md text-primary hover:underline">
             Use full package instead
           </button>
         </div>
@@ -283,7 +283,7 @@ export function DeliverablesPanel({
                 <span
                   className={`text-[10px] px-2 py-0.5 rounded border font-bold uppercase ${
                     existing
-                      ? "bg-secondary-container text-on-secondary-container border-secondary/20"
+                      ? "bg-secondary-container text-on-secondary-container border-primary/20"
                       : "bg-surface-container-low text-on-surface-variant border-outline-variant"
                   }`}
                 >
@@ -296,7 +296,7 @@ export function DeliverablesPanel({
                   href={existing.file_url}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-secondary font-bold hover:underline text-body-md block mb-2"
+                  className="text-primary font-bold hover:underline text-body-md block mb-2"
                 >
                   Current file
                 </a>
@@ -310,7 +310,7 @@ export function DeliverablesPanel({
                 }}
                 rows={3}
                 placeholder="Paste or write the content directly…"
-                className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none mb-2"
+                className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none mb-2"
               />
 
               <div className="flex items-center gap-3 flex-wrap">
@@ -325,12 +325,12 @@ export function DeliverablesPanel({
                 <button
                   onClick={() => handleSaveText(t.value)}
                   disabled={isBusy}
-                  className="px-4 py-2 bg-secondary text-on-secondary rounded text-label-md hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
+                  className="px-4 py-2 bg-primary-container text-on-primary-container rounded text-label-md hover:opacity-90 transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
                 >
                   {isSaving && <Spinner />}
                   {isSaving ? "Saving…" : "Save text"}
                 </button>
-                <label className="px-4 py-2 rounded border border-secondary text-secondary text-label-md font-bold hover:bg-surface-container-low transition active:scale-[0.97] cursor-pointer flex items-center gap-2">
+                <label className="px-4 py-2 rounded border border-primary text-primary text-label-md font-bold hover:bg-surface-container-low transition active:scale-[0.97] cursor-pointer flex items-center gap-2">
                   {isSaving && <Spinner />}
                   {isSaving ? "Saving…" : "Upload file instead"}
                   <input
@@ -340,7 +340,7 @@ export function DeliverablesPanel({
                     className="hidden"
                   />
                 </label>
-                <FadeMessage show={!!savedTypes[t.value]} className="text-body-md text-secondary">
+                <FadeMessage show={!!savedTypes[t.value]} className="text-body-md text-primary">
                   Saved
                 </FadeMessage>
               </div>

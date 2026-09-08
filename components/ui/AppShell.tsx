@@ -29,6 +29,11 @@ const NAV_LINKS: Record<Role, { href: string; label: string; icon: string }[]> =
   ],
 };
 
+const SIDEBAR_LABEL: Record<Role, string> = {
+  admin: "Operational Modules",
+  client: "Your Account",
+};
+
 export function AppShell({
   activePath,
   role,
@@ -48,13 +53,10 @@ export function AppShell({
   return (
     <div className="min-h-screen flex flex-col bg-surface">
       <header className="fixed top-0 w-full z-40 bg-surface/95 backdrop-blur border-b border-outline-variant">
-        {/* max-w-container mx-auto matches <main> below (and MarketingShell's
-            own header/main pattern) so the logo lines up with the page
-            content's left edge on wide viewports instead of sitting flush
-            against the true browser edge while <main> is centered under it —
-            that mismatch was why the logo appeared to "jump" position
-            switching between app pages and marketing/intake pages. */}
-        <div className="flex items-center justify-between px-margin-mobile md:px-margin-desktop py-3 max-w-container mx-auto">
+        {/* Full-bleed header (nav lives in the sidebar below, for both
+            roles) so the logo sits flush left above the sidebar, matching
+            the Stitch screens' header+sidebar shell. */}
+        <div className="flex items-center justify-between px-margin-mobile md:px-margin-desktop py-3">
           {/* "/" always bounces a signed-in user straight back into the app
               (see app/page.tsx's root routing), so this can't link there like
               the marketing nav's logo does — /pricing is a real public page
@@ -62,23 +64,8 @@ export function AppShell({
           <Link href="/pricing" className="shrink-0 flex items-center">
             <Logo priority />
           </Link>
-          <nav className="hidden md:flex gap-6">
-            {links.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`text-label-md px-3 py-2 rounded-lg transition ${
-                  activePath === link.href
-                    ? "text-secondary font-bold bg-surface-container-highest"
-                    : "text-on-surface-variant hover:bg-surface-container-high"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
           <div className="flex items-center gap-3">
-            <p className="hidden sm:block text-label-md text-on-surface-variant whitespace-nowrap">
+            <p className="hidden sm:block text-label-md uppercase tracking-wider text-on-surface-variant whitespace-nowrap">
               {viewerName} · {role === "admin" ? "Admin" : "Client view"}
             </p>
             <ThemeToggle />
@@ -89,8 +76,30 @@ export function AppShell({
         </div>
       </header>
 
-      <main className="animate-fade-in flex-grow pt-[72px] pb-[80px] md:pb-8 px-margin-mobile md:px-margin-desktop max-w-container mx-auto w-full flex flex-col gap-6">
-        {children}
+      <aside className="hidden md:flex flex-col fixed left-0 top-[65px] bottom-0 w-56 bg-surface-container-low border-r border-outline-variant py-4 z-30">
+        <div className="px-4 pb-2">
+          <span className="text-label-sm text-on-surface-variant uppercase tracking-wider">{SIDEBAR_LABEL[role]}</span>
+        </div>
+        <nav className="flex flex-col gap-1 px-2">
+          {links.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition text-label-md ${
+                activePath === link.href
+                  ? "bg-primary-container text-on-primary-container font-bold"
+                  : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
+              }`}
+            >
+              <span className="material-symbols-outlined text-[20px]">{link.icon}</span>
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+      </aside>
+
+      <main className="animate-fade-in flex-grow pt-[72px] pb-[80px] md:pb-8 px-margin-mobile md:px-margin-desktop w-full flex flex-col gap-6 md:pl-56">
+        <div className="max-w-container mx-auto w-full flex flex-col gap-6">{children}</div>
       </main>
 
       <nav className="md:hidden fixed bottom-0 w-full z-50 flex justify-around items-center px-margin-mobile py-2 bg-surface border-t border-outline-variant">
@@ -100,12 +109,12 @@ export function AppShell({
             href={link.href}
             className={`flex flex-col items-center justify-center transition-opacity active:opacity-80 ${
               activePath === link.href
-                ? "text-secondary font-bold bg-surface-container-highest rounded-xl px-3 py-1"
+                ? "text-primary font-bold bg-surface-container-highest rounded-xl px-3 py-1"
                 : "text-on-surface-variant"
             }`}
           >
             <span className="material-symbols-outlined">{link.icon}</span>
-            <span className="text-label-md-mobile mt-1">{link.label}</span>
+            <span className="text-label-md-mobile uppercase tracking-wider mt-1">{link.label}</span>
           </Link>
         ))}
       </nav>

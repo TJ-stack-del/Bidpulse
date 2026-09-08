@@ -42,7 +42,7 @@ export default async function CompanyProfilePage() {
 
       <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 mt-4">
         <h2 className="text-title-lg text-primary mb-4 flex items-center gap-2">
-          <span className="material-symbols-outlined text-secondary text-[20px]">business</span>
+          <span className="material-symbols-outlined text-primary text-[20px]">business</span>
           Company Info
         </h2>
         <p className="text-body-md text-on-surface-variant mb-4">
@@ -72,7 +72,7 @@ export default async function CompanyProfilePage() {
 
       <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 mt-4">
         <h2 className="text-title-lg text-primary mb-4 flex items-center gap-2">
-          <span className="material-symbols-outlined text-secondary text-[20px]">verified</span>
+          <span className="material-symbols-outlined text-primary text-[20px]">verified</span>
           Certifications
         </h2>
         <p className="text-body-md text-on-surface-variant mb-4">

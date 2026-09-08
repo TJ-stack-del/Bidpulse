@@ -157,9 +157,9 @@ export function AdminSubmissionActions({
     <div className="flex flex-col gap-6">
       <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
         <h2 className="text-title-lg text-primary mb-4 flex items-center gap-2">
-          <span className="material-symbols-outlined text-secondary text-[20px]">timeline</span>
+          <span className="material-symbols-outlined text-primary text-[20px]">timeline</span>
           Move to stage
-          {savingStage && <Spinner className="text-secondary" />}
+          {savingStage && <Spinner className="text-primary" />}
         </h2>
         <div className="flex flex-wrap gap-2">
           {STAGES.map((s) => (
@@ -169,7 +169,7 @@ export function AdminSubmissionActions({
               disabled={savingStage}
               className={`px-3 py-2 rounded text-label-md border transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 ${
                 stage === s
-                  ? "bg-secondary text-on-secondary border-secondary"
+                  ? "bg-primary-container text-on-primary-container border-primary"
                   : "bg-surface border-outline-variant text-on-surface hover:bg-surface-container-high"
               }`}
             >
@@ -177,7 +177,7 @@ export function AdminSubmissionActions({
             </button>
           ))}
         </div>
-        <FadeMessage show={notifySuccess} className="text-body-md text-secondary block mt-3">
+        <FadeMessage show={notifySuccess} className="text-body-md text-primary block mt-3">
           Client notified by email.
         </FadeMessage>
         {notifySkipReason && (
@@ -189,7 +189,7 @@ export function AdminSubmissionActions({
 
       <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
         <h2 className="text-title-lg text-primary mb-4 flex items-center gap-2">
-          <span className="material-symbols-outlined text-secondary text-[20px]">fact_check</span>
+          <span className="material-symbols-outlined text-primary text-[20px]">fact_check</span>
           Compliance checklist
         </h2>
         {/* Shows up on the client's own dashboard as "What we still need
@@ -200,12 +200,12 @@ export function AdminSubmissionActions({
             value={checklistLabel}
             onChange={(e) => setChecklistLabel(e.target.value)}
             placeholder="e.g. Complete your Company Profile (address, phone, insurance)…"
-            className="flex-1 px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+            className="flex-1 px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
           />
           <button
             type="submit"
             disabled={addingChecklistItem}
-            className="px-4 py-2 bg-secondary text-on-secondary rounded text-label-md hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
+            className="px-4 py-2 bg-primary-container text-on-primary-container rounded text-label-md hover:opacity-90 transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
           >
             {addingChecklistItem && <Spinner />}
             Add
@@ -218,7 +218,7 @@ export function AdminSubmissionActions({
               <div key={item.id} className="flex items-center justify-between gap-3">
                 <span className="text-body-md text-on-surface">{item.label}</span>
                 <div className="flex items-center gap-2">
-                  <FadeMessage show={!!savedChecklistIds[item.id]} className="text-label-md text-secondary">
+                  <FadeMessage show={!!savedChecklistIds[item.id]} className="text-label-md text-primary">
                     Saved
                   </FadeMessage>
                   <select
@@ -242,7 +242,7 @@ export function AdminSubmissionActions({
 
       <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
         <h2 className="text-title-lg text-primary mb-4 flex items-center gap-2">
-          <span className="material-symbols-outlined text-secondary text-[20px]">edit_note</span>
+          <span className="material-symbols-outlined text-primary text-[20px]">edit_note</span>
           Internal notes
         </h2>
         <form onSubmit={handleAddNote} className="flex gap-2 mb-4">
@@ -251,12 +251,12 @@ export function AdminSubmissionActions({
             value={noteText}
             onChange={(e) => setNoteText(e.target.value)}
             placeholder="Add a note…"
-            className="flex-1 px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+            className="flex-1 px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
           />
           <button
             type="submit"
             disabled={addingNote}
-            className="px-4 py-2 bg-secondary text-on-secondary rounded text-label-md hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
+            className="px-4 py-2 bg-primary-container text-on-primary-container rounded text-label-md hover:opacity-90 transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
           >
             {addingNote && <Spinner />}
             Add

@@ -69,7 +69,7 @@ export default function FaqPage() {
         <p className="text-body-lg text-on-surface-variant">Can&apos;t find the answer you&apos;re looking for?</p>
         <Link
           href="/contact"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-secondary text-on-secondary rounded text-label-md font-semibold hover:bg-on-secondary-container transition active:scale-[0.97]"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 transition active:scale-[0.97]"
         >
           Contact support
           <span className="material-symbols-outlined text-[18px]">arrow_forward</span>

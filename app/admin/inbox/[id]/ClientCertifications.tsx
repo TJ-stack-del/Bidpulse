@@ -101,7 +101,7 @@ export function ClientCertifications({
               {cert.file_url && (
                 <>
                   {" · "}
-                  <a href={cert.file_url} target="_blank" rel="noopener noreferrer" className="text-secondary hover:underline">
+                  <a href={cert.file_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                     {cert.file_name ?? "View document"}
                   </a>
                 </>
@@ -121,7 +121,7 @@ export function ClientCertifications({
             className={`px-3 py-1.5 rounded text-label-md font-bold transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 disabled:cursor-not-allowed flex items-center gap-2 ${
               cert.verified
                 ? "border border-outline-variant text-on-surface hover:bg-surface-container-high"
-                : "bg-secondary text-on-secondary hover:bg-on-secondary-container"
+                : "bg-primary-container text-on-primary-container hover:opacity-90"
             }`}
           >
             {saving === cert.id && <Spinner />}

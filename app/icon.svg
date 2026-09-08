@@ -1,35 +1,30 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" fill="none">
-  <!-- BidPulse Favicon / App Icon Master (512x512 px) in Deep Navy and #EF5B25 -->
-  <rect width="512" height="512" rx="112" fill="#0A182F"/>
-  <rect x="2" y="2" width="508" height="508" rx="110" stroke="#1E293B" stroke-width="4"/>
-
-  <!-- Centered Shield & Pulse in #EF5B25 -->
-  <g transform="translate(256, 256) scale(4.2)">
-    <!-- White Shield Outline -->
-    <path d="M0 -34 L28 -20 C28 10 0 32 0 35 C0 32 -28 10 -28 -20 Z" 
-          fill="none" 
-          stroke="#FFFFFF" 
-          stroke-width="5" 
-          stroke-linejoin="round" 
-          stroke-linecap="round"/>
-
-    <!-- Subtle Inset Shield -->
-    <path d="M0 -26 L20 -16 C20 6 0 24 0 26 C0 24 -20 6 -20 -16 Z" 
-          fill="none" 
-          stroke="#FFFFFF" 
-          stroke-opacity="0.25" 
-          stroke-width="1.8" 
-          stroke-linejoin="round"/>
-
-    <!-- Pulse Wave in #EF5B25 — horizontally rescaled to 90% of the
-         shield's half-width (28 to 25.2), keeping y untouched. Originally
-         extended to x=+-40 against a shield half-width of 28, the worst
-         overflow of the three variants (12 units each side). -->
-    <path d="M-25.2 0 L-12.6 0 L-7.6 -18 L-2.5 20 L2.5 -12 L7.6 8 L12.6 0 L25.2 0"
-          fill="none" 
-          stroke="#EF5B25" 
-          stroke-width="4.8" 
-          stroke-linecap="round" 
-          stroke-linejoin="round"/>
-  </g>
+  <!-- BidPulse app icon — Stitch "Industrial Precision" shield & pulse mark -->
+  <defs>
+    <linearGradient id="iconShieldGrad" x1="256" y1="40" x2="256" y2="450" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#131b2e"/>
+      <stop offset="100%" stop-color="#080e1a"/>
+    </linearGradient>
+    <linearGradient id="iconAmber" x1="120" y1="120" x2="392" y2="380" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+  </defs>
+  <path d="M256 52 L400 110 C400 272 338 392 256 444 C174 392 112 272 112 110 Z"
+        fill="url(#iconShieldGrad)"
+        stroke="url(#iconAmber)"
+        stroke-width="12"
+        stroke-linejoin="round"/>
+  <path d="M256 80 L374 128 C374 262 322 364 256 410 C190 364 138 262 138 128 Z"
+        stroke="#232f48"
+        stroke-width="4"
+        stroke-linejoin="round"
+        fill="none"/>
+  <path d="M148 256 H202 L232 184 L270 328 L306 218 L326 256 H364"
+        stroke="url(#iconAmber)"
+        stroke-width="14"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+  <circle cx="270" cy="328" r="6" fill="#f59e0b"/>
+  <circle cx="232" cy="184" r="6" fill="#fbbf24"/>
 </svg>

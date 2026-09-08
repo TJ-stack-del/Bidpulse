@@ -142,7 +142,7 @@ export function CertificationsSection({
               value={otherLabel}
               onChange={(e) => setOtherLabel(e.target.value)}
               placeholder="e.g. MBE, DBE"
-              className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+              className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
             />
           </div>
         )}
@@ -152,7 +152,7 @@ export function CertificationsSection({
           <input
             value={certNumber}
             onChange={(e) => setCertNumber(e.target.value)}
-            className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+            className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
           />
         </div>
 
@@ -162,13 +162,13 @@ export function CertificationsSection({
             type="date"
             value={expirationDate}
             onChange={(e) => setExpirationDate(e.target.value)}
-            className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+            className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
           />
         </div>
 
         <div className="flex-1 min-w-[160px]">
           <label className="text-label-md text-on-surface-variant block mb-1">Certificate document (optional)</label>
-          <label className="px-4 py-2 rounded border border-secondary text-secondary text-label-md font-bold hover:bg-surface-container-low transition cursor-pointer inline-block">
+          <label className="px-4 py-2 rounded border border-primary text-primary text-label-md font-bold hover:bg-surface-container-low transition cursor-pointer inline-block">
             {file ? file.name : "Choose file"}
             <input
               type="file"
@@ -181,7 +181,7 @@ export function CertificationsSection({
         <button
           type="submit"
           disabled={submitting}
-          className="py-2 px-4 bg-secondary text-on-secondary rounded text-label-md font-semibold hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
+          className="py-2 px-4 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
         >
           {submitting && <Spinner />}
           {submitting ? "Adding…" : "Add certification"}
@@ -209,7 +209,7 @@ export function CertificationsSection({
                   {cert.file_url && (
                     <>
                       {" · "}
-                      <a href={cert.file_url} target="_blank" rel="noopener noreferrer" className="text-secondary hover:underline">
+                      <a href={cert.file_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                         {cert.file_name ?? "View document"}
                       </a>
                     </>
@@ -221,7 +221,7 @@ export function CertificationsSection({
                   title={cert.verified ? CERT_REVIEWED_TOOLTIP : undefined}
                   className={`text-[10px] px-2 py-0.5 rounded border font-bold uppercase ${
                     cert.verified
-                      ? "bg-secondary-container text-on-secondary-container border-secondary/20"
+                      ? "bg-secondary-container text-on-secondary-container border-primary/20"
                       : "bg-surface-container-low text-on-surface-variant border-outline-variant"
                   }`}
                 >

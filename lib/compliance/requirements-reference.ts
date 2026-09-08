@@ -123,6 +123,18 @@ export const TRADE_SPECIFIC_CERTIFICATIONS: TriggeredRequirementDefinition[] = [
     verificationNote: "[Confirm assigned technicians hold current EPA Section 608 certification before servicing refrigerant equipment]",
   },
   {
+    id: "electrical-contractor-license",
+    label: "State/Local Electrical Contractor License",
+    triggerKeywords: ["electrical", "electrician", "wiring", "switchgear", "panel upgrade", "lighting retrofit", "conduit"],
+    verificationNote: "[Confirm the assigned electrician holds a current state or local electrical contractor license covering the jurisdiction where work will be performed]",
+  },
+  {
+    id: "nfpa-70e-arc-flash",
+    label: "NFPA 70E Arc-Flash Electrical Safety Training",
+    triggerKeywords: ["electrical", "switchgear", "energized", "arc flash", "high voltage", "panel upgrade"],
+    verificationNote: "[Confirm assigned electricians have current NFPA 70E arc-flash safety training before performing energized electrical work]",
+  },
+  {
     id: "bloodborne-pathogen-training",
     label: "Bloodborne Pathogen Exposure Control Training",
     triggerKeywords: ["detention", "correctional", "jail", "inmate", "medical facility", "healthcare", "clinic", "hospital"],

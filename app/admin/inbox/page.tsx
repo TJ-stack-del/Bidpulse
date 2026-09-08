@@ -38,11 +38,31 @@ export default async function AdminInboxPage() {
   const { data: rawSubmissions } = await supabase
     .from("submissions")
     .select(
-      "id, agency, solicitation_number, stage, due_date, is_test, draft, submitted_at, updated_at, created_at, clients!submissions_client_id_fkey(company_name)"
+      "id, agency, solicitation_number, stage, due_date, is_test, draft, submitted_at, updated_at, created_at, estimated_value, clients!submissions_client_id_fkey(company_name)"
     )
     .eq("draft", false)
     .order("is_test", { ascending: true })
     .order("submitted_at", { ascending: true });
+
+  // Real per-submission "X of 3 core deliverables drafted" count -- one
+  // query for every visible submission's deliverables rather than N+1.
+  // Only the 3 core types count toward the /3 (a lean-package submission's
+  // rate_sheet/executive_cover/certificate_of_insurance rows would never
+  // reach 3/3 against this denominator, so they're excluded rather than
+  // shown as permanently incomplete).
+  const CORE_DELIVERABLE_TYPES = new Set(["capability_statement", "compliance_matrix", "technical_narrative"]);
+  const submissionIds = (rawSubmissions ?? []).map((s: any) => s.id);
+  const deliverablesCountBySubmission = new Map<string, number>();
+  if (submissionIds.length > 0) {
+    const { data: deliverableRows } = await supabase
+      .from("deliverables")
+      .select("submission_id, deliverable_type")
+      .in("submission_id", submissionIds);
+    for (const row of deliverableRows ?? []) {
+      if (!CORE_DELIVERABLE_TYPES.has(row.deliverable_type)) continue;
+      deliverablesCountBySubmission.set(row.submission_id, (deliverablesCountBySubmission.get(row.submission_id) ?? 0) + 1);
+    }
+  }
 
   const FORTY_EIGHT_HOURS_MS = 48 * 60 * 60 * 1000;
   const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
@@ -64,7 +84,9 @@ export default async function AdminInboxPage() {
     const isStale =
       sub.stage !== "closed" && now - new Date(lastTouched).getTime() >= THREE_DAYS_MS;
 
-    return { ...sub, pastPromise, isStale };
+    const deliverablesDrafted = deliverablesCountBySubmission.get(sub.id) ?? 0;
+
+    return { ...sub, pastPromise, isStale, deliverablesDrafted };
   });
 
   const stageLabels: Record<string, string> = {
@@ -83,6 +105,41 @@ export default async function AdminInboxPage() {
     closed: "bg-surface-variant text-on-surface-variant",
   };
 
+  // Real, accurate one-line descriptions of what each stage actually means
+  // (not fabricated metrics) and a per-stage dot color for the board
+  // column headers, matching the Stitch "Industrial Precision" kanban
+  // reference (admin-kanban.html) — same color role each stage plays there.
+  const stageDescriptions: Record<string, string> = {
+    submitted: "Awaiting first admin review",
+    in_review: "Admin preparing deliverables",
+    deliverables_ready: "Ready for the client to review",
+    client_review: "Contractor reviewing the packet",
+    closed: "Finished — won, lost, or closed out",
+  };
+
+  const stageDotColor: Record<string, string> = {
+    submitted: "bg-tertiary-container",
+    in_review: "bg-primary-container",
+    deliverables_ready: "bg-tertiary",
+    client_review: "bg-secondary",
+    closed: "bg-outline",
+  };
+
+  // Real, computed aggregates for the footer strip below the board —
+  // deliberately not the fabricated SLA-adherence/win-rate stats the Stitch
+  // reference shows (this app tracks neither), just the two figures that
+  // are actually derivable from real data. Test rows never contribute.
+  const openSubmissions = submissions.filter((s) => s.stage !== "closed" && !s.is_test);
+  const openCount = openSubmissions.length;
+  const grossValue = openSubmissions.reduce((sum, s) => sum + (s.estimated_value ?? 0), 0);
+
+  // Same pastPromise/isStale flags the daily-digest cron already emails
+  // out (app/api/daily-digest/route.ts) — this just surfaces the identical
+  // real computation as an on-screen banner instead of only a per-card
+  // badge, so it isn't missed until the next digest run.
+  const pastPromiseCount = openSubmissions.filter((s) => s.pastPromise).length;
+  const staleCount = openSubmissions.filter((s) => s.isStale && !s.pastPromise).length;
+
   return (
     <AppShell activePath="/admin/inbox" role="admin" viewerName={member.full_name}>
       <div className="mt-6">
@@ -92,7 +149,53 @@ export default async function AdminInboxPage() {
         </p>
       </div>
 
-      <InboxBoard submissions={submissions as any} stageLabels={stageLabels} stagePillStyle={stagePillStyle} />
+      {(pastPromiseCount > 0 || staleCount > 0) && (
+        <div className="w-full bg-surface-container-low px-gutter py-3 rounded-xl shadow-md flex flex-wrap items-center gap-3">
+          <span className="material-symbols-outlined text-primary-container text-lg">timer</span>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-body-sm">
+            {pastPromiseCount > 0 && (
+              <span className="text-on-surface">
+                <strong className="font-bold">{pastPromiseCount}</strong>{" "}
+                {pastPromiseCount === 1 ? "submission" : "submissions"} past the 48-hour turnaround
+              </span>
+            )}
+            {pastPromiseCount > 0 && staleCount > 0 && <span className="text-outline-variant">•</span>}
+            {staleCount > 0 && (
+              <span className="text-error font-medium">
+                <strong className="font-bold">{staleCount}</strong> {staleCount === 1 ? "submission" : "submissions"}{" "}
+                untouched for 3+ days
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      <InboxBoard
+        submissions={submissions as any}
+        stageLabels={stageLabels}
+        stagePillStyle={stagePillStyle}
+        stageDescriptions={stageDescriptions}
+        stageDotColor={stageDotColor}
+      />
+
+      <div className="w-full bg-surface-container px-gutter py-4 rounded-xl shadow-md flex flex-wrap items-center gap-8">
+        <div className="flex items-center gap-3">
+          <span className="material-symbols-outlined text-primary text-xl">folder_shared</span>
+          <div className="flex flex-col">
+            <span className="text-label-sm text-on-surface-variant uppercase tracking-wider">Open Pipeline Submissions</span>
+            <span className="font-code text-body-lg text-on-surface font-bold">{openCount} Total Active</span>
+          </div>
+        </div>
+        {grossValue > 0 && (
+          <div className="flex items-center gap-3">
+            <span className="material-symbols-outlined text-secondary text-xl">payments</span>
+            <div className="flex flex-col">
+              <span className="text-label-sm text-on-surface-variant uppercase tracking-wider">Gross Pipeline Value</span>
+              <span className="font-code text-body-lg text-secondary font-bold">${grossValue.toLocaleString()}</span>
+            </div>
+          </div>
+        )}
+      </div>
     </AppShell>
   );
 }

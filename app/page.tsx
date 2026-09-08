@@ -121,6 +121,12 @@ const TRADES = [
     title: "IT / Computer Support",
     body: "Help desk, network support, and technical-service contracts for schools, agencies, and public offices.",
   },
+  {
+    id: "electrical",
+    icon: "electrical_services",
+    title: "Electrical",
+    body: "Panel upgrades, lighting retrofits, and wiring contracts for municipal and school facilities.",
+  },
 ];
 
 // Each id here must match a KNOWN_TRADES id — this section needs a real
@@ -144,19 +150,25 @@ const PRICING_PREVIEW = [
     name: "Pilot",
     tagline: "A low-commitment first bid, on us to prove the process.",
     terms: "No commitment after",
+    features: ["One full bid, done for you", "See how the process works"],
     cta: { label: "Get started", href: "/intake" },
+    highlight: false,
   },
   {
     name: "One-off",
     tagline: "A single bid, fully prepared.",
     terms: "Confirmed with you before work starts",
+    features: ["The write-up about your company", "A checklist matching the agency's rules", "The technical write-up"],
     cta: { label: "Get started", href: "/intake" },
+    highlight: true,
   },
   {
     name: "Retainer",
     tagline: "Ongoing coverage for teams bidding regularly.",
     terms: "Up to 2 full bids a month",
+    features: ["We watch for new bids every month", "One person who knows your file"],
     cta: { label: "Email us", href: "mailto:hello@bidpulse.com" },
+    highlight: false,
   },
 ];
 
@@ -172,8 +184,12 @@ const FAQ_PREVIEW = [
     a: "No one can guarantee an award. What we guarantee is a complete, compliant submission prepared by people who've done this before.",
   },
   {
+    q: "Why do I submit the bid myself instead of BidPulse submitting it?",
+    a: "You hold the reins. Government procurement portals tie submissions to your own company's registered vendor credentials, so you're the one who uploads and hits submit — we prepare the package, you stay in control of your own account.",
+  },
+  {
     q: "How does pricing work?",
-    a: "We confirm pricing with you directly before any work starts — one-off, retainer, and pilot options are on the Pricing page. No card is required to get started.",
+    a: "We confirm pricing with you directly before any work starts — one-off, retainer, and pilot options are on the Pricing page. No card is required to get started. Every deliverable is free to preview before anything's due.",
   },
 ];
 
@@ -197,7 +213,7 @@ function Home() {
         <div className="flex flex-wrap gap-4 justify-center mt-2">
           <Link
             href="/intake"
-            className="px-8 py-4 bg-secondary text-on-secondary rounded text-label-md hover:bg-on-secondary-container transition active:scale-[0.97] flex items-center gap-2"
+            className="px-8 py-4 bg-primary-container text-on-primary-container rounded text-label-md hover:opacity-90 transition active:scale-[0.97] flex items-center gap-2"
           >
             Start your bid
             <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
@@ -210,78 +226,107 @@ function Home() {
           </a>
         </div>
 
-        {/* Document transform: messy RFP in, clean capability statement out —
-            same idea as the "before/after" panel in the printed deliverable
-            itself (see lib/pdf/deliverables-packet.ts), just rendered live. */}
-        <div className="flex items-center justify-center gap-6 md:gap-10 pt-8 flex-wrap">
-          <div className="w-56 md:w-64 aspect-[7/9] bg-surface-container-lowest border border-outline-variant rounded shadow-lg p-6 -rotate-3 shrink-0">
-            <div className="flex gap-1.5 mb-3">
-              <span className="font-code text-[8px] px-1.5 py-0.5 border border-outline-variant rounded text-on-surface-variant">
-                ITB-C893
-              </span>
-              <span className="font-code text-[8px] px-1.5 py-0.5 border border-tertiary rounded text-tertiary">
-                SET-ASIDE
-              </span>
-            </div>
-            <div className="h-1.5 bg-outline-variant rounded mb-2" />
-            <div className="h-1.5 bg-outline-variant rounded mb-2 w-1/2" />
-            <div className="h-1.5 bg-outline-variant rounded mb-3 w-1/4" />
-            <div className="border border-outline-variant rounded divide-y divide-outline-variant mb-3">
-              {[0, 1, 2].map((row) => (
-                <div key={row} className="flex gap-2 p-1.5">
-                  <span className="h-1.5 flex-1 bg-outline-variant/70 rounded" />
-                  <span className="h-1.5 flex-1 bg-outline-variant/70 rounded" />
-                  <span className="h-1.5 flex-1 bg-outline-variant/70 rounded" />
-                </div>
-              ))}
-            </div>
-            <div className="h-1.5 bg-outline-variant rounded mb-2" />
-            <div className="h-1.5 bg-outline-variant rounded w-2/3 mb-4" />
-            <p className="text-center text-label-sm font-code text-on-surface-variant uppercase tracking-wide">
-              the RFP
-            </p>
+        <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+          {TRADES.map((trade) => (
+            <span
+              key={trade.id}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider"
+            >
+              <span className="material-symbols-outlined text-primary text-[14px]">{trade.icon}</span>
+              {trade.title}
+            </span>
+          ))}
+        </div>
+
+        {/* Transformation pipeline card: messy RFP in, clean 3-file package
+            out — same idea as the "before/after" panel in the printed
+            deliverable itself (see lib/pdf/deliverables-packet.ts), just
+            rendered live. Deliberately illustrative-only labels throughout
+            (generic "Sample Solicitation", no named agency/client) — same
+            discipline the Gallery page's own "synthetic samples only"
+            notice already applies. The 3 package rows are the real core
+            deliverable types (capability_statement/compliance_matrix/
+            technical_narrative); the 48h figure is the same real internal
+            turnaround target app/api/daily-digest/route.ts already tracks. */}
+        <div className="w-full max-w-4xl bg-surface-container-low rounded-xl shadow-lg p-space-base md:p-8 flex flex-col gap-space-base mt-8">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <span className="text-label-sm font-code text-tertiary uppercase tracking-wide flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-primary" aria-hidden="true" />
+              Transformation pipeline: RFP spec to ready-to-send packet
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container text-label-sm font-bold">
+              <span className="material-symbols-outlined text-[16px]">check_circle</span>
+              Turnaround: 48 hours
+            </span>
           </div>
 
-          <span className="material-symbols-outlined text-tertiary text-4xl shrink-0 hidden sm:block" aria-hidden="true">
-            arrow_forward
-          </span>
-
-          <div className="relative w-56 md:w-64 aspect-[7/9] bg-surface border border-outline-variant rounded shadow-lg p-6 rotate-2 shrink-0">
-            <div className="absolute top-5 right-4 w-20 h-20 rounded-full border-2 border-tertiary flex items-center justify-center -rotate-[14deg]">
-              <span className="text-[9px] font-code text-tertiary text-center leading-tight uppercase">
-                Ready
-                <br />
-                to send
-              </span>
-            </div>
-            <h3 className="text-title-lg text-primary mb-0.5 pr-16 text-left">Coastal HVAC Services</h3>
-            <p className="font-code text-[9px] text-on-surface-variant uppercase tracking-wide mb-4 text-left">
-              Capability statement
-            </p>
-            <div className="h-1 w-8 bg-tertiary rounded mb-2" />
-            <div className="h-1.5 bg-outline-variant/60 rounded mb-1.5 w-11/12" />
-            <div className="h-1.5 bg-outline-variant/60 rounded mb-1.5 w-4/5" />
-            <div className="h-1.5 bg-outline-variant/60 rounded mb-4 w-5/6" />
-            {[100, 100, 45].map((width, i) => (
-              <div key={i} className="flex items-center gap-2 mb-2">
-                {/* Deliberately not bg-secondary/orange -- green reads as
-                    "confirmed" distinctly from the brand accent, so orange
-                    isn't overloaded with two meanings on the same page. */}
-                <span className="w-3.5 h-3.5 rounded-full bg-[#0F7A4C] flex items-center justify-center shrink-0">
-                  <span className="material-symbols-outlined text-white text-[10px]">check</span>
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-space-base items-center">
+            {/* Left: incoming RFP */}
+            <div className="bg-surface-container-lowest rounded-lg p-space-base flex flex-col gap-space-sm text-left">
+              <div className="flex items-center justify-between gap-2">
+                <span className="px-2 py-0.5 rounded bg-error-container/30 text-error text-label-sm font-bold uppercase tracking-wider">
+                  Incoming raw RFP
                 </span>
-                <span className="h-1.5 bg-outline-variant/60 rounded" style={{ width: `${width * 0.6}%` }} />
+                <span className="text-label-sm text-on-surface-variant">Sample PDF</span>
               </div>
-            ))}
-            <p className="text-center text-label-sm font-code text-on-surface-variant uppercase tracking-wide mt-4">
-              what you send
-            </p>
+              <h3 className="text-title-lg text-on-surface font-bold">Sample Solicitation</h3>
+              <p className="text-body-sm text-on-surface-variant">
+                Dense procurement language, buried insurance covenants, prevailing wage rate sheets, bonding
+                certifications, and confusing submission checklists.
+              </p>
+              <div className="border border-outline-variant rounded p-2 flex flex-col gap-1.5">
+                <span className="h-1.5 rounded bg-outline-variant w-full" />
+                <span className="h-1.5 rounded bg-outline-variant w-4/5" />
+                <span className="h-1.5 rounded bg-primary/60 w-3/5" />
+                <span className="h-1.5 rounded bg-error/60 w-2/5" />
+              </div>
+              <div className="flex items-center justify-between text-label-sm">
+                <span className="text-primary font-bold">Needs review</span>
+                <span className="text-on-surface-variant">Prevailing wage flagged</span>
+              </div>
+            </div>
+
+            {/* Middle: arrow */}
+            <div className="flex md:flex-col items-center justify-center gap-2 py-1">
+              <div className="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-on-primary-container">arrow_forward</span>
+              </div>
+              <span className="text-label-sm text-on-surface-variant font-code whitespace-nowrap">BidPulse Pipeline</span>
+            </div>
+
+            {/* Right: ready package */}
+            <div className="bg-surface-container-lowest rounded-lg p-space-base flex flex-col gap-space-sm text-left">
+              <div className="flex items-center justify-between gap-2">
+                <span className="px-2 py-0.5 rounded bg-secondary-container text-on-secondary-container text-label-sm font-bold uppercase tracking-wider">
+                  Ready to submit
+                </span>
+                <span className="text-label-sm text-on-surface-variant">3 clean files</span>
+              </div>
+              <h3 className="text-title-lg text-on-surface font-bold">Tailored Bid Submission Package</h3>
+              <div className="flex flex-col gap-1.5">
+                {["Capability statement", "Compliance matrix", "Technical narrative"].map((label, i) => (
+                  <div key={label} className="flex items-center justify-between bg-surface-container px-2.5 py-1.5 rounded">
+                    <span className="flex items-center gap-2 text-body-sm text-on-surface">
+                      <span className="font-code text-label-sm text-on-surface-variant">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      {label}
+                    </span>
+                    <span className="text-label-sm text-secondary font-bold uppercase tracking-wider">Ready</span>
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center justify-between text-label-sm">
+                <span className="text-primary font-bold">You submit it</span>
+                <span className="text-on-surface-variant">No jargon</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       <section className="flex flex-col items-center gap-6">
-        <span className="text-label-md text-secondary font-bold uppercase tracking-wide border border-secondary rounded-full px-4 py-1">
+        <span className="text-label-md text-primary font-bold uppercase tracking-wide border border-primary rounded-full px-4 py-1">
           Now accepting founding clients
         </span>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter w-full">
@@ -303,7 +348,7 @@ function Home() {
             },
           ].map((item) => (
             <div key={item.title} className="flex flex-col items-center text-center gap-2 p-gutter">
-              <span className="material-symbols-outlined text-secondary text-[28px]">{item.icon}</span>
+              <span className="material-symbols-outlined text-primary text-[28px]">{item.icon}</span>
               <h3 className="text-title-lg text-primary">{item.title}</h3>
               <p className="text-body-sm text-on-surface-variant">{item.body}</p>
             </div>
@@ -333,6 +378,10 @@ function Home() {
             </div>
           ))}
         </div>
+        <p className="text-body-sm text-on-primary/70 flex items-center gap-2">
+          <span className="material-symbols-outlined text-on-primary text-[18px] shrink-0">verified_user</span>
+          We never submit on your behalf — you stay in control of your own agency portal account.
+        </p>
       </section>
 
       {/* ---------- Trades ---------- */}
@@ -349,7 +398,7 @@ function Home() {
               key={trade.title}
               className="flex items-start gap-4 p-gutter border border-outline-variant rounded bg-surface"
             >
-              <span className="material-symbols-outlined text-secondary mt-1">{trade.icon}</span>
+              <span className="material-symbols-outlined text-primary mt-1">{trade.icon}</span>
               <div>
                 <h4 className="text-label-md text-primary uppercase tracking-wide">{trade.title}</h4>
                 <p className="text-body-sm text-on-surface-variant mt-1">{trade.body}</p>
@@ -358,7 +407,7 @@ function Home() {
           ))}
         </ul>
         {/* The intake flow already accepts any trade and gives an honest
-            heads-up (not a rejection) when it's outside the four above with
+            heads-up (not a rejection) when it's outside the trades above with
             deep compliance-matrix coverage — see lib/compliance/known-trades.ts.
             This copy makes that explicit instead of implying a harder gate
             than the product actually has. Points at the intake CTA, not a
@@ -367,16 +416,16 @@ function Home() {
             BidPulse — the product already answers the question for free. */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 max-w-2xl">
           <p className="text-body-sm text-on-surface-variant">
-            We&apos;re deepest in these four — but if you&apos;re in a related trade, go
+            We&apos;re deepest in these five — but if you&apos;re in a related trade, go
             ahead and{" "}
-            <Link href="/intake" className="text-secondary font-bold hover:underline">
+            <Link href="/intake" className="text-primary font-bold hover:underline">
               start your bid
             </Link>
             . You&apos;ll get an honest heads-up right away if something&apos;s outside our
-            sweet spot (a trade outside these four gets less tailored compliance
+            sweet spot (a trade outside these five gets less tailored compliance
             guidance, but we&apos;ll tell you that up front, not after you&apos;ve paid).
             Prefer to ask first?{" "}
-            <Link href="/contact" className="text-secondary font-bold hover:underline">
+            <Link href="/contact" className="text-primary font-bold hover:underline">
               Contact us
             </Link>
             .
@@ -394,26 +443,42 @@ function Home() {
             confirm exact pricing with you directly before any work starts.
           </p>
         </div>
-        <div className="border-t border-outline-variant">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
           {PRICING_PREVIEW.map((tier) => (
             <div
               key={tier.name}
-              className="grid grid-cols-1 md:grid-cols-[200px_1fr_auto] gap-3 md:gap-8 py-8 border-b border-outline-variant md:items-center"
+              className={`bg-surface-container-low rounded-xl p-space-base flex flex-col gap-space-md shadow-sm ${
+                tier.highlight ? "ring-2 ring-primary" : ""
+              }`}
             >
-              <h3 className="text-headline-md text-primary">{tier.name}</h3>
+              {tier.highlight && (
+                <span className="self-start px-2 py-0.5 rounded bg-primary-container text-on-primary-container text-label-sm font-bold uppercase tracking-wider">
+                  Most popular
+                </span>
+              )}
               <div>
-                <p className="text-body-md text-on-surface-variant">{tier.tagline}</p>
-                <p className="text-label-sm font-code text-on-surface-variant uppercase tracking-wide mt-2">
-                  {tier.terms}
-                </p>
+                <h3 className="text-headline-md text-primary">{tier.name}</h3>
+                <p className="text-body-md text-on-surface-variant mt-1">{tier.tagline}</p>
               </div>
-              <Link href={tier.cta.href} className="text-secondary font-bold hover:underline whitespace-nowrap">
+              <ul className="flex flex-col gap-2 flex-grow">
+                {tier.features.map((f) => (
+                  <li key={f} className="flex items-start gap-2 text-body-sm text-on-surface">
+                    <span className="material-symbols-outlined text-secondary text-[18px] shrink-0">check_circle</span>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <p className="text-label-sm font-code text-on-surface-variant uppercase tracking-wide">{tier.terms}</p>
+              <Link
+                href={tier.cta.href}
+                className="mt-auto px-4 py-2.5 bg-primary-container hover:bg-primary text-on-primary-container rounded-lg text-label-md font-bold text-center transition active:scale-[0.97]"
+              >
                 {tier.cta.label}
               </Link>
             </div>
           ))}
         </div>
-        <Link href="/pricing" className="text-secondary font-bold hover:underline self-start">
+        <Link href="/pricing" className="text-primary font-bold hover:underline self-start">
           See full pricing →
         </Link>
       </section>
@@ -427,7 +492,7 @@ function Home() {
           <h2 className="text-headline-lg text-primary">Questions contractors actually ask</h2>
         </div>
         <FaqAccordion faqs={FAQ_PREVIEW} />
-        <Link href="/faq" className="text-secondary font-bold hover:underline text-center">
+        <Link href="/faq" className="text-primary font-bold hover:underline text-center">
           Read the full FAQ →
         </Link>
       </section>
@@ -441,7 +506,7 @@ function Home() {
         </p>
         <Link
           href="/intake"
-          className="px-8 py-4 bg-secondary text-on-secondary rounded text-label-md hover:bg-on-secondary-container transition active:scale-[0.97] flex items-center gap-2"
+          className="px-8 py-4 bg-primary-container text-on-primary-container rounded text-label-md hover:opacity-90 transition active:scale-[0.97] flex items-center gap-2"
         >
           <span className="material-symbols-outlined text-[18px]">assignment</span>
           Get started

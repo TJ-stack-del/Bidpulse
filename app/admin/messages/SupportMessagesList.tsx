@@ -43,7 +43,7 @@ export function SupportMessagesList({ messages }: { messages: Message[] }) {
               <div className="flex items-center gap-2 flex-wrap">
                 <p className="font-semibold text-on-surface break-words">{m.name}</p>
                 {!m.read && (
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-secondary text-on-secondary font-bold uppercase">
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-primary-container text-on-primary-container font-bold uppercase">
                     New
                   </span>
                 )}

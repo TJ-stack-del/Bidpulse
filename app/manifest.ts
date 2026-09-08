@@ -12,8 +12,10 @@ export default function manifest(): MetadataRoute.Manifest {
       "Done-for-you bid prep for small trade contractors bidding on local government contracts.",
     start_url: "/",
     display: "standalone",
-    background_color: "#0A182F",
-    theme_color: "#0A182F",
+    // Matches app/globals.css's .dark surface/background token (the
+    // Stitch "Industrial Precision" dark system's --color-surface).
+    background_color: "#0f172a",
+    theme_color: "#0f172a",
     icons: [
       {
         src: "/icon.svg",

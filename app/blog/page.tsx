@@ -38,10 +38,10 @@ export default function BlogPage() {
         {POSTS.map((post) => (
           <article
             key={post.title}
-            className="bg-surface-container-lowest border border-outline-variant rounded-lg p-6 flex flex-col gap-3 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-secondary/50"
+            className="bg-surface-container-lowest border border-outline-variant rounded-lg p-6 flex flex-col gap-3 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-primary/50"
           >
             <div className="flex items-center justify-between text-label-sm text-on-surface-variant uppercase tracking-wider">
-              <span className="text-secondary font-bold">{post.category}</span>
+              <span className="text-primary font-bold">{post.category}</span>
               <span>{new Date(post.date).toLocaleDateString()}</span>
             </div>
             <h2 className="text-title-lg text-primary">{post.title}</h2>

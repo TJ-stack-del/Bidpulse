@@ -19,16 +19,16 @@ export function Logo({ className = "", priority = false }: { className?: string;
       <Image
         src="/logo.svg"
         alt="BidPulse"
-        width={99}
-        height={22}
+        width={100}
+        height={30}
         className={`h-[var(--nav-logo-height)] w-auto dark:hidden ${className}`}
         priority={priority}
       />
       <Image
         src="/logo-dark.svg"
         alt="BidPulse"
-        width={99}
-        height={22}
+        width={100}
+        height={30}
         className={`hidden h-[var(--nav-logo-height)] w-auto dark:block ${className}`}
         priority={priority}
       />

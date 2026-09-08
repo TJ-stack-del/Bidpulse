@@ -56,13 +56,13 @@ export default function PricingPage() {
             key={pkg.type}
             className={`bg-surface-container-lowest rounded-lg p-gutter flex flex-col gap-6 relative overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg ${
               pkg.highlight
-                ? "border border-secondary shadow-md md:-translate-y-2"
-                : "border border-outline-variant hover:border-secondary/50"
+                ? "border border-primary shadow-md md:-translate-y-2"
+                : "border border-outline-variant hover:border-primary/50"
             }`}
           >
-            <div className={`absolute top-0 left-0 w-1 h-full ${pkg.highlight ? "bg-secondary" : "bg-surface-dim"}`} />
+            <div className={`absolute top-0 left-0 w-1 h-full ${pkg.highlight ? "bg-primary-container" : "bg-surface-dim"}`} />
             {pkg.highlight && (
-              <div className="absolute top-0 right-0 bg-secondary text-on-secondary text-label-sm py-1 px-3 rounded-bl-lg">
+              <div className="absolute top-0 right-0 bg-primary-container text-on-primary-container text-label-sm py-1 px-3 rounded-bl-lg">
                 Popular
               </div>
             )}
@@ -73,7 +73,7 @@ export default function PricingPage() {
             <ul className="flex flex-col gap-3 flex-grow">
               {pkg.features.map((f) => (
                 <li key={f} className="flex items-start gap-3">
-                  <span className="material-symbols-outlined text-secondary text-[20px]">check_circle</span>
+                  <span className="material-symbols-outlined text-primary text-[20px]">check_circle</span>
                   <span className="text-body-md text-on-surface">{f}</span>
                 </li>
               ))}
@@ -82,7 +82,7 @@ export default function PricingPage() {
               href={pkg.cta.href}
               className={`py-3 px-4 rounded text-label-md text-center transition active:scale-[0.97] ${
                 pkg.highlight
-                  ? "bg-secondary text-on-secondary hover:bg-on-secondary-container"
+                  ? "bg-primary-container text-on-primary-container hover:opacity-90"
                   : "bg-surface-container-low text-on-surface border border-outline hover:bg-surface-container-high"
               }`}
             >

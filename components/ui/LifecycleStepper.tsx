@@ -32,7 +32,7 @@ export function LifecycleStepper({ currentStage }: { currentStage: number }) {
                   isDone
                     ? "bg-tertiary-fixed text-on-tertiary-fixed"
                     : isActive
-                    ? "bg-secondary text-on-secondary shadow-[0_0_0_2px_#EF5B25]"
+                    ? "bg-primary-container text-on-primary-container shadow-[0_0_0_2px_rgb(var(--color-primary))]"
                     : "bg-surface text-outline border-2 border-outline-variant"
                 }`}
               >
@@ -40,7 +40,7 @@ export function LifecycleStepper({ currentStage }: { currentStage: number }) {
               </div>
               <span
                 className={`text-label-md ${
-                  isActive ? "text-secondary font-bold" : "text-on-surface-variant"
+                  isActive ? "text-primary font-bold" : "text-on-surface-variant"
                 }`}
               >
                 {label}

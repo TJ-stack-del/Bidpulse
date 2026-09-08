@@ -35,6 +35,10 @@ export function ContactForm() {
   if (sent) {
     return (
       <div className="text-center flex flex-col items-center gap-3 py-6">
+        {/* Genuine success-state icon (a real "message sent" confirmation) —
+            deliberately secondary/emerald, matching the design system's
+            compliance/success signal color, not the brand-accent amber
+            every other icon on this page uses. */}
         <span className="material-symbols-outlined text-secondary text-[40px]">check_circle</span>
         <h2 className="text-title-lg text-primary">Message sent</h2>
         <p className="text-body-md text-on-surface-variant">
@@ -56,7 +60,7 @@ export function ContactForm() {
           required
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+          className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
         />
       </div>
 
@@ -70,7 +74,7 @@ export function ContactForm() {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+          className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
         />
       </div>
 
@@ -84,7 +88,7 @@ export function ContactForm() {
           rows={5}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none resize-y"
+          className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none resize-y"
         />
       </div>
 
@@ -93,7 +97,7 @@ export function ContactForm() {
       <button
         type="submit"
         disabled={sending}
-        className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-secondary text-on-secondary rounded text-label-md font-semibold hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100"
+        className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100"
       >
         {sending && <Spinner />}
         Send message

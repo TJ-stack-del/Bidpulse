@@ -6,14 +6,17 @@ import { useMemo, useState } from "react";
 type Submission = {
   id: string;
   agency: string;
+  solicitation_number: string | null;
   stage: string;
   due_date: string | null;
   is_test: boolean;
   draft: boolean;
   submitted_at: string | null;
+  estimated_value: number | null;
   clients: { company_name: string } | null;
   pastPromise: boolean;
   isStale: boolean;
+  deliverablesDrafted: number;
 };
 
 const STAGE_ORDER = [
@@ -39,14 +42,27 @@ function initials(name: string) {
     .toUpperCase();
 }
 
+// Same $-thousands shorthand the deliverables/pricing side of the app
+// already uses for estimated_value — never invents a figure, just formats
+// the real admin-entered one (or renders nothing if it's null).
+function formatValue(value: number | null): string | null {
+  if (value == null) return null;
+  if (value >= 1000) return `$${Math.round(value / 1000)}k`;
+  return `$${value.toLocaleString()}`;
+}
+
 export function InboxBoard({
   submissions,
   stageLabels,
   stagePillStyle,
+  stageDescriptions,
+  stageDotColor,
 }: {
   submissions: Submission[];
   stageLabels: Record<string, string>;
   stagePillStyle: Record<string, string>;
+  stageDescriptions: Record<string, string>;
+  stageDotColor: Record<string, string>;
 }) {
   const [view, setView] = useState<"board" | "list">("board");
   const [needsAttentionOnly, setNeedsAttentionOnly] = useState(false);
@@ -87,7 +103,7 @@ export function InboxBoard({
           type="button"
           onClick={() => setView("board")}
           className={`px-3 py-1.5 text-label-md font-semibold transition active:scale-[0.97] ${
-            view === "board" ? "bg-secondary text-on-secondary" : "bg-surface-container-lowest text-on-surface hover:bg-surface-container-low"
+            view === "board" ? "bg-primary-container text-on-primary-container" : "bg-surface-container-lowest text-on-surface hover:bg-surface-container-low"
           }`}
         >
           Board
@@ -96,7 +112,7 @@ export function InboxBoard({
           type="button"
           onClick={() => setView("list")}
           className={`px-3 py-1.5 text-label-md font-semibold transition active:scale-[0.97] border-l border-outline-variant ${
-            view === "list" ? "bg-secondary text-on-secondary" : "bg-surface-container-lowest text-on-surface hover:bg-surface-container-low"
+            view === "list" ? "bg-primary-container text-on-primary-container" : "bg-surface-container-lowest text-on-surface hover:bg-surface-container-low"
           }`}
         >
           List
@@ -174,40 +190,94 @@ export function InboxBoard({
           {visibleStages.map((stage) => {
             const cards = filtered.filter((s) => s.stage === stage);
             return (
-              <div key={stage} className="w-full sm:flex-none sm:w-72 bg-surface-container-low border border-outline-variant rounded-xl">
-                <div className="px-3 py-2.5 border-b border-outline-variant flex items-center justify-between">
-                  <span className="text-label-lg font-semibold text-on-surface">{stageLabels[stage] ?? stage}</span>
-                  <span className="text-label-sm text-on-surface-variant">{cards.length}</span>
+              <div key={stage} className="w-full sm:flex-none sm:w-80 bg-surface-container-low p-2 rounded-xl flex flex-col gap-2">
+                <div className="px-1 pt-1 flex flex-col gap-0.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className={`w-2 h-2 rounded ${stageDotColor[stage] ?? "bg-outline"}`} />
+                      <h2 className="text-[15px] font-headline uppercase tracking-wide font-bold text-on-surface">
+                        {stageLabels[stage] ?? stage}
+                      </h2>
+                    </div>
+                    <span className="px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface font-code text-body-sm font-bold">
+                      {cards.length}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-on-surface-variant leading-tight">
+                    {stageDescriptions[stage] ?? ""}
+                  </p>
                 </div>
-                <div className="p-2 flex flex-col gap-2 min-h-[80px]">
-                  {cards.map((sub) => (
-                    <Link
-                      key={sub.id}
-                      href={`/admin/inbox/${sub.id}`}
-                      className="block bg-surface-container-lowest border border-outline-variant rounded-lg p-3 hover:bg-surface-container transition"
-                    >
-                      <div className="flex items-center gap-2 min-w-0 mb-1.5">
-                        <div className="w-7 h-7 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center justify-center text-[10px] font-bold shrink-0">
-                          {initials(sub.clients?.company_name ?? "—")}
+                <div className="flex flex-col gap-2 min-h-[80px]">
+                  {cards.map((sub) => {
+                    const formattedValue = formatValue(sub.estimated_value);
+                    return (
+                      <Link
+                        key={sub.id}
+                        href={`/admin/inbox/${sub.id}`}
+                        className={`bg-surface-container p-3 rounded-lg shadow-sm hover:bg-surface-container-high transition-all flex flex-col gap-2 group ${
+                          sub.is_test ? "opacity-80" : ""
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex flex-col min-w-0">
+                            <span className="text-[11px] font-code text-primary font-bold">
+                              {sub.solicitation_number || "No solicitation #"}
+                            </span>
+                            <span className="text-body-md font-headline font-bold text-on-surface line-clamp-1 group-hover:text-primary transition-colors">
+                              {sub.clients?.company_name ?? "—"}
+                            </span>
+                          </div>
+                          {sub.is_test ? (
+                            <span className="px-2 py-0.5 rounded bg-surface-bright text-on-surface-variant text-[10px] font-bold uppercase whitespace-nowrap">
+                              Test
+                            </span>
+                          ) : (
+                            <AttentionBadge sub={sub} />
+                          )}
                         </div>
-                        <span className="font-semibold text-on-surface text-label-md break-words min-w-0">
-                          {sub.clients?.company_name ?? "—"}
-                        </span>
-                      </div>
-                      <p className="text-label-sm text-on-surface-variant break-words mb-1.5">{sub.agency}</p>
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <AttentionBadge sub={sub} />
-                        {sub.is_test && (
-                          <span className="text-[10px] px-2 py-0.5 rounded bg-surface-container-highest text-on-surface-variant font-bold uppercase">
-                            Test
-                          </span>
-                        )}
-                        <span className="text-label-sm text-on-surface-variant ml-auto">
-                          {sub.due_date ? new Date(sub.due_date).toLocaleDateString() : "No due date"}
-                        </span>
-                      </div>
-                    </Link>
-                  ))}
+                        <div className="flex items-center gap-1.5 text-body-sm text-on-surface-variant min-w-0">
+                          <span className="material-symbols-outlined text-xs text-outline shrink-0">account_balance</span>
+                          <span className="truncate">{sub.agency}</span>
+                        </div>
+                        {(() => {
+                          const showDrafted = stage !== "submitted" && stage !== "closed";
+                          if (!formattedValue && !sub.due_date && !showDrafted) return null;
+                          return (
+                            <div
+                              className={`bg-surface-container-lowest p-1.5 rounded grid gap-1 text-center ${
+                                showDrafted ? "grid-cols-3" : "grid-cols-2"
+                              }`}
+                            >
+                              <div className="flex flex-col">
+                                <span className="text-[9px] text-on-surface-variant uppercase font-code">Est. value</span>
+                                <span className="text-body-sm text-on-surface font-bold font-code">
+                                  {formattedValue ?? "—"}
+                                </span>
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="text-[9px] text-on-surface-variant uppercase font-code">Due</span>
+                                <span className="text-body-sm text-on-surface font-bold font-code">
+                                  {sub.due_date ? new Date(sub.due_date).toLocaleDateString() : "—"}
+                                </span>
+                              </div>
+                              {showDrafted && (
+                                <div className="flex flex-col">
+                                  <span className="text-[9px] text-on-surface-variant uppercase font-code">Drafted</span>
+                                  <span
+                                    className={`text-body-sm font-bold font-code ${
+                                      sub.deliverablesDrafted >= 3 ? "text-secondary" : "text-on-surface"
+                                    }`}
+                                  >
+                                    {sub.deliverablesDrafted} of 3
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
+                      </Link>
+                    );
+                  })}
                   {cards.length === 0 && <p className="text-label-sm text-on-surface-variant px-1 py-3 text-center">Empty</p>}
                 </div>
               </div>
@@ -280,7 +350,7 @@ export function InboxBoard({
                 <td className="px-4 py-3">
                   <Link
                     href={`/admin/inbox/${sub.id}`}
-                    className="inline-flex px-3 py-1.5 rounded bg-secondary text-on-secondary text-label-md font-semibold hover:bg-on-secondary-container transition active:scale-[0.97]"
+                    className="inline-flex px-3 py-1.5 rounded bg-primary-container text-on-primary-container text-label-md font-semibold hover:opacity-90 transition active:scale-[0.97]"
                   >
                     Open
                   </Link>
@@ -318,7 +388,7 @@ export function InboxBoard({
                   <p className="text-label-md text-on-surface-variant break-words">{sub.agency}</p>
                 </div>
               </div>
-              <span className="shrink-0 inline-flex px-3 py-1.5 rounded bg-secondary text-on-secondary text-label-md font-semibold">
+              <span className="shrink-0 inline-flex px-3 py-1.5 rounded bg-primary-container text-on-primary-container text-label-md font-semibold">
                 Open
               </span>
             </div>

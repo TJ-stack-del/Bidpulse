@@ -37,4 +37,5 @@ export const COMMON_NAICS_CODES: { code: string; label: string }[] = [
   { code: "238220", label: "Plumbing, Heating, and Air-Conditioning Contractors" },
   { code: "238290", label: "Other Building Equipment Contractors" },
   { code: "561210", label: "Facilities Support Services" },
+  { code: "238210", label: "Electrical Contractors" },
 ];

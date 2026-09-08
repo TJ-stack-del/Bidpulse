@@ -22,6 +22,24 @@ type Match = {
 
 type Client = { id: string; company_name: string };
 
+// Real urgency signal computed from the real due_date -- no invented SLA
+// countdown, just how many days out the actual deadline is.
+function dueDateInfo(dueDate: string | null): { label: string; className: string } {
+  if (!dueDate) return { label: "—", className: "text-on-surface-variant" };
+  const days = Math.ceil((new Date(dueDate).getTime() - Date.now()) / (24 * 60 * 60 * 1000));
+  const date = new Date(dueDate).toLocaleDateString();
+  if (days < 0) return { label: date, className: "text-on-surface-variant" };
+  if (days <= 3) return { label: `${date} · ${days}d left`, className: "text-error font-bold" };
+  if (days <= 10) return { label: `${date} · ${days}d left`, className: "text-primary font-bold" };
+  return { label: date, className: "text-on-surface-variant" };
+}
+
+const STATUS_ACCENT: Record<string, string> = {
+  new: "border-l-secondary",
+  assigned: "border-l-primary",
+  dismissed: "border-l-outline-variant",
+};
+
 export function MatchesPanel({
   orgId,
   actorId,
@@ -45,6 +63,7 @@ export function MatchesPanel({
   const [scope, setScope] = useState("");
   const [solicitationNumber, setSolicitationNumber] = useState("");
   const [dueDate, setDueDate] = useState("");
+  const [search, setSearch] = useState("");
 
   const supabase = createClient();
   const { showToast } = useToast();
@@ -52,6 +71,13 @@ export function MatchesPanel({
   function clientName(clientId: string | null) {
     return clients.find((c) => c.id === clientId)?.company_name ?? "—";
   }
+
+  const filteredMatches = search.trim()
+    ? matches.filter((m) => {
+        const q = search.trim().toLowerCase();
+        return m.source_title.toLowerCase().includes(q) || m.source_agency.toLowerCase().includes(q);
+      })
+    : matches;
 
   async function handleLogOpportunity(e: React.FormEvent) {
     e.preventDefault();
@@ -217,138 +243,158 @@ export function MatchesPanel({
     <div className="flex flex-col gap-6 mt-4">
       <form
         onSubmit={handleLogOpportunity}
-        className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 flex flex-col gap-3"
+        className="bg-surface-container p-space-base rounded-xl shadow-sm flex flex-col gap-space-base"
       >
-        <div className="flex flex-col md:flex-row gap-3 items-end flex-wrap">
-          <div className="flex-1 min-w-[160px]">
-            <label className="text-label-md text-on-surface-variant block mb-1">Title</label>
+        <div className="flex items-center gap-space-xs">
+          <span className="material-symbols-outlined text-primary text-[20px]">travel_explore</span>
+          <h2 className="font-headline text-[18px] text-on-surface font-bold">Log an opportunity</h2>
+        </div>
+        <div className="flex flex-col md:flex-row gap-space-base items-end flex-wrap">
+          <div className="flex-1 min-w-[160px] flex flex-col gap-space-2xs">
+            <label className="text-label-sm text-on-surface-variant font-bold uppercase tracking-wider">Title</label>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
-              className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+              className="w-full border-0 bg-surface-container-low text-on-surface text-body-md px-space-md py-space-sm rounded-lg placeholder:text-outline focus:outline-none focus:ring-0 focus:bg-surface-container-highest"
             />
           </div>
-          <div className="flex-1 min-w-[160px]">
-            <label className="text-label-md text-on-surface-variant block mb-1">Agency</label>
+          <div className="flex-1 min-w-[160px] flex flex-col gap-space-2xs">
+            <label className="text-label-sm text-on-surface-variant font-bold uppercase tracking-wider">Agency</label>
             <input
               value={agency}
               onChange={(e) => setAgency(e.target.value)}
               required
-              className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+              className="w-full border-0 bg-surface-container-low text-on-surface text-body-md px-space-md py-space-sm rounded-lg placeholder:text-outline focus:outline-none focus:ring-0 focus:bg-surface-container-highest"
             />
           </div>
-          <div className="flex-1 min-w-[160px]">
-            <label className="text-label-md text-on-surface-variant block mb-1">Solicitation number</label>
+          <div className="flex-1 min-w-[160px] flex flex-col gap-space-2xs">
+            <label className="text-label-sm text-on-surface-variant font-bold uppercase tracking-wider">Solicitation number</label>
             <input
               value={solicitationNumber}
               onChange={(e) => setSolicitationNumber(e.target.value)}
-              className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+              className="w-full border-0 bg-surface-container-low text-on-surface text-body-md px-space-md py-space-sm rounded-lg placeholder:text-outline focus:outline-none focus:ring-0 focus:bg-surface-container-highest"
             />
           </div>
-          <div>
-            <label className="text-label-md text-on-surface-variant block mb-1">Due date</label>
+          <div className="flex flex-col gap-space-2xs">
+            <label className="text-label-sm text-on-surface-variant font-bold uppercase tracking-wider">Due date</label>
             <input
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+              className="border-0 bg-surface-container-low text-on-surface text-body-md px-space-md py-space-sm rounded-lg focus:outline-none focus:ring-0 focus:bg-surface-container-highest"
             />
           </div>
         </div>
-        <div>
-          <label className="text-label-md text-on-surface-variant block mb-1">Scope of work</label>
+        <div className="flex flex-col gap-space-2xs">
+          <label className="text-label-sm text-on-surface-variant font-bold uppercase tracking-wider">Scope of work</label>
           <textarea
             value={scope}
             onChange={(e) => setScope(e.target.value)}
             rows={3}
             placeholder="What the job actually involves…"
-            className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none resize-y"
+            className="w-full border-0 bg-surface-container-low text-on-surface text-body-md px-space-md py-space-sm rounded-lg placeholder:text-outline focus:outline-none focus:ring-0 focus:bg-surface-container-highest resize-y"
           />
         </div>
         <button
           type="submit"
           disabled={logging}
-          className="self-end py-2 px-4 bg-secondary text-on-secondary rounded text-label-md font-semibold hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
+          className="self-end px-space-lg py-space-sm bg-primary-container hover:bg-primary text-on-primary-container font-headline text-[14px] font-bold uppercase tracking-wider rounded-xl shadow-md flex items-center gap-space-sm active:scale-[0.99] transition-all disabled:opacity-40 disabled:active:scale-100"
         >
           {logging && <Spinner />}
           {logging ? "Logging…" : "Log opportunity"}
         </button>
       </form>
 
+      {/* Real search over the actual title/agency fields -- no fabricated
+          Source/Trade filters (matched_opportunities has no such columns). */}
+      <div className="relative flex items-center max-w-md">
+        <span className="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[20px] pointer-events-none">search</span>
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search title or agency…"
+          className="w-full border-0 bg-surface-container-low text-on-surface text-body-md pl-11 pr-space-md py-space-sm rounded-lg placeholder:text-outline focus:outline-none focus:ring-0 focus:bg-surface-container-highest"
+        />
+      </div>
+
       {/* Table — needs real width for the title/agency/status columns plus
           an inline assign-to select and two buttons in the last one, so
           it's reserved for wide-enough viewports. Below xl, the card list
           further down carries the same data and controls stacked. */}
-      <div className="hidden xl:block bg-surface-container-lowest border border-outline-variant rounded-xl">
+      <div className="hidden xl:block bg-surface-container-low rounded-xl shadow-sm overflow-hidden">
         <table className="w-full text-body-md table-fixed">
-          <thead className="bg-surface-container-low">
+          <thead className="bg-surface-container-high">
             <tr>
-              <th className="text-left px-4 py-3 text-label-md text-on-surface-variant w-[26%]">Title</th>
-              <th className="text-left px-4 py-3 text-label-md text-on-surface-variant w-[16%]">Agency</th>
-              <th className="text-left px-4 py-3 text-label-md text-on-surface-variant w-[10%]">Due</th>
-              <th className="text-left px-4 py-3 text-label-md text-on-surface-variant w-[8%]">Score</th>
-              <th className="text-left px-4 py-3 text-label-md text-on-surface-variant w-[14%]">Status</th>
-              <th className="text-left px-4 py-3 text-label-md text-on-surface-variant w-[26%]"></th>
+              <th className="text-left px-space-base py-space-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-bold w-[24%]">Bid title</th>
+              <th className="text-left px-space-base py-space-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-bold w-[16%]">Agency</th>
+              <th className="text-left px-space-base py-space-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-bold w-[16%]">Deadline</th>
+              <th className="text-left px-space-base py-space-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-bold w-[8%]">Score</th>
+              <th className="text-left px-space-base py-space-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-bold w-[12%]">Status</th>
+              <th className="text-left px-space-base py-space-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-bold w-[24%]"></th>
             </tr>
           </thead>
           <tbody>
-            {matches.map((m) => (
-              <tr
-                key={m.id}
-                className={`border-t border-outline-variant align-top border-l-4 ${
-                  m.status === "new" ? "border-l-secondary" : "border-l-transparent"
-                } hover:bg-surface-container-low transition`}
-              >
-                <td className="px-4 py-3 text-on-surface font-semibold break-words">
-                  {m.source_url ? (
-                    <a
-                      href={m.source_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-secondary hover:underline"
-                    >
-                      {m.source_title}
-                    </a>
-                  ) : (
-                    m.source_title
-                  )}
-                </td>
-                <td className="px-4 py-3 text-on-surface-variant break-words">{m.source_agency}</td>
-                <td className="px-4 py-3 text-on-surface-variant">
-                  {m.due_date ? new Date(m.due_date).toLocaleDateString() : "—"}
-                </td>
-                <td className="px-4 py-3 text-on-surface-variant">{m.match_score ?? "—"}</td>
-                <td className="px-4 py-3">
-                  <StatusPill match={m} clientName={clientName} />
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {m.status === "new" && (
-                      <AssignControls
-                        match={m}
-                        clients={clients}
-                        selected={assignSelections[m.id] ?? ""}
-                        onSelect={(v) => setAssignSelections((s) => ({ ...s, [m.id]: v }))}
-                        onAssign={() => handleAssign(m.id)}
-                        onDismiss={() => handleDismiss(m.id)}
-                        busy={busyId === m.id}
-                      />
+            {filteredMatches.map((m) => {
+              const due = dueDateInfo(m.due_date);
+              return (
+                <tr
+                  key={m.id}
+                  className={`border-t border-outline-variant align-top border-l-4 ${STATUS_ACCENT[m.status] ?? "border-l-transparent"} hover:bg-surface-container-high transition`}
+                >
+                  <td className="px-space-base py-space-base text-on-surface font-bold break-words">
+                    {m.source_url ? (
+                      <a
+                        href={m.source_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-primary hover:underline"
+                      >
+                        {m.source_title}
+                      </a>
+                    ) : (
+                      m.source_title
                     )}
-                    <button
-                      onClick={() => setDeleteTarget(m)}
-                      className="px-3 py-1.5 rounded border border-error text-error text-label-md hover:bg-error-container/20 transition active:scale-[0.97] shrink-0"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {matches.length === 0 && (
+                  </td>
+                  <td className="px-space-base py-space-base text-on-surface-variant break-words">
+                    <span className="inline-flex items-center gap-space-xs">
+                      <span className="material-symbols-outlined text-outline text-[16px]">account_balance</span>
+                      {m.source_agency}
+                    </span>
+                  </td>
+                  <td className={`px-space-base py-space-base font-code ${due.className}`}>{due.label}</td>
+                  <td className="px-space-base py-space-base text-on-surface-variant font-code">{m.match_score ?? "—"}</td>
+                  <td className="px-space-base py-space-base">
+                    <StatusPill match={m} clientName={clientName} />
+                  </td>
+                  <td className="px-space-base py-space-base">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {m.status === "new" && (
+                        <AssignControls
+                          match={m}
+                          clients={clients}
+                          selected={assignSelections[m.id] ?? ""}
+                          onSelect={(v) => setAssignSelections((s) => ({ ...s, [m.id]: v }))}
+                          onAssign={() => handleAssign(m.id)}
+                          onDismiss={() => handleDismiss(m.id)}
+                          busy={busyId === m.id}
+                        />
+                      )}
+                      <button
+                        onClick={() => setDeleteTarget(m)}
+                        className="px-3 py-1.5 rounded-lg border border-error text-error text-label-sm uppercase tracking-wider font-bold hover:bg-error-container/20 transition active:scale-[0.97] shrink-0"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+            {filteredMatches.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-4 py-6 text-center text-on-surface-variant">
-                  No opportunities logged yet.
+                  {matches.length === 0 ? "No opportunities logged yet." : "No opportunities match your search."}
                 </td>
               </tr>
             )}
@@ -357,55 +403,61 @@ export function MatchesPanel({
       </div>
 
       {/* Card list — narrower than xl. */}
-      <div className="xl:hidden bg-surface-container-lowest border border-outline-variant rounded-xl divide-y divide-outline-variant">
-        {matches.map((m) => (
-          <div
-            key={m.id}
-            className={`flex flex-col gap-3 px-4 py-4 border-l-4 ${
-              m.status === "new" ? "border-l-secondary" : "border-l-transparent"
-            }`}
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-on-surface font-semibold break-words">
-                  {m.source_url ? (
-                    <a href={m.source_url} target="_blank" rel="noreferrer" className="text-secondary hover:underline">
-                      {m.source_title}
-                    </a>
-                  ) : (
-                    m.source_title
-                  )}
-                </p>
-                <p className="text-label-md text-on-surface-variant break-words">{m.source_agency}</p>
-              </div>
-              <StatusPill match={m} clientName={clientName} className="shrink-0" />
-            </div>
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-label-md text-on-surface-variant">
-              <span>Due: {m.due_date ? new Date(m.due_date).toLocaleDateString() : "—"}</span>
-              <span>Score: {m.match_score ?? "—"}</span>
-            </div>
-            {m.status === "new" && (
-              <AssignControls
-                match={m}
-                clients={clients}
-                selected={assignSelections[m.id] ?? ""}
-                onSelect={(v) => setAssignSelections((s) => ({ ...s, [m.id]: v }))}
-                onAssign={() => handleAssign(m.id)}
-                onDismiss={() => handleDismiss(m.id)}
-                busy={busyId === m.id}
-                stacked
-              />
-            )}
-            <button
-              onClick={() => setDeleteTarget(m)}
-              className="w-full px-3 py-1.5 rounded border border-error text-error text-label-md hover:bg-error-container/20 transition active:scale-[0.97]"
+      <div className="xl:hidden bg-surface-container-low rounded-xl shadow-sm divide-y divide-outline-variant overflow-hidden">
+        {filteredMatches.map((m) => {
+          const due = dueDateInfo(m.due_date);
+          return (
+            <div
+              key={m.id}
+              className={`flex flex-col gap-3 px-space-base py-space-base border-l-4 ${STATUS_ACCENT[m.status] ?? "border-l-transparent"}`}
             >
-              Delete
-            </button>
-          </div>
-        ))}
-        {matches.length === 0 && (
-          <p className="px-4 py-6 text-center text-on-surface-variant">No opportunities logged yet.</p>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-on-surface font-bold break-words">
+                    {m.source_url ? (
+                      <a href={m.source_url} target="_blank" rel="noreferrer" className="text-primary hover:underline">
+                        {m.source_title}
+                      </a>
+                    ) : (
+                      m.source_title
+                    )}
+                  </p>
+                  <p className="text-label-md text-on-surface-variant break-words flex items-center gap-1 mt-0.5">
+                    <span className="material-symbols-outlined text-outline text-[14px]">account_balance</span>
+                    {m.source_agency}
+                  </p>
+                </div>
+                <StatusPill match={m} clientName={clientName} className="shrink-0" />
+              </div>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-label-md">
+                <span className={`font-code ${due.className}`}>{due.label}</span>
+                <span className="text-on-surface-variant font-code">Score: {m.match_score ?? "—"}</span>
+              </div>
+              {m.status === "new" && (
+                <AssignControls
+                  match={m}
+                  clients={clients}
+                  selected={assignSelections[m.id] ?? ""}
+                  onSelect={(v) => setAssignSelections((s) => ({ ...s, [m.id]: v }))}
+                  onAssign={() => handleAssign(m.id)}
+                  onDismiss={() => handleDismiss(m.id)}
+                  busy={busyId === m.id}
+                  stacked
+                />
+              )}
+              <button
+                onClick={() => setDeleteTarget(m)}
+                className="w-full px-3 py-1.5 rounded-lg border border-error text-error text-label-sm uppercase tracking-wider font-bold hover:bg-error-container/20 transition active:scale-[0.97]"
+              >
+                Delete
+              </button>
+            </div>
+          );
+        })}
+        {filteredMatches.length === 0 && (
+          <p className="px-4 py-6 text-center text-on-surface-variant">
+            {matches.length === 0 ? "No opportunities logged yet." : "No opportunities match your search."}
+          </p>
         )}
       </div>
 
@@ -452,13 +504,13 @@ function StatusPill({
   }
   if (match.status === "dismissed") {
     return (
-      <span className={`inline-flex px-2.5 py-1 rounded-full text-label-sm font-medium bg-surface-variant text-on-surface-variant ${className}`}>
+      <span className={`inline-flex px-2.5 py-1 rounded text-label-sm font-bold uppercase tracking-wider bg-surface-variant text-on-surface-variant ${className}`}>
         Dismissed
       </span>
     );
   }
   return (
-    <span className={`inline-flex px-2.5 py-1 rounded-full text-label-sm font-medium bg-secondary-container text-on-secondary-container ${className}`}>
+    <span className={`inline-flex px-2.5 py-1 rounded text-label-sm font-bold uppercase tracking-wider bg-secondary-container text-on-secondary-container ${className}`}>
       New
     </span>
   );
@@ -508,7 +560,7 @@ function AssignControls({
         <button
           onClick={onAssign}
           disabled={busy}
-          className="px-3 py-1.5 rounded bg-secondary text-on-secondary text-label-md font-semibold hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
+          className="px-3 py-1.5 rounded-lg bg-primary-container hover:bg-primary text-on-primary-container text-label-sm uppercase tracking-wider font-bold transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
         >
           {busy && <Spinner />}
           Assign
@@ -516,7 +568,7 @@ function AssignControls({
         <button
           onClick={onDismiss}
           disabled={busy}
-          className="px-3 py-1.5 rounded border border-outline-variant text-on-surface text-label-md hover:bg-surface-container-high transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100"
+          className="px-3 py-1.5 rounded-lg border border-outline-variant text-on-surface text-label-sm uppercase tracking-wider font-bold hover:bg-surface-container-high transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100"
         >
           Dismiss
         </button>

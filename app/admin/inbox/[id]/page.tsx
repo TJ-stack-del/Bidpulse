@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { AppShell } from "@/components/ui/AppShell";
+import { LifecycleStepper, stageNumber } from "@/components/ui/LifecycleStepper";
 import { AdminSubmissionActions } from "./AdminSubmissionActions";
 import { DeliverablesPanel } from "./DeliverablesPanel";
 import { PaymentStatus } from "./PaymentStatus";
@@ -257,13 +258,18 @@ export default async function AdminSubmissionDetailPage({
         <div>
           <p className="text-label-md text-on-surface-variant uppercase tracking-wider mb-1">
             {client?.company_name}
+            {submission.solicitation_number && (
+              <span className="font-code text-primary"> · {submission.solicitation_number}</span>
+            )}
           </p>
           <h1 className="text-headline-lg text-primary">{submission.agency}</h1>
         </div>
-        <span className="inline-flex px-3 py-1 rounded-full text-label-md font-medium bg-secondary-container text-on-secondary-container">
+        <span className="inline-flex px-3 py-1 rounded-full text-label-md font-bold uppercase tracking-wider bg-secondary-container text-on-secondary-container">
           {STAGE_LABELS[submission.stage] ?? submission.stage}
         </span>
       </div>
+
+      <LifecycleStepper currentStage={stageNumber(submission.stage)} />
 
       {/* Mechanical pre-flight checks -- never an LLM judgment call, same
           reasoning as every other compliance detector in this codebase.
@@ -275,7 +281,7 @@ export default async function AdminSubmissionDetailPage({
         {preflightChecks.map((check) => (
           <span
             key={check.key}
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-label-sm font-medium ${
+            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded text-label-sm font-bold uppercase tracking-wider ${
               check.ok
                 ? "bg-secondary-container text-on-secondary-container"
                 : "bg-tertiary-container text-on-tertiary-container"
@@ -291,7 +297,7 @@ export default async function AdminSubmissionDetailPage({
         <div className="lg:col-span-2 flex flex-col gap-6">
           <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
             <h2 className="text-title-lg text-primary mb-4 flex items-center gap-2">
-              <span className="material-symbols-outlined text-secondary text-[20px]">info</span>
+              <span className="material-symbols-outlined text-primary text-[20px]">info</span>
               Bid details
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-body-md">
@@ -315,7 +321,7 @@ export default async function AdminSubmissionDetailPage({
 
           <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
             <h2 className="text-title-lg text-primary mb-4 flex items-center gap-2">
-              <span className="material-symbols-outlined text-secondary text-[20px]">person</span>
+              <span className="material-symbols-outlined text-primary text-[20px]">person</span>
               Client info
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-body-md">
@@ -424,7 +430,7 @@ export default async function AdminSubmissionDetailPage({
         <div className="flex flex-col gap-6">
           <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
             <h3 className="text-title-lg text-primary mb-4 flex items-center gap-2">
-              <span className="material-symbols-outlined text-secondary text-[20px]">admin_panel_settings</span>
+              <span className="material-symbols-outlined text-primary text-[20px]">admin_panel_settings</span>
               Status
             </h3>
             <p className="text-body-md text-on-surface-variant">
@@ -444,7 +450,7 @@ export default async function AdminSubmissionDetailPage({
 
           <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
             <h3 className="text-title-lg text-primary mb-4 flex items-center gap-2">
-              <span className="material-symbols-outlined text-secondary text-[20px]">travel_explore</span>
+              <span className="material-symbols-outlined text-primary text-[20px]">travel_explore</span>
               Fit check
             </h3>
             {submission.fit_alignment ? (

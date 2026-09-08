@@ -1,42 +1,39 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 120" width="540" height="120" fill="none">
-  <!-- Horizontal Nav Logo - Dark Text / Transparent for Light Backgrounds (#EF5B25) -->
-  <g transform="translate(48, 60)">
-    <!-- Deep Navy Shield Outline -->
-    <path d="M0 -34 L28 -20 C28 10 0 32 0 35 C0 32 -28 10 -28 -20 Z" 
-          fill="none" 
-          stroke="#0A182F" 
-          stroke-width="5" 
-          stroke-linejoin="round" 
-          stroke-linecap="round"/>
-
-    <!-- Subtle Inset Shield -->
-    <path d="M0 -26 L20 -16 C20 6 0 24 0 26 C0 24 -20 6 -20 -16 Z" 
-          fill="none" 
-          stroke="#0A182F" 
-          stroke-opacity="0.15" 
-          stroke-width="1.8" 
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" width="400" height="120" fill="none">
+  <!-- Horizontal nav logo — light theme (dark wordmark, for light surfaces) -->
+  <defs>
+    <linearGradient id="logoLightShieldGrad" x1="256" y1="40" x2="256" y2="450" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#131b2e"/>
+      <stop offset="100%" stop-color="#080e1a"/>
+    </linearGradient>
+    <linearGradient id="logoLightAmber" x1="120" y1="120" x2="392" y2="380" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(-12.4, 10.4) scale(0.2)">
+    <path d="M256 52 L400 110 C400 272 338 392 256 444 C174 392 112 272 112 110 Z"
+          fill="url(#logoLightShieldGrad)"
+          stroke="url(#logoLightAmber)"
+          stroke-width="12"
           stroke-linejoin="round"/>
-
-    <!-- Pulse Wave in #EF5B25 — horizontally rescaled to 90% of the
-         shield's half-width (28 to 25.2), keeping y untouched. This
-         variant's own pulse path was narrower than the app icon's to
-         begin with (x=+-38, not +-40), but the shield here is the same
-         28-half-width one — still overflowed by 10 units each side, not
-         "already fine" as originally assumed. -->
-    <path d="M-25.2 0 L-12.6 0 L-7.3 -18 L-2 20 L3.3 -12 L8.6 8 L13.9 0 L25.2 0"
-          fill="none" 
-          stroke="#EF5B25" 
-          stroke-width="4.5" 
-          stroke-linecap="round" 
+    <path d="M256 80 L374 128 C374 262 322 364 256 410 C190 364 138 262 138 128 Z"
+          stroke="#232f48"
+          stroke-width="4"
+          stroke-linejoin="round"
+          fill="none"/>
+    <path d="M148 256 H202 L232 184 L270 328 L306 218 L326 256 H364"
+          stroke="url(#logoLightAmber)"
+          stroke-width="14"
+          stroke-linecap="round"
           stroke-linejoin="round"/>
+    <circle cx="270" cy="328" r="6" fill="#f59e0b"/>
+    <circle cx="232" cy="184" r="6" fill="#fbbf24"/>
   </g>
-
-  <!-- Wordmark 'BidPulse' with 'Bid' in Deep Navy (#0A182F) and 'Pulse' in #EF5B25 -->
-  <text x="110" y="74" 
-        font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" 
-        font-size="46" 
-        font-weight="800" 
-        letter-spacing="-0.5">
-    <tspan fill="#0A182F">Bid</tspan><tspan fill="#EF5B25">Pulse</tspan>
+  <!-- "Pulse" uses the light-mode primary token color (#8d4b00) rather
+       than the vivid dark-mode amber (#f59e0b): the vivid amber is a
+       container/accent color, not a WCAG-legible text color on a white
+       surface (see the light design system's own AAA-contrast note). -->
+  <text x="90" y="74" font-family="Chivo, system-ui, sans-serif" font-size="46" font-weight="800" letter-spacing="-1">
+    <tspan fill="#0b1c30">Bid</tspan><tspan fill="#8d4b00">Pulse</tspan>
   </text>
 </svg>

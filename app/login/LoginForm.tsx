@@ -155,7 +155,7 @@ export function LoginForm() {
                 setForgotSent(false);
                 setForgotEmail("");
               }}
-              className="text-body-md text-secondary hover:underline"
+              className="text-body-md text-primary hover:underline"
             >
               Back to sign in
             </button>
@@ -182,7 +182,7 @@ export function LoginForm() {
             <button
               type="submit"
               disabled={forgotSubmitting}
-              className="w-full py-3 px-4 bg-secondary text-on-secondary rounded text-label-md font-semibold hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full h-14 bg-primary text-on-primary font-headline text-headline-sm rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-[0.99] transition-transform disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {forgotSubmitting && <Spinner />}
               {forgotSubmitting ? "Sending…" : "Send reset link"}
@@ -190,7 +190,7 @@ export function LoginForm() {
             <button
               type="button"
               onClick={() => setMode("password")}
-              className="text-body-md text-secondary hover:underline text-center"
+              className="text-body-md text-primary hover:underline text-center"
             >
               Back to sign in
             </button>
@@ -218,7 +218,7 @@ export function LoginForm() {
             <button
               type="submit"
               disabled={otpSubmitting}
-              className="w-full py-3 px-4 bg-secondary text-on-secondary rounded text-label-md font-semibold hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full h-14 bg-primary text-on-primary font-headline text-headline-sm rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-[0.99] transition-transform disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {otpSubmitting && <Spinner />}
               {otpSubmitting ? "Verifying…" : "Verify & sign in"}
@@ -226,7 +226,7 @@ export function LoginForm() {
             <button
               type="button"
               onClick={resetPasswordless}
-              className="text-body-md text-secondary hover:underline text-center"
+              className="text-body-md text-primary hover:underline text-center"
             >
               Use a different email or phone
             </button>
@@ -239,7 +239,7 @@ export function LoginForm() {
             <button
               type="button"
               onClick={resetPasswordless}
-              className="text-body-md text-secondary hover:underline"
+              className="text-body-md text-primary hover:underline"
             >
               Use a different email or phone
             </button>
@@ -258,7 +258,7 @@ export function LoginForm() {
             <button
               type="submit"
               disabled={otpSubmitting}
-              className="w-full py-3 px-4 bg-secondary text-on-secondary rounded text-label-md font-semibold hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full h-14 bg-primary text-on-primary font-headline text-headline-sm rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-[0.99] transition-transform disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {otpSubmitting && <Spinner />}
               {otpSubmitting ? "Sending…" : "Send me a code or link"}
@@ -272,7 +272,7 @@ export function LoginForm() {
             setMode("password");
             resetPasswordless();
           }}
-          className="text-body-md text-secondary hover:underline text-center"
+          className="text-body-md text-primary hover:underline text-center"
         >
           Use my password instead
         </button>
@@ -310,7 +310,7 @@ export function LoginForm() {
         <button
           type="button"
           onClick={() => setMode("forgot")}
-          className="text-label-md text-secondary hover:underline mt-1"
+          className="text-label-md text-primary hover:underline mt-1"
         >
           Forgot password?
         </button>
@@ -319,16 +319,17 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={submitting}
-        className="w-full py-3 px-4 bg-secondary text-on-secondary rounded text-label-md font-semibold hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        className="w-full h-14 bg-primary text-on-primary font-headline text-headline-sm rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-[0.99] transition-transform disabled:opacity-40 disabled:cursor-not-allowed"
       >
         {submitting && <Spinner />}
         {submitting ? "Signing in…" : "Sign In"}
+        {!submitting && <span className="material-symbols-outlined font-bold">arrow_forward</span>}
       </button>
 
       <button
         type="button"
         onClick={() => setMode("passwordless")}
-        className="text-body-md text-secondary hover:underline text-center"
+        className="text-body-md text-primary hover:underline text-center"
       >
         Sign in without a password
       </button>
@@ -354,11 +355,11 @@ function Field({
   required?: boolean;
 }) {
   return (
-    <label className="flex flex-col gap-1">
-      <span className="text-label-md text-on-surface-variant">{label}</span>
-      <div className="relative">
+    <label className="flex flex-col gap-1.5">
+      <span className="text-label-sm text-on-surface-variant uppercase tracking-wider">{label}</span>
+      <div className="relative flex items-center">
         {icon && (
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant pointer-events-none text-[20px]">
+          <span className="material-symbols-outlined absolute left-3.5 flex items-center pointer-events-none text-on-surface-variant text-xl">
             {icon}
           </span>
         )}
@@ -368,8 +369,8 @@ function Field({
           onChange={(e) => onChange(e.target.value)}
           autoComplete={autoComplete}
           required={required}
-          className={`w-full bg-surface border border-outline-variant rounded py-2 text-body-md text-on-surface focus:outline-none focus:border-secondary transition ${
-            icon ? "pl-10 pr-3" : "px-3"
+          className={`w-full h-14 border-0 bg-surface-container text-on-surface placeholder:text-outline text-body-lg rounded-xl focus:outline-none focus:ring-0 focus:bg-surface-container-high transition-colors ${
+            icon ? "pl-12 pr-4" : "px-4"
           }`}
         />
       </div>

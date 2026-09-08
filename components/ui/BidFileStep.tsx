@@ -65,7 +65,7 @@ export function BidFileStep({
           type="checkbox"
           checked={infoAttested}
           onChange={(e) => setInfoAttested(e.target.checked)}
-          className="mt-1 h-4 w-4 shrink-0 rounded border-outline-variant text-secondary focus:ring-secondary"
+          className="mt-1 h-4 w-4 shrink-0 rounded border-outline-variant text-primary focus:ring-primary"
         />
         I certify that all information provided in this submission is true and accurate to the
         best of my knowledge.
@@ -76,7 +76,7 @@ export function BidFileStep({
           type="checkbox"
           checked={acknowledged}
           onChange={(e) => setAcknowledged(e.target.checked)}
-          className="mt-1 h-4 w-4 shrink-0 rounded border-outline-variant text-secondary focus:ring-secondary"
+          className="mt-1 h-4 w-4 shrink-0 rounded border-outline-variant text-primary focus:ring-primary"
         />
         I understand that BidPulse helps prepare my bid but does not guarantee I will win the
         contract.
@@ -94,14 +94,14 @@ export function BidFileStep({
         <button
           onClick={handleFinalSubmit}
           disabled={saving || !acknowledged || !infoAttested}
-          className="flex-1 py-3 px-4 bg-secondary text-on-secondary rounded text-label-md hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center justify-center gap-2"
+          className="flex-1 py-3 px-4 bg-primary-container text-on-primary-container rounded text-label-md hover:opacity-90 transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center justify-center gap-2"
         >
           {saving && <Spinner />}
           {saving ? "Sending…" : "Send it to us"}
           {!saving && <span className="material-symbols-outlined text-[18px]">arrow_forward</span>}
         </button>
       </div>
-      <FadeMessage show={saved} className="text-body-md text-secondary block">
+      <FadeMessage show={saved} className="text-body-md text-primary block">
         Saved — you can come back anytime.
       </FadeMessage>
     </div>

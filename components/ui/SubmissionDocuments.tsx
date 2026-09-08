@@ -118,7 +118,7 @@ export function SubmissionDocuments({ submissionId }: { submissionId: string }) 
             </option>
           ))}
         </select>
-        <label className="px-4 py-2 rounded border border-secondary text-secondary text-label-md font-bold hover:bg-surface-container-low transition cursor-pointer">
+        <label className="px-4 py-2 rounded border border-primary text-primary text-label-md font-bold hover:bg-surface-container-low transition cursor-pointer">
           {uploading ? "Uploading…" : "Choose file"}
           <input type="file" onChange={handleUpload} disabled={uploading} className="hidden" />
         </label>
@@ -140,7 +140,7 @@ export function SubmissionDocuments({ submissionId }: { submissionId: string }) 
                   href={doc.file_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-body-md text-secondary hover:underline"
+                  className="text-body-md text-primary hover:underline"
                 >
                   {doc.file_name}
                 </a>

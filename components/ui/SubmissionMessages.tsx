@@ -98,7 +98,7 @@ export function SubmissionMessages({
   return (
     <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
       <h2 className="text-title-lg text-primary mb-4 flex items-center gap-2">
-        <span className="material-symbols-outlined text-secondary text-[20px]">chat</span>
+        <span className="material-symbols-outlined text-primary text-[20px]">chat</span>
         Messages
       </h2>
 
@@ -141,12 +141,12 @@ export function SubmissionMessages({
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           placeholder="Write a message…"
-          className="flex-1 px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+          className="flex-1 px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
         />
         <button
           type="submit"
           disabled={sending || !draft.trim()}
-          className="px-4 py-2 bg-secondary text-on-secondary rounded text-label-md font-semibold hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 flex items-center gap-2"
+          className="px-4 py-2 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 transition active:scale-[0.97] disabled:opacity-40 flex items-center gap-2"
         >
           {sending && <Spinner />}
           {sending ? "Sending…" : "Send"}

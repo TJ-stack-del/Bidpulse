@@ -144,7 +144,7 @@ export function CompanyInfoForm({
               type={f.type ?? "text"}
               value={values[f.key] ?? ""}
               onChange={(e) => setField(f.key, e.target.value)}
-              className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+              className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
             />
           </div>
         ))}
@@ -168,7 +168,7 @@ export function CompanyInfoForm({
             setNaicsOther(e.target.value);
             setSaved(false);
           }}
-          className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+          className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
         />
       </div>
 
@@ -202,7 +202,7 @@ export function CompanyInfoForm({
             setSetAsideOther(e.target.value);
             setSaved(false);
           }}
-          className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+          className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
         />
       </div>
 
@@ -215,7 +215,7 @@ export function CompanyInfoForm({
           onChange={(e) => setField("differentiators", e.target.value)}
           rows={4}
           placeholder="What sets your company apart — track record, capacity, notable prior contracts…"
-          className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+          className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
         />
       </div>
 
@@ -223,12 +223,12 @@ export function CompanyInfoForm({
         <button
           type="submit"
           disabled={saving}
-          className="py-2 px-4 bg-secondary text-on-secondary rounded text-label-md font-semibold hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2 w-fit"
+          className="py-2 px-4 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2 w-fit"
         >
           {saving && <Spinner />}
           {saving ? "Saving…" : "Save company info"}
         </button>
-        <FadeMessage show={saved} className="text-body-md text-secondary">
+        <FadeMessage show={saved} className="text-body-md text-primary">
           Saved
         </FadeMessage>
       </div>

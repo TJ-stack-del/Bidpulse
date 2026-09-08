@@ -1,16 +1,17 @@
 import type { Config } from "tailwindcss";
 import forms from "@tailwindcss/forms";
 
-// Design tokens matched to the BidPulse logo (deep teal #0f6e7a accent,
-// navy #0c1524/#101a30 ink and containers, burnt-orange #a84d0f tertiary
-// pulled from the logo's bolt), Inter + JetBrains Mono, sharper corners,
-// neutral-gray surfaces. This is a shared, global file — the token values
-// below affect every page in the app, not just the ones the original
-// mockups covered (home, pricing, gallery, intake). `full` is deliberately
-// NOT overridden to the mockup's 0.75rem: that value only reads as a circle
-// for one specific 24px element in the mockup itself, and overriding
-// Tailwind's real "fully rounded" keyword globally would flatten every
-// actual circle elsewhere in the app (e.g. AppShell's avatar placeholder).
+// Design tokens matched to the Stitch "Industrial Precision" design system
+// (dark: assets/7f0094d24ac44e9e885c0d324b7805a5, light companion:
+// assets/969209daeee94fb5bb6f8c3b04c218ae) — amber/emerald/cyan on a dark
+// slate "flight deck" surface (light mode: deep amber/emerald/cyan on a
+// daylight-legible near-white surface), Chivo headlines + Hanken Grotesk
+// body + JetBrains Mono for metrics/labels/tabular data, 4px-based
+// roundness. This is a shared, global file — the token values below affect
+// every page in the app. `full` is deliberately NOT overridden to the
+// design system's own 0.75rem "xl": Tailwind's real "fully rounded"
+// keyword needs to stay 9999px globally so it keeps rendering actual
+// circles elsewhere in the app (e.g. AppShell's avatar placeholder).
 const config: Config = {
   darkMode: "class",
   content: [
@@ -60,44 +61,65 @@ const config: Config = {
         "surface-variant": "rgb(var(--color-surface-variant) / <alpha-value>)",
         // "-fixed" tokens are the same color in both themes by M3 design
         // (a badge/chip that should look identical regardless of theme) —
-        // plain static hex, no CSS variable indirection needed.
-        "primary-fixed": "#d6e3ff",
-        "primary-fixed-dim": "#b9c7e4",
-        "on-primary-fixed": "#101a30",
-        "on-primary-fixed-variant": "#39475f",
-        "secondary-fixed": "#6ff0e2",
-        "secondary-fixed-dim": "#45d6c8",
-        "on-secondary-fixed": "#00201e",
-        "on-secondary-fixed-variant": "#0a4e52",
-        "tertiary-fixed": "#ffddb8",
-        "tertiary-fixed-dim": "#ffb870",
-        "on-tertiary-fixed": "#351a00",
-        "on-tertiary-fixed-variant": "#7a3c00",
+        // plain static hex, no CSS variable indirection needed. Taken from
+        // the dark "Industrial Precision" system's own namedColors (M3
+        // "fixed" tokens are theme-independent by definition, so the dark
+        // system's authored set is used as canonical rather than picking
+        // between two very-similar dark/light-authored variants).
+        "primary-fixed": "#ffddb8",
+        "primary-fixed-dim": "#ffb95f",
+        "on-primary-fixed": "#2a1700",
+        "on-primary-fixed-variant": "#653e00",
+        "secondary-fixed": "#6ffbbe",
+        "secondary-fixed-dim": "#4edea3",
+        "on-secondary-fixed": "#002113",
+        "on-secondary-fixed-variant": "#005236",
+        "tertiary-fixed": "#c4e7ff",
+        "tertiary-fixed-dim": "#7bd0ff",
+        "on-tertiary-fixed": "#001e2c",
+        "on-tertiary-fixed-variant": "#004c69",
       },
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
+        sans: ["Hanken Grotesk", "sans-serif"],
+        headline: ["Chivo", "sans-serif"],
         code: ["JetBrains Mono", "monospace"],
       },
       fontSize: {
-        "display-lg": ["48px", { lineHeight: "56px", letterSpacing: "-0.02em", fontWeight: "700" }],
-        "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.01em", fontWeight: "600" }],
-        "headline-lg-mobile": ["24px", { lineHeight: "32px", fontWeight: "600" }],
-        "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
-        "title-lg": ["18px", { lineHeight: "28px", fontWeight: "600" }],
-        "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
-        "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }],
-        "body-sm": ["14px", { lineHeight: "20px", fontWeight: "400" }],
-        "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "500" }],
-        "label-sm": ["10px", { lineHeight: "14px", letterSpacing: "0.05em", fontWeight: "500" }],
-        "label-md-mobile": ["11px", { lineHeight: "14px", fontWeight: "500" }],
+        // Sizes/weights/tracking taken directly from the design system's
+        // own typography spec; fontFamily added per level so headline/
+        // display text renders Chivo and metric/label text renders
+        // JetBrains Mono without needing a separate font-headline/font-code
+        // class at every call site (font-code is still available directly
+        // for spots that want mono text at an arbitrary size, e.g. app/page.tsx).
+        // Tailwind's built-in `text-*` utility only reads lineHeight/
+        // letterSpacing/fontWeight from this tuple — it silently drops any
+        // fontFamily key (confirmed against tailwindcss/src/corePlugins.js).
+        // Font family per tier is applied instead via a small selector list
+        // in app/globals.css so every text-display-*/text-headline-*/
+        // text-title-lg/text-metric-*/text-label-* call site (dozens of
+        // files) automatically gets the right family with no per-usage change.
+        "display-lg": ["44px", { lineHeight: "52px", letterSpacing: "-0.03em", fontWeight: "800" }],
+        "display-lg-mobile": ["32px", { lineHeight: "38px", letterSpacing: "-0.02em", fontWeight: "800" }],
+        "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "700" }],
+        "headline-lg-mobile": ["24px", { lineHeight: "30px", letterSpacing: "-0.01em", fontWeight: "700" }],
+        "headline-md": ["24px", { lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "700" }],
+        "title-lg": ["20px", { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600" }],
+        "body-lg": ["16px", { lineHeight: "24px", letterSpacing: "-0.005em", fontWeight: "400" }],
+        "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+        "body-sm": ["12px", { lineHeight: "18px", letterSpacing: "0.005em", fontWeight: "400" }],
+        "metric-xl": ["36px", { lineHeight: "44px", letterSpacing: "-0.03em", fontWeight: "700" }],
+        "metric-lg": ["24px", { lineHeight: "32px", letterSpacing: "-0.02em", fontWeight: "700" }],
+        "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.04em", fontWeight: "500" }],
+        "label-sm": ["10px", { lineHeight: "14px", letterSpacing: "0.06em", fontWeight: "600" }],
+        "label-md-mobile": ["11px", { lineHeight: "14px", letterSpacing: "0.04em", fontWeight: "500" }],
         "code-sm": ["12px", { lineHeight: "16px", fontWeight: "400" }],
       },
       borderRadius: {
         sm: "0.125rem",
-        DEFAULT: "0.125rem",
-        md: "0.1875rem",
-        lg: "0.25rem",
-        xl: "0.5rem",
+        DEFAULT: "0.25rem",
+        md: "0.375rem",
+        lg: "0.5rem",
+        xl: "0.75rem",
       },
       spacing: {
         "margin-mobile": "16px",
@@ -105,6 +127,18 @@ const config: Config = {
         gutter: "24px",
         "section-gap": "64px",
         base: "8px",
+        // Stitch "Industrial Precision" spacing scale (space-2xs..space-3xl) —
+        // used directly by restyled pages so their card/section padding and
+        // gaps match the generated screens' own spacing values exactly.
+        "space-2xs": "0.125rem",
+        "space-xs": "0.25rem",
+        "space-sm": "0.5rem",
+        "space-md": "0.75rem",
+        "space-base": "1rem",
+        "space-lg": "1.5rem",
+        "space-xl": "2rem",
+        "space-2xl": "3rem",
+        "space-3xl": "4rem",
       },
       maxWidth: {
         container: "1440px",

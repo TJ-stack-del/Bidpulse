@@ -47,18 +47,18 @@ export function ThresholdSettingsForm({ orgId, initialThreshold }: { orgId: stri
           step="1000"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none w-40"
+          className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none w-40"
         />
       </div>
       <button
         type="submit"
         disabled={saving}
-        className="py-2 px-4 bg-secondary text-on-secondary rounded text-label-md font-semibold hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 flex items-center gap-2"
+        className="py-2 px-4 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 transition active:scale-[0.97] disabled:opacity-40 flex items-center gap-2"
       >
         {saving && <Spinner />}
         {saving ? "Saving…" : "Save"}
       </button>
-      <FadeMessage show={saved} className="text-body-md text-secondary">
+      <FadeMessage show={saved} className="text-body-md text-primary">
         Saved
       </FadeMessage>
     </form>

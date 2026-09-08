@@ -34,7 +34,7 @@ export default async function AdminSettingsPage() {
 
       <div className="mt-6 bg-surface-container-lowest border border-outline-variant rounded-xl p-6 max-w-xl">
         <h2 className="text-title-lg text-primary mb-2 flex items-center gap-2">
-          <span className="material-symbols-outlined text-secondary text-[20px]">payments</span>
+          <span className="material-symbols-outlined text-primary text-[20px]">payments</span>
           Lean package threshold
         </h2>
         <p className="text-body-md text-on-surface-variant mb-4">

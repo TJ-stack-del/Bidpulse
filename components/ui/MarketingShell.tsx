@@ -39,10 +39,10 @@ export function MarketingShell({
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-label-md px-1 py-1 transition ${
+                className={`text-label-md uppercase tracking-wider px-1 py-1 transition ${
                   activePath === link.href
-                    ? "text-secondary font-bold border-b-2 border-secondary"
-                    : "text-on-surface-variant hover:text-secondary"
+                    ? "text-primary font-bold border-b-2 border-primary"
+                    : "text-on-surface-variant hover:text-primary"
                 }`}
               >
                 {link.label}
@@ -50,12 +50,15 @@ export function MarketingShell({
             ))}
           </nav>
           <div className="hidden md:flex items-center gap-4">
-            <Link href="/login" className="text-label-md text-on-surface-variant hover:text-secondary transition">
+            <Link
+              href="/login"
+              className="text-label-md uppercase tracking-wider text-on-surface-variant hover:text-primary transition"
+            >
               Log in
             </Link>
             <Link
               href="/intake"
-              className="px-4 py-2 bg-secondary text-on-secondary rounded text-label-md hover:bg-on-secondary-container transition active:scale-[0.97]"
+              className="px-4 py-2 bg-primary-container text-on-primary-container rounded text-label-md uppercase tracking-wider font-bold hover:opacity-90 transition active:scale-[0.97]"
             >
               Get started
             </Link>
@@ -80,7 +83,7 @@ export function MarketingShell({
                 onClick={() => setMenuOpen(false)}
                 className={`px-4 py-3 border rounded text-label-md text-center transition active:scale-[0.97] ${
                   activePath === link.href
-                    ? "border-secondary text-secondary font-bold"
+                    ? "border-primary text-primary font-bold"
                     : "border-outline-variant text-on-surface-variant hover:bg-surface-container-low"
                 }`}
               >
@@ -98,7 +101,7 @@ export function MarketingShell({
               <Link
                 href="/intake"
                 onClick={() => setMenuOpen(false)}
-                className="px-4 py-3 bg-secondary text-on-secondary rounded text-label-md text-center active:scale-[0.97]"
+                className="px-4 py-3 bg-primary-container text-on-primary-container rounded text-label-md text-center active:scale-[0.97]"
               >
                 Get started
               </Link>
@@ -125,7 +128,7 @@ export function MarketingShell({
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-label-sm text-on-surface-variant hover:text-secondary transition"
+                className="text-label-sm text-on-surface-variant hover:text-primary transition"
               >
                 {link.label}
               </Link>

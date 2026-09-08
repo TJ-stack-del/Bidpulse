@@ -36,7 +36,7 @@ export function QuizForm() {
         </p>
         <Link
           href="/intake"
-          className="self-center px-6 py-3 bg-secondary text-on-secondary rounded text-label-md font-semibold hover:bg-on-secondary-container transition active:scale-[0.97]"
+          className="self-center px-6 py-3 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 transition active:scale-[0.97]"
         >
           Start your bid
         </Link>
@@ -48,7 +48,7 @@ export function QuizForm() {
     <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-8 flex flex-col gap-8">
       <div className="w-full bg-surface-container-high rounded-full h-2 overflow-hidden">
         <div
-          className="bg-secondary h-2 rounded-full transition-all duration-500 ease-in-out"
+          className="bg-primary-container h-2 rounded-full transition-all duration-500 ease-in-out"
           style={{ width: `${((step + 1) / QUESTIONS.length) * 100}%` }}
         />
       </div>
@@ -63,7 +63,7 @@ export function QuizForm() {
       <div className="flex gap-3">
         <button
           onClick={() => answer(true)}
-          className="flex-1 py-3 px-4 bg-secondary text-on-secondary rounded text-label-md font-semibold hover:bg-on-secondary-container transition active:scale-[0.97]"
+          className="flex-1 py-3 px-4 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 transition active:scale-[0.97]"
         >
           Yes
         </button>

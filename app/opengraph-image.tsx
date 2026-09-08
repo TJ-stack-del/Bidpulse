@@ -22,7 +22,7 @@ export default async function Image() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "#0A182F",
+          backgroundColor: "#0f172a",
           fontFamily: "sans-serif",
         }}
       >
@@ -46,7 +46,7 @@ export default async function Image() {
           <path
             d="M-38 0 L-19 0 L-11 -18 L-3 20 L5 -12 L13 8 L21 0 L38 0"
             fill="none"
-            stroke="#EF5B25"
+            stroke="#f59e0b"
             strokeWidth={4.5}
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -54,7 +54,7 @@ export default async function Image() {
         </svg>
         <div style={{ display: "flex", marginTop: 28, fontSize: 76, fontWeight: 800, letterSpacing: -1 }}>
           <span style={{ color: "#FFFFFF" }}>Bid</span>
-          <span style={{ color: "#EF5B25" }}>Pulse</span>
+          <span style={{ color: "#f59e0b" }}>Pulse</span>
         </div>
         <div
           style={{

@@ -62,7 +62,7 @@ export function EstimatedValueInput({
           placeholder="Not set"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          className="px-2 py-1 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none w-32"
+          className="px-2 py-1 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none w-32"
         />
         <button
           onClick={handleSave}
@@ -72,7 +72,7 @@ export function EstimatedValueInput({
           {saving && <Spinner />}
           {saving ? "Saving…" : "Save"}
         </button>
-        <FadeMessage show={saved} className="text-label-md text-secondary">
+        <FadeMessage show={saved} className="text-label-md text-primary">
           Saved
         </FadeMessage>
       </div>

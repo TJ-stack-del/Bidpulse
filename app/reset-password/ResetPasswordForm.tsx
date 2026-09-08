@@ -71,7 +71,7 @@ export function ResetPasswordForm() {
   if (checkingSession) {
     return (
       <div className="flex items-center justify-center py-16">
-        <Spinner className="text-secondary" />
+        <Spinner className="text-primary" />
       </div>
     );
   }
@@ -82,7 +82,7 @@ export function ResetPasswordForm() {
         <p className="text-body-md text-on-surface-variant">
           This reset link is invalid or has expired. Request a new one from the login page.
         </p>
-        <Link href="/login" className="text-body-md text-secondary hover:underline">
+        <Link href="/login" className="text-body-md text-primary hover:underline">
           Back to login
         </Link>
       </div>
@@ -95,7 +95,7 @@ export function ResetPasswordForm() {
         <p className="text-body-md text-on-surface-variant">
           Password updated. Taking you to your dashboard…
         </p>
-        <Spinner className="text-secondary mx-auto" />
+        <Spinner className="text-primary mx-auto" />
       </div>
     );
   }
@@ -116,7 +116,7 @@ export function ResetPasswordForm() {
           onChange={(e) => setPassword(e.target.value)}
           autoComplete="new-password"
           required
-          className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+          className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
         />
       </label>
       <label className="flex flex-col gap-1">
@@ -127,14 +127,14 @@ export function ResetPasswordForm() {
           onChange={(e) => setConfirmPassword(e.target.value)}
           autoComplete="new-password"
           required
-          className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+          className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
         />
       </label>
 
       <button
         type="submit"
         disabled={submitting}
-        className="w-full py-3 px-4 bg-secondary text-on-secondary rounded text-label-md font-semibold hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        className="w-full py-3 px-4 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 transition active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
         {submitting && <Spinner />}
         {submitting ? "Updating…" : "Update password"}

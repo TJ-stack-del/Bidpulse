@@ -156,7 +156,7 @@ export function PaymentStatus({
   return (
     <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
       <h2 className="text-title-lg text-primary mb-4 flex items-center gap-2">
-        <span className="material-symbols-outlined text-secondary text-[20px]">payments</span>
+        <span className="material-symbols-outlined text-primary text-[20px]">payments</span>
         Payment
       </h2>
 
@@ -174,7 +174,7 @@ export function PaymentStatus({
                 onClick={() => setMode("existing")}
                 className={`px-3 py-1.5 rounded text-label-md font-bold transition ${
                   mode === "existing"
-                    ? "bg-secondary text-on-secondary"
+                    ? "bg-primary-container text-on-primary-container"
                     : "border border-outline-variant text-on-surface hover:bg-surface-container-high"
                 }`}
               >
@@ -185,7 +185,7 @@ export function PaymentStatus({
                 onClick={() => setMode("new")}
                 className={`px-3 py-1.5 rounded text-label-md font-bold transition ${
                   mode === "new"
-                    ? "bg-secondary text-on-secondary"
+                    ? "bg-primary-container text-on-primary-container"
                     : "border border-outline-variant text-on-surface hover:bg-surface-container-high"
                 }`}
               >
@@ -199,7 +199,7 @@ export function PaymentStatus({
               <select
                 value={selectedExistingId}
                 onChange={(e) => setSelectedExistingId(e.target.value)}
-                className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+                className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
               >
                 {existingPackages.map((p) => (
                   <option key={p.id} value={p.id}>
@@ -211,7 +211,7 @@ export function PaymentStatus({
               <button
                 onClick={handleLinkExisting}
                 disabled={linking}
-                className="self-start px-4 py-2 bg-secondary text-on-secondary rounded text-label-md font-bold hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
+                className="self-start px-4 py-2 bg-primary-container text-on-primary-container rounded text-label-md font-bold hover:opacity-90 transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
               >
                 {linking && <Spinner />}
                 {linking ? "Linking…" : "Link this package"}
@@ -224,7 +224,7 @@ export function PaymentStatus({
                 <select
                   value={newType}
                   onChange={(e) => setNewType(e.target.value)}
-                  className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+                  className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
                 >
                   <option value="one_off">One-off</option>
                   <option value="retainer">Retainer</option>
@@ -241,13 +241,13 @@ export function PaymentStatus({
                   value={newPriceNote}
                   onChange={(e) => setNewPriceNote(e.target.value)}
                   placeholder="e.g. $450 flat, invoiced separately"
-                  className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+                  className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
                 />
               </div>
               <button
                 onClick={handleLinkNew}
                 disabled={linking}
-                className="self-start px-4 py-2 bg-secondary text-on-secondary rounded text-label-md font-bold hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
+                className="self-start px-4 py-2 bg-primary-container text-on-primary-container rounded text-label-md font-bold hover:opacity-90 transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
               >
                 {linking && <Spinner />}
                 {linking ? "Linking…" : "Create and link package"}
@@ -262,7 +262,7 @@ export function PaymentStatus({
             {packagePriceNote ? ` — ${packagePriceNote}` : ""}
           </p>
           {isPilot && (
-            <p className="text-label-md text-secondary mb-2 uppercase tracking-wider font-bold">
+            <p className="text-label-md text-primary mb-2 uppercase tracking-wider font-bold">
               Pilot package — downloads are unlocked for the client regardless of this flag
             </p>
           )}
@@ -284,7 +284,7 @@ export function PaymentStatus({
             className={`px-4 py-2 rounded text-label-md font-bold transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2 ${
               paid
                 ? "border border-outline-variant text-on-surface hover:bg-surface-container-high"
-                : "bg-secondary text-on-secondary hover:bg-on-secondary-container"
+                : "bg-primary-container text-on-primary-container hover:opacity-90"
             }`}
           >
             {saving && <Spinner />}

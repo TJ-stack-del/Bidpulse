@@ -56,6 +56,12 @@ export const KNOWN_TRADES: { id: string; label: string; naicsCodes: string[]; ke
       "desktop support",
     ],
   },
+  {
+    id: "electrical",
+    label: "Electrical",
+    naicsCodes: ["238210"],
+    keywords: ["electrical", "electrician", "wiring", "switchgear", "panel upgrade", "lighting retrofit", "conduit"],
+  },
 ];
 
 // naicsCodes: the client's Company Profile codes (clients.naics_codes).

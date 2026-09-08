@@ -48,6 +48,15 @@ const EXAMPLES = [
     excerpt:
       "Sample IT Solutions has staffed help desk and network operations for two municipal agencies since 2021, holding a 24-hour response guarantee and CompTIA-certified technicians on every ticket.",
   },
+  {
+    id: "electrical",
+    trade: "Electrical",
+    icon: "electrical_services",
+    accent: "bg-secondary-container text-on-secondary-container",
+    title: "Panel & Lighting Upgrades",
+    excerpt:
+      "Sample Electric Co. has completed 25+ municipal panel and lighting retrofit projects, with licensed electricians and current NFPA 70E arc-flash training on every crew.",
+  },
 ];
 
 // Each id above must match a KNOWN_TRADES id — this section needs a real
@@ -77,7 +86,7 @@ export default function GalleryPage() {
         {EXAMPLES.map((ex) => (
           <div
             key={ex.trade}
-            className="bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden flex flex-col transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-secondary/50"
+            className="bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden flex flex-col transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-primary/50"
           >
             <div className={`h-32 flex items-center justify-center ${ex.accent}`}>
               <span className="material-symbols-outlined text-[40px]">{ex.icon}</span>

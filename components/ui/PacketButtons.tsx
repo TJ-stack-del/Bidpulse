@@ -213,14 +213,14 @@ export function PacketButtons({
         <button
           onClick={handlePreview}
           disabled={generating !== null}
-          className="px-4 py-2 rounded border border-secondary text-secondary text-label-md font-bold hover:bg-surface-container-low transition-colors disabled:opacity-40"
+          className="px-4 py-2 rounded border border-primary text-primary text-label-md font-bold hover:bg-surface-container-low transition-colors disabled:opacity-40"
         >
           {generating === "preview" ? "Loading…" : "Preview packet"}
         </button>
         <button
           onClick={handleDownload}
           disabled={generating !== null}
-          className="px-4 py-2 rounded bg-primary text-on-primary text-label-md font-bold hover:bg-on-background transition-colors disabled:opacity-40"
+          className="px-4 py-2 rounded bg-primary-container text-on-primary-container text-label-md font-bold hover:opacity-90 transition-colors disabled:opacity-40"
         >
           {generating === "download" ? "Building…" : "Download packet"}
         </button>
@@ -327,7 +327,7 @@ export function PacketButtons({
                 type="checkbox"
                 checked={downloadAttested}
                 onChange={(e) => setDownloadAttested(e.target.checked)}
-                className="mt-1 h-4 w-4 shrink-0 rounded border-outline-variant text-secondary focus:ring-secondary"
+                className="mt-1 h-4 w-4 shrink-0 rounded border-outline-variant text-primary focus:ring-primary"
               />
               I&apos;ve reviewed this document, resolved any placeholders, and confirm it&apos;s
               accurate before submitting it to the agency.
@@ -348,7 +348,7 @@ export function PacketButtons({
               <button
                 onClick={handleConfirmDownload}
                 disabled={generating !== null || !downloadAttested}
-                className="px-4 py-2 rounded bg-primary text-on-primary text-label-md font-bold hover:bg-on-background transition-colors disabled:opacity-40"
+                className="px-4 py-2 rounded bg-primary-container text-on-primary-container text-label-md font-bold hover:opacity-90 transition-colors disabled:opacity-40"
               >
                 {generating === "download" ? "Building…" : "Confirm & download"}
               </button>

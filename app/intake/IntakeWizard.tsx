@@ -369,7 +369,7 @@ export function IntakeWizard() {
   if (checkingSession) {
     return (
       <div className="flex items-center justify-center py-16">
-        <Spinner className="text-secondary" />
+        <Spinner className="text-primary" />
       </div>
     );
   }
@@ -428,7 +428,7 @@ export function IntakeWizard() {
         <div className="flex flex-col items-center gap-3 mt-8">
           <Link
             href="/dashboard/profile"
-            className="py-3 px-6 bg-secondary text-on-secondary rounded text-label-md font-semibold hover:bg-on-secondary-container transition active:scale-[0.97]"
+            className="py-3 px-6 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 transition active:scale-[0.97]"
           >
             Complete your Company Profile
           </Link>
@@ -451,151 +451,186 @@ export function IntakeWizard() {
   }
 
   return (
-    <div className="flex flex-col gap-8">
-      {/* Step indicator */}
-      <div className="flex items-start justify-between relative">
-        <div className="absolute top-3 left-0 w-full h-0.5 bg-outline-variant -z-10" />
-        {STEPS.map((label, i) => {
-          const isDone = i < step;
-          const isActive = i === step;
-          return (
-            <div key={label} className="flex flex-col items-center gap-2 bg-surface-container-lowest px-1">
-              <div
-                className={`w-6 h-6 rounded-full flex items-center justify-center text-label-sm font-bold shrink-0 ${
-                  isDone
-                    ? "bg-secondary text-on-secondary"
-                    : isActive
-                    ? "border-2 border-secondary bg-surface text-secondary"
-                    : "border-2 border-outline-variant bg-surface text-on-surface-variant"
-                }`}
-              >
-                {isDone ? <span className="material-symbols-outlined text-[14px]">check</span> : i + 1}
-              </div>
-              <span className={`text-label-sm text-center ${isActive ? "text-secondary font-bold" : "text-on-surface-variant"}`}>
-                {label}
-              </span>
-            </div>
-          );
-        })}
+    <div className="flex flex-col gap-space-lg">
+      {/* Intro */}
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center gap-1.5">
+          <span className="inline-flex w-2 h-2 rounded-full bg-primary" />
+          <span className="text-label-sm text-primary uppercase tracking-wider font-semibold">New Bid</span>
+        </div>
+        <h1 className="font-headline text-headline-lg-mobile md:text-headline-lg text-on-surface font-bold tracking-tight">
+          Client Intake
+        </h1>
+        <p className="text-body-md text-on-surface-variant">
+          Tell us about the bid — we handle the technical paperwork from here.
+        </p>
+      </div>
+
+      {/* Step progress */}
+      <div className="bg-surface-container p-space-base rounded-xl flex flex-col gap-space-md shadow-sm">
+        <span className="text-label-md font-bold text-primary">
+          Step {step + 1} of {STEPS.length}: {STEPS[step]}
+        </span>
+        <div className="grid grid-cols-3 gap-space-xs w-full">
+          {STEPS.map((label, i) => (
+            <div
+              key={label}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                i <= step ? "bg-primary" : "bg-surface-container-highest"
+              }`}
+            />
+          ))}
+        </div>
+        <div className="grid grid-cols-3 text-center">
+          {STEPS.map((label, i) => (
+            <span
+              key={label}
+              className={`text-label-sm ${
+                i === step ? "text-primary font-bold" : "text-on-surface-variant font-medium"
+              }`}
+            >
+              {i + 1}. {label}
+            </span>
+          ))}
+        </div>
       </div>
 
       {error && <p className="text-body-md text-error">{error}</p>}
 
       {step === 0 && showProfileUpload && (
-        <div className="flex flex-col gap-4">
-          <h2 className="text-headline-md text-primary">Want to save some typing?</h2>
+        <section className="bg-surface-container p-space-base rounded-xl space-y-space-base shadow-sm">
+          <div className="flex items-center gap-space-xs">
+            <span className="material-symbols-outlined text-primary text-[20px]">bolt</span>
+            <h2 className="font-headline text-[18px] text-on-surface font-bold">Want to save some typing?</h2>
+          </div>
           <p className="text-body-md text-on-surface-variant">
             Upload a company document (capability statement, license packet, insurance certificates) and
             we&apos;ll fill in your Company Profile — you can always add or fix details there later.
           </p>
           <CompanyProfileUpload onExtracted={handleProfileExtracted} />
           {profileUploadDone && (
-            <p className="text-body-md text-secondary">Got it — filled in what we found.</p>
+            <p className="text-body-md text-primary">Got it — filled in what we found.</p>
           )}
           <button
             type="button"
             onClick={() => setStep(1)}
-            className="self-start py-3 px-4 bg-secondary text-on-secondary rounded text-label-md hover:bg-on-secondary-container transition active:scale-[0.97] flex items-center gap-2"
+            className="w-full min-h-[52px] bg-primary-container hover:bg-primary text-on-primary-container font-headline text-[16px] font-bold uppercase tracking-wider rounded-xl shadow-lg flex items-center justify-center gap-space-sm active:scale-[0.99] transition-all"
           >
             {profileUploadDone ? "Continue" : "Skip for now"}
-            <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+            <span className="material-symbols-outlined font-bold">arrow_forward</span>
           </button>
-        </div>
+        </section>
       )}
 
       {step === 0 && !showProfileUpload && (
-        <form onSubmit={handleAboutYouNext} className="flex flex-col gap-4">
-          <h2 className="text-headline-md text-primary">Tell us about your business</h2>
-          <Input label="Company name" value={form.companyName} onChange={(v) => update("companyName", v)} required />
-          <Input label="Your name" value={form.contactName} onChange={(v) => update("contactName", v)} required />
-          <div>
-            <Input label="Email or phone" value={form.contact} onChange={(v) => update("contact", v)} required />
-            <p className="text-label-md text-on-surface-variant mt-1">
-              We'll use this to send updates on your bid.
+        <form onSubmit={handleAboutYouNext} className="flex flex-col gap-space-lg">
+          <section className="bg-surface-container p-space-base rounded-xl space-y-space-base shadow-sm">
+            <div className="flex items-center gap-space-xs">
+              <span className="material-symbols-outlined text-primary text-[20px]">badge</span>
+              <h2 className="font-headline text-[18px] text-on-surface font-bold">Tell us about your business</h2>
+            </div>
+            <Input label="Company name" value={form.companyName} onChange={(v) => update("companyName", v)} required />
+            <Input label="Your name" value={form.contactName} onChange={(v) => update("contactName", v)} required />
+            <div className="flex flex-col gap-space-2xs">
+              <Input label="Email or phone" value={form.contact} onChange={(v) => update("contact", v)} required />
+              <p className="text-body-sm text-on-surface-variant">
+                We'll use this to send updates on your bid.
+              </p>
+            </div>
+            <Input label="Password" type="password" value={form.password} onChange={(v) => update("password", v)} required />
+            <p className="text-body-sm text-on-surface-variant">
+              NAICS codes, small business status, and set-asides can be added later from your Company Profile.
             </p>
-          </div>
-          <Input label="Password" type="password" value={form.password} onChange={(v) => update("password", v)} required />
-          <p className="text-label-md text-on-surface-variant -mt-2">
-            NAICS codes, small business status, and set-asides can be added later from your Company Profile.
-          </p>
+          </section>
           <button
             type="submit"
             disabled={saving}
-            className="py-3 px-4 bg-secondary text-on-secondary rounded text-label-md hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center justify-center gap-2"
+            className="w-full min-h-[52px] bg-primary-container hover:bg-primary text-on-primary-container font-headline text-[16px] font-bold uppercase tracking-wider rounded-xl shadow-lg flex items-center justify-center gap-space-sm active:scale-[0.99] transition-all disabled:opacity-40 disabled:active:scale-100"
           >
             {saving && <Spinner />}
             {saving ? "Saving…" : "Next"}
-            {!saving && <span className="material-symbols-outlined text-[18px]">arrow_forward</span>}
+            {!saving && <span className="material-symbols-outlined font-bold">arrow_forward</span>}
           </button>
         </form>
       )}
 
       {step === 1 && showBidUpload && (
-        <div className="flex flex-col gap-4">
-          <h2 className="text-headline-md text-primary">Want to save some typing?</h2>
+        <section className="bg-surface-container p-space-base rounded-xl space-y-space-base shadow-sm">
+          <div className="flex items-center gap-space-xs">
+            <span className="material-symbols-outlined text-primary text-[20px]">bolt</span>
+            <h2 className="font-headline text-[18px] text-on-surface font-bold">Want to save some typing?</h2>
+          </div>
           <RfpDocumentUpload onExtracted={handleBidExtracted} />
           {bidUploadDone && (
-            <p className="text-body-md text-secondary">
+            <p className="text-body-md text-primary">
               Got it — filled in what we found. Double-check the due date before continuing.
             </p>
           )}
           <button
             type="button"
             onClick={() => setShowBidUpload(false)}
-            className="self-start py-3 px-4 bg-secondary text-on-secondary rounded text-label-md hover:bg-on-secondary-container transition active:scale-[0.97] flex items-center gap-2"
+            className="w-full min-h-[52px] bg-primary-container hover:bg-primary text-on-primary-container font-headline text-[16px] font-bold uppercase tracking-wider rounded-xl shadow-lg flex items-center justify-center gap-space-sm active:scale-[0.99] transition-all"
           >
             {bidUploadDone ? "Continue" : "Skip and type it myself"}
-            <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+            <span className="material-symbols-outlined font-bold">arrow_forward</span>
           </button>
-        </div>
+        </section>
       )}
 
       {step === 1 && !showBidUpload && (
-        <form onSubmit={handleAboutBidNext} className="flex flex-col gap-4">
-          <h2 className="text-headline-md text-primary">Tell us about the job</h2>
-          <Input
-            label="Who is asking for this? (the agency or department)"
-            value={form.agency}
-            onChange={(v) => update("agency", v)}
-            required
-          />
-          <div>
+        <form onSubmit={handleAboutBidNext} className="flex flex-col gap-space-lg">
+          <section className="bg-surface-container p-space-base rounded-xl space-y-space-base shadow-sm">
+            <div className="flex items-center gap-space-xs">
+              <span className="material-symbols-outlined text-primary text-[20px]">account_balance</span>
+              <h2 className="font-headline text-[18px] text-on-surface font-bold">Tell us about the job</h2>
+            </div>
             <Input
-              label="Bid or RFP number (if you have one)"
-              value={form.solicitationNumber}
-              onChange={(v) => update("solicitationNumber", v)}
+              label="Who is asking for this? (the agency or department)"
+              value={form.agency}
+              onChange={(v) => update("agency", v)}
+              required
             />
-            <p className="text-label-md text-on-surface-variant mt-1">
-              This is the number the agency put on the job posting, if there is one.
-            </p>
-          </div>
-          <Input label="Due date" type="date" value={form.dueDate} onChange={(v) => update("dueDate", v)} />
-          <div>
-            <label className="text-label-md text-on-surface-variant block mb-1">
-              What does the job involve?
-            </label>
-            <textarea
-              value={form.scope}
-              onChange={(e) => update("scope", e.target.value)}
-              rows={4}
-              className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
-            />
-          </div>
+            <div className="flex flex-col gap-space-2xs">
+              <Input
+                label="Bid or RFP number (if you have one)"
+                value={form.solicitationNumber}
+                onChange={(v) => update("solicitationNumber", v)}
+              />
+              <p className="text-body-sm text-on-surface-variant">
+                This is the number the agency put on the job posting, if there is one.
+              </p>
+            </div>
+            <Input label="Due date" type="date" value={form.dueDate} onChange={(v) => update("dueDate", v)} />
+            <div className="flex flex-col gap-space-2xs">
+              <label className="text-label-sm text-on-surface-variant font-bold uppercase tracking-wider">
+                What does the job involve?
+              </label>
+              <textarea
+                value={form.scope}
+                onChange={(e) => update("scope", e.target.value)}
+                rows={4}
+                className="w-full border-0 bg-surface-container-low text-on-surface text-body-md px-space-md py-space-sm rounded-lg placeholder:text-outline focus:outline-none focus:ring-0 focus:bg-surface-container-highest"
+              />
+            </div>
+          </section>
           <button
             type="submit"
             disabled={saving}
-            className="py-3 px-4 bg-secondary text-on-secondary rounded text-label-md hover:bg-on-secondary-container transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center justify-center gap-2"
+            className="w-full min-h-[52px] bg-primary-container hover:bg-primary text-on-primary-container font-headline text-[16px] font-bold uppercase tracking-wider rounded-xl shadow-lg flex items-center justify-center gap-space-sm active:scale-[0.99] transition-all disabled:opacity-40 disabled:active:scale-100"
           >
             {saving && <Spinner />}
             {saving ? "Saving…" : "Next"}
-            {!saving && <span className="material-symbols-outlined text-[18px]">arrow_forward</span>}
+            {!saving && <span className="material-symbols-outlined font-bold">arrow_forward</span>}
           </button>
         </form>
       )}
 
       {step === 2 && submissionId && clientId && (
-        <div className="flex flex-col gap-4">
-          <h2 className="text-headline-md text-primary">Your bid file</h2>
+        <section className="bg-surface-container p-space-base rounded-xl space-y-space-base shadow-sm">
+          <div className="flex items-center gap-space-xs">
+            <span className="material-symbols-outlined text-primary text-[20px]">folder_zip</span>
+            <h2 className="font-headline text-[18px] text-on-surface font-bold">Your bid file</h2>
+          </div>
           <p className="text-body-md text-on-surface-variant">
             Upload the RFP file from the agency, if you have it. You can also
             add this later.
@@ -644,7 +679,7 @@ export function IntakeWizard() {
               setFitCheckLoading(false);
             }}
           />
-        </div>
+        </section>
       )}
     </div>
   );
@@ -664,14 +699,14 @@ function Input({
   required?: boolean;
 }) {
   return (
-    <div>
-      <label className="text-label-md text-on-surface-variant uppercase tracking-wide block mb-1">{label}</label>
+    <div className="flex flex-col gap-space-2xs">
+      <label className="text-label-sm text-on-surface-variant font-bold uppercase tracking-wider">{label}</label>
       <input
         type={type}
         required={required}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-secondary outline-none"
+        className="w-full border-0 bg-surface-container-low text-on-surface text-body-md px-space-md py-space-sm rounded-lg placeholder:text-outline focus:outline-none focus:ring-0 focus:bg-surface-container-highest"
       />
     </div>
   );

@@ -27,13 +27,8 @@ export default function IntakePage() {
           </Link>
         </div>
       </header>
-      <main className="animate-fade-in max-w-2xl md:max-w-3xl mx-auto px-margin-mobile md:px-margin-desktop py-section-gap">
-        <div className="bg-surface-container-lowest rounded-lg border border-outline-variant p-margin-mobile md:p-gutter shadow-sm">
-          <h1 className="text-headline-lg-mobile md:text-headline-lg text-primary mb-8">
-            Client Intake
-          </h1>
-          <IntakeWizard />
-        </div>
+      <main className="animate-fade-in max-w-2xl mx-auto px-margin-mobile md:px-margin-desktop py-space-2xl">
+        <IntakeWizard />
       </main>
     </div>
   );
