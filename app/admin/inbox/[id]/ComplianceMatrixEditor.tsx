@@ -20,7 +20,36 @@ type Segment = { kind: "prose"; text: string } | { kind: "table"; rows: Complian
 
 const STATUS_OPTIONS = ["NEEDS VERIFICATION", "NOT YET PROVIDED", "COMPLIANT", "NOT COMPLIANT", "NOT APPLICABLE"];
 
+// A row only reads as "confirmed" once an admin has actually landed on one
+// of the three terminal calls below -- NEEDS VERIFICATION/NOT YET PROVIDED
+// are exactly the two starting states generate-draft always writes (see
+// that route's own comment), so leaving a row on either of those must keep
+// counting as pending even after any bracket text in it has been edited
+// away.
+const TERMINAL_STATUSES = ["COMPLIANT", "NOT COMPLIANT", "NOT APPLICABLE"];
+
+// Same badge language as computePreflightSummary's own checks on this same
+// page (bg-secondary-container = ok, bg-tertiary-container = attention) --
+// this reuses that vocabulary per-row instead of inventing a new one.
+const STATUS_STYLES: Record<string, string> = {
+  "NEEDS VERIFICATION": "bg-tertiary-container text-on-tertiary-container",
+  "NOT YET PROVIDED": "bg-tertiary-container text-on-tertiary-container",
+  COMPLIANT: "bg-secondary-container text-on-secondary-container",
+  "NOT COMPLIANT": "bg-error-container text-on-error-container",
+  "NOT APPLICABLE": "bg-surface-container-high text-on-surface-variant",
+};
+
 const PLACEHOLDER_RE = /\[[^\[\]]+\]/;
+
+// No fixed-height scroll box -- this app's other cards (Bid details,
+// Client info) let text wrap at its natural height instead of hiding it
+// behind an internal scrollbar, and a 2-row textarea made every longer
+// requirement/methodology line scroll inside its own tiny box. A rough
+// chars-per-line estimate is enough; it only has to avoid the scrollbar,
+// not be exact.
+function autoRows(text: string): number {
+  return Math.max(2, Math.min(6, Math.ceil((text.length || 1) / 42)));
+}
 
 // Same row-detection rule as deliverables-packet.ts's PDF renderer: a
 // pipe-delimited table row never starts with "[" (that's a bracketed prose
@@ -78,8 +107,11 @@ export function ComplianceMatrixEditor({
 }) {
   const segments = parseSegments(value);
   const allRows = segments.filter((s): s is Extract<Segment, { kind: "table" }> => s.kind === "table").flatMap((s) => s.rows);
-  const unresolvedCount = allRows.filter(
-    (r) => PLACEHOLDER_RE.test(r.requirement) || PLACEHOLDER_RE.test(r.status) || PLACEHOLDER_RE.test(r.methodology)
+  const confirmedCount = allRows.filter(
+    (r) =>
+      TERMINAL_STATUSES.includes(r.status) &&
+      !PLACEHOLDER_RE.test(r.requirement) &&
+      !PLACEHOLDER_RE.test(r.methodology)
   ).length;
 
   function updateRow(segIndex: number, rowIndex: number, field: keyof ComplianceRow, newValue: string) {
@@ -92,9 +124,19 @@ export function ComplianceMatrixEditor({
 
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-label-md text-on-surface-variant">
-        {allRows.length - unresolvedCount} of {allRows.length} rows confirmed
-      </p>
+      <span
+        className={`self-start inline-flex items-center gap-1.5 px-3 py-1 rounded text-label-sm font-bold uppercase tracking-wider ${
+          confirmedCount === allRows.length
+            ? "bg-secondary-container text-on-secondary-container"
+            : "bg-tertiary-container text-on-tertiary-container"
+        }`}
+      >
+        <span className="material-symbols-outlined text-[16px]">
+          {confirmedCount === allRows.length ? "check_circle" : "fact_check"}
+        </span>
+        {confirmedCount} of {allRows.length} rows confirmed
+      </span>
+
       {segments.map((seg, si) =>
         seg.kind === "prose" ? (
           seg.text.trim() ? (
@@ -106,48 +148,67 @@ export function ComplianceMatrixEditor({
             </p>
           ) : null
         ) : (
-          <div key={si} className="flex flex-col gap-2">
+          <div key={si} className="flex flex-col gap-3">
             {seg.rows.map((row, ri) => {
-              const rowUnresolved =
-                PLACEHOLDER_RE.test(row.requirement) || PLACEHOLDER_RE.test(row.status) || PLACEHOLDER_RE.test(row.methodology);
+              const confirmed =
+                TERMINAL_STATUSES.includes(row.status) && !PLACEHOLDER_RE.test(row.requirement) && !PLACEHOLDER_RE.test(row.methodology);
+              const statusKnown = Object.prototype.hasOwnProperty.call(STATUS_STYLES, row.status);
               return (
                 <div
                   key={ri}
-                  className={`grid grid-cols-1 md:grid-cols-[2fr_1fr_2fr] gap-2 p-2 rounded border ${
-                    rowUnresolved ? "border-tertiary bg-tertiary-container/20" : "border-outline-variant"
+                  className={`rounded-lg border bg-surface p-4 flex flex-col gap-3 ${
+                    confirmed ? "border-outline-variant" : "border-tertiary/50"
                   }`}
                 >
-                  <textarea
-                    value={row.requirement}
-                    onChange={(e) => updateRow(si, ri, "requirement", e.target.value)}
-                    disabled={disabled}
-                    rows={2}
-                    placeholder="Requirement (from the RFP)"
-                    className="px-2 py-1.5 rounded border border-outline-variant bg-surface text-label-md text-on-surface focus:border-primary outline-none resize-none disabled:opacity-60"
-                  />
-                  <select
-                    value={STATUS_OPTIONS.includes(row.status) ? row.status : ""}
-                    onChange={(e) => updateRow(si, ri, "status", e.target.value)}
-                    disabled={disabled}
-                    className="px-2 py-1.5 rounded border border-outline-variant bg-surface text-label-md text-on-surface focus:border-primary outline-none disabled:opacity-60"
-                  >
-                    <option value="" disabled>
-                      Choose status…
-                    </option>
-                    {STATUS_OPTIONS.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-2 flex-1 min-w-0">
+                      <span
+                        className={`material-symbols-outlined text-[18px] mt-1 shrink-0 ${
+                          confirmed ? "text-secondary" : "text-tertiary"
+                        }`}
+                      >
+                        {confirmed ? "check_circle" : "radio_button_unchecked"}
+                      </span>
+                      <textarea
+                        value={row.requirement}
+                        onChange={(e) => updateRow(si, ri, "requirement", e.target.value)}
+                        disabled={disabled}
+                        rows={autoRows(row.requirement)}
+                        placeholder="Requirement (from the RFP)"
+                        className="flex-1 min-w-0 bg-transparent text-body-md text-on-surface font-bold outline-none resize-none disabled:opacity-60"
+                      />
+                    </div>
+                    <select
+                      value={statusKnown ? row.status : ""}
+                      onChange={(e) => updateRow(si, ri, "status", e.target.value)}
+                      disabled={disabled}
+                      className={`shrink-0 px-2.5 py-1 rounded text-label-sm font-bold uppercase tracking-wider border-0 outline-none disabled:opacity-60 ${
+                        statusKnown ? STATUS_STYLES[row.status] : "bg-surface-container-high text-on-surface-variant"
+                      }`}
+                    >
+                      <option value="" disabled>
+                        Choose status…
                       </option>
-                    ))}
-                  </select>
-                  <textarea
-                    value={row.methodology}
-                    onChange={(e) => updateRow(si, ri, "methodology", e.target.value)}
-                    disabled={disabled}
-                    rows={2}
-                    placeholder="Methodology & verification notes"
-                    className="px-2 py-1.5 rounded border border-outline-variant bg-surface text-label-md text-on-surface focus:border-primary outline-none resize-none disabled:opacity-60"
-                  />
+                      {STATUS_OPTIONS.map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-label-sm text-on-surface-variant uppercase tracking-wider block mb-1">
+                      Methodology &amp; verification
+                    </label>
+                    <textarea
+                      value={row.methodology}
+                      onChange={(e) => updateRow(si, ri, "methodology", e.target.value)}
+                      disabled={disabled}
+                      rows={autoRows(row.methodology)}
+                      placeholder="How was this confirmed?"
+                      className="w-full px-3 py-2 rounded border border-outline-variant bg-surface-container-low text-body-sm text-on-surface-variant focus:border-primary focus:text-on-surface outline-none resize-none disabled:opacity-60"
+                    />
+                  </div>
                 </div>
               );
             })}
