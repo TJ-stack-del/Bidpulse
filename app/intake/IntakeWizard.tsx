@@ -8,6 +8,7 @@ import { Spinner } from "@/components/ui/Spinner";
 import { BidFileStep } from "@/components/ui/BidFileStep";
 import { BidProcessNotices } from "@/components/ui/BidProcessNotices";
 import { CompanyProfileUpload, type ExtractedCompanyProfile } from "@/components/ui/CompanyProfileUpload";
+import { RfpDocumentUpload, type ExtractedBidFields } from "@/components/ui/RfpDocumentUpload";
 import { isEmail, normalizePhone } from "@/lib/phone";
 import type { FitCheckResult } from "@/lib/submissions";
 import { computeProfileCompleteness } from "@/lib/compliance/profile-completeness";
@@ -90,6 +91,13 @@ export function IntakeWizard() {
   // FormState above).
   const [showProfileUpload, setShowProfileUpload] = useState(false);
   const [profileUploadDone, setProfileUploadDone] = useState(false);
+  // Mirrors the "About you" upload micro-step above — an interstitial
+  // shown once on arrival at step 1, before "Tell us about the job".
+  // Starts true unconditionally (unlike showProfileUpload, this doesn't
+  // need to wait on an async account-creation step first) since it's
+  // gated on step === 1 in the render below regardless of this value.
+  const [showBidUpload, setShowBidUpload] = useState(true);
+  const [bidUploadDone, setBidUploadDone] = useState(false);
   const supabase = createClient();
 
   // A client who's already logged in (starting a second bid, or just
@@ -306,6 +314,27 @@ export function IntakeWizard() {
     setProfileUploadDone(true);
   }
 
+  // Prefills the "About the bid" form from an uploaded RFP/solicitation.
+  // Only overwrites a field the extraction actually found — same "never
+  // invent, leave it for the client to fill in" discipline as every other
+  // extraction in this app. The due-date prompt itself (extract-from-
+  // document/route.ts) is deliberately conservative: real solicitations
+  // often list several other dates (site visit, Q&A deadline, pre-bid
+  // conference) that are NOT the submission deadline, so it returns null
+  // rather than guessing when it can't clearly tell which date is which —
+  // still shown here as a blank field for the client to fill in themselves,
+  // never silently defaulted to some other date found in the document.
+  function handleBidExtracted(data: ExtractedBidFields) {
+    setForm((f) => ({
+      ...f,
+      agency: data.agency ?? f.agency,
+      solicitationNumber: data.solicitationNumber ?? f.solicitationNumber,
+      dueDate: data.dueDate ?? f.dueDate,
+      scope: data.scope ?? f.scope,
+    }));
+    setBidUploadDone(true);
+  }
+
   // Step 2 -> 3: creates the draft submission.
   async function handleAboutBidNext(e: React.FormEvent) {
     e.preventDefault();
@@ -501,7 +530,27 @@ export function IntakeWizard() {
         </form>
       )}
 
-      {step === 1 && (
+      {step === 1 && showBidUpload && (
+        <div className="flex flex-col gap-4">
+          <h2 className="text-headline-md text-primary">Want to save some typing?</h2>
+          <RfpDocumentUpload onExtracted={handleBidExtracted} />
+          {bidUploadDone && (
+            <p className="text-body-md text-secondary">
+              Got it — filled in what we found. Double-check the due date before continuing.
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={() => setShowBidUpload(false)}
+            className="self-start py-3 px-4 bg-secondary text-on-secondary rounded text-label-md hover:bg-on-secondary-container transition active:scale-[0.97] flex items-center gap-2"
+          >
+            {bidUploadDone ? "Continue" : "Skip and type it myself"}
+            <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+          </button>
+        </div>
+      )}
+
+      {step === 1 && !showBidUpload && (
         <form onSubmit={handleAboutBidNext} className="flex flex-col gap-4">
           <h2 className="text-headline-md text-primary">Tell us about the job</h2>
           <Input

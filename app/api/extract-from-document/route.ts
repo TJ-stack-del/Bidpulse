@@ -33,7 +33,7 @@ const SYSTEM_PROMPT = `You extract structured bid information from US government
 Read the provided document and respond with ONLY a single JSON object with exactly these keys:
 - "agency": the contracting agency or department name, or null if not found
 - "solicitationNumber": the solicitation/RFP/RFQ number, or null if not found
-- "dueDate": the proposal/quote due date in YYYY-MM-DD format, or null if not found or ambiguous
+- "dueDate": the FINAL PROPOSAL/QUOTE/BID SUBMISSION due date — the actual deadline by which the bid itself must be submitted — in YYYY-MM-DD format. Real solicitations often list several other dates that are NOT this one: a site-visit date, a question-submission/Q&A deadline, a pre-bid or pre-proposal conference date, an amendment-acknowledgment deadline. Do not use any of those. If the document lists multiple dates and you cannot clearly identify which one is specifically the final bid/proposal submission deadline, return null rather than guessing — a wrong date here is worse than no date.
 - "scope": a concise 2-4 sentence plain-English summary of the work being requested, or null if the document doesn't describe one
 - "naicsCodes": an array of JSON strings (e.g. "561720", not the bare number 561720) for each NAICS code explicitly stated in the document that exactly matches one of these codes: ${COMMON_NAICS_CODES.map((n) => n.code).join(", ")}. Empty array if none match.
 - "naicsOther": if the document states a NAICS code that is NOT in that list, put that one code as a JSON string (e.g. "238160", not 238160) here, otherwise null.

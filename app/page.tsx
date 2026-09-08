@@ -357,6 +357,31 @@ function Home() {
             </li>
           ))}
         </ul>
+        {/* The intake flow already accepts any trade and gives an honest
+            heads-up (not a rejection) when it's outside the four above with
+            deep compliance-matrix coverage — see lib/compliance/known-trades.ts.
+            This copy makes that explicit instead of implying a harder gate
+            than the product actually has. Points at the intake CTA, not a
+            contact form, since a reply-and-wait step is the wrong thing to
+            introduce at the exact moment someone's deciding whether to try
+            BidPulse — the product already answers the question for free. */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 max-w-2xl">
+          <p className="text-body-sm text-on-surface-variant">
+            We&apos;re deepest in these four — but if you&apos;re in a related trade, go
+            ahead and{" "}
+            <Link href="/intake" className="text-secondary font-bold hover:underline">
+              start your bid
+            </Link>
+            . You&apos;ll get an honest heads-up right away if something&apos;s outside our
+            sweet spot (a trade outside these four gets less tailored compliance
+            guidance, but we&apos;ll tell you that up front, not after you&apos;ve paid).
+            Prefer to ask first?{" "}
+            <Link href="/contact" className="text-secondary font-bold hover:underline">
+              Contact us
+            </Link>
+            .
+          </p>
+        </div>
       </section>
 
       {/* ---------- Pricing (rate sheet, not a card grid) ---------- */}

@@ -245,10 +245,11 @@ export default async function DashboardPage({
                   A note about your trade
                 </p>
                 <p className="text-body-md text-on-surface-variant">
-                  We&apos;re still building extra bid-help for your kind of business. We&apos;ll still write your
-                  capability statement and approach summary in full. The compliance checklist might not catch
-                  everything specific to your trade yet. We&apos;ll flag that for you when it&apos;s ready. You can
-                  always ask us directly.
+                  We&apos;re still building extra bid-help for your kind of business, but we&apos;ll still write
+                  your capability statement and approach summary in full. Our compliance checklist might not
+                  catch everything specific to your trade yet, so our team will flag anything that needs your
+                  attention while reviewing your bid. You can always ask us directly if you&apos;re not sure
+                  about something.
                 </p>
               </div>
             </div>
