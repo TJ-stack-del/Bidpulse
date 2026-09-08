@@ -48,7 +48,7 @@ const PLACEHOLDER_RE = /\[[^\[\]]+\]/;
 // chars-per-line estimate is enough; it only has to avoid the scrollbar,
 // not be exact.
 function autoRows(text: string): number {
-  return Math.max(2, Math.min(6, Math.ceil((text.length || 1) / 42)));
+  return Math.max(1, Math.min(4, Math.ceil((text.length || 1) / 56)));
 }
 
 // Same row-detection rule as deliverables-packet.ts's PDF renderer: a
@@ -123,15 +123,15 @@ export function ComplianceMatrixEditor({
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2">
       <span
-        className={`self-start inline-flex items-center gap-1.5 px-3 py-1 rounded text-label-sm font-bold uppercase tracking-wider ${
+        className={`self-start inline-flex items-center gap-1 px-2 py-0.5 rounded text-label-sm font-bold uppercase tracking-wider ${
           confirmedCount === allRows.length
             ? "bg-secondary-container text-on-secondary-container"
             : "bg-tertiary-container text-on-tertiary-container"
         }`}
       >
-        <span className="material-symbols-outlined text-[16px]">
+        <span className="material-symbols-outlined text-[14px]">
           {confirmedCount === allRows.length ? "check_circle" : "fact_check"}
         </span>
         {confirmedCount} of {allRows.length} rows confirmed
@@ -148,7 +148,7 @@ export function ComplianceMatrixEditor({
             </p>
           ) : null
         ) : (
-          <div key={si} className="flex flex-col gap-3">
+          <div key={si} className="flex flex-col gap-1.5">
             {seg.rows.map((row, ri) => {
               const confirmed =
                 TERMINAL_STATUSES.includes(row.status) && !PLACEHOLDER_RE.test(row.requirement) && !PLACEHOLDER_RE.test(row.methodology);
@@ -156,14 +156,14 @@ export function ComplianceMatrixEditor({
               return (
                 <div
                   key={ri}
-                  className={`rounded-lg border bg-surface p-4 flex flex-col gap-3 ${
+                  className={`rounded-lg border bg-surface p-2 flex flex-col gap-1.5 ${
                     confirmed ? "border-outline-variant" : "border-tertiary/50"
                   }`}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-start gap-2 flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 flex-1 min-w-0">
                       <span
-                        className={`material-symbols-outlined text-[18px] mt-1 shrink-0 ${
+                        className={`material-symbols-outlined text-[15px] shrink-0 ${
                           confirmed ? "text-secondary" : "text-tertiary"
                         }`}
                       >
@@ -175,14 +175,14 @@ export function ComplianceMatrixEditor({
                         disabled={disabled}
                         rows={autoRows(row.requirement)}
                         placeholder="Requirement (from the RFP)"
-                        className="flex-1 min-w-0 bg-transparent text-body-md text-on-surface font-bold outline-none resize-none disabled:opacity-60"
+                        className="flex-1 min-w-0 bg-transparent text-label-md text-on-surface font-bold outline-none resize-none disabled:opacity-60 leading-snug py-0.5"
                       />
                     </div>
                     <select
                       value={statusKnown ? row.status : ""}
                       onChange={(e) => updateRow(si, ri, "status", e.target.value)}
                       disabled={disabled}
-                      className={`shrink-0 px-2.5 py-1 rounded text-label-sm font-bold uppercase tracking-wider border-0 outline-none disabled:opacity-60 ${
+                      className={`shrink-0 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border-0 outline-none disabled:opacity-60 ${
                         statusKnown ? STATUS_STYLES[row.status] : "bg-surface-container-high text-on-surface-variant"
                       }`}
                     >
@@ -196,19 +196,15 @@ export function ComplianceMatrixEditor({
                       ))}
                     </select>
                   </div>
-                  <div>
-                    <label className="text-label-sm text-on-surface-variant uppercase tracking-wider block mb-1">
-                      Methodology &amp; verification
-                    </label>
-                    <textarea
-                      value={row.methodology}
-                      onChange={(e) => updateRow(si, ri, "methodology", e.target.value)}
-                      disabled={disabled}
-                      rows={autoRows(row.methodology)}
-                      placeholder="How was this confirmed?"
-                      className="w-full px-3 py-2 rounded border border-outline-variant bg-surface-container-low text-body-sm text-on-surface-variant focus:border-primary focus:text-on-surface outline-none resize-none disabled:opacity-60"
-                    />
-                  </div>
+                  <textarea
+                    value={row.methodology}
+                    onChange={(e) => updateRow(si, ri, "methodology", e.target.value)}
+                    disabled={disabled}
+                    rows={autoRows(row.methodology)}
+                    placeholder="Methodology & verification notes"
+                    className="w-full ml-[21px] px-2 py-1 rounded border border-outline-variant bg-surface-container-low text-label-sm text-on-surface-variant focus:border-primary focus:text-on-surface outline-none resize-none disabled:opacity-60 leading-snug"
+                    style={{ width: "calc(100% - 21px)" }}
+                  />
                 </div>
               );
             })}
