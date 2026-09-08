@@ -145,49 +145,45 @@ disposable admin + client account and a real authenticated session
 cookie — both the number and the label render correctly on the actual
 page.
 
-### 5. New feature: extract bid fields from an uploaded RFP document
-Real ask 2026-09-05, confirmed in scope — a genuinely new extraction
-capability, not just a UI reorder. Currently, step 2 ("About the bid")
-requires manually typing agency, solicitation number, due date, and
-scope; step 3 ("Your bid file") only stores the raw uploaded RFP with no
-extraction at all. This adds real auto-fill from the RFP itself,
-mirroring the existing company-document extraction pattern — same
-"never invent, return null if not actually found" discipline already
-used elsewhere.
+### 5. New feature: extract bid fields from an uploaded RFP document — built and verified
+**Real finding before building anything: the extraction backend already
+existed.** `app/api/extract-from-document/route.ts` was built in an
+early commit (`1609c2a`, well before this brief) — it already extracted
+agency/solicitationNumber/dueDate/scope/naicsCodes/smallBusinessStatuses/
+setAsides from an uploaded document with the same "never invent, return
+null if not found" discipline used elsewhere. It just had **zero UI
+callers anywhere in the app.** The real gap was integration, not a
+missing capability.
 
-**Real technical risk, worth taking seriously before building:** real
-RFP/solicitation documents are nothing like the short specimen documents
-used for company-profile extraction (a page or two). A real solicitation
-can run 30+ pages and often lists **multiple dates** — site-visit date,
-Q&A/question-submission deadline, pre-bid conference date, and the
-actual final bid-submission due date. The extraction must correctly
-identify the real submission due date specifically, not just the first
-date-like string encountered — a wrong-date extraction here is a
-genuinely serious failure mode (a client could miss a real deadline).
-Solicitation number and agency name are comparatively low-risk
-(typically clear on a cover page); due date is the one to scrutinize
-hardest.
+**Built:** `components/ui/RfpDocumentUpload.tsx`, mirroring
+`CompanyProfileUpload.tsx`'s upload/error-handling pattern exactly, wired
+into the intake wizard's "About the bid" step as an upload-first
+interstitial (matching the company-info precedent) — skippable via
+"Skip and type it myself," prefills only the fields actually found,
+leaves the rest blank for manual entry.
 
-**Also worth deciding:** what "scope" should actually contain — a
-faithful excerpt/summary of the real Scope of Work / Statement of Work
-section (common section header patterns to look for: "SCOPE OF WORK,"
-"STATEMENT OF WORK," "SECTION 1"), not an invented paraphrase, and left
-null with a prompt for manual entry if no clear section can be
-confidently found — never guessed.
+**The one real technical risk — hardened, not just accepted:** real
+solicitations often list multiple dates (site visit, Q&A deadline,
+pre-bid conference, amendment deadlines) that are NOT the actual
+submission due date. The extraction prompt now explicitly names each of
+those decoy date types and instructs the model to return `null` rather
+than guess when it can't clearly identify which date is the real
+submission deadline — "a wrong date here is worse than no date."
 
-**UX presentation — recommend mirroring the same upload-first pattern
-already decided for company info, but this is an assumption, not a
-locked decision:** confirm before building.
+**Verified against three adversarial synthetic solicitations** (real
+HTTP POSTs to the live route with a disposable authenticated test user,
+not a simplified proxy):
+1. A document with 5 distinct dates (pre-bid conference, question
+   deadline, site-visit window, addendum date, and the actual due date)
+   — correctly extracted only the explicitly-labeled submission deadline.
+2. A harder case where the real deadline required cross-referencing a
+   "bid opening" date named in prose against a separate schedule list
+   above it — resolved correctly.
+3. A genuinely ambiguous sources-sought notice with no real due date
+   (only unrelated budget/fiscal dates) — correctly returned `null`
+   rather than guessing.
 
-**Verification required:** test against a **real, actual solicitation
-document** (e.g. one of the real JAA/JEA/City of Jacksonville RFPs
-already referenced in this project), not just the short synthetic
-specimens used for company-profile testing — document length and
-structure are a real, distinct risk factor here. Specifically confirm:
-the correct due date is extracted when multiple dates are present in
-the source document, scope is either a real faithful excerpt or
-correctly left null (never invented), and solicitation number/agency
-name are captured correctly.
+`tsc --noEmit` and `next build` both clean.
 
 ### 6. Inbound bid email pipeline — built, blocked on Mike's email setup
 Code is done and verified (`app/api/inbound-bid-email/route.ts`, a second
@@ -238,12 +234,19 @@ container (`max-w-2xl` → `md:max-w-3xl`) and the confirmation screen's
 inner cards (`max-w-md` → `md:max-w-lg` on desktop), leaving mobile
 sizing unchanged.
 
-**Verified:** `tsc --noEmit` clean, full `next build` succeeds
-(including the build-time trade-card drift check, confirming it wasn't
-accidentally weakened). **Not yet verified:** an actual browser
-click-through (real signup → submit → see the percentage render, real
-screenshots at a genuine desktop viewport) — worth doing before calling
-this fully closed.
+**Verified, including a real browser click-through — CLOSED.**
+`tsc --noEmit` clean, full `next build` succeeds (including the
+build-time trade-card drift check, confirming it wasn't accidentally
+weakened). Real Playwright session: signed up a disposable client,
+skipped both upload interstitials, submitted a bid, reached the real
+confirmation screen. Confirmed via the actual rendered page: "Profile
+0% complete" badge renders correctly, zero trace of the old fit-badge
+text anywhere on the page. Measured the real rendered `<main>` bounding
+box directly: 768px wide at a 1440px desktop viewport (the new
+`md:max-w-3xl`), correctly full-width (390px) at a 390px mobile
+viewport — confirms the width fix applies on desktop without regressing
+mobile. Real screenshots taken at both sizes. Disposable client,
+submission, and auth user deleted afterward and confirmed gone.
 
 **Not built yet, deliberately, real reason:** auto-populating the
 compliance checklist from these same missing-field signals — this
@@ -310,6 +313,30 @@ Verified: `tsc --noEmit` and `next build` both clean. **Not yet
 verified:** an actual admin click-through (real login, click the
 toggle, confirm the DB write) — worth doing before calling this fully
 closed.
+
+### 11. Landing page "Trades we work with" copy — built and verified
+Real concern: the grid only lists 4 trades, but the intake flow already
+accepts *any* trade and gives an honest heads-up (not a rejection) when
+it's outside those four — the landing page implied a harder gate than
+the product actually has. **Built:** copy below the trade grid
+(`app/page.tsx`) — "We're deepest in these four — but if you're in a
+related trade, go ahead and start your bid. You'll get an honest
+heads-up right away if something's outside our sweet spot," with the
+real tradeoff (less tailored compliance guidance outside the four)
+stated honestly, plus a small secondary "Contact us" link. Points at
+`/intake` as the primary CTA, not a contact form — the product already
+answers the question for free, and a reply-and-wait step is the wrong
+thing to introduce at the exact moment someone's deciding whether to
+try BidPulse. Did not touch `TRADES`, `KNOWN_TRADES`, or
+`assertNoMissingTradeCards()`. Also reviewed and lightly clarified the
+existing intake-time trade-coverage heads-up on the dashboard (an
+ambiguous referent in the old wording, "We'll flag that for you when
+it's ready") without changing its tone; the compliance-matrix
+deliverable's own version of this note was reviewed and already read
+clearly, left unchanged. Verified with a real screenshot of the updated
+section at a genuine desktop viewport, and confirmed both `/intake` and
+`/contact` resolve (200). `next build` succeeded, confirming the
+drift check wasn't weakened.
 
 ## Process / Infrastructure Recommendations
 These aren't things a client would ever notice missing — they're
