@@ -1,0 +1,39 @@
+{
+  "headings": [
+    {
+      "text": "SECTION L. Instructions to Offerors",
+      "page": 1,
+      "font_size": 12.0,
+      "canonical_section": "instructions_to_offerors",
+      "matched_via": "top_font_size",
+      "matched_pattern": "^SECTION\\s+([A-M])\\b"
+    },
+    {
+      "text": "SECTION M. Evaluation Factors",
+      "page": 1,
+      "font_size": 12.0,
+      "canonical_section": "evaluation_factors",
+      "matched_via": "top_font_size",
+      "matched_pattern": "^SECTION\\s+([A-M])\\b"
+    }
+  ],
+  "sections": [
+    {
+      "canonical_type": "instructions_to_offerors",
+      "heading_text": "SECTION L. Instructions to Offerors",
+      "start_page": 1,
+      "line_count": 3,
+      "preview": "Offerors shall submit one original and three copies of their proposal no later than the due date specified herein."
+    },
+    {
+      "canonical_type": "evaluation_factors",
+      "heading_text": "SECTION M. Evaluation Factors",
+      "start_page": 1,
+      "line_count": 3,
+      "preview": "Award will be made to the responsible offeror whose proposal is most advantageous to the City."
+    }
+  ],
+  "unresolved": {
+    "unclassified_headings": []
+  }
+}

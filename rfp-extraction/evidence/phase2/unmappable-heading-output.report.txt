@@ -1,0 +1,9 @@
+Section segmentation report -- unmappable-heading-fixture.pdf
+============================================================
+1 headings detected, 0 classified, 1 unclassified.
+
+Sections found (1):
+  - (unclassified body / front matter) -- "4. Green Cleaning Certification Appendix" (3 lines, starts page 1)
+
+1 heading(s) did NOT match any entry in SECTION_SYNONYMS -- review these; if a real pattern emerges, add it as one new list entry, no code restructuring needed:
+  - p1: "4. Green Cleaning Certification Appendix"
