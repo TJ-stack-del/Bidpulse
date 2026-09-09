@@ -42,6 +42,19 @@ This file tracks what's actually queued to work on next.
 14. **Final pass on `PROJECT-STATUS.md`'s Known Issues** — confirm
     nothing still genuinely open has been missed before launch. Not done
     in any session so far.
+15. **Push 13 local commits to `origin/main` and deploy — top
+    priority, nothing below this line is live yet.** Local `main` is at
+    `5ddb0fc`, `origin/main` still at `fb688a4`. Covers the full Stitch
+    "Industrial Precision" redesign plus the Past Performance feature,
+    the PDF placeholder gate, the RFP-documents admin view, and the
+    compliance-matrix row editor — see `PROJECT-STATUS.md`'s Deploy
+    status line and Confirmed Working section (2026-09-08/09 entries)
+    for full detail. One wrinkle before pushing: the
+    `client_past_performance` migration was already applied directly
+    against production (no DB-DDL access this session) — confirm via
+    `supabase migration list` that it's recorded as applied remotely
+    before running `supabase db push`, and regenerate `schema.sql`
+    after.
 
 ## Status as of 2026-09-05 (reconciled across two same-day sessions)
 The first 2026-09-05 session closed two real investigations in dev only

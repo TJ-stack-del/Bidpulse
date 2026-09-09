@@ -14,15 +14,22 @@ using AI-assisted drafting, then the client pays and downloads the package.
 (Postgres + Auth + Storage), Vercel (now deployed at bidpulse-nine.vercel.app).
 GitHub Codespaces for development.
 
-**Deploy status (2026-09-05, reconciled across two same-day sessions):**
-`origin/main` is at `abdfa9f`, 12 commits pushed and confirmed live —
-all pending migrations applied to `bidpulse-production` and verified via
-`supabase migration list` (local == remote for every one), `schema.sql`
-regenerated to match. Vercel auto-deploy from Git confirmed genuinely
-working via a real empirical test (a harmless commit produced an
-automatic deployment, no manual `vercel --prod` needed) — see Confirmed
-Working for the full story, including an earlier false "no Git
-integration" finding that was later corrected.
+**Deploy status (2026-09-09 — STALE, see item #10 in Currently Open):**
+`origin/main` is at `fb688a4`. Local `main` is **13 commits ahead**,
+ending at `5ddb0fc` — none of it pushed, so none of it is live. This
+includes the entire Stitch "Industrial Precision" redesign and the
+Past Performance / compliance-matrix-editor / placeholder-gate work
+documented below. **Push and deploy before treating any of it as done
+from a user's perspective.** Everything from the earlier 2026-09-05
+status line below this (12 commits, `abdfa9f`) was itself superseded by
+further pushes between then and now — this line only tracks the latest
+known-accurate split. Vercel auto-deploy from Git was confirmed
+genuinely working via a real empirical test in that earlier session (a
+harmless commit produced an automatic deployment, no manual
+`vercel --prod` needed) — see Confirmed Working for that story,
+including an earlier false "no Git integration" finding that was later
+corrected. That mechanism should still apply once these 13 commits are
+actually pushed.
 
 ## How schema changes get made now
 As of 2026-08-31, all schema changes go through Supabase CLI migrations —
@@ -116,6 +123,27 @@ non-action (see Known Issues / Recently Fixed, which includes real
    verified:** an actual admin click-through (real login, click the
    toggle, confirm the DB write) — worth doing before calling this
    fully closed.
+
+10. **13 local commits sitting unpushed on `main` — push, verify
+    migrations, and deploy before any of this counts as shipped.** See
+    the Deploy status line at the top. Covers the entire Stitch
+    "Industrial Precision" redesign (`626cf4f`) and everything in
+    Confirmed Working below dated 2026-09-08/09 (Past Performance
+    feature, the placeholder-gate fixes, the RFP-documents admin view,
+    the compliance-matrix row editor). One real complication: the
+    `client_past_performance` table's migration
+    (`supabase/migrations/20260908130300_add_client_past_performance.sql`)
+    was already applied **directly against the live production
+    database** via the Supabase dashboard SQL editor — this session had
+    no `SUPABASE_ACCESS_TOKEN`/DB connection string, only a
+    service-role REST key, which can't run DDL — so schema is already
+    live in production *ahead of* the code that depends on it. That's
+    exactly the anti-pattern "How schema changes get made now" (above)
+    warns against; before pushing, run `supabase migration list` to
+    confirm this migration is recorded as applied remotely (it should
+    be, since the SQL matches the file verbatim) and regenerate
+    `schema.sql` to match once confirmed, rather than re-running
+    `supabase db push` blind.
 
 ### Business decisions (Mike's, not code tasks)
 - **Pricing as a deliberate throttle** — raising prices to intentionally
@@ -893,8 +921,163 @@ non-action (see Known Issues / Recently Fixed, which includes real
   for *both* pages via a temporary 5th fake trade (both `/` and
   `/gallery` returned real 500s), reverted and confirmed clean 200s;
   real production build succeeds.
+- **Full frontend rebuild onto Google Stitch's "Industrial Precision"
+  design system, 2026-09-08 (`626cf4f`, 55 files).** Restyled every
+  major screen to match actual rendered Stitch mockups — verified by
+  comparing real screenshots against the mockups' screenshots, not by
+  translating Tailwind class names, after several early passes were
+  correctly called out as "just re-themed, not from Stitch" and had to
+  be redone structurally. Every real data field, route, and behavior
+  was kept; anything the mockups fabricated was dropped or replaced
+  with real copy/fields (fake personas, invented win-rate/SLA stats,
+  SMS/social SSO login, a non-existent "Cost Calculator" page). Notable
+  pieces: `AppShell.tsx` now gives both admin *and* client roles a
+  persistent left sidebar (previously client-only pages had none —
+  caught by a user-shared Stitch reference screenshot: "These do not
+  look the same look at the menu"); the client dashboard
+  (`app/dashboard/page.tsx`) was rebuilt from a tab-switcher hiding all
+  but one bid into one unified card per active submission (stepper,
+  deadline, checklist, deliverables, messages together) plus a real
+  stat row and a persistent profile/credentials sidebar; the admin
+  inbox and matches pages got restyled tables/cards with real filters
+  kept intact; the landing page got a real trade-coverage pill strip,
+  a card-grid pricing preview with no fabricated dollar figures, and a
+  two-card "transformation pipeline" visual matching a specific
+  user-shared reference image. Added real Electrical trade compliance
+  coverage (NAICS 238210, license + NFPA 70E arc-flash) alongside
+  HVAC/Janitorial/Landscaping/IT, with matching homepage and Gallery
+  cards (passes `assertNoMissingTradeCards()`). Dark-theme
+  `--color-secondary-container`/`--color-surface` tokens were corrected
+  to the exact Stitch brand-seed hexes (`#10b981`/`#0f172a`) per the
+  user's explicit choice, after confirming these differ from the
+  M3-tonal-expanded values Stitch's own screens actually render (the
+  seed rarely survives verbatim into any token slot — the *rendered*
+  values were ground truth for every other token, this one pairing was
+  a deliberate exception). `tsc --noEmit` clean; real Playwright
+  screenshots taken across admin/client/marketing pages in both
+  themes. **Not yet pushed — see Currently Open #10.**
+- **Client Past Performance / references — real feature, replaces two
+  bracket placeholders every capability statement used to leave
+  unfilled, 2026-09-08 (`88eac4f`).** User's own complaint: the app had
+  no place for a client to enter past-project references, so the
+  capability statement always shipped with literal
+  `[Client name] — [scope of work] — $[contract value] — [outcome/result]`
+  lines — while the client-facing completeness badge still read "100%
+  complete." New `client_past_performance` table (migration applied
+  directly to production — see Currently Open #10) plus a
+  `PastPerformanceSection.tsx` client form on `/dashboard/profile`
+  (client/agency name, scope, contract value, outcome — self-reported,
+  no verification gate, same trust level as the existing
+  Differentiators field). `generate-draft/route.ts` now queries up to
+  3 real entries and uses them in the capability statement instead of
+  the placeholder lines when any exist. Verified end-to-end against a
+  real production client (Sunrise Janitorial Solutions LLC): two real
+  past-project entries added, confirmed present via direct DB read.
+  Same commit also fixed `business_registration_number` being
+  hardcoded to a bracket placeholder in the entity line even when the
+  real value was on file, and fixed `deriveRequirementLabels()`
+  producing garbled mid-sentence-truncated fake "requirements" from
+  dense scope paragraphs (now only derives a label when it can do so
+  without truncating; otherwise falls back to the existing
+  zero-labels path).
+- **PDF/download placeholder gate — literal `[bracket]` template text
+  could reach a client-downloaded PDF; now blocked, 2026-09-08
+  (`88eac4f`).** Real user report: a downloaded capability statement
+  PDF still had unresolved brackets in it. New
+  `lib/pdf/placeholder-check.ts` (`hasUnresolvedPlaceholders`) is now
+  checked in two places: `advance-if-deliverables-complete/route.ts`
+  won't auto-advance a submission to "Deliverables ready" while any
+  text deliverable (file uploads exempt) still has brackets, and
+  `PacketButtons.tsx` blocks a *client* (not admin) download the same
+  way, before the attestation flow. Verified with real Supabase test
+  data and the exact query the real code runs, per this file's own
+  "test the exact query" rule — an early false negative during testing
+  came from reusing one Supabase client instance across a service-role
+  call and a client sign-in, which silently downgrades that instance's
+  session for every later call (same class of bug worth watching for
+  again).
+- **Admin console had no way to open the client's actual RFP/
+  solicitation document — fixed, 2026-09-08 (`c9cf762`).** Real gap
+  found while answering "where do I get the info to fill in the
+  Compliance Matrix": `SubmissionDocuments.tsx` (client-facing RFP
+  upload, used during intake) was never rendered anywhere in
+  `app/admin/inbox/[id]/page.tsx`, and RLS already allowed admin read
+  access — the component just wasn't wired in. Now rendered inside the
+  "Bid details" card so the file the client uploaded is one click away
+  from where the compliance matrix and technical narrative are edited.
+  Verified against a real production submission (Sunrise Janitorial /
+  City of Jacksonville RFP-0892-26): the actual uploaded solicitation
+  PDF renders and opens correctly.
+- **Compliance matrix editor rebuilt as a structured per-row form —
+  no LLM, purely a mechanical editing-UX fix, 2026-09-08/09
+  (`15448df`, `93391f5`, `7ea3763`).** User pushback after being told
+  filling in the matrix is a genuinely manual step ("there has to be
+  an easier way... that does not use an LLM"). The matrix was one
+  giant `<textarea>` holding strict pipe-delimited text
+  (`Requirement | Status | Methodology`, one row per line — the same
+  convention `deliverables-packet.ts`'s PDF table renderer already
+  parses), so confirming one row meant hunting for its line in a wall
+  of text and hand-retyping it without breaking the format. New
+  `ComplianceMatrixEditor.tsx` parses the same content into real rows
+  and reserializes back to the identical pipe-delimited string on
+  every edit, so Auto-draft, the PDF renderer, and the placeholder
+  gate all needed zero changes. First pass added a status dropdown, a
+  live "N of M rows confirmed" count, and unresolved-row highlighting;
+  user feedback ("looks out of place") led to a restyle referencing
+  this same Stitch project's "Proposal Paperwork & Forms Checklist"
+  screen and reusing this same page's own preflight-check badge colors
+  instead of inventing a new palette; further feedback ("seem a little
+  big") led to a compaction pass (tighter padding/gaps, textareas sized
+  to content instead of a fixed 2-row minimum). Verified with a real
+  save round-trip against the real Sunrise Janitorial submission's
+  actual compliance matrix (10 rows preserved, edit persisted, then
+  restored so no test edits were left on real data) and real
+  screenshots in both themes. A "raw text" toggle stays available as
+  an escape hatch. Prose/Capability Statement/Technical Narrative
+  textareas got the same "don't hide content behind a fixed-height
+  scrollbox" treatment separately (`5ddb0fc`) — sized to content
+  instead of the structured-row form, since that content is free prose
+  with no parseable schema to build a form out of.
 
 ## Known Issues / Recently Fixed
+- **Admin submission page's "N deliverables still have bracketed
+  placeholders" badge undercounted — fixed, 2026-09-08.**
+  `lib/compliance/preflight-summary.ts` declared its placeholder regex
+  at module scope *with the `g` flag* (`/\[[^\[\]]+\]/g`) and reused
+  that same object across every deliverable via `.test()` inside a
+  `.filter()`. A global regex's `.test()` is stateful — it advances
+  `lastIndex` on a match and resumes from there on the *next* call
+  instead of starting at 0 — so across several different strings in a
+  row it silently returns `false` for a real match. Caught directly: a
+  real submission's badge read "2 deliverables still have bracketed
+  placeholders" while a direct DB check showed all 3 actually did.
+  Fixed by dropping the `g` flag (`.test()` never needed it for a
+  boolean check). The real gating logic
+  (`advance-if-deliverables-complete/route.ts`,
+  `hasUnresolvedPlaceholders`) was unaffected — it builds a fresh regex
+  literal per call — so this was a display-only bug, not a gate bypass.
+- **"New Bid" from the client dashboard reportedly dropped an existing
+  client onto the signup form instead of skipping to step 2 —
+  mitigated, root cause NOT confirmed, 2026-09-08.** Real user report.
+  Code review found `IntakeWizard.tsx`'s session-check `useEffect`
+  intact and correct, and a real Playwright reproduction (fresh client
+  account, real "New Bid" click) landed correctly on step 2 — could not
+  reproduce. User confirmed it was a fresh navigation, not a
+  back-button/cache scenario, which points at either a transient
+  failure or something account-specific. Hardened the one plausible
+  mechanism: `getUser()` is a real network round-trip to Supabase's
+  auth server (not a local cache read), and the effect had no retry —
+  any transient failure on that call, or on the follow-up `clients`
+  lookup, was silently treated identically to "not logged in"/"no
+  client record." Added a bounded retry (3 attempts, backoff) that only
+  fires on an actual Supabase `error`, never on a genuine error-free
+  "no session"/"no client" result, so a legitimately new visitor still
+  lands on step 0 immediately with no added delay. Verified no
+  regression with a real seeded-client Playwright test. **This is a
+  plausible fix, not a confirmed root-cause fix** — if the user reports
+  it again, the next step is checking that specific account's data
+  directly (their `clients` row, `auth_user_id` match), not re-testing
+  the happy path again.
 - **Admin inbox Board view had horizontal-only scroll, unusable on
   mobile — fixed.** Columns were a fixed `flex` row at every width,
   meaning reaching later-stage columns on a ~380px phone required
