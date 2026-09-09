@@ -42,19 +42,34 @@ This file tracks what's actually queued to work on next.
 14. **Final pass on `PROJECT-STATUS.md`'s Known Issues** — confirm
     nothing still genuinely open has been missed before launch. Not done
     in any session so far.
-15. **Push 13 local commits to `origin/main` and deploy — top
+15. **Push 19 local commits to `origin/main` and deploy — top
     priority, nothing below this line is live yet.** Local `main` is at
-    `5ddb0fc`, `origin/main` still at `fb688a4`. Covers the full Stitch
-    "Industrial Precision" redesign plus the Past Performance feature,
-    the PDF placeholder gate, the RFP-documents admin view, and the
-    compliance-matrix row editor — see `PROJECT-STATUS.md`'s Deploy
-    status line and Confirmed Working section (2026-09-08/09 entries)
-    for full detail. One wrinkle before pushing: the
-    `client_past_performance` migration was already applied directly
-    against production (no DB-DDL access this session) — confirm via
-    `supabase migration list` that it's recorded as applied remotely
-    before running `supabase db push`, and regenerate `schema.sql`
-    after.
+    `58a3279`, `origin/main` still at `fb688a4` — get a fresh
+    `git log origin/main..HEAD --oneline | wc -l` before trusting this
+    count, it goes stale fast. Covers the full Stitch "Industrial
+    Precision" redesign, the Past Performance feature, the PDF
+    placeholder gate, the RFP-documents admin view, and the City of
+    Jacksonville scraper rewrite (drops `@sparticuz/chromium`) — see
+    `PROJECT-STATUS.md`'s Deploy status line and Confirmed Working
+    section for full detail, **including a real, live divergence risk
+    with a separate cloud session also working on this repo** that
+    needs Mike's decision before either side pushes. The compliance-
+    matrix row editor mentioned in older summaries was built *and then
+    reverted* per Mike's own feedback — don't push expecting to find
+    it. One wrinkle before pushing: the `client_past_performance`
+    migration was already applied directly against production (no
+    DB-DDL access this session) — confirm via `supabase migration
+    list` that it's recorded as applied remotely before running
+    `supabase db push`, and regenerate `schema.sql` after.
+16. **RFP extraction pipeline — new initiative, standalone
+    `rfp-extraction/` Python module, not part of this app-build-order
+    list's usual scope but worth tracking here since it's real,
+    ongoing work.** Phases 1 (admin-field regex) and 2 (section
+    segmentation) are built and verified with real evidence; Phase 3
+    (obligation harvesting — the part that actually reduces Mike's
+    review burden) and Phase 4 (table extraction) are not started. See
+    `PROJECT-STATUS.md`'s Confirmed Working entry and
+    `rfp-extraction/README.md` for detail and how to run it.
 
 ## Status as of 2026-09-05 (reconciled across two same-day sessions)
 The first 2026-09-05 session closed two real investigations in dev only

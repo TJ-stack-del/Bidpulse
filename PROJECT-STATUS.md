@@ -14,22 +14,36 @@ using AI-assisted drafting, then the client pays and downloads the package.
 (Postgres + Auth + Storage), Vercel (now deployed at bidpulse-nine.vercel.app).
 GitHub Codespaces for development.
 
-**Deploy status (2026-09-09 — STALE, see item #10 in Currently Open):**
-`origin/main` is at `fb688a4`. Local `main` is **13 commits ahead**,
-ending at `5ddb0fc` — none of it pushed, so none of it is live. This
-includes the entire Stitch "Industrial Precision" redesign and the
-Past Performance / compliance-matrix-editor / placeholder-gate work
-documented below. **Push and deploy before treating any of it as done
-from a user's perspective.** Everything from the earlier 2026-09-05
-status line below this (12 commits, `abdfa9f`) was itself superseded by
-further pushes between then and now — this line only tracks the latest
-known-accurate split. Vercel auto-deploy from Git was confirmed
-genuinely working via a real empirical test in that earlier session (a
+**Deploy status (2026-09-09, updated — see item #10 in Currently
+Open):** `origin/main` is at `fb688a4`. Local `main` is **19 commits
+ahead**, ending at `58a3279` — none of it pushed, so none of it is
+live. Covers the Stitch "Industrial Precision" redesign, Past
+Performance / placeholder-gate work, a reverted compliance-matrix
+editor experiment (built, then explicitly undone per Mike's own
+feedback — see Known Issues), the RFP extraction pipeline's Phase 1 +
+Phase 2 (standalone, not wired into the app either way), and a rewrite
+of the City of Jacksonville scraper that removes a real dependency
+(`@sparticuz/chromium`) from what would ship. **Push and deploy before
+treating any of it as done from a user's perspective.** Get a fresh
+`git log origin/main..HEAD --oneline | wc -l` before relying on any
+specific count here — this number goes stale fast in a session doing
+this much work per sitting. Vercel auto-deploy from Git was confirmed
+genuinely working via a real empirical test in an earlier session (a
 harmless commit produced an automatic deployment, no manual
 `vercel --prod` needed) — see Confirmed Working for that story,
 including an earlier false "no Git integration" finding that was later
-corrected. That mechanism should still apply once these 13 commits are
+corrected. That mechanism should still apply once these commits are
 actually pushed.
+
+**Known parallel-work risk, not yet resolved:** a separate cloud Claude
+Code session has also been working on this same repo, on a separate
+checkout, including its own "revised Stitch redesign... replacing the
+earlier `626cf4f` pass" that this session has no visibility into beyond
+a status doc the user shared. Neither side has pushed, so this is a
+real, live divergence risk — whichever side pushes first may silently
+discard the other's work. Not a code task to fix; needs Mike to decide
+which checkout's redesign work is authoritative before either side
+pushes.
 
 ## How schema changes get made now
 As of 2026-08-31, all schema changes go through Supabase CLI migrations —
@@ -124,13 +138,19 @@ non-action (see Known Issues / Recently Fixed, which includes real
    toggle, confirm the DB write) — worth doing before calling this
    fully closed.
 
-10. **13 local commits sitting unpushed on `main` — push, verify
+10. **19 local commits sitting unpushed on `main` — push, verify
     migrations, and deploy before any of this counts as shipped.** See
-    the Deploy status line at the top. Covers the entire Stitch
-    "Industrial Precision" redesign (`626cf4f`) and everything in
-    Confirmed Working below dated 2026-09-08/09 (Past Performance
-    feature, the placeholder-gate fixes, the RFP-documents admin view,
-    the compliance-matrix row editor). One real complication: the
+    the Deploy status line at the top for the full list and the
+    parallel-work risk with the other session's own redesign work.
+    Covers the entire Stitch "Industrial Precision" redesign
+    (`626cf4f`), Past Performance / placeholder-gate work, the
+    RFP-documents admin view, a compliance-matrix row editor that was
+    built *and then explicitly reverted* per Mike's own feedback (see
+    Known Issues — the file no longer exists, don't assume it does from
+    an older summary), the standalone RFP extraction pipeline's Phase 1
+    + Phase 2, and the City of Jacksonville scraper rewrite (drops
+    `@sparticuz/chromium` as a dependency entirely). One real
+    complication: the
     `client_past_performance` table's migration
     (`supabase/migrations/20260908130300_add_client_past_performance.sql`)
     was already applied **directly against the live production
@@ -1013,9 +1033,21 @@ non-action (see Known Issues / Recently Fixed, which includes real
   RFP-0892-26 — not a real customer, see the note on the Past
   Performance entry above): the actual uploaded solicitation PDF
   renders and opens correctly.
-- **Compliance matrix editor rebuilt as a structured per-row form —
-  no LLM, purely a mechanical editing-UX fix, 2026-09-08/09
-  (`15448df`, `93391f5`, `7ea3763`).** User pushback after being told
+- **Compliance matrix editor rebuilt as a structured per-row form, then
+  REVERTED — `ComplianceMatrixEditor.tsx` does not exist in the
+  codebase anymore, don't build on this entry.** Built 2026-09-08/09
+  (`15448df`, `93391f5`, `7ea3763`), then explicitly undone
+  (`d49ec01`, same day) per Mike's own direct feedback: "i was not
+  happy with the the code changes made for updating the compliance
+  matrix so do not want that in production." `DeliverablesPanel.tsx`
+  is back to a single plain textarea for all three deliverable types
+  (kept the `estimateRows()` content-sizing fix from `5ddb0fc`, which
+  wasn't part of the complaint). Left the rest of this entry below
+  intact as a real record of what was tried and why, in case a future
+  session revisits per-row compliance-matrix editing — starting over
+  from scratch here would be wasted effort if the same design already
+  didn't land well. No LLM, purely a mechanical editing-UX fix,
+  2026-09-08/09. User pushback after being told
   filling in the matrix is a genuinely manual step ("there has to be
   an easier way... that does not use an LLM"). The matrix was one
   giant `<textarea>` holding strict pipe-delimited text
@@ -1043,6 +1075,100 @@ non-action (see Known Issues / Recently Fixed, which includes real
   scrollbox" treatment separately (`5ddb0fc`) — sized to content
   instead of the structured-row form, since that content is free prose
   with no parseable schema to build a form out of.
+- **RFP extraction pipeline — new, separate initiative, standalone
+  Python module, Phases 1-2 built and verified, 2026-09-09
+  (`1aa32bf`, `d1e0acb`).** Real motivation: the existing LLM-based
+  intake extraction only pulls a handful of admin fields for the
+  intake form — it does nothing to relieve Mike from personally reading
+  a full RFP to identify what belongs in the compliance matrix,
+  technical narrative, or capability statement. Deterministic
+  (regex/layout-heuristic based), no generative model calls anywhere.
+  Lives entirely in `rfp-extraction/` — does not touch the Next.js app,
+  any existing route, or any of BidPulse's own LLM-based extraction.
+  Full design: `rfp-extraction-pipeline-design.md`; phase briefs:
+  `BRIEF-rfp-extraction-phase1.md`, `BRIEF-rfp-extraction-phase2.md`
+  (all three uploaded by the user this session, now committed).
+  - **Phase 1** (ingest + admin-field regex: due date, NAICS, set-aside,
+    contract type, page limit, solicitation number): tested against a
+    real fixture pulled from the actual `RFP-2026-0847-JANI` submission
+    in the production database (an `is_test: true` QA fixture, labeled
+    synthetic on every page — not a real customer document, but a real
+    object, not invented for this task). Two of the design doc's own
+    §5 regex patterns needed real fixing, not just tuning: `due_date`
+    silently returned the *wrong* date at high confidence (matched a
+    decoy "Questions Deadline" instead of the real "Proposal Due
+    Date," with no conflict flagged), and `solicitation_number` had a
+    self-matching bug (the "RFP" anchor keyword also matches as a
+    prefix inside the ID itself, "RFP-2026-0847-JANI"). Also verified:
+    a field-free input returns null on all six fields (no false
+    positives), and a genuinely image-only page (confirmed via an
+    empty-text precheck) correctly triggers Tesseract OCR fallback with
+    every result flagged `low` confidence. Full evidence:
+    `rfp-extraction/evidence/NOTES.md`.
+  - **Phase 2** (section segmentation: heading detection + a
+    data-driven `SECTION_SYNONYMS` canonical taxonomy + an actually-
+    surfaced `unclassified_headings` report, not just a JSON field
+    nobody opens): zero changes to any Phase 1 file (verified via
+    `git diff`). Found and fixed **five** real bugs against the same
+    fixture plus two deliberately constructed synthetic tests (an
+    unmappable heading, a row-interleaved two-column layout — both
+    stated plainly as constructed, not naturally occurring), three of
+    them genuine silent-failure bugs rather than tuning issues: a
+    document's own title (the single biggest font on the page) was
+    swallowing the entire rest of the document into one section since
+    nothing else could ever match-or-beat its font size; fixing that
+    exposed a second bug where the *fallback* section's font-size
+    sentinel (`inf`) made it equally unclosable; every info-table label
+    cell was bold+short, indistinguishable from a real sub-heading by
+    the design doc's own rule alone; "top 2 font sizes" over-triggered
+    on a short document with only 2 distinct sizes; and multi-column
+    reordering was a **complete no-op on every input**, an off-by-one
+    in the column-split index having silently swallowed both columns
+    into "left" every single time. Full evidence:
+    `rfp-extraction/evidence/phase2/NOTES.md`. **Stated limitation, not
+    glossed over:** the synonym map is validated against synthetic
+    fixtures only — no real agency solicitation was available to test
+    against in this environment. First draft, needs a real
+    second-verification pass once real solicitations are sourced.
+  - **Not yet done, and don't assume otherwise:** Phase 3 (obligation
+    harvesting — the part that actually finds compliance-matrix
+    requirements, not just organizes the document) and Phase 4 (table
+    extraction: CLINs, evaluation factors, deliverables) are both
+    unbuilt. Neither phase reduces Mike's actual review burden on its
+    own yet — that only arrives once obligation harvesting and real
+    wiring into `generate-draft/route.ts` both exist.
+- **City of Jacksonville scraper rewritten from headless Chromium to
+  plain `fetch()`, 2026-09-09 (`58a3279`).** Important context: a real,
+  working Playwright + `@sparticuz/chromium`-based `coj.ts` already
+  existed and was already deployed (`acea384`, on `origin/main`,
+  wired into the daily `/api/scrape` cron alongside `jaa.ts`) — a
+  separate status doc shared this session described this as an unsolved
+  "research phase" problem, apparently unaware the file already
+  existed; worth reconciling with whoever owns that doc so this doesn't
+  get "solved" a third time. That said, real, independent live
+  investigation (actual `curl` + Node `fetch` runs against the live
+  Oracle Fusion Cloud Procurement page, not assumptions) found the
+  existing implementation, while working, was heavier than necessary:
+  the page's "JavaScript-rendered" table is actually gated behind a
+  two-step Oracle ADF loopback redirect, not a real client-side data
+  fetch — `_afrLoop`, the value that gates it, is a literal the server
+  bakes directly into the loopback response's own JS source
+  (extractable via one regex, no JS execution needed), and a live
+  browser's own network capture confirmed zero XHR/JSON requests are
+  involved at all — the solicitation table is server-rendered HTML.
+  Replaced with a 3-request `fetch()` chain (cold request → regex out
+  `_afrLoop` → replay with a cookie jar → follow the resulting 302 →
+  real data), feeding the same cheerio-based extraction `jaa.ts`
+  already uses. Verified live, twice, both times returning real active
+  solicitations. Never hardcodes `_afrLoop`/`_adf.ctrl-state` — both
+  are scraped fresh every run (confirmed necessary: a fabricated value
+  gets rejected, re-serving the loopback shell instead). Removed
+  `@sparticuz/chromium` entirely and moved `playwright-core` to
+  `devDependencies` — confirmed via a real `next build` that
+  `/api/scrape` dropped from bundling a full browser binary to a 173B
+  function. `route.ts`'s `runtime`/`maxDuration` settings deliberately
+  left untouched — no longer strictly required by `coj.ts` alone, but
+  changing them is a real infra decision, not implied by this change.
 
 ## Known Issues / Recently Fixed
 - **Admin submission page's "N deliverables still have bracketed
