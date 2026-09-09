@@ -608,14 +608,6 @@ CREATE POLICY "a client can insert their own record" ON "public"."clients" FOR I
 
 
 
-CREATE POLICY "a user can bootstrap the first team_members row for a new org" ON "public"."team_members" FOR INSERT WITH CHECK ((("auth_user_id" = "auth"."uid"()) AND (NOT "public"."org_has_admin"("org_id"))));
-
-
-
-CREATE POLICY "a user can insert their own team_members row" ON "public"."team_members" FOR INSERT WITH CHECK (("auth_user_id" = "auth"."uid"()));
-
-
-
 CREATE POLICY "access submission_documents via submission" ON "public"."submission_documents" USING ((EXISTS ( SELECT 1
    FROM ("public"."submissions" "s"
      JOIN "public"."clients" "c" ON (("c"."id" = "s"."client_id")))
@@ -718,10 +710,6 @@ CREATE POLICY "admins read support messages in their org" ON "public"."support_m
 
 
 CREATE POLICY "admins update support messages in their org" ON "public"."support_messages" FOR UPDATE USING ("public"."is_admin"("org_id"));
-
-
-
-CREATE POLICY "any authenticated user can create an organization" ON "public"."organizations" FOR INSERT WITH CHECK (("auth"."uid"() IS NOT NULL));
 
 
 
@@ -927,8 +915,8 @@ GRANT ALL ON TABLE "public"."matched_opportunities" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."organizations" TO "anon";
-GRANT ALL ON TABLE "public"."organizations" TO "authenticated";
+GRANT SELECT,DELETE,TRUNCATE,REFERENCES,TRIGGER,UPDATE ON TABLE "public"."organizations" TO "anon";
+GRANT SELECT,DELETE,TRUNCATE,REFERENCES,TRIGGER,UPDATE ON TABLE "public"."organizations" TO "authenticated";
 GRANT ALL ON TABLE "public"."organizations" TO "service_role";
 
 
@@ -957,8 +945,8 @@ GRANT ALL ON TABLE "public"."support_messages" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."team_members" TO "anon";
-GRANT ALL ON TABLE "public"."team_members" TO "authenticated";
+GRANT SELECT,DELETE,TRUNCATE,REFERENCES,TRIGGER,UPDATE ON TABLE "public"."team_members" TO "anon";
+GRANT SELECT,DELETE,TRUNCATE,REFERENCES,TRIGGER,UPDATE ON TABLE "public"."team_members" TO "authenticated";
 GRANT ALL ON TABLE "public"."team_members" TO "service_role";
 
 
@@ -987,7 +975,6 @@ ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TAB
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "authenticated";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "service_role";
-
 
 
 
