@@ -3,13 +3,16 @@ import { createClient } from "@supabase/supabase-js";
 import { scrapeJaa, type ScrapedOpportunity } from "@/lib/scrapers/jaa";
 import { scrapeCoj } from "@/lib/scrapers/coj";
 
-// coj.ts launches a real headless Chromium (playwright-core +
-// @sparticuz/chromium) since City of Jacksonville's listings are
-// JavaScript-rendered — needs the Node.js runtime (Edge can't run a
-// browser binary) and meaningfully longer than the default 10s function
-// timeout. 60s is this project's existing ceiling for a heavy route (see
-// extract-from-document, inbound-bid-email) and matches what's actually
-// available on Hobby.
+// coj.ts no longer needs a real browser (see that file's own comment —
+// the "JS-rendered" table turned out to be a plain Oracle ADF loopback
+// redirect, replayable with plain fetch()), so neither the Node.js
+// runtime nor a long timeout is strictly required by it anymore. Left
+// as-is rather than narrowed to Edge/a shorter timeout: this route still
+// makes several sequential external requests per scraper per run, and
+// 60s matches this project's existing ceiling for every other
+// external-network-dependent route (extract-from-document,
+// inbound-bid-email) — a real infra change, not just cleanup, so left
+// for a deliberate decision rather than done as a drive-by here.
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
