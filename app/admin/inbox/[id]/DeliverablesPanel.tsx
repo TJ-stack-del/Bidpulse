@@ -8,7 +8,6 @@ import { FadeMessage } from "@/components/ui/FadeMessage";
 import { PacketButtons } from "@/components/ui/PacketButtons";
 import { signRfpDocumentUrl } from "@/lib/storage";
 import { useToast } from "@/components/Toast";
-import { ComplianceMatrixEditor, hasParsableRows } from "./ComplianceMatrixEditor";
 
 type Deliverable = {
   id: string;
@@ -92,12 +91,6 @@ export function DeliverablesPanel({
   const [saving, setSaving] = useState<string | null>(null);
   const [generating, setGenerating] = useState<string | null>(null);
   const [savedTypes, setSavedTypes] = useState<Record<string, boolean>>({});
-  // Per-type escape hatch back to the plain textarea -- the structured
-  // compliance-matrix editor below assumes the strict pipe-delimited
-  // convention Auto-draft always produces, but this box is still free text
-  // underneath, so an admin who wants to paste something outside that
-  // convention isn't stuck.
-  const [rawMode, setRawMode] = useState<Record<string, boolean>>({});
   const supabase = createClient();
   const { showToast } = useToast();
   const router = useRouter();
@@ -325,45 +318,16 @@ export function DeliverablesPanel({
                 </a>
               )}
 
-              {t.value === "compliance_matrix" && !rawMode[t.value] && hasParsableRows(drafts[t.value] ?? "") ? (
-                <div className="mb-2">
-                  <ComplianceMatrixEditor
-                    value={drafts[t.value] ?? ""}
-                    onChange={(next) => {
-                      setDrafts((d) => ({ ...d, [t.value]: next }));
-                      setSavedTypes((s) => ({ ...s, [t.value]: false }));
-                    }}
-                    disabled={isBusy}
-                  />
-                  <button
-                    onClick={() => setRawMode((m) => ({ ...m, [t.value]: true }))}
-                    className="text-label-sm text-on-surface-variant hover:underline mt-2"
-                  >
-                    Edit as raw text instead
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <textarea
-                    value={drafts[t.value] ?? ""}
-                    onChange={(e) => {
-                      setDrafts((d) => ({ ...d, [t.value]: e.target.value }));
-                      setSavedTypes((s) => ({ ...s, [t.value]: false }));
-                    }}
-                    rows={estimateRows(drafts[t.value] ?? "")}
-                    placeholder="Paste or write the content directly…"
-                    className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none mb-2"
-                  />
-                  {t.value === "compliance_matrix" && rawMode[t.value] && hasParsableRows(drafts[t.value] ?? "") && (
-                    <button
-                      onClick={() => setRawMode((m) => ({ ...m, [t.value]: false }))}
-                      className="text-label-sm text-on-surface-variant hover:underline -mt-1 mb-2 block"
-                    >
-                      Back to row editor
-                    </button>
-                  )}
-                </>
-              )}
+              <textarea
+                value={drafts[t.value] ?? ""}
+                onChange={(e) => {
+                  setDrafts((d) => ({ ...d, [t.value]: e.target.value }));
+                  setSavedTypes((s) => ({ ...s, [t.value]: false }));
+                }}
+                rows={estimateRows(drafts[t.value] ?? "")}
+                placeholder="Paste or write the content directly…"
+                className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none mb-2"
+              />
 
               <div className="flex items-center gap-3 flex-wrap">
                 <button
