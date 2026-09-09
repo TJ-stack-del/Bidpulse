@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { ensureOrgAndMembership } from "@/lib/auth/ensure-org";
 import { MarketingShell } from "@/components/ui/MarketingShell";
 import { KNOWN_TRADES, assertNoMissingTradeCards } from "@/lib/compliance/known-trades";
 import { FaqAccordion } from "@/app/faq/FaqAccordion";
@@ -39,18 +38,6 @@ export default async function RootPage() {
     .maybeSingle();
 
   if (client) redirect("/dashboard");
-
-  // Signed in, but neither row exists yet: the only legitimate case left is
-  // an already-pending admin account whose org_name metadata was set by the
-  // admin signup form back when it existed — that form has since been
-  // removed (single-org business, no legitimate reason for a second org to
-  // ever get created through the UI again), but this self-heal path stays
-  // so any account still mid-confirmation from before the removal finishes
-  // setting up on next login instead of being left stuck.
-  if (user.user_metadata?.org_name) {
-    await ensureOrgAndMembership(supabase, user);
-    redirect("/admin/inbox");
-  }
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-surface px-margin-mobile py-12 text-center">
