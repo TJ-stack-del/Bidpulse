@@ -20,7 +20,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
 
       - name: Install dependencies
@@ -29,31 +29,14 @@ jobs:
       - name: Type check + build
         run: npm run build
         env:
-          # Use the DEV project's values here, never production's —
-          # this is just a build/type check, not a real deploy, and CI
-          # secrets are a real attack surface if they hold live keys.
-          # Add each of these as a Repository Secret under
-          # Settings -> Secrets and variables -> Actions in GitHub.
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
-          NEXT_PUBLIC_SUPABASE_JWKS_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_JWKS_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-          CRON_SECRET: ${{ secrets.CRON_SECRET }}
-          ADMIN_DIGEST_EMAIL: ${{ secrets.ADMIN_DIGEST_EMAIL }}
-
-# Setup steps for Mike, one-time:
-# 1. Create this file at .github/workflows/ci.yml in the repo (commit + push).
-# 2. In GitHub: repo Settings -> Secrets and variables -> Actions ->
-#    "New repository secret" for each env var above, using DEV project
-#    values only.
-# 3. That's it — every future push to main, and every PR, will now
-#    automatically fail loudly (a red X in GitHub) if the build breaks,
-#    instead of silently sitting broken until someone notices manually.
-#
-# Not included, deliberately: a real migration dry-run against a scratch
-# Supabase branch. That's a genuine next step but requires Supabase's
-# branching feature, which may not be available on the current plan tier
-# — worth checking, but not a blocker for getting this first layer in
-# place today.
+          # Next.js requires these variables while prerendering, but this
+          # job does not call Supabase, Anthropic, or Resend. Placeholder
+          # values keep real development and production secrets out of CI.
+          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-key
+          NEXT_PUBLIC_SUPABASE_JWKS_URL: https://example.supabase.co/auth/v1/.well-known/jwks.json
+          SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-service-key
+          ANTHROPIC_API_KEY: ci-placeholder-anthropic-key
+          RESEND_API_KEY: ci-placeholder-resend-key
+          CRON_SECRET: ci-placeholder-cron-secret
+          ADMIN_DIGEST_EMAIL: admin@example.com
