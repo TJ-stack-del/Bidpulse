@@ -970,9 +970,12 @@ non-action (see Known Issues / Recently Fixed, which includes real
   no verification gate, same trust level as the existing
   Differentiators field). `generate-draft/route.ts` now queries up to
   3 real entries and uses them in the capability statement instead of
-  the placeholder lines when any exist. Verified end-to-end against a
-  real production client (Sunrise Janitorial Solutions LLC): two real
-  past-project entries added, confirmed present via direct DB read.
+  the placeholder lines when any exist. Verified end-to-end against
+  "Sunrise Janitorial Solutions, LLC" — a `is_test: true` QA fixture in
+  the production database (synthetic company, `.test`-domain email; see
+  the specimen capability-statement PDF used to create it), not a real
+  customer — two entries added through the real UI, confirmed present
+  via direct DB read.
   Same commit also fixed `business_registration_number` being
   hardcoded to a bracket placeholder in the entity line even when the
   real value was on file, and fixed `deriveRequirementLabels()`
@@ -1005,9 +1008,11 @@ non-action (see Known Issues / Recently Fixed, which includes real
   access — the component just wasn't wired in. Now rendered inside the
   "Bid details" card so the file the client uploaded is one click away
   from where the compliance matrix and technical narrative are edited.
-  Verified against a real production submission (Sunrise Janitorial /
-  City of Jacksonville RFP-0892-26): the actual uploaded solicitation
-  PDF renders and opens correctly.
+  Verified against the same `is_test: true` QA-fixture submission used
+  throughout this session (Sunrise Janitorial / City of Jacksonville
+  RFP-0892-26 — not a real customer, see the note on the Past
+  Performance entry above): the actual uploaded solicitation PDF
+  renders and opens correctly.
 - **Compliance matrix editor rebuilt as a structured per-row form —
   no LLM, purely a mechanical editing-UX fix, 2026-09-08/09
   (`15448df`, `93391f5`, `7ea3763`).** User pushback after being told
@@ -1029,10 +1034,10 @@ non-action (see Known Issues / Recently Fixed, which includes real
   instead of inventing a new palette; further feedback ("seem a little
   big") led to a compaction pass (tighter padding/gaps, textareas sized
   to content instead of a fixed 2-row minimum). Verified with a real
-  save round-trip against the real Sunrise Janitorial submission's
+  save round-trip against the Sunrise Janitorial `is_test` fixture's
   actual compliance matrix (10 rows preserved, edit persisted, then
-  restored so no test edits were left on real data) and real
-  screenshots in both themes. A "raw text" toggle stays available as
+  restored to its original content afterward) and real screenshots in
+  both themes. A "raw text" toggle stays available as
   an escape hatch. Prose/Capability Statement/Technical Narrative
   textareas got the same "don't hide content behind a fixed-height
   scrollbox" treatment separately (`5ddb0fc`) — sized to content
