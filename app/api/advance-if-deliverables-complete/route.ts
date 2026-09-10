@@ -1,15 +1,14 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { sendEmail } from "@/lib/email/send";
-import { getStageChangeEmail } from "@/lib/email/templates";
+import { transitionSubmissionStage } from "@/lib/submissions/transition-stage";
 
 // Called by DeliverablesPanel right after every deliverable save (text or
 // file) — checks a fact the system can verify directly (all three full
 // deliverables have real content or a file) rather than requiring an admin
 // to remember to click "Move to stage" once they're done. Re-verifies
 // against the DB itself rather than trusting whatever the client component
-// believes just got saved, same reasoning as notify-stage-change looking up
-// the current stage itself instead of trusting the request body.
+// believes just got saved. The transition helper atomically updates the
+// stage, writes its audit record, and enqueues the client notification.
 const REQUIRED_TYPES = ["capability_statement", "compliance_matrix", "technical_narrative"];
 
 export async function POST(request: Request) {
@@ -29,8 +28,9 @@ export async function POST(request: Request) {
 
   const { data: member } = await supabase
     .from("team_members")
-    .select("id, org_id")
+    .select("id")
     .eq("auth_user_id", user.id)
+    .eq("role", "admin")
     .maybeSingle();
   if (!member) {
     return NextResponse.json({ error: "Admin access required." }, { status: 403 });
@@ -38,14 +38,17 @@ export async function POST(request: Request) {
 
   const { data: submission } = await supabase
     .from("submissions")
-    .select("id, agency, stage, is_test, clients!submissions_client_id_fkey(company_name, email)")
+    .select("id, stage")
     .eq("id", submissionId)
     .maybeSingle();
   if (!submission) {
     return NextResponse.json({ error: "Submission not found." }, { status: 404 });
   }
 
-  if (submission.stage !== "in_review") {
+  if (
+    submission.stage !== "in_review" &&
+    submission.stage !== "deliverables_ready"
+  ) {
     return NextResponse.json({ advanced: false, reason: "wrong_stage" });
   }
 
@@ -63,49 +66,43 @@ export async function POST(request: Request) {
     return NextResponse.json({ advanced: false, reason: "incomplete" });
   }
 
-  const { error: updateError } = await supabase
-    .from("submissions")
-    .update({ stage: "deliverables_ready", updated_at: new Date().toISOString() })
-    .eq("id", submissionId);
-  if (updateError) {
-    return NextResponse.json({ error: updateError.message }, { status: 500 });
-  }
-
-  await supabase.from("audit_log").insert({
-    submission_id: submission.id,
-    org_id: member.org_id,
-    actor_id: member.id,
-    event_type: "stage_auto_advanced",
-    event_detail: { from: "in_review", to: "deliverables_ready", trigger: "deliverables_complete" },
-  });
-
-  if (submission.is_test) {
-    return NextResponse.json({ advanced: true, sent: false, reason: "test_submission" });
-  }
-
-  const client = submission.clients as unknown as { company_name: string; email: string } | null;
-  if (!client?.email) {
-    return NextResponse.json({ advanced: true, sent: false, reason: "no_client_email" });
-  }
-
-  const email = getStageChangeEmail("deliverables_ready", submission.agency, client.company_name);
-  if (!email) {
-    return NextResponse.json({ advanced: true, sent: false, reason: "no_template_for_stage" });
-  }
-
   try {
-    await sendEmail({ to: client.email, subject: email.subject, html: email.html });
-    await supabase.from("audit_log").insert({
-      submission_id: submission.id,
-      org_id: member.org_id,
-      actor_id: member.id,
-      event_type: "stage_change_email_sent",
-      event_detail: { stage: "deliverables_ready", auto: true },
+    const { transition, delivery } = await transitionSubmissionStage({
+      submissionId,
+      expectedStage: "in_review",
+      newStage: "deliverables_ready",
+      actorId: member.id,
+      eventType: "stage_auto_advanced",
+      trigger: "deliverables_complete",
+      requireCompleteDeliverables: true,
     });
-  } catch (err) {
-    console.error("[advance-if-deliverables-complete] send failed", err);
-    return NextResponse.json({ advanced: true, sent: false, reason: "send_failed" });
-  }
 
-  return NextResponse.json({ advanced: true, sent: true });
+    if (
+      transition.outcome === "conflict" ||
+      transition.outcome === "not_found" ||
+      transition.outcome === "ineligible"
+    ) {
+      return NextResponse.json({
+        advanced: false,
+        reason: transition.outcome,
+        currentStage: transition.current_stage,
+      });
+    }
+
+    const status = delivery?.status ?? transition.notification_status;
+    return NextResponse.json({
+      advanced: transition.current_stage === "deliverables_ready",
+      sent: status === "sent",
+      reason:
+        delivery?.reason ??
+        transition.notification_skip_reason ??
+        (status === "sent" ? undefined : "queued_for_retry"),
+    });
+  } catch (error) {
+    console.error("[advance-if-deliverables-complete] transition failed", error);
+    return NextResponse.json(
+      { error: "Couldn't advance the submission." },
+      { status: 500 }
+    );
+  }
 }

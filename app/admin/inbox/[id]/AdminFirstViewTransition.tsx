@@ -24,6 +24,7 @@ export function AdminFirstViewTransition({
         expectedStage: "submitted",
         newStage: "in_review",
         trigger: "admin_first_view",
+        requestId: crypto.randomUUID(),
       }),
     })
       .then(async (response) => {

@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { sendEmail } from "@/lib/email/send";
-import { getStageChangeEmail } from "@/lib/email/templates";
+import {
+  transitionSubmissionStage,
+  type SubmissionStage,
+} from "@/lib/submissions/transition-stage";
 
 const STAGES = [
   "submitted",
@@ -15,24 +16,16 @@ const STAGES = [
 type Stage = (typeof STAGES)[number];
 type Trigger = "manual" | "admin_first_view";
 
-type TransitionResult = {
-  outcome: "applied" | "unchanged" | "conflict" | "ineligible" | "not_found";
-  current_stage: Stage | null;
-  agency: string | null;
-  is_test: boolean | null;
-  client_company_name: string | null;
-  client_email: string | null;
-  submission_org_id: string | null;
-};
-
 function isStage(value: unknown): value is Stage {
   return typeof value === "string" && STAGES.includes(value as Stage);
 }
 
-function serviceClient() {
-  return createServiceClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
+function isUuid(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      value
+    )
   );
 }
 
@@ -43,6 +36,9 @@ export async function POST(
   const { id: submissionId } = await params;
   const body = await request.json().catch(() => null);
   const trigger = body?.trigger as Trigger | undefined;
+  const idempotencyKey = isUuid(body?.requestId)
+    ? body.requestId
+    : crypto.randomUUID();
 
   if (
     !isStage(body?.expectedStage) ||
@@ -52,9 +48,9 @@ export async function POST(
     return NextResponse.json({ error: "Invalid stage transition." }, { status: 400 });
   }
 
-  const expectedStage: Stage =
+  const expectedStage: SubmissionStage =
     trigger === "admin_first_view" ? "submitted" : body.expectedStage;
-  const newStage: Stage =
+  const newStage: SubmissionStage =
     trigger === "admin_first_view" ? "in_review" : body.newStage;
 
   const supabase = await createClient();
@@ -102,116 +98,62 @@ export async function POST(
     });
   }
 
-  const service = serviceClient();
-  const { data, error } = await service.rpc("transition_submission_stage", {
-    p_submission_id: submissionId,
-    p_expected_stage: expectedStage,
-    p_new_stage: newStage,
-    p_actor_id: member.id,
-    p_event_type: trigger === "admin_first_view" ? "stage_auto_advanced" : "stage_change",
-    p_event_detail: { trigger },
-    p_mark_first_viewed: trigger === "admin_first_view",
-  });
-
-  if (error) {
-    console.error("[transition-stage] transaction failed", error);
+  let transitionResult;
+  try {
+    transitionResult = await transitionSubmissionStage({
+      submissionId,
+      expectedStage,
+      newStage,
+      actorId: member.id,
+      eventType:
+        trigger === "admin_first_view"
+          ? "stage_auto_advanced"
+          : "stage_change",
+      trigger,
+      markFirstViewed: trigger === "admin_first_view",
+      idempotencyKey,
+    });
+  } catch (error) {
+    console.error("[transition-stage] transaction or delivery failed", error);
     return NextResponse.json({ error: "Couldn't save the stage change." }, { status: 500 });
   }
 
-  const result = (data?.[0] ?? null) as TransitionResult | null;
-  if (!result || result.outcome === "not_found") {
+  const { transition, delivery } = transitionResult;
+  if (transition.outcome === "not_found") {
     return NextResponse.json({ error: "Submission not found." }, { status: 404 });
   }
-  if (result.outcome === "ineligible") {
+  if (transition.outcome === "ineligible") {
     return NextResponse.json({
       applied: false,
-      currentStage: result.current_stage,
+      currentStage: transition.current_stage,
       sent: false,
       reason: "draft_submission",
     });
   }
-  if (result.outcome === "conflict") {
+  if (transition.outcome === "conflict") {
     return NextResponse.json(
       {
         error: "The stage changed in another tab. The latest stage has been loaded.",
-        currentStage: result.current_stage,
+        currentStage: transition.current_stage,
       },
       { status: 409 }
     );
   }
-  if (result.outcome === "unchanged") {
-    return NextResponse.json({
-      applied: false,
-      currentStage: result.current_stage,
-      sent: false,
-      reason: "unchanged",
-    });
-  }
 
-  if (result.is_test) {
-    return NextResponse.json({
-      applied: true,
-      currentStage: result.current_stage,
-      sent: false,
-      reason: "test_submission",
-    });
-  }
-  if (!result.client_email) {
-    return NextResponse.json({
-      applied: true,
-      currentStage: result.current_stage,
-      sent: false,
-      reason: "no_client_email",
-    });
-  }
+  const status = delivery?.status ?? transition.notification_status;
+  const reason =
+    delivery?.reason ??
+    transition.notification_skip_reason ??
+    (status === "sent"
+      ? undefined
+      : transition.outcome === "unchanged"
+        ? "unchanged"
+        : "queued_for_retry");
 
-  const email = getStageChangeEmail(
-    result.current_stage!,
-    result.agency ?? "",
-    result.client_company_name ?? "Client"
-  );
-  if (!email) {
-    return NextResponse.json({
-      applied: true,
-      currentStage: result.current_stage,
-      sent: false,
-      reason: "no_template_for_stage",
-    });
-  }
-
-  try {
-    await sendEmail({
-      to: result.client_email,
-      subject: email.subject,
-      html: email.html,
-    });
-
-    const { error: auditError } = await service.from("audit_log").insert({
-      submission_id: submissionId,
-      org_id: result.submission_org_id,
-      actor_id: member.id,
-      event_type: "stage_change_email_sent",
-      event_detail: {
-        stage: result.current_stage,
-        auto: trigger !== "manual",
-      },
-    });
-    if (auditError) {
-      console.error("[transition-stage] email audit insert failed", auditError);
-    }
-
-    return NextResponse.json({
-      applied: true,
-      currentStage: result.current_stage,
-      sent: true,
-    });
-  } catch (sendError) {
-    console.error("[transition-stage] email send failed", sendError);
-    return NextResponse.json({
-      applied: true,
-      currentStage: result.current_stage,
-      sent: false,
-      reason: "send_failed",
-    });
-  }
+  return NextResponse.json({
+    applied: transition.outcome === "applied",
+    currentStage: transition.current_stage,
+    sent: status === "sent",
+    ...((status !== "sent" || reason) ? { reason } : {}),
+  });
 }
