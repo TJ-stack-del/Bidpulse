@@ -1,0 +1,877 @@
+{
+  "document": {
+    "id": "sha256:d7636827da358ff51323cca56d10b3283f05fbd84f110e341e2fe04a216763c6",
+    "filename": "phase1-synthetic.pdf",
+    "byte_size": 4966,
+    "page_count": 3,
+    "pdf_metadata": {
+      "format": "PDF 1.7"
+    },
+    "parser_version": "0.1.0",
+    "rule_set_version": "2026-09-10"
+  },
+  "quality": {
+    "status": "ok",
+    "native_pages": 3,
+    "ocr_pages": 0,
+    "suspect_pages": [],
+    "unreadable_pages": [],
+    "coverage_warnings": []
+  },
+  "pages": [
+    {
+      "page_index": 0,
+      "printed_page_label": "1",
+      "width": 612.0,
+      "height": 792.0,
+      "extraction_mode": "native",
+      "text_coverage_ratio": 0.035797,
+      "word_count": 27,
+      "blocks": [
+        {
+          "block_id": "p0000-b0000",
+          "page_index": 0,
+          "bbox": [
+            72.0,
+            19.4,
+            223.152,
+            30.392
+          ],
+          "text": "Solicitation Number: FALSE-HEADER-999",
+          "normalized_text": "solicitation number: false-header-999",
+          "font_name": "Helvetica",
+          "font_size": 8.0,
+          "reading_order": 0,
+          "is_header_footer": true
+        },
+        {
+          "block_id": "p0000-b0001",
+          "page_index": 0,
+          "bbox": [
+            72.0,
+            82.8,
+            290.72,
+            104.784
+          ],
+          "text": "REQUEST FOR PROPOSALS",
+          "normalized_text": "request for proposals",
+          "font_name": "Helvetica",
+          "font_size": 16.0,
+          "reading_order": 1,
+          "is_header_footer": false
+        },
+        {
+          "block_id": "p0000-b0002",
+          "page_index": 0,
+          "bbox": [
+            72.0,
+            138.175,
+            244.403,
+            153.289
+          ],
+          "text": "Solicitation Number: BP-2026-0042",
+          "normalized_text": "solicitation number: bp-2026-0042",
+          "font_name": "Helvetica",
+          "font_size": 11.0,
+          "reading_order": 2,
+          "is_header_footer": false
+        },
+        {
+          "block_id": "p0000-b0003",
+          "page_index": 0,
+          "bbox": [
+            72.0,
+            178.175,
+            177.776,
+            193.289
+          ],
+          "text": "NAICS Code: 561720",
+          "normalized_text": "naics code: 561720",
+          "font_name": "Helvetica",
+          "font_size": 11.0,
+          "reading_order": 3,
+          "is_header_footer": false
+        },
+        {
+          "block_id": "p0000-b0004",
+          "page_index": 0,
+          "bbox": [
+            72.0,
+            218.175,
+            327.53,
+            233.289
+          ],
+          "text": "This procurement is a total small business set-aside.",
+          "normalized_text": "this procurement is a total small business set-aside.",
+          "font_name": "Helvetica",
+          "font_size": 11.0,
+          "reading_order": 4,
+          "is_header_footer": false
+        },
+        {
+          "block_id": "p0000-b0005",
+          "page_index": 0,
+          "bbox": [
+            72.0,
+            258.175,
+            228.464,
+            273.289
+          ],
+          "text": "Contract Type: Firm-Fixed-Price",
+          "normalized_text": "contract type: firm-fixed-price",
+          "font_name": "Helvetica",
+          "font_size": 11.0,
+          "reading_order": 5,
+          "is_header_footer": false
+        },
+        {
+          "block_id": "p0000-b0006",
+          "page_index": 0,
+          "bbox": [
+            270.0,
+            761.4,
+            310.92,
+            772.392
+          ],
+          "text": "Page 1 of 3",
+          "normalized_text": "page 1 of 3",
+          "font_name": "Helvetica",
+          "font_size": 8.0,
+          "reading_order": 6,
+          "is_header_footer": true
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "page_index": 1,
+      "printed_page_label": "2",
+      "width": 612.0,
+      "height": 792.0,
+      "extraction_mode": "native",
+      "text_coverage_ratio": 0.057017,
+      "word_count": 57,
+      "blocks": [
+        {
+          "block_id": "p0001-b0000",
+          "page_index": 1,
+          "bbox": [
+            72.0,
+            19.4,
+            223.152,
+            30.392
+          ],
+          "text": "Solicitation Number: FALSE-HEADER-999",
+          "normalized_text": "solicitation number: false-header-999",
+          "font_name": "Helvetica",
+          "font_size": 8.0,
+          "reading_order": 0,
+          "is_header_footer": true
+        },
+        {
+          "block_id": "p0001-b0001",
+          "page_index": 1,
+          "bbox": [
+            72.0,
+            84.95,
+            368.366,
+            104.186
+          ],
+          "text": "SECTION L - INSTRUCTIONS TO OFFERORS",
+          "normalized_text": "section l - instructions to offerors",
+          "font_name": "Helvetica",
+          "font_size": 14.0,
+          "reading_order": 1,
+          "is_header_footer": false
+        },
+        {
+          "block_id": "p0001-b0002",
+          "page_index": 1,
+          "bbox": [
+            72.0,
+            148.175,
+            341.038,
+            163.289
+          ],
+          "text": "Questions are due September 18, 2026 at 5:00 PM ET.",
+          "normalized_text": "questions are due september 18, 2026 at 5:00 pm et.",
+          "font_name": "Helvetica",
+          "font_size": 11.0,
+          "reading_order": 2,
+          "is_header_footer": false
+        },
+        {
+          "block_id": "p0001-b0003",
+          "page_index": 1,
+          "bbox": [
+            72.0,
+            208.175,
+            386.875,
+            223.289
+          ],
+          "text": "Proposals must be received by October 15, 2026 at 2:00 PM ET.",
+          "normalized_text": "proposals must be received by october 15, 2026 at 2:00 pm et.",
+          "font_name": "Helvetica",
+          "font_size": 11.0,
+          "reading_order": 3,
+          "is_header_footer": false
+        },
+        {
+          "block_id": "p0001-b0004",
+          "page_index": 1,
+          "bbox": [
+            72.0,
+            268.175,
+            315.342,
+            283.289
+          ],
+          "text": "The Technical Volume shall not exceed 25 pages.",
+          "normalized_text": "the technical volume shall not exceed 25 pages.",
+          "font_name": "Helvetica",
+          "font_size": 11.0,
+          "reading_order": 4,
+          "is_header_footer": false
+        },
+        {
+          "block_id": "p0001-b0005",
+          "page_index": 1,
+          "bbox": [
+            72.0,
+            328.175,
+            331.38,
+            343.289
+          ],
+          "text": "Submit the response via email to bids@example.test.",
+          "normalized_text": "submit the response via email to bids@example.test.",
+          "font_name": "Helvetica",
+          "font_size": 11.0,
+          "reading_order": 5,
+          "is_header_footer": false
+        },
+        {
+          "block_id": "p0001-b0006",
+          "page_index": 1,
+          "bbox": [
+            72.0,
+            388.175,
+            297.016,
+            403.289
+          ],
+          "text": "Upload one copy through the OpenGov portal.",
+          "normalized_text": "upload one copy through the opengov portal.",
+          "font_name": "Helvetica",
+          "font_size": 11.0,
+          "reading_order": 6,
+          "is_header_footer": false
+        },
+        {
+          "block_id": "p0001-b0007",
+          "page_index": 1,
+          "bbox": [
+            270.0,
+            761.4,
+            310.92,
+            772.392
+          ],
+          "text": "Page 2 of 3",
+          "normalized_text": "page 2 of 3",
+          "font_name": "Helvetica",
+          "font_size": 8.0,
+          "reading_order": 7,
+          "is_header_footer": true
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "page_index": 2,
+      "printed_page_label": "3",
+      "width": 612.0,
+      "height": 792.0,
+      "extraction_mode": "native",
+      "text_coverage_ratio": 0.0274,
+      "word_count": 29,
+      "blocks": [
+        {
+          "block_id": "p0002-b0000",
+          "page_index": 2,
+          "bbox": [
+            72.0,
+            19.4,
+            223.152,
+            30.392
+          ],
+          "text": "Solicitation Number: FALSE-HEADER-999",
+          "normalized_text": "solicitation number: false-header-999",
+          "font_name": "Helvetica",
+          "font_size": 8.0,
+          "reading_order": 0,
+          "is_header_footer": true
+        },
+        {
+          "block_id": "p0002-b0001",
+          "page_index": 2,
+          "bbox": [
+            72.0,
+            84.95,
+            197.244,
+            104.186
+          ],
+          "text": "AMENDMENT 0001",
+          "normalized_text": "amendment 0001",
+          "font_name": "Helvetica",
+          "font_size": 14.0,
+          "reading_order": 1,
+          "is_header_footer": false
+        },
+        {
+          "block_id": "p0002-b0002",
+          "page_index": 2,
+          "bbox": [
+            72.0,
+            148.175,
+            356.317,
+            163.289
+          ],
+          "text": "The proposal deadline is October 16, 2026 at 2:00 PM ET.",
+          "normalized_text": "the proposal deadline is october 16, 2026 at 2:00 pm et.",
+          "font_name": "Helvetica",
+          "font_size": 11.0,
+          "reading_order": 2,
+          "is_header_footer": false
+        },
+        {
+          "block_id": "p0002-b0003",
+          "page_index": 2,
+          "bbox": [
+            72.0,
+            208.175,
+            367.295,
+            223.289
+          ],
+          "text": "The original deadline remains printed in the base solicitation.",
+          "normalized_text": "the original deadline remains printed in the base solicitation.",
+          "font_name": "Helvetica",
+          "font_size": 11.0,
+          "reading_order": 3,
+          "is_header_footer": false
+        },
+        {
+          "block_id": "p0002-b0004",
+          "page_index": 2,
+          "bbox": [
+            270.0,
+            761.4,
+            310.92,
+            772.392
+          ],
+          "text": "Page 3 of 3",
+          "normalized_text": "page 3 of 3",
+          "font_name": "Helvetica",
+          "font_size": 8.0,
+          "reading_order": 4,
+          "is_header_footer": true
+        }
+      ],
+      "warnings": []
+    }
+  ],
+  "administrative_fields": {
+    "contract_type": {
+      "status": "resolved",
+      "selected": [
+        "firm-fixed-price"
+      ],
+      "candidates": [
+        {
+          "candidate_id": "cand-c4d4d399e775e22a",
+          "field": "contract_type",
+          "value": "firm-fixed-price",
+          "normalized_value": "firm-fixed-price",
+          "quote": "Contract Type: Firm-Fixed-Price",
+          "provenance": {
+            "page_index": 0,
+            "printed_page_label": "1",
+            "block_ids": [
+              "p0000-b0005"
+            ],
+            "bbox": [
+              72.0,
+              258.175,
+              228.464,
+              273.289
+            ],
+            "char_span": [
+              15,
+              31
+            ]
+          },
+          "rule_id": "contract_type.named",
+          "score": 8,
+          "source_role": "body"
+        }
+      ]
+    },
+    "naics": {
+      "status": "resolved",
+      "selected": [
+        "561720"
+      ],
+      "candidates": [
+        {
+          "candidate_id": "cand-75409f9b024bc2b0",
+          "field": "naics",
+          "value": "561720",
+          "normalized_value": "561720",
+          "quote": "NAICS Code: 561720",
+          "provenance": {
+            "page_index": 0,
+            "printed_page_label": "1",
+            "block_ids": [
+              "p0000-b0003"
+            ],
+            "bbox": [
+              72.0,
+              178.175,
+              177.776,
+              193.289
+            ],
+            "char_span": [
+              0,
+              18
+            ]
+          },
+          "rule_id": "naics.six_digit",
+          "score": 9,
+          "source_role": "body"
+        }
+      ]
+    },
+    "other_deadline": {
+      "status": "absent",
+      "selected": null,
+      "candidates": []
+    },
+    "page_limits": {
+      "status": "resolved",
+      "selected": [
+        "shall not exceed 25 pages"
+      ],
+      "candidates": [
+        {
+          "candidate_id": "cand-0e13241703eb71b7",
+          "field": "page_limits",
+          "value": "shall not exceed 25 pages",
+          "normalized_value": "shall not exceed 25 pages",
+          "quote": "The Technical Volume shall not exceed 25 pages.",
+          "provenance": {
+            "page_index": 1,
+            "printed_page_label": "2",
+            "block_ids": [
+              "p0001-b0004"
+            ],
+            "bbox": [
+              72.0,
+              268.175,
+              315.342,
+              283.289
+            ],
+            "char_span": [
+              21,
+              46
+            ]
+          },
+          "rule_id": "page_limit.explicit",
+          "score": 7,
+          "source_role": "body"
+        }
+      ]
+    },
+    "proposal_due": {
+      "status": "conflict",
+      "selected": null,
+      "candidates": [
+        {
+          "candidate_id": "cand-bad0c3e6f6a01be9",
+          "field": "proposal_due",
+          "value": {
+            "date": "2026-10-15",
+            "time": "14:00:00",
+            "timezone": "America/New_York",
+            "timezone_abbreviation": "ET",
+            "utc_offset": null,
+            "raw": "October 15, 2026 at 2:00 PM ET"
+          },
+          "normalized_value": "{\"date\":\"2026-10-15\",\"time\":\"14:00:00\",\"timezone\":\"America/New_York\",\"utc_offset\":null}",
+          "quote": "Proposals must be received by October 15, 2026 at 2:00 PM ET",
+          "provenance": {
+            "page_index": 1,
+            "printed_page_label": "2",
+            "block_ids": [
+              "p0001-b0003"
+            ],
+            "bbox": [
+              72.0,
+              208.175,
+              386.875,
+              223.289
+            ],
+            "char_span": [
+              30,
+              60
+            ]
+          },
+          "rule_id": "deadline.proposal_due",
+          "score": 8,
+          "source_role": "body"
+        },
+        {
+          "candidate_id": "cand-7061e4bf255804e1",
+          "field": "proposal_due",
+          "value": {
+            "date": "2026-10-16",
+            "time": "14:00:00",
+            "timezone": "America/New_York",
+            "timezone_abbreviation": "ET",
+            "utc_offset": null,
+            "raw": "October 16, 2026 at 2:00 PM ET"
+          },
+          "normalized_value": "{\"date\":\"2026-10-16\",\"time\":\"14:00:00\",\"timezone\":\"America/New_York\",\"utc_offset\":null}",
+          "quote": "The proposal deadline is October 16, 2026 at 2:00 PM ET",
+          "provenance": {
+            "page_index": 2,
+            "printed_page_label": "3",
+            "block_ids": [
+              "p0002-b0002"
+            ],
+            "bbox": [
+              72.0,
+              148.175,
+              356.317,
+              163.289
+            ],
+            "char_span": [
+              25,
+              55
+            ]
+          },
+          "rule_id": "deadline.proposal_due",
+          "score": 8,
+          "source_role": "body"
+        }
+      ]
+    },
+    "questions_due": {
+      "status": "resolved",
+      "selected": {
+        "date": "2026-09-18",
+        "time": "17:00:00",
+        "timezone": "America/New_York",
+        "timezone_abbreviation": "ET",
+        "utc_offset": null,
+        "raw": "September 18, 2026 at 5:00 PM ET"
+      },
+      "candidates": [
+        {
+          "candidate_id": "cand-0b61deec2db454ab",
+          "field": "questions_due",
+          "value": {
+            "date": "2026-09-18",
+            "time": "17:00:00",
+            "timezone": "America/New_York",
+            "timezone_abbreviation": "ET",
+            "utc_offset": null,
+            "raw": "September 18, 2026 at 5:00 PM ET"
+          },
+          "normalized_value": "{\"date\":\"2026-09-18\",\"time\":\"17:00:00\",\"timezone\":\"America/New_York\",\"utc_offset\":null}",
+          "quote": "Questions are due September 18, 2026 at 5:00 PM ET",
+          "provenance": {
+            "page_index": 1,
+            "printed_page_label": "2",
+            "block_ids": [
+              "p0001-b0002"
+            ],
+            "bbox": [
+              72.0,
+              148.175,
+              341.038,
+              163.289
+            ],
+            "char_span": [
+              18,
+              50
+            ]
+          },
+          "rule_id": "deadline.questions_due",
+          "score": 8,
+          "source_role": "body"
+        }
+      ]
+    },
+    "set_aside": {
+      "status": "resolved",
+      "selected": [
+        "total small business set-aside"
+      ],
+      "candidates": [
+        {
+          "candidate_id": "cand-1fe6a769cdf0d1c5",
+          "field": "set_aside",
+          "value": "total small business set-aside",
+          "normalized_value": "total small business set-aside",
+          "quote": "This procurement is a total small business set-aside.",
+          "provenance": {
+            "page_index": 0,
+            "printed_page_label": "1",
+            "block_ids": [
+              "p0000-b0004"
+            ],
+            "bbox": [
+              72.0,
+              218.175,
+              327.53,
+              233.289
+            ],
+            "char_span": [
+              22,
+              52
+            ]
+          },
+          "rule_id": "set_aside.named_program",
+          "score": 8,
+          "source_role": "body"
+        }
+      ]
+    },
+    "site_visit": {
+      "status": "absent",
+      "selected": null,
+      "candidates": []
+    },
+    "solicitation_number": {
+      "status": "resolved",
+      "selected": "BP-2026-0042",
+      "candidates": [
+        {
+          "candidate_id": "cand-625471716cd7f06b",
+          "field": "solicitation_number",
+          "value": "FALSE-HEADER-999",
+          "normalized_value": "false-header-999",
+          "quote": "Solicitation Number: FALSE-HEADER-999",
+          "provenance": {
+            "page_index": 0,
+            "printed_page_label": "1",
+            "block_ids": [
+              "p0000-b0000"
+            ],
+            "bbox": [
+              72.0,
+              19.4,
+              223.152,
+              30.392
+            ],
+            "char_span": [
+              0,
+              37
+            ]
+          },
+          "rule_id": "solicitation_number.anchor",
+          "score": 6,
+          "source_role": "repeated_header_footer"
+        },
+        {
+          "candidate_id": "cand-3ee984c59d536070",
+          "field": "solicitation_number",
+          "value": "BP-2026-0042",
+          "normalized_value": "bp-2026-0042",
+          "quote": "Solicitation Number: BP-2026-0042",
+          "provenance": {
+            "page_index": 0,
+            "printed_page_label": "1",
+            "block_ids": [
+              "p0000-b0002"
+            ],
+            "bbox": [
+              72.0,
+              138.175,
+              244.403,
+              153.289
+            ],
+            "char_span": [
+              0,
+              33
+            ]
+          },
+          "rule_id": "solicitation_number.anchor",
+          "score": 8,
+          "source_role": "body"
+        },
+        {
+          "candidate_id": "cand-138904a7ffc945c9",
+          "field": "solicitation_number",
+          "value": "FALSE-HEADER-999",
+          "normalized_value": "false-header-999",
+          "quote": "Solicitation Number: FALSE-HEADER-999",
+          "provenance": {
+            "page_index": 1,
+            "printed_page_label": "2",
+            "block_ids": [
+              "p0001-b0000"
+            ],
+            "bbox": [
+              72.0,
+              19.4,
+              223.152,
+              30.392
+            ],
+            "char_span": [
+              0,
+              37
+            ]
+          },
+          "rule_id": "solicitation_number.anchor",
+          "score": 6,
+          "source_role": "repeated_header_footer"
+        },
+        {
+          "candidate_id": "cand-947b3f24d58d6308",
+          "field": "solicitation_number",
+          "value": "FALSE-HEADER-999",
+          "normalized_value": "false-header-999",
+          "quote": "Solicitation Number: FALSE-HEADER-999",
+          "provenance": {
+            "page_index": 2,
+            "printed_page_label": "3",
+            "block_ids": [
+              "p0002-b0000"
+            ],
+            "bbox": [
+              72.0,
+              19.4,
+              223.152,
+              30.392
+            ],
+            "char_span": [
+              0,
+              37
+            ]
+          },
+          "rule_id": "solicitation_number.anchor",
+          "score": 6,
+          "source_role": "repeated_header_footer"
+        }
+      ]
+    },
+    "submission_methods": {
+      "status": "resolved",
+      "selected": [
+        "email",
+        "portal"
+      ],
+      "candidates": [
+        {
+          "candidate_id": "cand-7b798004e4b3632c",
+          "field": "submission_methods",
+          "value": "email",
+          "normalized_value": "email",
+          "quote": "Submit the response via email to bids@example.test.",
+          "provenance": {
+            "page_index": 1,
+            "printed_page_label": "2",
+            "block_ids": [
+              "p0001-b0005"
+            ],
+            "bbox": [
+              72.0,
+              328.175,
+              331.38,
+              343.289
+            ],
+            "char_span": [
+              0,
+              29
+            ]
+          },
+          "rule_id": "submission.email",
+          "score": 6,
+          "source_role": "body"
+        },
+        {
+          "candidate_id": "cand-9bfc179000c45e2f",
+          "field": "submission_methods",
+          "value": "portal",
+          "normalized_value": "portal",
+          "quote": "Upload one copy through the OpenGov portal.",
+          "provenance": {
+            "page_index": 1,
+            "printed_page_label": "2",
+            "block_ids": [
+              "p0001-b0006"
+            ],
+            "bbox": [
+              72.0,
+              388.175,
+              297.016,
+              403.289
+            ],
+            "char_span": [
+              0,
+              42
+            ]
+          },
+          "rule_id": "submission.portal",
+          "score": 6,
+          "source_role": "body"
+        }
+      ]
+    }
+  },
+  "diagnostics": {
+    "ingest": {
+      "repeated_header_footer_blocks": 6,
+      "ocr_mode": "never",
+      "ocr_language": "eng",
+      "runtime_versions": {
+        "python": "3.11.15",
+        "pymupdf": "1.28.2",
+        "tesseract": null
+      },
+      "processing_limits": {
+        "max_file_bytes": 52428800,
+        "max_pages": 500,
+        "max_pdf_objects": 100000,
+        "max_page_area_points": 400000000,
+        "max_images_per_page": 500,
+        "max_image_rects_per_page": 1000,
+        "max_text_blocks_per_page": 20000,
+        "max_total_text_blocks": 100000,
+        "max_text_spans_per_page": 100000,
+        "max_total_text_characters": 10000000,
+        "max_ocr_pages": 100,
+        "max_ocr_pixels_per_page": 30000000,
+        "max_processing_seconds": 120.0,
+        "max_memory_bytes": 1500000000
+      }
+    },
+    "administrative_fields": {
+      "rule_set_version": "2026-09-10",
+      "rule_set_sha256": "3b459479f96a59ece05054956c17f3416290a065ba35ee00512ce791187235b4",
+      "candidate_count": 13,
+      "candidate_counts_by_field": {
+        "contract_type": 1,
+        "naics": 1,
+        "other_deadline": 0,
+        "page_limits": 1,
+        "proposal_due": 2,
+        "questions_due": 1,
+        "set_aside": 1,
+        "site_visit": 0,
+        "solicitation_number": 4,
+        "submission_methods": 2
+      },
+      "conflicting_fields": [
+        "proposal_due"
+      ]
+    }
+  }
+}

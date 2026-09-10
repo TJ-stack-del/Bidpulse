@@ -40,3 +40,37 @@ jobs:
           RESEND_API_KEY: ci-placeholder-resend-key
           CRON_SECRET: ci-placeholder-cron-secret
           ADMIN_DIGEST_EMAIL: admin@example.com
+
+  rfp-extractor:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12']
+    defaults:
+      run:
+        working-directory: rfp-extractor
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.8.17'
+          enable-cache: true
+          cache-dependency-glob: rfp-extractor/uv.lock
+
+      - name: Install OCR engine
+        run: sudo apt-get update && sudo apt-get install -y tesseract-ocr
+
+      - name: Install Python
+        run: uv python install ${{ matrix.python-version }}
+
+      - name: Install extractor
+        run: uv sync --frozen --extra dev --python ${{ matrix.python-version }}
+
+      - name: Run extractor tests
+        run: uv run --frozen pytest
+
+      - name: Build extractor package
+        run: uv build
