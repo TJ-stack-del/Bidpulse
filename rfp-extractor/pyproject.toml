@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "bidpulse-rfp-extractor"
+version = "0.1.0"
+description = "Deterministic, provenance-first extraction for government solicitation PDFs"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "PyMuPDF==1.28.2",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8,<9",
+]
+
+[project.scripts]
+bidpulse-rfp-extract = "bidpulse_rfp_extractor.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/bidpulse_rfp_extractor"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
