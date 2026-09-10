@@ -27,14 +27,12 @@ const SKIP_REASON_LABELS: Record<string, string> = {
 
 export function AdminSubmissionActions({
   submissionId,
-  orgId,
   actorId,
   currentStage,
   checklist,
   notes,
 }: {
   submissionId: string;
-  orgId: string;
   actorId: string;
   currentStage: string;
   checklist: ChecklistItem[];
@@ -64,46 +62,43 @@ export function AdminSubmissionActions({
   const { showToast } = useToast();
 
   async function handleStageChange(newStage: string) {
+    if (newStage === stage) return;
     setSavingStage(true);
     setNotifySkipReason(null);
     setNotifySuccess(false);
 
-    const nowIso = new Date().toISOString();
-    await supabase
-      .from("submissions")
-      .update({ stage: newStage, updated_at: nowIso })
-      .eq("id", submissionId);
-
-    await supabase.from("audit_log").insert({
-      submission_id: submissionId,
-      org_id: orgId,
-      actor_id: actorId,
-      event_type: "stage_change",
-      event_detail: { from: stage, to: newStage },
-    });
-
-    setStage(newStage);
-    setSavingStage(false);
-
-    // The stage change itself already succeeded above — a failure here
-    // (e.g. Resend's test-mode recipient restriction) shouldn't look like
-    // the stage change failed, so it's surfaced as its own small note.
     try {
-      const res = await fetch("/api/notify-stage-change", {
+      const res = await fetch(`/api/admin/submissions/${submissionId}/transition-stage`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ submissionId, newStage }),
+        body: JSON.stringify({
+          expectedStage: stage,
+          newStage,
+          trigger: "manual",
+        }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data?.error ?? "Couldn't send the client notification email.");
+      if (res.status === 409) {
+        if (typeof data?.currentStage === "string") setStage(data.currentStage);
+        showToast(data?.error ?? "The stage changed in another tab.", "error");
+        return;
+      }
+      if (!res.ok) throw new Error(data?.error ?? "Couldn't save the stage change.");
+
+      if (typeof data?.currentStage === "string") setStage(data.currentStage);
       if (data.sent) {
         setNotifySuccess(true);
-      } else {
+      } else if (data.reason && data.reason !== "unchanged") {
         setNotifySkipReason(data.reason ?? "skipped");
       }
+      if (data.reason === "send_failed") {
+        showToast("Stage saved, but the client notification email failed.", "error");
+      }
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Couldn't send the client notification email.";
-      showToast(`Stage saved, but the client wasn't notified: ${message}`, "error");
+      const message = err instanceof Error ? err.message : "Couldn't save the stage change.";
+      showToast(message, "error");
+    } finally {
+      setSavingStage(false);
     }
   }
 
