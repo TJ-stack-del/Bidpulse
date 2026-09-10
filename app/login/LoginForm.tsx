@@ -49,10 +49,9 @@ export function LoginForm() {
       return;
     }
 
-    // Deliberately no org/membership setup here — a client sign-in must
-    // never create an organizations/team_members row (see app/page.tsx,
-    // which handles the one case that legitimately needs that: an admin
-    // signup that was still pending email confirmation).
+    // Deliberately no org/membership setup here. Admin memberships are
+    // security-sensitive and must be provisioned through a trusted
+    // service-role process, never by a browser session.
     router.push("/");
     router.refresh();
   }

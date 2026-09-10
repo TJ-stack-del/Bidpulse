@@ -1,0 +1,61 @@
+{
+  "version": "2026-09-10",
+  "fields": [
+    {
+      "id": "solicitation_number.anchor",
+      "field": "solicitation_number",
+      "cardinality": "single",
+      "score": 8,
+      "pattern": "\\b(?:solicitation|rfp|rfq|ifb|bid)\\s*(?:number|no\\.?|#)\\s*[:\\-]?\\s*(?P<value>[A-Z0-9][A-Z0-9._\\-/]{2,39})\\b"
+    },
+    {
+      "id": "naics.six_digit",
+      "field": "naics",
+      "cardinality": "many",
+      "score": 9,
+      "pattern": "\\bNAICS(?:\\s+(?:code|number))?\\s*[:#\\-]?\\s*(?P<value>\\d{6})\\b"
+    },
+    {
+      "id": "set_aside.named_program",
+      "field": "set_aside",
+      "cardinality": "many",
+      "score": 8,
+      "pattern": "\\b(?P<value>(?:total|partial)\\s+small\\s+business\\s+set-aside|small\\s+business\\s+set-aside|8\\s*\\(a\\)|HUBZone|SDVOSB|WOSB|EDWOSB|DBE(?:/SDB)?|JSEB)(?=\\W|$)"
+    },
+    {
+      "id": "contract_type.named",
+      "field": "contract_type",
+      "cardinality": "many",
+      "score": 8,
+      "pattern": "\\b(?P<value>firm[- ]fixed[- ]price|fixed[- ]price|cost[- ]plus(?:[- ]\\w+)*|time\\s+and\\s+materials|T&M|IDIQ|indefinite[- ]delivery(?:/indefinite[- ]quantity)?|requirements\\s+contract)\\b"
+    },
+    {
+      "id": "page_limit.explicit",
+      "field": "page_limits",
+      "cardinality": "many",
+      "score": 7,
+      "pattern": "\\b(?P<value>(?:shall\\s+not\\s+exceed|must\\s+not\\s+exceed|maximum(?:\\s+of)?|limited\\s+to|page\\s+limit(?:\\s+of)?)\\s+\\d{1,4}\\s+pages?)\\b"
+    },
+    {
+      "id": "submission.email",
+      "field": "submission_methods",
+      "cardinality": "many",
+      "score": 6,
+      "pattern": "\\b(?P<value>(?:submit|send|deliver)[^.!?;\\n]{0,80}\\b(?:by|via|through)\\s+email)\\b"
+    },
+    {
+      "id": "submission.portal",
+      "field": "submission_methods",
+      "cardinality": "many",
+      "score": 6,
+      "pattern": "\\b(?P<value>(?:submit|upload)[^.!?;\\n]{0,100}\\b(?:portal|SAM\\.gov|Bonfire|DemandStar|OpenGov|PublicPurchase))\\b"
+    },
+    {
+      "id": "submission.hard_copy",
+      "field": "submission_methods",
+      "cardinality": "many",
+      "score": 6,
+      "pattern": "\\b(?P<value>(?:submit|deliver|provide)[^.!?;\\n]{0,80}\\b(?:hard cop(?:y|ies)|sealed (?:bid|proposal|response)))\\b"
+    }
+  ]
+}

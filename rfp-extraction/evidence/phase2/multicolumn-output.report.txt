@@ -1,9 +1,0 @@
-Section segmentation report -- multicolumn-fixture.pdf
-============================================================
-2 headings detected, 2 classified, 0 unclassified.
-
-Sections found (2):
-  - instructions_to_offerors -- "SECTION L. Instructions to Offerors" (3 lines, starts page 1)
-  - evaluation_factors -- "SECTION M. Evaluation Factors" (3 lines, starts page 1)
-
-Every detected heading classified to a canonical section. Nothing to review.
