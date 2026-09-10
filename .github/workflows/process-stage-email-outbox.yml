@@ -1,0 +1,40 @@
+name: Process stage email outbox
+
+on:
+  schedule:
+    - cron: "7,22,37,52 * * * *"
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+
+concurrency:
+  group: stage-email-outbox
+  cancel-in-progress: false
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Request GitHub OIDC token and process queued email
+        shell: bash
+        env:
+          OIDC_AUDIENCE: https://bidpulse.co/api/process-stage-email-outbox
+        run: |
+          set -euo pipefail
+
+          encoded_audience="$(jq -rn --arg value "$OIDC_AUDIENCE" '$value|@uri')"
+          token_response="$(
+            curl --fail-with-body --silent --show-error \
+              -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+              "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${encoded_audience}"
+          )"
+          token="$(jq -er '.value' <<<"$token_response")"
+          echo "::add-mask::$token"
+
+          curl --fail-with-body --silent --show-error \
+            --retry 2 \
+            --retry-all-errors \
+            -H "Authorization: Bearer $token" \
+            "$OIDC_AUDIENCE"
