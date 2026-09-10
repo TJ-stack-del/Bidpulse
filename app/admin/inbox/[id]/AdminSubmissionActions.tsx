@@ -23,6 +23,9 @@ const SKIP_REASON_LABELS: Record<string, string> = {
   test_submission: "test submission — no email sent",
   no_client_email: "client has no email on file",
   no_template_for_stage: "no email template for this stage",
+  queued_for_retry: "email queued for automatic retry",
+  delivery_failed: "email delivery needs manual attention",
+  delivery_status_unconfirmed: "email sent; delivery record needs review",
 };
 
 export function AdminSubmissionActions({
@@ -75,6 +78,7 @@ export function AdminSubmissionActions({
           expectedStage: stage,
           newStage,
           trigger: "manual",
+          requestId: crypto.randomUUID(),
         }),
       });
       const data = await res.json();
@@ -91,8 +95,16 @@ export function AdminSubmissionActions({
       } else if (data.reason && data.reason !== "unchanged") {
         setNotifySkipReason(data.reason ?? "skipped");
       }
-      if (data.reason === "send_failed") {
-        showToast("Stage saved, but the client notification email failed.", "error");
+      if (
+        data.reason === "delivery_failed" ||
+        data.reason === "delivery_status_unconfirmed"
+      ) {
+        showToast(
+          data.reason === "delivery_status_unconfirmed"
+            ? "Stage saved and email accepted, but its delivery record needs review."
+            : "Stage saved, but email delivery needs manual attention.",
+          "error"
+        );
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Couldn't save the stage change.";
