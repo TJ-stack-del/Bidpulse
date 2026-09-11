@@ -129,7 +129,27 @@ non-action (see Known Issues / Recently Fixed, which includes real
    toggle, confirm the DB write) — worth doing before calling this
    fully closed.
 
-9. **19 local commits, push/deploy/migrations — CLOSED 2026-09-11,
+9. **jsPDF major-version upgrade (2026-09-11 npm audit) — deliberately
+   deferred, not a code task right now.** `npm audit` flags jsPDF as
+   critical / jspdf-autotable as high — the fix requires jsPDF 2→4 and
+   jspdf-autotable 3→5, both major-version bumps into the exact files
+   that generate this app's real client-facing deliverable PDFs
+   (`lib/pdf/deliverables-packet.ts`, `lib/pdf/bid-packet.ts`).
+   Individually checked every constituent CVE (not just trusted the
+   severity label): all of them require a specific jsPDF method this
+   app never calls — `addImage`, `.html()`, `addFont`, `addSvgAsImage`,
+   `addJS`, `AcroForm*`, `link`/`textWithLink`, `addMetadata`. Grepped
+   every `doc.*` call site in both files: only plain text/table/shape
+   primitives (`text`, `setFont`, `rect`, `line`, `autoTable`, etc.) are
+   actually used. Real risk today: low. Real residual risk: a future
+   change could add a call to one of those methods without whoever
+   writes it knowing this history — worth a deliberate major-version
+   upgrade (with its own real testing pass against the actual generated
+   PDFs) at some point, not an emergency. The two other CVEs in the same
+   audit pass (dompurify, postcss) were fixed for real via `overrides`
+   without any breaking bump — see the `fix:` commit from this date.
+
+10. **19 local commits, push/deploy/migrations — CLOSED 2026-09-11,
     including a real production-only bug found and fixed along the
     way.** All 19 commits merged with the other session's work and
     pushed (`f1413a2..14f8688`, see `HANDOFF-2026-09-10.md`); Vercel
