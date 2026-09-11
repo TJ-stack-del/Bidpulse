@@ -84,16 +84,7 @@ non-action (see Known Issues / Recently Fixed, which includes real
    Script trigger set up per `scripts/README.md`, plus the real
    `INBOUND_BID_EMAIL_SECRET` in Vercel's **production** environment.
 
-4. **Systemic dark-mode elevation bug, flagged not fixed.**
-   `surface-container-lowest` — the token used by every card/modal in
-   the app — is *darker* than plain `surface` in dark mode, the opposite
-   of "elevated." Fixed narrowly for the login/reset-password cards
-   only; every other card/modal (e.g. `ConfirmDeleteDialog.tsx`) still
-   has the same backwards-in-dark-mode issue. Not urgent — a broader
-   design-token pass someday, not a one-off patch each time it's
-   separately noticed.
-
-5. **Golden-set regression check for the "never invent facts"
+4. **Golden-set regression check for the "never invent facts"
    guarantee — needs real design time, not a quick add.** LLM outputs
    are non-deterministic, so a literal diff-against-expected-text script
    would be fragile and fail on harmless wording variation, not just
@@ -104,7 +95,7 @@ non-action (see Known Issues / Recently Fixed, which includes real
    repeatedly. Existing fixtures in `test-fixtures/` are a reasonable
    starting point.
 
-6. **Backup/disaster-recovery plan — Mike's own check, not a code
+5. **Backup/disaster-recovery plan — Mike's own check, not a code
    task.** Log into the Supabase dashboard for `bidpulse-production` →
    Settings → Backups, confirm what's actually available on the current
    plan tier, decide whether to upgrade given real client data now
@@ -112,19 +103,19 @@ non-action (see Known Issues / Recently Fixed, which includes real
    scheduled GitHub Action running `supabase db dump`, storing the
    result in a private repo) without requiring a plan upgrade.
 
-7. **Error monitoring and alerting — needs Mike to create a Sentry
+6. **Error monitoring and alerting — needs Mike to create a Sentry
    account first.** Sign up at sentry.io, choose Next.js, get a DSN
    key, hand it to a future session to wire in `@sentry/nextjs`. Not a
    code task until the DSN exists.
 
-8. **`client_reported_submitted_at` column — minor schema-tidiness
+7. **`client_reported_submitted_at` column — minor schema-tidiness
    item, not blocking anything.** Kept on `submissions` by Mike's
    explicit call even though the client-facing "I've submitted this"
    button itself was removed. A drop migration was written and
    verified safe but paused rather than pushed same-session. Nothing
    in the app reads or writes it either way.
 
-9. **Admin UI toggle for `is_test` — built, one click-through
+8. **Admin UI toggle for `is_test` — built, one click-through
    verification still needed.** Real finding while setting up a
    disposable test client to verify a production fix: nothing in the
    app ever wrote `is_test: true` anywhere, including the intake
@@ -138,7 +129,7 @@ non-action (see Known Issues / Recently Fixed, which includes real
    toggle, confirm the DB write) — worth doing before calling this
    fully closed.
 
-10. **19 local commits, push/deploy/migrations — CLOSED 2026-09-11,
+9. **19 local commits, push/deploy/migrations — CLOSED 2026-09-11,
     including a real production-only bug found and fixed along the
     way.** All 19 commits merged with the other session's work and
     pushed (`f1413a2..14f8688`, see `HANDOFF-2026-09-10.md`); Vercel
@@ -192,6 +183,27 @@ non-action (see Known Issues / Recently Fixed, which includes real
 
 
 ## Confirmed Working (tested with real evidence, not just "reported done")
+- **Systemic dark-mode elevation bug — CLOSED 2026-09-11, fixed
+  everywhere, not just the login/reset-password cards.** Root cause:
+  `surface-container-lowest`'s dark-mode value (52) is literally darker
+  than plain `surface` (80) — the opposite of "elevated" — while the
+  same token name is correctly the lightest tier in the light ramp (the
+  two ramps were authored independently against separate Stitch design
+  passes and ended up structurally inverted between themes). Applied
+  the `dark:bg-surface-container-low` override (the pattern already
+  used for login/reset-password) to every remaining card/modal across
+  24 files, including `ConfirmDeleteDialog.tsx` specifically. Also
+  fixed a second-order issue the blanket fix would otherwise have
+  introduced: several elements nest a plain `bg-surface-container-low`
+  directly inside a container now overridden to `dark:...-low` — table
+  theads, status badges, hover states, and `SubmissionCard`'s inner
+  detail boxes all got bumped one tier further
+  (`dark:bg-surface-container`) to preserve the same nesting
+  distinction in dark mode that already existed correctly in light
+  mode. Verified with real dark-mode screenshots (pricing and gallery
+  pages) and a real authenticated admin session triggering
+  `ConfirmDeleteDialog` — both show correct elevation now, not just a
+  passing build. `tsc --noEmit` and `next build` both clean.
 - **Landing page "Trades we work with" copy fix — built and verified.**
   Added honest copy below the trade grid (`app/page.tsx`): "We're
   deepest in these four — but if you're in a related trade, go ahead
