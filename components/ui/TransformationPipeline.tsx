@@ -52,9 +52,8 @@ const DELIVERABLE_LABELS = ["Capability statement", "Compliance matrix", "Techni
 // tailwind.config.ts's own "-fixed" tokens already use elsewhere.
 //
 // One component rather than several independent pieces, because its
-// effects need to read as one continuous system: the left card's scan
-// beam runs its own 4s loop, while the flying document sheets and the
-// READY badges' breathing glow share a separate 2.8s loop (see
+// effects need to read as one continuous system: the flying document
+// sheets and the READY badges' breathing glow share a 10s loop (see
 // globals.css's tp-* keyframes) -- components mounted independently
 // would each start their own clock at a slightly different moment.
 // useInView pauses everything off-screen (via a `data-tp-paused`
@@ -207,14 +206,6 @@ export function TransformationPipeline() {
           className="relative z-10 overflow-hidden rounded-xl p-space-base sm:p-6 shadow-inner"
           style={{ backgroundColor: "#0f172a", border: "1px solid #4c051d66" }}
         >
-          <div
-            className={tp("absolute top-0 bottom-0 w-[3px] pointer-events-none", "tp-scan-beam")}
-            style={{
-              background: "linear-gradient(to bottom, transparent, rgba(245, 158, 11, 0.9), transparent)",
-              boxShadow: "0 0 12px 2px rgba(245, 158, 11, 0.6)",
-            }}
-            aria-hidden="true"
-          />
           <div className="flex items-center justify-between gap-2 mb-3 text-xs">
             <span
               className="rounded px-2 py-0.5 font-bold tracking-wider text-[11px]"
@@ -241,11 +232,8 @@ export function TransformationPipeline() {
             ].map((line, i) => (
               <span
                 key={i}
-                className={tp(`h-2 rounded ${line.width}`, "tp-line")}
-                style={{
-                  backgroundColor: line.color,
-                  ...(animating ? { animationDelay: `${i * 0.1}s` } : {}),
-                }}
+                className={`h-2 rounded ${line.width}`}
+                style={{ backgroundColor: line.color }}
               />
             ))}
           </div>

@@ -178,16 +178,12 @@ body {
 }
 
 /* Landing page "Transformation pipeline" card (components/ui/
-   TransformationPipeline.tsx). Two independent shared cycles rather than
-   one — the left-card scan (4s) and the flying-document handoff (2.8s,
-   two sheets offset by half a cycle so one is always in flight) tell
-   different parts of the story and don't need to land on the same beat.
-   Plain CSS keyframes on a shared duration stay in sync natively (all
-   mount at once, same clock) without needing a JS ticker to coordinate
-   them. `.tp-anim` elements get paused via `[data-tp-paused="true"]
-   .tp-anim` (the component toggles this off-screen, via useInView)
-   rather than removed, so resuming doesn't restart every element from a
-   different phase. */
+   TransformationPipeline.tsx). Plain CSS keyframes on a shared duration
+   stay in sync natively (all mount at once, same clock) without needing
+   a JS ticker to coordinate them. `.tp-anim` elements get paused via
+   `[data-tp-paused="true"] .tp-anim` (the component toggles this
+   off-screen, via useInView) rather than removed, so resuming doesn't
+   restart every element from a different phase. */
 [data-tp-paused="true"] .tp-anim {
   animation-play-state: paused;
 }
@@ -205,36 +201,15 @@ body {
    (fill-mode included) to its initial value, so a same-specificity
    longhand rule earlier in the file loses regardless of source order. */
 
-@keyframes tp-scan-beam {
-  0%, 100% { left: -3%; opacity: 0; }
-  4% { opacity: 1; }
-  26% { opacity: 1; }
-  30% { left: 101%; opacity: 0; }
-}
-.tp-scan-beam {
-  animation: tp-scan-beam 4s ease-in-out infinite backwards;
-}
-
-@keyframes tp-line-scanned {
-  0%, 6% { opacity: 0.4; filter: brightness(0.75) saturate(0.7); transform: translateX(0); }
-  9% { opacity: 1; filter: brightness(1.2) saturate(1.1); transform: translateX(-1px); }
-  10% { transform: translateX(1px); }
-  11% { transform: translateX(0); }
-  16%, 92% { opacity: 0.9; filter: brightness(1) saturate(1); }
-  100% { opacity: 0.4; filter: brightness(0.75) saturate(0.7); }
-}
-.tp-line {
-  animation: tp-line-scanned 4s ease-in-out infinite backwards;
-}
-
 /* Flying document sheets: peel off the left card, arc up and forward in
    3D space through the portal (the amber arrow), and land in the right
-   card. background-color/border-color are animated directly in the same
-   keyframe as the position/rotation -- CSS interpolates color changes
+   card -- no rotation, just position/depth/scale, so the sheet never
+   flips edge-on. background-color/border-color are animated directly in
+   the same keyframe as the position -- CSS interpolates color changes
    smoothly on its own, so the "morph" from raw to clean is a real color
    transition, not a cross-fade of two differently-colored copies. The
    two text layers (tp-sheet-raw / tp-sheet-clean) stacked inside DO
-   cross-fade via opacity, timed to the same 42-50% window the shell's
+   cross-fade via opacity, timed to the same 21-25% window the shell's
    color finishes changing in, so the label swap reads as part of the
    same transformation instant. Colors are fixed hex, not this app's
    usual theme-reactive tokens -- deliberately, the same reasoning
@@ -266,17 +241,17 @@ body {
   0% {
     left: 12%;
     top: 50%;
-    transform: translate3d(0, 0, 0) rotateY(0deg) scale(0.35);
+    transform: translate3d(0, 0, 0) scale(0.35);
     opacity: 0;
     background-color: #1e293b;
     border-color: #fb7185;
   }
-  5% { opacity: 0.35; transform: translate3d(0, 0, 0) rotateY(0deg) scale(0.5); }
+  5% { opacity: 0.35; transform: translate3d(0, 0, 0) scale(0.5); }
   13% {
     left: 28%;
     top: 48%;
     opacity: 0.8;
-    transform: translate3d(0, -4px, 15px) rotateY(15deg) scale(0.85);
+    transform: translate3d(0, -4px, 15px) scale(0.85);
     background-color: #1e293b;
     border-color: #fb7185;
   }
@@ -284,14 +259,14 @@ body {
     left: 40%;
     top: 42%;
     opacity: 1;
-    transform: translate3d(0, -10px, 45px) rotateY(140deg) scale(1.15);
+    transform: translate3d(0, -10px, 45px) scale(1.15);
     background-color: #1e293b;
     border-color: #fb7185;
   }
   25% {
     left: 48%;
     top: 39%;
-    transform: translate3d(0, -12px, 55px) rotateY(180deg) scale(1.4);
+    transform: translate3d(0, -12px, 55px) scale(1.4);
     background-color: #064e3b;
     border-color: #34d399;
   }
@@ -299,7 +274,7 @@ body {
     left: 56%;
     top: 42%;
     opacity: 1;
-    transform: translate3d(0, -10px, 45px) rotateY(220deg) scale(1.15);
+    transform: translate3d(0, -10px, 45px) scale(1.15);
     background-color: #064e3b;
     border-color: #34d399;
   }
@@ -307,14 +282,14 @@ body {
     left: 70%;
     top: 48%;
     opacity: 0.8;
-    transform: translate3d(0, 0, 0) rotateY(300deg) scale(0.85);
+    transform: translate3d(0, 0, 0) scale(0.85);
     background-color: #064e3b;
     border-color: #34d399;
   }
   45% {
     left: 84%;
     top: 62%;
-    transform: translate3d(0, 0, 0) rotateY(355deg) scale(0.45);
+    transform: translate3d(0, 0, 0) scale(0.45);
     opacity: 0.4;
     background-color: #064e3b;
     border-color: #34d399;
@@ -323,7 +298,7 @@ body {
     left: 88%;
     top: 62%;
     opacity: 0;
-    transform: translate3d(0, 0, 0) rotateY(360deg) scale(0.2);
+    transform: translate3d(0, 0, 0) scale(0.2);
     background-color: #064e3b;
     border-color: #34d399;
   }
@@ -376,8 +351,6 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tp-scan-beam,
-  .tp-line,
   .tp-sheet,
   .tp-sheet-raw,
   .tp-sheet-clean,
