@@ -123,27 +123,25 @@ export function TransformationPipeline() {
             styling to clean-package styling as they cross the portal,
             and land in the right card. lg: and up only, per spec --
             mobile/tablet keep the plain stacked layout with no 3D
-            layer at all. Each sheet's own flight fills the first half
-            of the shared 10s cycle (see globals.css's tp-sheet-flight),
-            then sits idle+invisible for the second half -- the second
-            sheet is delayed by exactly half that cycle, so the two
-            genuinely take turns (one finishes landing, then the other
-            starts) rather than both being mid-flight at once. Each
-            shows a different real deliverable's own before/after
-            rather than identical generic content. Not removed for
-            prefers-reduced-motion (rather than frozen mid-transform at
-            a random, potentially confusing pose). */}
+            layer at all. Both sheets share the same 4.2s cycle
+            (globals.css's tp-sheet-flight), the second delayed by only
+            1.4s -- matching the reference preview's literal timing, so
+            the two are often mid-flight at once rather than strictly
+            taking turns. Each shows a different real deliverable's own
+            before/after rather than identical generic content. Not
+            removed for prefers-reduced-motion (rather than frozen
+            mid-transform at a random, potentially confusing pose). */}
         {!reduceMotion && (
           <div
             className="hidden lg:block absolute inset-0 z-30 pointer-events-none [perspective:1200px]"
             aria-hidden="true"
           >
             {SHEETS.map((sheet, i) => {
-              const delay = i * 5;
+              const delay = i * 1.4;
               return (
                 <div
                   key={sheet.cleanLabel}
-                  className="tp-anim tp-sheet absolute w-36 h-40 sm:w-40 sm:h-44 rounded-lg border-2 shadow-2xl [transform-style:preserve-3d]"
+                  className="tp-anim tp-sheet absolute w-48 h-56 rounded-lg border-2 shadow-2xl [transform-style:preserve-3d]"
                   style={{ animationDelay: `${delay}s` }}
                 >
                   {/* Raw face */}

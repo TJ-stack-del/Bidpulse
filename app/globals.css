@@ -203,131 +203,92 @@ body {
 
 /* Flying document sheets: peel off the left card, arc up and forward in
    3D space through the portal (the amber arrow), and land in the right
-   card -- no rotation, just position/depth/scale, so the sheet never
-   flips edge-on. background-color/border-color are animated directly in
-   the same keyframe as the position -- CSS interpolates color changes
-   smoothly on its own, so the "morph" from raw to clean is a real color
-   transition, not a cross-fade of two differently-colored copies. The
-   two text layers (tp-sheet-raw / tp-sheet-clean) stacked inside DO
-   cross-fade via opacity, timed to the same 21-25% window the shell's
-   color finishes changing in, so the label swap reads as part of the
-   same transformation instant. Colors are fixed hex, not this app's
+   card, picking up a natural in-flight paper tilt (rotateZ skew plus a
+   partial rotateY, not a full spin) along the way. background-color/
+   border-color are animated directly in the same keyframe as the
+   position -- CSS interpolates color changes smoothly on its own, so
+   the "morph" from raw to clean is a real color transition, not a
+   cross-fade of two differently-colored copies, and it passes through
+   a transitional slate/amber tint at 50% as it crosses the portal
+   rather than jumping straight from rose to green. The two text layers
+   (tp-sheet-raw / tp-sheet-clean) stacked inside DO cross-fade via
+   opacity, timed to the same 45-55% window the shell's color finishes
+   changing in, so the label swap reads as part of the same
+   transformation instant. Colors are fixed hex/rgba, not this app's
    usual theme-reactive tokens -- deliberately, the same reasoning
    tailwind.config.ts's own "-fixed" tokens document: a raw-vs-clean
    contrast this dramatic should look the same regardless of site theme,
    not wash out in light mode. */
 @keyframes tp-sheet-flight {
-  /* Percentages below are measured against the real rendered layout
-     (1280px viewport), not guessed: the left card occupies the
-     left ~41% of the grid, the right card the right ~41% (starting at
-     ~59%), leaving a real gap of only ~18 points in the middle for the
-     arrow -- much narrower than earlier drafts of this assumed. `top`
-     stays in a 37-50% band throughout (never the 0-25% band the
-     cards' own titles occupy) -- that vertical placement, not a small
-     peak scale, is what actually keeps this clear of the title text,
-     so the sheet can peak well above 1x scale without re-introducing
-     the original bug. Two real bugs caught on screen while first
-     tuning this: too-large a peak scale *and* too high a vertical arc
-     both put "TAILORED PACKAGE" directly over "...red Bid
-     Submission...age" -- only the arc height actually needed to
-     change.
-
-     The whole flight now lives in the FIRST HALF (0-50%) of this
-     keyframe, holding invisible at the landed end-state through the
-     second half (50-100%) -- see the .tp-sheet rule below for why: two
-     sheets sharing one long duration, offset by exactly half of it,
-     each active only in their own first half, means only one is ever
-     actually flying at a time instead of both overlapping mid-air. */
+  /* left/top percentages are measured against the real rendered layout,
+     not guessed: `top` stays in a 39-62% band throughout (never the
+     0-25% band the cards' own titles occupy) -- that vertical
+     placement is what keeps this clear of the title text. The two
+     sheets share one 4.2s cycle offset by only 1.4s (see .tp-sheet
+     below), so they're often mid-flight at once by design -- matching
+     the reference preview's timing exactly rather than the strict
+     one-at-a-time alternation an earlier pass used. */
   0% {
     left: 12%;
     top: 50%;
-    transform: translate3d(0, 0, 0) scale(0.35);
+    transform: translate3d(0, 0, 0) rotateZ(-4deg) rotateY(0deg) scale(1);
     opacity: 0;
     background-color: #1e293b;
-    border-color: #fb7185;
+    border-color: rgba(244, 63, 94, 0.4);
   }
-  5% { opacity: 0.35; transform: translate3d(0, 0, 0) scale(0.5); }
-  13% {
-    left: 28%;
-    top: 48%;
-    opacity: 0.8;
-    transform: translate3d(0, -4px, 15px) scale(0.85);
-    background-color: #1e293b;
-    border-color: #fb7185;
-  }
-  20% {
-    left: 40%;
-    top: 42%;
-    opacity: 1;
-    transform: translate3d(0, -10px, 45px) scale(1.15);
-    background-color: #1e293b;
-    border-color: #fb7185;
-  }
-  25% {
-    left: 48%;
+  10% { opacity: 1; }
+  40% {
+    left: 41%;
     top: 39%;
-    transform: translate3d(0, -12px, 55px) scale(1.4);
-    background-color: #064e3b;
-    border-color: #34d399;
+    transform: translate3d(0, -10px, 90px) rotateZ(14deg) rotateY(40deg) scale(1.08);
+    background-color: #1e293b;
+    border-color: rgba(244, 63, 94, 0.7);
+    box-shadow: 0 20px 30px rgba(0, 0, 0, 0.6);
   }
-  30% {
-    left: 56%;
-    top: 42%;
-    opacity: 1;
-    transform: translate3d(0, -10px, 45px) scale(1.15);
-    background-color: #064e3b;
-    border-color: #34d399;
+  50% {
+    background-color: #0f172a;
+    border-color: rgba(245, 158, 11, 0.9);
   }
-  37% {
-    left: 70%;
+  70% {
+    left: 76%;
     top: 48%;
-    opacity: 0.8;
-    transform: translate3d(0, 0, 0) scale(0.85);
+    transform: translate3d(0, 0, 40px) rotateZ(-5deg) rotateY(15deg) scale(0.96);
     background-color: #064e3b;
-    border-color: #34d399;
+    border-color: rgba(52, 211, 153, 0.8);
+    box-shadow: 0 15px 25px rgba(16, 185, 129, 0.25);
   }
-  45% {
-    left: 84%;
-    top: 62%;
-    transform: translate3d(0, 0, 0) scale(0.45);
-    opacity: 0.4;
-    background-color: #064e3b;
-    border-color: #34d399;
-  }
-  50%, 100% {
+  90% { opacity: 1; }
+  100% {
     left: 88%;
     top: 62%;
+    transform: translate3d(0, 0, 0) rotateZ(0deg) rotateY(0deg) scale(0.92);
     opacity: 0;
-    transform: translate3d(0, 0, 0) scale(0.2);
     background-color: #064e3b;
-    border-color: #34d399;
+    border-color: rgba(52, 211, 153, 0.8);
   }
 }
-/* One shared 10s cycle (a real slowdown from the previous 2.8s flight,
-   on top of now taking turns instead of overlapping): each sheet's own
-   flight fills the first 5s of its cycle (the keyframe's 0-50%), then
-   sits idle+invisible for the remaining 5s. The second sheet is
-   delayed by exactly half the cycle (5s), so it starts flying the
-   moment the first one finishes landing, not before -- true
-   alternation, not just two overlapping loops slowed down together. */
+/* One shared 4.2s cycle, the second sheet offset by 1.4s -- matching
+   the reference preview's literal timing, which means the two sheets
+   spend most of each cycle mid-flight simultaneously rather than
+   strictly taking turns. */
 .tp-sheet {
-  animation: tp-sheet-flight 10s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite backwards;
+  animation: tp-sheet-flight 4.2s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite backwards;
 }
 
 @keyframes tp-sheet-raw-label {
-  0%, 21% { opacity: 1; }
-  25%, 100% { opacity: 0; }
+  0%, 45% { opacity: 1; }
+  55%, 100% { opacity: 0; }
 }
 .tp-sheet-raw {
-  animation: tp-sheet-raw-label 10s ease-in-out infinite backwards;
+  animation: tp-sheet-raw-label 4.2s ease-in-out infinite backwards;
 }
 
 @keyframes tp-sheet-clean-label {
-  0%, 21% { opacity: 0; }
-  25%, 100% { opacity: 1; }
+  0%, 45% { opacity: 0; }
+  55%, 100% { opacity: 1; }
 }
 .tp-sheet-clean {
-  animation: tp-sheet-clean-label 10s ease-in-out infinite backwards;
+  animation: tp-sheet-clean-label 4.2s ease-in-out infinite backwards;
 }
 
 /* Header status dot -- Tailwind's own animate-ping utility isn't used
