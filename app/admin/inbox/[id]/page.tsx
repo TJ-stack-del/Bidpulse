@@ -253,7 +253,7 @@ export default async function AdminSubmissionDetailPage({
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
         <div className="lg:col-span-2 flex flex-col gap-6">
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
+          <div className="bg-surface-container-lowest dark:bg-surface-container-low border border-outline-variant rounded-xl p-6">
             <h2 className="text-title-lg text-primary mb-4 flex items-center gap-2">
               <span className="material-symbols-outlined text-primary text-[20px]">info</span>
               Bid details
@@ -288,7 +288,7 @@ export default async function AdminSubmissionDetailPage({
             <SubmissionDocuments submissionId={submission.id} />
           </div>
 
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
+          <div className="bg-surface-container-lowest dark:bg-surface-container-low border border-outline-variant rounded-xl p-6">
             <h2 className="text-title-lg text-primary mb-4 flex items-center gap-2">
               <span className="material-symbols-outlined text-primary text-[20px]">person</span>
               Client info
@@ -396,7 +396,7 @@ export default async function AdminSubmissionDetailPage({
         </div>
 
         <div className="flex flex-col gap-6">
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
+          <div className="bg-surface-container-lowest dark:bg-surface-container-low border border-outline-variant rounded-xl p-6">
             <h3 className="text-title-lg text-primary mb-4 flex items-center gap-2">
               <span className="material-symbols-outlined text-primary text-[20px]">admin_panel_settings</span>
               Status
@@ -416,7 +416,7 @@ export default async function AdminSubmissionDetailPage({
             </div>
           </div>
 
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
+          <div className="bg-surface-container-lowest dark:bg-surface-container-low border border-outline-variant rounded-xl p-6">
             <h3 className="text-title-lg text-primary mb-4 flex items-center gap-2">
               <span className="material-symbols-outlined text-primary text-[20px]">travel_explore</span>
               Fit check
@@ -498,9 +498,9 @@ export default async function AdminSubmissionDetailPage({
           <span className="material-symbols-outlined text-on-surface-variant text-[20px]">history</span>
           Audit log
         </h2>
-        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-x-auto">
+        <div className="bg-surface-container-lowest dark:bg-surface-container-low border border-outline-variant rounded-xl overflow-x-auto">
           <table className="w-full text-left border-collapse text-body-sm">
-            <thead className="bg-surface-container-low border-b border-outline-variant">
+            <thead className="bg-surface-container-low dark:bg-surface-container border-b border-outline-variant">
               <tr>
                 <th className="py-3 px-4 text-label-sm text-on-surface-variant uppercase tracking-wider">Timestamp</th>
                 <th className="py-3 px-4 text-label-sm text-on-surface-variant uppercase tracking-wider">By</th>

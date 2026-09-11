@@ -18,7 +18,7 @@ export default function ContactPage() {
       </section>
 
       <section className="max-w-xl mx-auto w-full">
-        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 md:p-8">
+        <div className="bg-surface-container-lowest dark:bg-surface-container-low border border-outline-variant rounded-xl p-6 md:p-8">
           <ContactForm />
         </div>
       </section>

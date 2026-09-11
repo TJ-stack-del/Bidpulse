@@ -249,7 +249,7 @@ function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-space-base items-center">
             {/* Left: incoming RFP */}
-            <div className="bg-surface-container-lowest rounded-lg p-space-base flex flex-col gap-space-sm text-left">
+            <div className="bg-surface-container-lowest dark:bg-surface-container-low rounded-lg p-space-base flex flex-col gap-space-sm text-left">
               <div className="flex items-center justify-between gap-2">
                 <span className="px-2 py-0.5 rounded bg-error-container/30 text-error text-label-sm font-bold uppercase tracking-wider">
                   Incoming raw RFP
@@ -282,7 +282,7 @@ function Home() {
             </div>
 
             {/* Right: ready package */}
-            <div className="bg-surface-container-lowest rounded-lg p-space-base flex flex-col gap-space-sm text-left">
+            <div className="bg-surface-container-lowest dark:bg-surface-container-low rounded-lg p-space-base flex flex-col gap-space-sm text-left">
               <div className="flex items-center justify-between gap-2">
                 <span className="px-2 py-0.5 rounded bg-secondary-container text-on-secondary-container text-label-sm font-bold uppercase tracking-wider">
                   Ready to submit

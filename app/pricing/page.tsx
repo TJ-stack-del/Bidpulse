@@ -54,7 +54,7 @@ export default function PricingPage() {
         {PACKAGES.map((pkg) => (
           <article
             key={pkg.type}
-            className={`bg-surface-container-lowest rounded-lg p-gutter flex flex-col gap-6 relative overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg ${
+            className={`bg-surface-container-lowest dark:bg-surface-container-low rounded-lg p-gutter flex flex-col gap-6 relative overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg ${
               pkg.highlight
                 ? "border border-primary shadow-md md:-translate-y-2"
                 : "border border-outline-variant hover:border-primary/50"
@@ -83,7 +83,7 @@ export default function PricingPage() {
               className={`py-3 px-4 rounded text-label-md text-center transition active:scale-[0.97] ${
                 pkg.highlight
                   ? "bg-primary-container text-on-primary-container hover:opacity-90"
-                  : "bg-surface-container-low text-on-surface border border-outline hover:bg-surface-container-high"
+                  : "bg-surface-container-low dark:bg-surface-container text-on-surface border border-outline hover:bg-surface-container-high"
               }`}
             >
               {pkg.cta.label}

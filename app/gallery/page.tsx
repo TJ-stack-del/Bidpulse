@@ -86,7 +86,7 @@ export default function GalleryPage() {
         {EXAMPLES.map((ex) => (
           <div
             key={ex.trade}
-            className="bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden flex flex-col transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-primary/50"
+            className="bg-surface-container-lowest dark:bg-surface-container-low border border-outline-variant rounded-lg overflow-hidden flex flex-col transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-primary/50"
           >
             <div className={`h-32 flex items-center justify-center ${ex.accent}`}>
               <span className="material-symbols-outlined text-[40px]">{ex.icon}</span>
@@ -94,7 +94,7 @@ export default function GalleryPage() {
             <div className="p-gutter flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <h2 className="text-label-md text-on-surface-variant uppercase tracking-wider">{ex.trade}</h2>
-                <span className="text-[10px] px-2 py-0.5 rounded border border-outline-variant bg-surface-container-low text-on-surface-variant font-bold uppercase">
+                <span className="text-[10px] px-2 py-0.5 rounded border border-outline-variant bg-surface-container-low dark:bg-surface-container text-on-surface-variant font-bold uppercase">
                   Sample
                 </span>
               </div>
