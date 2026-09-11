@@ -177,6 +177,84 @@ body {
   animation: fade-in 0.25s ease-out;
 }
 
+/* Landing page "Transformation pipeline" card (components/ui/
+   TransformationPipeline.tsx) — one shared 4s cycle across three zones
+   (scan the left card, travel the center conduit, stamp the right card)
+   so the whole thing reads as one continuous system rather than three
+   independently-timed loops. Plain CSS keyframes on a shared duration
+   stay in sync natively (all mount at once, same clock) without needing
+   a JS ticker to coordinate them. `.tp-anim` elements get paused via
+   `[data-tp-paused="true"] .tp-anim` (the component toggles this off-
+   screen, via IntersectionObserver) rather than removed, so resuming
+   doesn't restart every element from a different phase.
+   Percentages below are that shared 4s cycle:
+   0-30%   scan beam sweeps the left card, lines light up as it passes
+   28-64%  glowing pulses travel the center conduit
+   55-100% right-card rows "stamp" in and their READY badge flashes */
+[data-tp-paused="true"] .tp-anim {
+  animation-play-state: paused;
+}
+
+@keyframes tp-scan-beam {
+  0%, 100% { left: -3%; opacity: 0; }
+  4% { opacity: 1; }
+  26% { opacity: 1; }
+  30% { left: 101%; opacity: 0; }
+}
+.tp-scan-beam {
+  animation: tp-scan-beam 4s ease-in-out infinite;
+}
+
+@keyframes tp-line-scanned {
+  0%, 6% { opacity: 0.4; filter: brightness(0.75) saturate(0.7); transform: translateX(0); }
+  9% { opacity: 1; filter: brightness(1.2) saturate(1.1); transform: translateX(-1px); }
+  10% { transform: translateX(1px); }
+  11% { transform: translateX(0); }
+  16%, 92% { opacity: 0.9; filter: brightness(1) saturate(1); }
+  100% { opacity: 0.4; filter: brightness(0.75) saturate(0.7); }
+}
+.tp-line {
+  animation: tp-line-scanned 4s ease-in-out infinite;
+}
+
+@keyframes tp-pulse-travel {
+  0%, 28% { left: 0%; opacity: 0; }
+  32% { opacity: 1; }
+  62% { left: 97%; opacity: 1; }
+  66%, 100% { left: 97%; opacity: 0; }
+}
+.tp-pulse-dot {
+  animation: tp-pulse-travel 4s ease-in-out infinite;
+}
+
+@keyframes tp-stamp-in {
+  0%, 53% { opacity: 0.55; transform: translateY(3px) scale(0.99); }
+  62% { opacity: 1; transform: translateY(-1px) scale(1.02); }
+  70%, 100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.tp-row {
+  animation: tp-stamp-in 4s ease-in-out infinite;
+}
+
+@keyframes tp-badge-flash {
+  0%, 58% { transform: scale(1); filter: brightness(1); }
+  65% { transform: scale(1.05); filter: brightness(1.3); }
+  74%, 100% { transform: scale(1); filter: brightness(1); }
+}
+.tp-badge {
+  animation: tp-badge-flash 4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tp-scan-beam,
+  .tp-line,
+  .tp-pulse-dot,
+  .tp-row,
+  .tp-badge {
+    animation: none !important;
+  }
+}
+
 
 /* Per-tier font family for the named type scale (tailwind.config.ts
    fontSize) — see the comment there: Tailwind's text-* utility can't carry

@@ -5,8 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { MarketingShell } from "@/components/ui/MarketingShell";
 import { KNOWN_TRADES, assertNoMissingTradeCards } from "@/lib/compliance/known-trades";
 import { FaqAccordion } from "@/app/faq/FaqAccordion";
-import { DeliverableRowsReveal } from "@/components/ui/DeliverableRowsReveal";
-import { PipelineArrow } from "@/components/ui/PipelineArrow";
+import { TransformationPipeline } from "@/components/ui/TransformationPipeline";
 
 export const metadata: Metadata = {
   description: "We help you win local government contracts. Send us the bid papers — our team handles the paperwork so you can send in a strong bid.",
@@ -227,81 +226,7 @@ function Home() {
           ))}
         </div>
 
-        {/* Transformation pipeline card: messy RFP in, clean 3-file package
-            out — same idea as the "before/after" panel in the printed
-            deliverable itself (see lib/pdf/deliverables-packet.ts), just
-            rendered live. Deliberately illustrative-only labels throughout
-            (generic "Sample Solicitation", no named agency/client) — same
-            discipline the Gallery page's own "synthetic samples only"
-            notice already applies. The 3 package rows are the real core
-            deliverable types (capability_statement/compliance_matrix/
-            technical_narrative); the 48h figure is the same real internal
-            turnaround target app/api/daily-digest/route.ts already tracks. */}
-        <div className="w-full max-w-4xl bg-surface-container-low rounded-xl shadow-lg p-space-base md:p-8 flex flex-col gap-space-base mt-8">
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <span className="text-label-sm font-code text-tertiary uppercase tracking-wide flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-primary" aria-hidden="true" />
-              Transformation pipeline: RFP spec to ready-to-send packet
-            </span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container text-label-sm font-bold">
-              <span className="material-symbols-outlined text-[16px]">check_circle</span>
-              Turnaround: 48 hours
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-space-base items-center">
-            {/* Left: incoming RFP */}
-            <div className="bg-surface-container-lowest dark:bg-surface-container-low rounded-lg p-space-base flex flex-col gap-space-sm text-left">
-              <div className="flex items-center justify-between gap-2">
-                <span className="px-2 py-0.5 rounded bg-error-container/30 text-error text-label-sm font-bold uppercase tracking-wider">
-                  Incoming raw RFP
-                </span>
-                <span className="text-label-sm text-on-surface-variant">Sample PDF</span>
-              </div>
-              <h3 className="text-title-lg text-on-surface font-bold">Sample Solicitation</h3>
-              <p className="text-body-sm text-on-surface-variant">
-                Dense procurement language, buried insurance covenants, prevailing wage rate sheets, bonding
-                certifications, and confusing submission checklists.
-              </p>
-              <div className="border border-outline-variant rounded p-2 flex flex-col gap-1.5">
-                <span className="h-1.5 rounded bg-outline-variant w-full" />
-                <span className="h-1.5 rounded bg-outline-variant w-4/5" />
-                <span className="h-1.5 rounded bg-primary/60 w-3/5" />
-                <span className="h-1.5 rounded bg-error/60 w-2/5" />
-              </div>
-              <div className="flex items-center flex-wrap gap-2 text-label-sm">
-                <span className="px-2 py-0.5 rounded bg-primary-container text-on-primary-container font-bold uppercase tracking-wider">
-                  Needs review
-                </span>
-                <span className="px-2 py-0.5 rounded bg-error-container/20 text-error font-bold uppercase tracking-wider">
-                  Prevailing wage flagged
-                </span>
-              </div>
-            </div>
-
-            {/* Middle: arrow */}
-            <div className="flex md:flex-col items-center justify-center gap-2 py-1">
-              <PipelineArrow />
-              <span className="text-label-sm text-on-surface-variant font-code whitespace-nowrap">BidPulse Pipeline</span>
-            </div>
-
-            {/* Right: ready package */}
-            <div className="bg-surface-container-lowest dark:bg-surface-container-low rounded-lg p-space-base flex flex-col gap-space-sm text-left">
-              <div className="flex items-center justify-between gap-2">
-                <span className="px-2 py-0.5 rounded bg-secondary-container text-on-secondary-container text-label-sm font-bold uppercase tracking-wider">
-                  Ready to submit
-                </span>
-                <span className="text-label-sm text-on-surface-variant">3 clean files</span>
-              </div>
-              <h3 className="text-title-lg text-on-surface font-bold">Tailored Bid Submission Package</h3>
-              <DeliverableRowsReveal />
-              <div className="flex items-center justify-between text-label-sm">
-                <span className="text-primary font-bold">You submit it</span>
-                <span className="text-on-surface-variant">No jargon</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        <TransformationPipeline />
       </section>
 
       <section className="flex flex-col items-center gap-6">
