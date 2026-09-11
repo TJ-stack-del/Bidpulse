@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
 import { ConfirmDeleteDialog } from "@/components/ui/ConfirmDeleteDialog";
+import { RfpDocumentUpload, type ExtractedBidFields } from "@/components/ui/RfpDocumentUpload";
 import { useToast } from "@/components/Toast";
 
 type Match = {
@@ -78,6 +79,23 @@ export function MatchesPanel({
         return m.source_title.toLowerCase().includes(q) || m.source_agency.toLowerCase().includes(q);
       })
     : matches;
+
+  // Reuses the same extract-from-document route/component already built and
+  // verified for the intake wizard's "About the bid" step -- an admin
+  // logging a bid they found themselves is doing the same thing a client
+  // does at intake (typing agency/solicitation number/due date/scope out of
+  // a real RFP document by hand), so the same fix applies. Only fills a
+  // field the document actually stated -- never overwrites something
+  // already typed with a blank, and never invents a value that came back
+  // null. Title isn't part of ExtractedBidFields (a document rarely has a
+  // clean, distinct "title" the way it has an agency name or solicitation
+  // number) -- left as a manual field on purpose rather than guessing one.
+  function handleOpportunityExtracted(data: ExtractedBidFields) {
+    if (data.agency) setAgency(data.agency);
+    if (data.solicitationNumber) setSolicitationNumber(data.solicitationNumber);
+    if (data.dueDate) setDueDate(data.dueDate);
+    if (data.scope) setScope(data.scope);
+  }
 
   async function handleLogOpportunity(e: React.FormEvent) {
     e.preventDefault();
@@ -249,6 +267,7 @@ export function MatchesPanel({
           <span className="material-symbols-outlined text-primary text-[20px]">travel_explore</span>
           <h2 className="font-headline text-[18px] text-on-surface font-bold">Log an opportunity</h2>
         </div>
+        <RfpDocumentUpload onExtracted={handleOpportunityExtracted} />
         <div className="flex flex-col md:flex-row gap-space-base items-end flex-wrap">
           <div className="flex-1 min-w-[160px] flex flex-col gap-space-2xs">
             <label className="text-label-sm text-on-surface-variant font-bold uppercase tracking-wider">Title</label>
