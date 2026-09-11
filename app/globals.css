@@ -177,6 +177,39 @@ body {
   animation: fade-in 0.25s ease-out;
 }
 
+/* Landing page "Transformation pipeline" card (app/page.tsx) — ambient,
+   continuous loops (arrow float/glow, READY badge breathe), so plain
+   `animation: ... infinite` is enough; no scroll trigger needed. The
+   three deliverable rows' staggered reveal-on-scroll is separate (see
+   components/ui/DeliverableRowsReveal.tsx) since that one genuinely needs
+   an IntersectionObserver, not just CSS. */
+@keyframes pipeline-arrow-float {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(4px); }
+}
+@keyframes pipeline-arrow-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgb(var(--color-primary) / 0.35); }
+  50% { box-shadow: 0 0 0 7px rgb(var(--color-primary) / 0); }
+}
+.animate-pipeline-arrow {
+  animation: pipeline-arrow-float 2.6s ease-in-out infinite, pipeline-arrow-glow 2.6s ease-in-out infinite;
+}
+
+@keyframes ready-badge-breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.72; }
+}
+.animate-ready-badge {
+  animation: ready-badge-breathe 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pipeline-arrow,
+  .animate-ready-badge {
+    animation: none;
+  }
+}
+
 /* Per-tier font family for the named type scale (tailwind.config.ts
    fontSize) — see the comment there: Tailwind's text-* utility can't carry
    a fontFamily itself, so every display/headline/title text-* class gets

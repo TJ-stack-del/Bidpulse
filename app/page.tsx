@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { MarketingShell } from "@/components/ui/MarketingShell";
 import { KNOWN_TRADES, assertNoMissingTradeCards } from "@/lib/compliance/known-trades";
 import { FaqAccordion } from "@/app/faq/FaqAccordion";
+import { DeliverableRowsReveal } from "@/components/ui/DeliverableRowsReveal";
 
 export const metadata: Metadata = {
   description: "We help you win local government contracts. Send us the bid papers — our team handles the paperwork so you can send in a strong bid.",
@@ -189,13 +190,13 @@ function Home() {
           <span className="w-5 h-px bg-tertiary" aria-hidden="true" />
           Government bid prep · Jacksonville, FL
         </span>
-        <h1 className="text-display-lg text-primary max-w-3xl">
-          You run the crew. We handle <em className="italic text-tertiary">the paperwork</em>.
+        <h1 className="text-display-lg text-primary font-bold max-w-3xl">
+          You run the crew. We handle the paperwork.
         </h1>
         <p className="text-body-lg text-on-surface-variant max-w-xl">
-          Send us the bid. We turn it into a real capability statement, compliance
-          checklist, and technical narrative — ready for you to review and send. No
-          procurement jargon required.
+          Upload the RFP. We turn complex solicitations into a ready-to-submit capability
+          statement, compliance matrix, and technical narrative — so you can review, sign,
+          and send.
         </p>
         <div className="flex flex-wrap gap-4 justify-center mt-2">
           <Link
@@ -267,15 +268,19 @@ function Home() {
                 <span className="h-1.5 rounded bg-primary/60 w-3/5" />
                 <span className="h-1.5 rounded bg-error/60 w-2/5" />
               </div>
-              <div className="flex items-center justify-between text-label-sm">
-                <span className="text-primary font-bold">Needs review</span>
-                <span className="text-on-surface-variant">Prevailing wage flagged</span>
+              <div className="flex items-center flex-wrap gap-2 text-label-sm">
+                <span className="px-2 py-0.5 rounded bg-primary-container text-on-primary-container font-bold uppercase tracking-wider">
+                  Needs review
+                </span>
+                <span className="px-2 py-0.5 rounded bg-error-container/20 text-error font-bold uppercase tracking-wider">
+                  Prevailing wage flagged
+                </span>
               </div>
             </div>
 
             {/* Middle: arrow */}
             <div className="flex md:flex-col items-center justify-center gap-2 py-1">
-              <div className="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center shrink-0">
+              <div className="animate-pipeline-arrow w-12 h-12 rounded-full bg-primary-container flex items-center justify-center shrink-0">
                 <span className="material-symbols-outlined text-on-primary-container">arrow_forward</span>
               </div>
               <span className="text-label-sm text-on-surface-variant font-code whitespace-nowrap">BidPulse Pipeline</span>
@@ -290,19 +295,7 @@ function Home() {
                 <span className="text-label-sm text-on-surface-variant">3 clean files</span>
               </div>
               <h3 className="text-title-lg text-on-surface font-bold">Tailored Bid Submission Package</h3>
-              <div className="flex flex-col gap-1.5">
-                {["Capability statement", "Compliance matrix", "Technical narrative"].map((label, i) => (
-                  <div key={label} className="flex items-center justify-between bg-surface-container px-2.5 py-1.5 rounded">
-                    <span className="flex items-center gap-2 text-body-sm text-on-surface">
-                      <span className="font-code text-label-sm text-on-surface-variant">
-                        {String(i + 1).padStart(2, "0")}
-                      </span>
-                      {label}
-                    </span>
-                    <span className="text-label-sm text-secondary font-bold uppercase tracking-wider">Ready</span>
-                  </div>
-                ))}
-              </div>
+              <DeliverableRowsReveal />
               <div className="flex items-center justify-between text-label-sm">
                 <span className="text-primary font-bold">You submit it</span>
                 <span className="text-on-surface-variant">No jargon</span>
