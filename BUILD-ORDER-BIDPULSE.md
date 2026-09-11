@@ -62,14 +62,27 @@ This file tracks what's actually queued to work on next.
     list` that it's recorded as applied remotely before running
     `supabase db push`, and regenerate `schema.sql` after.
 16. **RFP extraction pipeline — new initiative, standalone
-    `rfp-extraction/` Python module, not part of this app-build-order
-    list's usual scope but worth tracking here since it's real,
-    ongoing work.** Phases 1 (admin-field regex) and 2 (section
-    segmentation) are built and verified with real evidence; Phase 3
-    (obligation harvesting — the part that actually reduces Mike's
-    review burden) and Phase 4 (table extraction) are not started. See
+    `rfp-extractor/` Python module (singular — the package that won a
+    2026-09-10 merge over an independent `rfp-extraction/` build from a
+    parallel session; see `HANDOFF-2026-09-10.md`), not part of this
+    app-build-order list's usual scope but worth tracking here since
+    it's real, ongoing work.** Phases 1 (admin-field regex) and 2
+    (section segmentation) are both built and verified with real
+    evidence against a real fixture (`test-fixtures/RFP-2026-0847-JANI.pdf`),
+    2026-09-11 commit `c3fea15` — Phase 2 was the losing session's
+    contribution, recovered from this checkout's own git history
+    (it was never lost, just deleted from HEAD by the merge) and ported
+    onto `rfp-extractor`'s actual conventions rather than copied
+    verbatim: a new `rules/section_synonyms.json` data file matching the
+    existing `admin_fields.json` pattern, dataclasses folded into the
+    shared `models.py`, and real `pytest` regression coverage
+    (`tests/test_sections.py`) for the three real bugs its original
+    evidence pass found, not just narrative writeup. Phase 3 (obligation
+    harvesting — the part that actually reduces Mike's review burden)
+    and Phase 4 (table extraction) are not started. See
     `PROJECT-STATUS.md`'s Confirmed Working entry and
-    `rfp-extraction/README.md` for detail and how to run it.
+    `rfp-extractor/README.md` / `rfp-extractor/evidence/phase2/README.md`
+    for detail and how to run it.
 
 ## Status as of 2026-09-05 (reconciled across two same-day sessions)
 The first 2026-09-05 session closed two real investigations in dev only
