@@ -138,32 +138,40 @@ non-action (see Known Issues / Recently Fixed, which includes real
    toggle, confirm the DB write) — worth doing before calling this
    fully closed.
 
-10. **19 local commits sitting unpushed on `main` — push, verify
-    migrations, and deploy before any of this counts as shipped.** See
-    the Deploy status line at the top for the full list and the
-    parallel-work risk with the other session's own redesign work.
-    Covers the entire Stitch "Industrial Precision" redesign
-    (`626cf4f`), Past Performance / placeholder-gate work, the
-    RFP-documents admin view, a compliance-matrix row editor that was
-    built *and then explicitly reverted* per Mike's own feedback (see
-    Known Issues — the file no longer exists, don't assume it does from
-    an older summary), the standalone RFP extraction pipeline's Phase 1
-    + Phase 2, and the City of Jacksonville scraper rewrite (drops
-    `@sparticuz/chromium` as a dependency entirely). One real
-    complication: the
-    `client_past_performance` table's migration
-    (`supabase/migrations/20260908130300_add_client_past_performance.sql`)
-    was already applied **directly against the live production
-    database** via the Supabase dashboard SQL editor — this session had
-    no `SUPABASE_ACCESS_TOKEN`/DB connection string, only a
-    service-role REST key, which can't run DDL — so schema is already
-    live in production *ahead of* the code that depends on it. That's
-    exactly the anti-pattern "How schema changes get made now" (above)
-    warns against; before pushing, run `supabase migration list` to
-    confirm this migration is recorded as applied remotely (it should
-    be, since the SQL matches the file verbatim) and regenerate
-    `schema.sql` to match once confirmed, rather than re-running
-    `supabase db push` blind.
+10. **19 local commits, push/deploy/migrations — CLOSED 2026-09-11,
+    including a real production-only bug found and fixed along the
+    way.** All 19 commits merged with the other session's work and
+    pushed (`f1413a2..14f8688`, see `HANDOFF-2026-09-10.md`); Vercel
+    confirmed serving the merged commit at `bidpulse.co`. Migration
+    verification took real digging: this checkout's `.env.local` turned
+    out to point at **`bidpulse-dev`** (`hvrwxcyqgjobrgpcequj`), not the
+    project `bidpulse.co` actually runs on
+    (**`bidpulse-production`**, `rixsgnbivayeaxbdseij`) — see `CLAUDE.md`
+    for the full rule this incident produced. Once checked against the
+    real project via an authenticated `supabase migration list`, every
+    migration *except* `client_past_performance`
+    (`20260908130300_add_client_past_performance.sql`) was already
+    applied. That migration's earlier "applied directly against
+    production via the dashboard SQL editor" note (previously logged
+    right here) was almost certainly against the wrong project too —
+    same root confusion. Fixing it for real surfaced a second, real bug:
+    the table already existed in `bidpulse-production` (confirmed once
+    `db push --include-all` hit `relation already exists`), but
+    PostgREST's schema cache didn't know about it
+    (`PGRST205` on a real `GET` against the table), meaning **every real
+    request touching Past Performance had been silently failing in
+    production** until a manual `NOTIFY pgrst, 'reload schema';` fixed
+    it. Migration bookkeeping repaired via `supabase migration repair
+    --status applied 20260908130300 --linked`. Verified end-to-end: a
+    real disposable-fixture Playwright test against dev confirmed the
+    `advance-if-deliverables-complete` placeholder guard works both
+    directions (blocks on a leftover `[ADD: ...]` bracket, advances to
+    `deliverables_ready` once clean, DB read-back confirmed the stage
+    change), and `supabase migration list` against
+    `bidpulse-production` now shows all 25 migrations with local ==
+    remote, zero mismatches. `schema.sql` regeneration against the real
+    production project is still outstanding — do that next, not from
+    dev.
 
 ### Business decisions (Mike's, not code tasks)
 - **Pricing as a deliberate throttle** — raising prices to intentionally
