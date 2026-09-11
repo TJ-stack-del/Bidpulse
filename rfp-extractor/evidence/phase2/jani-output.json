@@ -1,0 +1,189 @@
+{
+  "result": {
+    "headings": [
+      {
+        "text": "City of Jacksonville — Procurement Division",
+        "page_index": 0,
+        "printed_page_label": "1",
+        "font_size": 16.0,
+        "canonical_section": null,
+        "matched_via": "top_font_size",
+        "matched_pattern": null
+      },
+      {
+        "text": "Request for Proposals (RFP) No. RFP-2026-0847-JANI",
+        "page_index": 0,
+        "printed_page_label": "1",
+        "font_size": 12.5,
+        "canonical_section": null,
+        "matched_via": "top_font_size",
+        "matched_pattern": null
+      },
+      {
+        "text": "1. Scope of Work",
+        "page_index": 0,
+        "printed_page_label": "1",
+        "font_size": 12.5,
+        "canonical_section": "scope_of_work",
+        "matched_via": "top_font_size",
+        "matched_pattern": "^(\\d{1,2})\\.\\s+[A-Z]"
+      },
+      {
+        "text": "1.1 Day Porter Services (M–F, 7:00 AM–4:00 PM)",
+        "page_index": 0,
+        "printed_page_label": "1",
+        "font_size": 9.5,
+        "canonical_section": null,
+        "matched_via": "numbering_pattern",
+        "matched_pattern": "^(\\d{1,2})\\.\\d+(\\.\\d+)*\\s"
+      },
+      {
+        "text": "1.2 Night Shift Services (M–F, 6:00 PM–2:00 AM)",
+        "page_index": 0,
+        "printed_page_label": "1",
+        "font_size": 9.5,
+        "canonical_section": null,
+        "matched_via": "numbering_pattern",
+        "matched_pattern": "^(\\d{1,2})\\.\\d+(\\.\\d+)*\\s"
+      },
+      {
+        "text": "1.3 Periodic Care (Scheduled / Quarterly unless noted)",
+        "page_index": 0,
+        "printed_page_label": "1",
+        "font_size": 9.5,
+        "canonical_section": null,
+        "matched_via": "numbering_pattern",
+        "matched_pattern": "^(\\d{1,2})\\.\\d+(\\.\\d+)*\\s"
+      },
+      {
+        "text": "2. Evaluation Criteria (100 Points Total)",
+        "page_index": 0,
+        "printed_page_label": "1",
+        "font_size": 12.5,
+        "canonical_section": "evaluation_factors",
+        "matched_via": "top_font_size",
+        "matched_pattern": "^(\\d{1,2})\\.\\s+[A-Z]"
+      },
+      {
+        "text": "3. Minimum Qualification Requirements",
+        "page_index": 1,
+        "printed_page_label": "2",
+        "font_size": 12.5,
+        "canonical_section": "minimum_qualifications",
+        "matched_via": "top_font_size",
+        "matched_pattern": "^(\\d{1,2})\\.\\s+[A-Z]"
+      }
+    ],
+    "sections": [
+      {
+        "canonical_type": null,
+        "heading_text": null,
+        "start_page_index": 0,
+        "line_count": 23,
+        "preview": "MOCK DOCUMENT — TEST FIXTURE [SPECIMEN SOLICITATION — FICTIONAL AGENCY DATA] City of Jacksonville — Procurement Division Request for Proposals (RFP) No. RFP-2026-0847-JANI Janitorial & Custodial Servi"
+      },
+      {
+        "canonical_type": "scope_of_work",
+        "heading_text": "1. Scope of Work",
+        "start_page_index": 0,
+        "line_count": 16,
+        "preview": "The successful contractor shall provide comprehensive janitorial and custodial services across both facilities, organized into three service tiers: 1.1 Day Porter Services (M–F, 7:00 AM–4:00 PM) Restr"
+      },
+      {
+        "canonical_type": "evaluation_factors",
+        "heading_text": "2. Evaluation Criteria (100 Points Total)",
+        "start_page_index": 0,
+        "line_count": 20,
+        "preview": "Criterion Points What Evaluators Are Scoring Technical Approach & Work Plan 30 Cleaning methodology, quality-control plan, chemical/equipment standards, green-cleaning Staffing Plan & Key Personnel 20"
+      },
+      {
+        "canonical_type": "minimum_qualifications",
+        "heading_text": "3. Minimum Qualification Requirements",
+        "start_page_index": 1,
+        "line_count": 9,
+        "preview": "• Active Florida business registration (Sunbiz) in good standing • Minimum 3 years' continuous experience in commercial/institutional janitorial services • Current Commercial General Liability: $2,000"
+      }
+    ],
+    "unresolved": {
+      "unclassified_headings": [
+        {
+          "text": "City of Jacksonville — Procurement Division",
+          "page_index": 0
+        },
+        {
+          "text": "Request for Proposals (RFP) No. RFP-2026-0847-JANI",
+          "page_index": 0
+        },
+        {
+          "text": "1.1 Day Porter Services (M–F, 7:00 AM–4:00 PM)",
+          "page_index": 0
+        },
+        {
+          "text": "1.2 Night Shift Services (M–F, 6:00 PM–2:00 AM)",
+          "page_index": 0
+        },
+        {
+          "text": "1.3 Periodic Care (Scheduled / Quarterly unless noted)",
+          "page_index": 0
+        }
+      ]
+    }
+  },
+  "diagnostics": {
+    "document": {
+      "id": "sha256:36fe5246f5fee0c2606644677ff1e905c9f9f1adb22a16b9ad4d6a01ffe61ab7",
+      "filename": "RFP-2026-0847-JANI.pdf",
+      "byte_size": 6114,
+      "page_count": 2,
+      "pdf_metadata": {
+        "format": "PDF 1.4",
+        "title": "(anonymous)",
+        "author": "(anonymous)",
+        "subject": "(unspecified)",
+        "creator": "(unspecified)",
+        "producer": "ReportLab PDF Library - (opensource)",
+        "creationDate": "D:20260902022147+00'00'",
+        "modDate": "D:20260902022147+00'00'"
+      }
+    },
+    "quality": {
+      "status": "ok",
+      "native_pages": 2,
+      "ocr_pages": 0,
+      "suspect_pages": [],
+      "unreadable_pages": [],
+      "coverage_warnings": []
+    },
+    "ingest": {
+      "repeated_header_footer_blocks": 4,
+      "ocr_mode": "never",
+      "ocr_language": "eng",
+      "runtime_versions": {
+        "python": "3.12.1",
+        "pymupdf": "1.28.2",
+        "tesseract": null
+      },
+      "processing_limits": {
+        "max_file_bytes": 52428800,
+        "max_pages": 500,
+        "max_pdf_objects": 100000,
+        "max_page_area_points": 400000000,
+        "max_images_per_page": 500,
+        "max_image_rects_per_page": 1000,
+        "max_text_blocks_per_page": 20000,
+        "max_total_text_blocks": 100000,
+        "max_text_spans_per_page": 100000,
+        "max_total_text_characters": 10000000,
+        "max_ocr_pages": 100,
+        "max_ocr_pixels_per_page": 30000000,
+        "max_processing_seconds": 120.0,
+        "max_memory_bytes": 1500000000
+      }
+    },
+    "sections": {
+      "rule_set_version": "2026-09-09",
+      "rule_set_sha256": "95b73d66c5a28a25198fcc4c694ecbffabeb4886dc4db426469e6c456e14e597"
+    },
+    "native_pages_used": 2
+  }
+}

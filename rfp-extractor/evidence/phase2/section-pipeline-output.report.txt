@@ -1,0 +1,11 @@
+Section segmentation report -- section-pipeline-fixture.pdf
+============================================================
+3 headings detected, 2 classified, 1 unclassified.
+
+Sections found (3):
+  - (unclassified body / front matter) (2 lines, starts page index 0)
+  - scope_of_work -- "1. Scope of Work" (2 lines, starts page index 0)
+  - evaluation_factors -- "2. Evaluation Criteria" (1 lines, starts page index 0)
+
+1 heading(s) did NOT match any entry in rules/section_synonyms.json -- review these; if a real pattern emerges, add it as one new list entry, no code changes needed:
+  - page 0: "City of Example, Procurement Division"

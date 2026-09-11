@@ -1,0 +1,67 @@
+{
+  "version": "2026-09-09",
+  "sections": {
+    "instructions_to_offerors": [
+      "instructions to offerors",
+      "instructions, conditions",
+      "proposal submission requirements",
+      "proposal preparation instructions",
+      "how to submit",
+      "submission instructions",
+      "section l"
+    ],
+    "evaluation_factors": [
+      "evaluation factors",
+      "evaluation criteria",
+      "basis for award",
+      "method of award",
+      "award criteria",
+      "section m"
+    ],
+    "scope_of_work": [
+      "scope of work",
+      "statement of work",
+      "performance work statement",
+      "specifications",
+      "description of services",
+      "section c",
+      "scope of services",
+      "technical specifications"
+    ],
+    "supplies_and_prices": [
+      "supplies or services and prices",
+      "price schedule",
+      "schedule of items",
+      "clin",
+      "bid schedule",
+      "section b"
+    ],
+    "deliveries_performance": [
+      "deliveries or performance",
+      "period of performance",
+      "delivery schedule",
+      "section f"
+    ],
+    "contract_clauses": [
+      "contract clauses",
+      "far clauses",
+      "applicable clauses",
+      "section i"
+    ],
+    "representations_certifications": [
+      "representations and certifications",
+      "certifications and representations",
+      "reps and certs",
+      "section k"
+    ],
+    "attachments": ["list of attachments", "section j", "exhibits"],
+    "special_requirements": ["special contract requirements", "section h"],
+    "admin_data": ["contract administration data", "section g"],
+    "definitions": ["definitions", "terms used", "terms and definitions"],
+    "minimum_qualifications": [
+      "minimum qualification requirements",
+      "minimum qualifications",
+      "eligibility requirements"
+    ]
+  }
+}

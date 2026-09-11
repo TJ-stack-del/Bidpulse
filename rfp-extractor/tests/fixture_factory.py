@@ -195,6 +195,77 @@ def build_scanned_text_pdf(path: Path) -> Path:
     return path
 
 
+def build_multicolumn_pdf(path: Path) -> Path:
+    """Two four-line columns at the same four y-rows, a wide gap apart
+    (72 vs 320 on a 612-wide page -- well past the 12%-of-page-width
+    threshold `_reorder_if_multicolumn` requires). PyMuPDF's own
+    row-sorted text order interleaves the two columns row-by-row
+    (L1, R1, L2, R2, ...) even with `sort=True`, since that only orders
+    top-to-bottom-then-left-to-right across the *whole* page, not per
+    column -- exactly the raw order `extract_layout_lines` has to
+    detect and regroup into column-major order (L1..L4, R1..R4)."""
+    document = pymupdf.open()
+    page = document.new_page(width=612, height=792)
+    left_lines = ["Left column line one", "Left column line two", "Left column line three", "Left column line four"]
+    right_lines = ["Right column line one", "Right column line two", "Right column line three", "Right column line four"]
+    for index, (left, right) in enumerate(zip(left_lines, right_lines)):
+        y = 100 + index * 30
+        page.insert_text((72, y), left, fontsize=11)
+        page.insert_text((320, y), right, fontsize=11)
+    document.save(path)
+    document.close()
+    return path
+
+
+def build_unmappable_heading_pdf(path: Path) -> Path:
+    """A short document with only two distinct font sizes (14pt bold
+    heading, 10pt plain body) -- against a naive "top 2 font sizes"
+    heading rule, the 10pt body lines share a size with the real
+    heading and would all be misdetected as headings too. Requiring
+    boldness for anything but the single largest size (the fix this
+    fixture proves) correctly leaves only the real heading detected.
+    "Special Provisions" is deliberately not in rules/section_synonyms.json,
+    so it also proves the unclassified_headings path."""
+    document = pymupdf.open()
+    page = document.new_page(width=612, height=792)
+    page.insert_text((72, 100), "Special Provisions", fontsize=14)
+    page.insert_text((72, 140), "This clause covers site-specific safety requirements.", fontsize=10)
+    page.insert_text((72, 165), "Contractors must complete orientation before starting work.", fontsize=10)
+    page.insert_text((72, 190), "No hot work is permitted without a daily permit.", fontsize=10)
+    document.save(path)
+    document.close()
+    return path
+
+
+def build_section_pipeline_pdf(path: Path) -> Path:
+    """Exercises all three real bugs Phase 2 was fixture-built to catch,
+    in one document:
+
+    - A single-instance 16pt title, the single biggest font on the
+      page -- must NOT swallow the rest of the document into one
+      section (the naive "bigger font = higher level" bug).
+    - Two numbered, bold, 12.5pt headings ("1. Scope of Work",
+      "2. Evaluation Criteria") at the document's dominant left margin
+      (x=72) -- equal-level headings that must each close the previous
+      section and open their own.
+    - A bold, short, 10pt "Issuing Agency" line indented well past the
+      dominant margin (x=300), simulating a table label cell -- must
+      NOT be detected as a heading despite being bold and short.
+    """
+    document = pymupdf.open()
+    page = document.new_page(width=612, height=792)
+    page.insert_text((72, 80), "City of Example, Procurement Division", fontsize=16)
+    page.insert_text((72, 120), "Request for Proposals", fontsize=10)
+    page.insert_text((72, 160), "1. Scope of Work", fontsize=12.5)
+    page.insert_text((72, 190), "The contractor shall provide janitorial services.", fontsize=10)
+    page.insert_text((300, 220), "Issuing Agency", fontsize=10)
+    page.insert_text((72, 260), "2. Evaluation Criteria", fontsize=12.5)
+    page.insert_text((72, 290), "Proposals are scored on price and past performance.", fontsize=10)
+    document.save(path)
+    document.close()
+    return path
+
+
 def build_encrypted_pdf(path: Path) -> Path:
     document = pymupdf.open()
     page = document.new_page()

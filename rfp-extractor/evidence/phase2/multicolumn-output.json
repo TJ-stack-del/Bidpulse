@@ -1,0 +1,173 @@
+{
+  "result": {
+    "headings": [
+      {
+        "text": "Left column line one",
+        "page_index": 0,
+        "printed_page_label": "1",
+        "font_size": 11.0,
+        "canonical_section": null,
+        "matched_via": "top_font_size",
+        "matched_pattern": null
+      },
+      {
+        "text": "Left column line two",
+        "page_index": 0,
+        "printed_page_label": "1",
+        "font_size": 11.0,
+        "canonical_section": null,
+        "matched_via": "top_font_size",
+        "matched_pattern": null
+      },
+      {
+        "text": "Left column line three",
+        "page_index": 0,
+        "printed_page_label": "1",
+        "font_size": 11.0,
+        "canonical_section": null,
+        "matched_via": "top_font_size",
+        "matched_pattern": null
+      },
+      {
+        "text": "Left column line four",
+        "page_index": 0,
+        "printed_page_label": "1",
+        "font_size": 11.0,
+        "canonical_section": null,
+        "matched_via": "top_font_size",
+        "matched_pattern": null
+      },
+      {
+        "text": "Right column line one",
+        "page_index": 0,
+        "printed_page_label": "1",
+        "font_size": 11.0,
+        "canonical_section": null,
+        "matched_via": "top_font_size",
+        "matched_pattern": null
+      },
+      {
+        "text": "Right column line two",
+        "page_index": 0,
+        "printed_page_label": "1",
+        "font_size": 11.0,
+        "canonical_section": null,
+        "matched_via": "top_font_size",
+        "matched_pattern": null
+      },
+      {
+        "text": "Right column line three",
+        "page_index": 0,
+        "printed_page_label": "1",
+        "font_size": 11.0,
+        "canonical_section": null,
+        "matched_via": "top_font_size",
+        "matched_pattern": null
+      },
+      {
+        "text": "Right column line four",
+        "page_index": 0,
+        "printed_page_label": "1",
+        "font_size": 11.0,
+        "canonical_section": null,
+        "matched_via": "top_font_size",
+        "matched_pattern": null
+      }
+    ],
+    "sections": [
+      {
+        "canonical_type": null,
+        "heading_text": null,
+        "start_page_index": 0,
+        "line_count": 8,
+        "preview": "Left column line one Left column line two Left column line three Left column line four Right column line one Right column line two Right column line three Right column line four"
+      }
+    ],
+    "unresolved": {
+      "unclassified_headings": [
+        {
+          "text": "Left column line one",
+          "page_index": 0
+        },
+        {
+          "text": "Left column line two",
+          "page_index": 0
+        },
+        {
+          "text": "Left column line three",
+          "page_index": 0
+        },
+        {
+          "text": "Left column line four",
+          "page_index": 0
+        },
+        {
+          "text": "Right column line one",
+          "page_index": 0
+        },
+        {
+          "text": "Right column line two",
+          "page_index": 0
+        },
+        {
+          "text": "Right column line three",
+          "page_index": 0
+        },
+        {
+          "text": "Right column line four",
+          "page_index": 0
+        }
+      ]
+    }
+  },
+  "diagnostics": {
+    "document": {
+      "id": "sha256:9c8f005a0f07fc056397bf26de96c56c6a4daab267214bfb9e923ba8cbe00d31",
+      "filename": "multicolumn-fixture.pdf",
+      "byte_size": 2014,
+      "page_count": 1,
+      "pdf_metadata": {
+        "format": "PDF 1.7"
+      }
+    },
+    "quality": {
+      "status": "ok",
+      "native_pages": 1,
+      "ocr_pages": 0,
+      "suspect_pages": [],
+      "unreadable_pages": [],
+      "coverage_warnings": []
+    },
+    "ingest": {
+      "repeated_header_footer_blocks": 0,
+      "ocr_mode": "never",
+      "ocr_language": "eng",
+      "runtime_versions": {
+        "python": "3.12.1",
+        "pymupdf": "1.28.2",
+        "tesseract": null
+      },
+      "processing_limits": {
+        "max_file_bytes": 52428800,
+        "max_pages": 500,
+        "max_pdf_objects": 100000,
+        "max_page_area_points": 400000000,
+        "max_images_per_page": 500,
+        "max_image_rects_per_page": 1000,
+        "max_text_blocks_per_page": 20000,
+        "max_total_text_blocks": 100000,
+        "max_text_spans_per_page": 100000,
+        "max_total_text_characters": 10000000,
+        "max_ocr_pages": 100,
+        "max_ocr_pixels_per_page": 30000000,
+        "max_processing_seconds": 120.0,
+        "max_memory_bytes": 1500000000
+      }
+    },
+    "sections": {
+      "rule_set_version": "2026-09-09",
+      "rule_set_sha256": "95b73d66c5a28a25198fcc4c694ecbffabeb4886dc4db426469e6c456e14e597"
+    },
+    "native_pages_used": 1
+  }
+}

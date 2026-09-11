@@ -17,6 +17,23 @@ Phase 1 currently provides:
   decompressed text, OCR, memory, and elapsed processing time
 - JSON output suitable for later section and obligation extraction phases
 
+Phase 2 adds deterministic section segmentation (no LLM):
+
+- per-line font size, boldness, and position, plus two-column page
+  reordering into correct document-wide reading order
+- heading detection (font-size ranking, numbering patterns, or bold
+  text at the document's own dominant left margin)
+- a data-driven canonical section taxonomy/synonym map
+  (`rules/section_synonyms.json`, trivially extended with one new list
+  entry — no code changes)
+- segmentation into sections, with front matter and unclassified
+  headings kept visible rather than silently dropped or force-matched
+- a human-readable report (`render_report`) surfacing
+  `unclassified_headings` for review, not just a JSON field nobody opens
+
+See `evidence/phase2/README.md` for real-fixture results and the real
+bugs this stage's evidence pass found and fixed.
+
 ## Development
 
 ```bash
@@ -39,6 +56,12 @@ always surfaced in diagnostics when OCR is unavailable or disabled.
 
 ```bash
 bidpulse-rfp-extract scanned.pdf --ocr auto --output result.json
+```
+
+Phase 2's segmentation has its own CLI entry point:
+
+```bash
+bidpulse-rfp-sections input.pdf --output sections.json
 ```
 
 The same input bytes, parser version, rule-set content, and OCR engine

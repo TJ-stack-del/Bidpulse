@@ -1,0 +1,16 @@
+Section segmentation report -- RFP-2026-0847-JANI.pdf
+============================================================
+8 headings detected, 3 classified, 5 unclassified.
+
+Sections found (4):
+  - (unclassified body / front matter) (23 lines, starts page index 0)
+  - scope_of_work -- "1. Scope of Work" (16 lines, starts page index 0)
+  - evaluation_factors -- "2. Evaluation Criteria (100 Points Total)" (20 lines, starts page index 0)
+  - minimum_qualifications -- "3. Minimum Qualification Requirements" (9 lines, starts page index 1)
+
+5 heading(s) did NOT match any entry in rules/section_synonyms.json -- review these; if a real pattern emerges, add it as one new list entry, no code changes needed:
+  - page 0: "City of Jacksonville — Procurement Division"
+  - page 0: "Request for Proposals (RFP) No. RFP-2026-0847-JANI"
+  - page 0: "1.1 Day Porter Services (M–F, 7:00 AM–4:00 PM)"
+  - page 0: "1.2 Night Shift Services (M–F, 6:00 PM–2:00 AM)"
+  - page 0: "1.3 Periodic Care (Scheduled / Quarterly unless noted)"

@@ -19,6 +19,7 @@ dev = [
 
 [project.scripts]
 bidpulse-rfp-extract = "bidpulse_rfp_extractor.cli:main"
+bidpulse-rfp-sections = "bidpulse_rfp_extractor.cli_sections:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/bidpulse_rfp_extractor"]

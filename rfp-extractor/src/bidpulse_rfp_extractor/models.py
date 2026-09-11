@@ -83,3 +83,61 @@ class ExtractionResult:
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
+
+
+# --- Phase 2 (section segmentation) -----------------------------------
+# Additive to the Phase 1 models above; nothing above this line is
+# touched or read by section segmentation.
+
+
+@dataclass(frozen=True)
+class LayoutLine:
+    text: str
+    page_index: int
+    printed_page_label: str
+    font_size: float
+    is_bold: bool
+    x0: float
+    y0: float
+
+
+@dataclass(frozen=True)
+class Heading:
+    text: str
+    page_index: int
+    printed_page_label: str
+    font_size: float
+    canonical_section: str | None
+    matched_via: Literal["top_font_size", "numbering_pattern", "bold_at_margin"]
+    matched_pattern: str | None = None
+
+
+@dataclass
+class Section:
+    canonical_type: str | None  # None => unclassified front matter / body
+    heading_text: str | None  # None for the unclassified fallback section
+    start_page_index: int
+    lines: list[str] = field(default_factory=list)
+
+
+@dataclass
+class SegmentationResult:
+    headings: list[Heading]
+    sections: list[Section]
+    unclassified_headings: list[dict[str, Any]]
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "headings": [asdict(heading) for heading in self.headings],
+            "sections": [
+                {
+                    "canonical_type": section.canonical_type,
+                    "heading_text": section.heading_text,
+                    "start_page_index": section.start_page_index,
+                    "line_count": len(section.lines),
+                    "preview": " ".join(section.lines)[:200],
+                }
+                for section in self.sections
+            ],
+            "unresolved": {"unclassified_headings": self.unclassified_headings},
+        }

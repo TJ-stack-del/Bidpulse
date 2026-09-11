@@ -1,0 +1,16 @@
+Section segmentation report -- multicolumn-fixture.pdf
+============================================================
+8 headings detected, 0 classified, 8 unclassified.
+
+Sections found (1):
+  - (unclassified body / front matter) (8 lines, starts page index 0)
+
+8 heading(s) did NOT match any entry in rules/section_synonyms.json -- review these; if a real pattern emerges, add it as one new list entry, no code changes needed:
+  - page 0: "Left column line one"
+  - page 0: "Left column line two"
+  - page 0: "Left column line three"
+  - page 0: "Left column line four"
+  - page 0: "Right column line one"
+  - page 0: "Right column line two"
+  - page 0: "Right column line three"
+  - page 0: "Right column line four"

@@ -1,0 +1,114 @@
+{
+  "result": {
+    "headings": [
+      {
+        "text": "City of Example, Procurement Division",
+        "page_index": 0,
+        "printed_page_label": "1",
+        "font_size": 16.0,
+        "canonical_section": null,
+        "matched_via": "top_font_size",
+        "matched_pattern": null
+      },
+      {
+        "text": "1. Scope of Work",
+        "page_index": 0,
+        "printed_page_label": "1",
+        "font_size": 12.5,
+        "canonical_section": "scope_of_work",
+        "matched_via": "numbering_pattern",
+        "matched_pattern": "^(\\d{1,2})\\.\\s+[A-Z]"
+      },
+      {
+        "text": "2. Evaluation Criteria",
+        "page_index": 0,
+        "printed_page_label": "1",
+        "font_size": 12.5,
+        "canonical_section": "evaluation_factors",
+        "matched_via": "numbering_pattern",
+        "matched_pattern": "^(\\d{1,2})\\.\\s+[A-Z]"
+      }
+    ],
+    "sections": [
+      {
+        "canonical_type": null,
+        "heading_text": null,
+        "start_page_index": 0,
+        "line_count": 2,
+        "preview": "City of Example, Procurement Division Request for Proposals"
+      },
+      {
+        "canonical_type": "scope_of_work",
+        "heading_text": "1. Scope of Work",
+        "start_page_index": 0,
+        "line_count": 2,
+        "preview": "The contractor shall provide janitorial services. Issuing Agency"
+      },
+      {
+        "canonical_type": "evaluation_factors",
+        "heading_text": "2. Evaluation Criteria",
+        "start_page_index": 0,
+        "line_count": 1,
+        "preview": "Proposals are scored on price and past performance."
+      }
+    ],
+    "unresolved": {
+      "unclassified_headings": [
+        {
+          "text": "City of Example, Procurement Division",
+          "page_index": 0
+        }
+      ]
+    }
+  },
+  "diagnostics": {
+    "document": {
+      "id": "sha256:76a320ac731fe69e09795bd457c2ed7dd465d584945105429827f298c85c2e1f",
+      "filename": "section-pipeline-fixture.pdf",
+      "byte_size": 1972,
+      "page_count": 1,
+      "pdf_metadata": {
+        "format": "PDF 1.7"
+      }
+    },
+    "quality": {
+      "status": "ok",
+      "native_pages": 1,
+      "ocr_pages": 0,
+      "suspect_pages": [],
+      "unreadable_pages": [],
+      "coverage_warnings": []
+    },
+    "ingest": {
+      "repeated_header_footer_blocks": 0,
+      "ocr_mode": "never",
+      "ocr_language": "eng",
+      "runtime_versions": {
+        "python": "3.12.1",
+        "pymupdf": "1.28.2",
+        "tesseract": null
+      },
+      "processing_limits": {
+        "max_file_bytes": 52428800,
+        "max_pages": 500,
+        "max_pdf_objects": 100000,
+        "max_page_area_points": 400000000,
+        "max_images_per_page": 500,
+        "max_image_rects_per_page": 1000,
+        "max_text_blocks_per_page": 20000,
+        "max_total_text_blocks": 100000,
+        "max_text_spans_per_page": 100000,
+        "max_total_text_characters": 10000000,
+        "max_ocr_pages": 100,
+        "max_ocr_pixels_per_page": 30000000,
+        "max_processing_seconds": 120.0,
+        "max_memory_bytes": 1500000000
+      }
+    },
+    "sections": {
+      "rule_set_version": "2026-09-09",
+      "rule_set_sha256": "95b73d66c5a28a25198fcc4c694ecbffabeb4886dc4db426469e6c456e14e597"
+    },
+    "native_pages_used": 1
+  }
+}
