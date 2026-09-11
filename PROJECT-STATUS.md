@@ -203,6 +203,42 @@ non-action (see Known Issues / Recently Fixed, which includes real
 
 
 ## Confirmed Working (tested with real evidence, not just "reported done")
+- **Auto-draft now pulls real requirements from the uploaded RFP —
+  CLOSED 2026-09-11.** Root cause of the user's original complaint
+  ("auto draft doesn't pull all items from the RFP that was loaded"):
+  `generate-draft/route.ts` only ever read the client's short intake
+  `scope` text and profile fields — it never read the actual RFP file
+  uploaded via `SubmissionDocuments.tsx` (`submission_documents`,
+  `document_type = 'rfp_file'`), even though the plumbing to do so
+  (Anthropic client, `buildDocumentContent`, the private
+  `rfp-documents` bucket) already existed from the intake-wizard
+  auto-fill feature built earlier this session. New
+  `lib/rfp-requirements.ts` extracts concrete, compliance-relevant
+  requirements from the submission's uploaded RFP file(s) via Claude
+  document understanding — grounded strictly in the document's own
+  text, same never-fabricate rule as everything else this app
+  generates — cached on new `submissions.rfp_requirements` /
+  `rfp_requirements_extracted_at` columns
+  (`20260911223430_add_rfp_requirements_cache.sql`), invalidated only
+  when a newer `rfp_file` is uploaded. Wired into `generate-draft`'s
+  `compliance_matrix` branch only — every other deliverable type and
+  the no-RFP-file case are unchanged. Verified live against a real
+  `is_test` fixture with an actual uploaded RFP PDF (Playwright +
+  disposable admin account, both cleaned up after): the generated
+  compliance matrix now includes correctly-cited real requirements
+  (exact deadlines, dollar amounts, JSEB percentage, wage rates,
+  required forms, evaluation point weights) that exist nowhere in the
+  scope text. Confirmed the cache actually works (repeat call: ~400ms,
+  not a fresh extraction) and the no-RFP-file fallback is byte-for-byte
+  the same behavior as before (~400ms, no RFP rows). Also repaired
+  `bidpulse-dev`'s migration bookkeeping for `client_past_performance`
+  (`20260908130300`) along the way — same "table exists but was never
+  recorded" gap already found and fixed on production, now closed on
+  dev too — and regenerated `schema.sql`. **Applied to `bidpulse-dev`
+  only; not yet pushed to `bidpulse-production`** — do that as a
+  deliberate, separate step (see `CLAUDE.md`'s rule on verifying which
+  project before touching production). `tsc --noEmit` and a clean
+  `next build` both pass.
 - **Systemic dark-mode elevation bug — CLOSED 2026-09-11, fixed
   everywhere, not just the login/reset-password cards.** Root cause:
   `surface-container-lowest`'s dark-mode value (52) is literally darker
