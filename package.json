@@ -32,9 +32,13 @@
     "eslint": "^8.57.0",
     "eslint-config-next": "^15.0.0",
     "playwright-core": "^1.62.1",
-    "postcss": "^8.4.0",
+    "postcss": "^8.5.28",
     "supabase": "^2.116.0",
     "tailwindcss": "^3.4.0",
     "typescript": "^5.5.0"
+  },
+  "overrides": {
+    "dompurify": "^3.4.15",
+    "postcss": "$postcss"
   }
 }
