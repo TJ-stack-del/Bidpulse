@@ -251,15 +251,18 @@ body {
      cards' own titles occupy) -- that vertical placement, not a small
      peak scale, is what actually keeps this clear of the title text,
      so the sheet can peak well above 1x scale without re-introducing
-     the original bug (an earlier, over-cautious pass capped peak scale
-     at 0.75 to compensate for an arc that was reaching too high;
-     fixing the arc's height directly let scale come back up, and stay
-     up -- the vertical band is the actual guardrail here, scale is
-     free to grow as long as `top` never leaves 37-50%). Two real bugs
-     caught on screen while first tuning this: too-large a peak scale
-     *and* too high a vertical arc both put "TAILORED PACKAGE" directly
-     over "...red Bid Submission...age" at the same time -- only the
-     arc height actually needed to change. */
+     the original bug. Two real bugs caught on screen while first
+     tuning this: too-large a peak scale *and* too high a vertical arc
+     both put "TAILORED PACKAGE" directly over "...red Bid
+     Submission...age" -- only the arc height actually needed to
+     change.
+
+     The whole flight now lives in the FIRST HALF (0-50%) of this
+     keyframe, holding invisible at the landed end-state through the
+     second half (50-100%) -- see the .tp-sheet rule below for why: two
+     sheets sharing one long duration, offset by exactly half of it,
+     each active only in their own first half, means only one is ever
+     actually flying at a time instead of both overlapping mid-air. */
   0% {
     left: 12%;
     top: 50%;
@@ -268,8 +271,8 @@ body {
     background-color: #1e293b;
     border-color: #fb7185;
   }
-  10% { opacity: 0.35; transform: translate3d(0, 0, 0) rotateY(0deg) scale(0.5); }
-  26% {
+  5% { opacity: 0.35; transform: translate3d(0, 0, 0) rotateY(0deg) scale(0.5); }
+  13% {
     left: 28%;
     top: 48%;
     opacity: 0.8;
@@ -277,7 +280,7 @@ body {
     background-color: #1e293b;
     border-color: #fb7185;
   }
-  40% {
+  20% {
     left: 40%;
     top: 42%;
     opacity: 1;
@@ -285,14 +288,14 @@ body {
     background-color: #1e293b;
     border-color: #fb7185;
   }
-  50% {
+  25% {
     left: 48%;
     top: 39%;
     transform: translate3d(0, -12px, 55px) rotateY(180deg) scale(1.4);
     background-color: #064e3b;
     border-color: #34d399;
   }
-  60% {
+  30% {
     left: 56%;
     top: 42%;
     opacity: 1;
@@ -300,7 +303,7 @@ body {
     background-color: #064e3b;
     border-color: #34d399;
   }
-  74% {
+  37% {
     left: 70%;
     top: 48%;
     opacity: 0.8;
@@ -308,7 +311,7 @@ body {
     background-color: #064e3b;
     border-color: #34d399;
   }
-  90% {
+  45% {
     left: 84%;
     top: 62%;
     transform: translate3d(0, 0, 0) rotateY(355deg) scale(0.45);
@@ -316,7 +319,7 @@ body {
     background-color: #064e3b;
     border-color: #34d399;
   }
-  100% {
+  50%, 100% {
     left: 88%;
     top: 62%;
     opacity: 0;
@@ -325,24 +328,31 @@ body {
     border-color: #34d399;
   }
 }
+/* One shared 10s cycle (a real slowdown from the previous 2.8s flight,
+   on top of now taking turns instead of overlapping): each sheet's own
+   flight fills the first 5s of its cycle (the keyframe's 0-50%), then
+   sits idle+invisible for the remaining 5s. The second sheet is
+   delayed by exactly half the cycle (5s), so it starts flying the
+   moment the first one finishes landing, not before -- true
+   alternation, not just two overlapping loops slowed down together. */
 .tp-sheet {
-  animation: tp-sheet-flight 2.8s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite backwards;
+  animation: tp-sheet-flight 10s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite backwards;
 }
 
 @keyframes tp-sheet-raw-label {
-  0%, 42% { opacity: 1; }
-  50%, 100% { opacity: 0; }
+  0%, 21% { opacity: 1; }
+  25%, 100% { opacity: 0; }
 }
 .tp-sheet-raw {
-  animation: tp-sheet-raw-label 2.8s ease-in-out infinite backwards;
+  animation: tp-sheet-raw-label 10s ease-in-out infinite backwards;
 }
 
 @keyframes tp-sheet-clean-label {
-  0%, 42% { opacity: 0; }
-  50%, 100% { opacity: 1; }
+  0%, 21% { opacity: 0; }
+  25%, 100% { opacity: 1; }
 }
 .tp-sheet-clean {
-  animation: tp-sheet-clean-label 2.8s ease-in-out infinite backwards;
+  animation: tp-sheet-clean-label 10s ease-in-out infinite backwards;
 }
 
 /* Header status dot -- Tailwind's own animate-ping utility isn't used

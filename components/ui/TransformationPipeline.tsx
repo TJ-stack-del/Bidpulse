@@ -124,19 +124,23 @@ export function TransformationPipeline() {
             styling to clean-package styling as they cross the portal,
             and land in the right card. lg: and up only, per spec --
             mobile/tablet keep the plain stacked layout with no 3D
-            layer at all. Two sheets offset by half the flight cycle so
-            one is always mid-flight, each showing a different real
-            deliverable's own before/after rather than identical
-            generic content. Not removed for prefers-reduced-motion
-            (rather than frozen mid-transform at a random, potentially
-            confusing pose). */}
+            layer at all. Each sheet's own flight fills the first half
+            of the shared 10s cycle (see globals.css's tp-sheet-flight),
+            then sits idle+invisible for the second half -- the second
+            sheet is delayed by exactly half that cycle, so the two
+            genuinely take turns (one finishes landing, then the other
+            starts) rather than both being mid-flight at once. Each
+            shows a different real deliverable's own before/after
+            rather than identical generic content. Not removed for
+            prefers-reduced-motion (rather than frozen mid-transform at
+            a random, potentially confusing pose). */}
         {!reduceMotion && (
           <div
             className="hidden lg:block absolute inset-0 z-30 pointer-events-none [perspective:1200px]"
             aria-hidden="true"
           >
             {SHEETS.map((sheet, i) => {
-              const delay = i * 1.4;
+              const delay = i * 5;
               return (
                 <div
                   key={sheet.cleanLabel}
