@@ -246,29 +246,32 @@ body {
      (1280px viewport), not guessed: the left card occupies the
      left ~41% of the grid, the right card the right ~41% (starting at
      ~59%), leaving a real gap of only ~18 points in the middle for the
-     arrow -- much narrower than earlier drafts of this assumed. Peak
-     scale is capped at 0.75 (was 1.1) specifically so the sheet, even
-     at its biggest, fits inside that gap without its edges reaching
-     into either card; `top` stays in a 37-50% band throughout (never
-     the 0-25% band the cards' own titles occupy). Two real bugs caught
-     on screen while tuning this: too-large a peak scale and too high a
-     vertical arc both put "TAILORED PACKAGE" directly over "...red Bid
-     Submission...age" -- this is deliberately more conservative than
-     it may look on paper. */
+     arrow -- much narrower than earlier drafts of this assumed. `top`
+     stays in a 37-50% band throughout (never the 0-25% band the
+     cards' own titles occupy) -- that vertical placement, not a small
+     peak scale, is what actually keeps this clear of the title text,
+     so the sheet can peak at a real 1.05x without re-introducing the
+     original bug (an earlier, over-cautious pass capped peak scale at
+     0.75 to compensate for an arc that was reaching too high; fixing
+     the arc's height directly let scale come back up). Two real bugs
+     caught on screen while first tuning this: too-large a peak scale
+     *and* too high a vertical arc both put "TAILORED PACKAGE" directly
+     over "...red Bid Submission...age" at the same time -- only the
+     arc height actually needed to change. */
   0% {
     left: 12%;
     top: 50%;
-    transform: translate3d(0, 0, 0) rotateY(0deg) scale(0.2);
+    transform: translate3d(0, 0, 0) rotateY(0deg) scale(0.3);
     opacity: 0;
     background-color: #131b2e;
     border-color: #e08064;
   }
-  10% { opacity: 0.35; transform: translate3d(0, 0, 0) rotateY(0deg) scale(0.28); }
+  10% { opacity: 0.35; transform: translate3d(0, 0, 0) rotateY(0deg) scale(0.4); }
   26% {
     left: 28%;
     top: 48%;
     opacity: 0.8;
-    transform: translate3d(0, -4px, 15px) rotateY(15deg) scale(0.45);
+    transform: translate3d(0, -4px, 15px) rotateY(15deg) scale(0.65);
     background-color: #131b2e;
     border-color: #e08064;
   }
@@ -276,14 +279,14 @@ body {
     left: 40%;
     top: 40%;
     opacity: 1;
-    transform: translate3d(0, -10px, 45px) rotateY(140deg) scale(0.65);
+    transform: translate3d(0, -10px, 45px) rotateY(140deg) scale(0.9);
     background-color: #131b2e;
     border-color: #e08064;
   }
   50% {
     left: 48%;
     top: 37%;
-    transform: translate3d(0, -12px, 55px) rotateY(180deg) scale(0.75);
+    transform: translate3d(0, -12px, 55px) rotateY(180deg) scale(1.05);
     background-color: #103826;
     border-color: #58c996;
   }
@@ -291,7 +294,7 @@ body {
     left: 56%;
     top: 40%;
     opacity: 1;
-    transform: translate3d(0, -10px, 45px) rotateY(220deg) scale(0.65);
+    transform: translate3d(0, -10px, 45px) rotateY(220deg) scale(0.9);
     background-color: #103826;
     border-color: #58c996;
   }
@@ -299,14 +302,14 @@ body {
     left: 70%;
     top: 48%;
     opacity: 0.8;
-    transform: translate3d(0, 0, 0) rotateY(300deg) scale(0.45);
+    transform: translate3d(0, 0, 0) rotateY(300deg) scale(0.65);
     background-color: #103826;
     border-color: #58c996;
   }
   90% {
     left: 84%;
     top: 62%;
-    transform: translate3d(0, 0, 0) rotateY(355deg) scale(0.25);
+    transform: translate3d(0, 0, 0) rotateY(355deg) scale(0.35);
     opacity: 0.4;
     background-color: #103826;
     border-color: #58c996;
@@ -315,7 +318,7 @@ body {
     left: 88%;
     top: 62%;
     opacity: 0;
-    transform: translate3d(0, 0, 0) rotateY(360deg) scale(0.15);
+    transform: translate3d(0, 0, 0) rotateY(360deg) scale(0.2);
     background-color: #103826;
     border-color: #58c996;
   }

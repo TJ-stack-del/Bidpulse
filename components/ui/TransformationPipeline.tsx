@@ -87,7 +87,7 @@ export function TransformationPipeline() {
             {[0, 1.4].map((delay) => (
               <div
                 key={delay}
-                className="tp-anim tp-sheet absolute w-16 h-20 rounded-md border-2 shadow-lg [transform-style:preserve-3d]"
+                className="tp-anim tp-sheet absolute w-20 h-24 rounded-md border-2 shadow-lg [transform-style:preserve-3d]"
                 style={{ animationDelay: `${delay}s` }}
               >
                 <span
