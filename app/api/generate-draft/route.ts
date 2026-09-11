@@ -4,15 +4,22 @@ import { isFederalAgency } from "@/lib/federal-agency";
 import { detectAgencyTypes } from "@/lib/agency-type";
 import { referenceRequirementRows } from "@/lib/compliance/requirements-reference";
 import { isKnownTrade } from "@/lib/compliance/known-trades";
+import { getOrExtractRfpRequirements, type RfpRequirement } from "@/lib/rfp-requirements";
+
+export const runtime = "nodejs";
+// Same reasoning as extract-from-document/route.ts: the compliance-matrix
+// path below can now trigger a real Claude document-extraction call against
+// the submission's uploaded RFP file(s), which routinely takes past
+// Vercel's default 10s serverless timeout.
+export const maxDuration = 60;
 
 // Admin-only "auto-draft" helper for DeliverablesPanel — removes the
 // blank-page problem by returning a structured starting draft built from
 // the submission's own intake data (agency, scope, client NAICS/status
-// info), not a fully-written deliverable. No LLM is wired up yet (no
-// provider key configured anywhere in this project), so this is a
-// template fill-in for now — swap buildDraft()'s internals for a real
-// model call later without touching the route's request/response contract
-// or the client-side wiring in DeliverablesPanel.tsx.
+// info) and, for the compliance matrix, real requirements extracted from
+// the submission's own uploaded RFP file(s) (see lib/rfp-requirements.ts) --
+// not a fully-written deliverable. Everything else here is still a
+// template fill-in, not a model call.
 
 const DELIVERABLE_LABELS: Record<string, string> = {
   capability_statement: "Capability statement",
@@ -45,6 +52,8 @@ type SubmissionInfo = {
   solicitation_number: string | null;
   scope: string | null;
   clients: ClientInfo | null;
+  rfp_requirements: RfpRequirement[] | null;
+  rfp_requirements_extracted_at: string | null;
 };
 
 function certificationLabel(cert: { cert_type: string; other_label: string | null }): string {
@@ -214,7 +223,7 @@ export async function POST(request: Request) {
   const { data: submission } = await supabase
     .from("submissions")
     .select(
-      "id, agency, solicitation_number, scope, client_id, clients!submissions_client_id_fkey(company_name, naics_codes, set_asides, license_number, business_registration_number, years_in_business, business_address, business_phone, insurance_provider, insurance_policy_number, general_liability_coverage, workers_comp_coverage, differentiators)"
+      "id, agency, solicitation_number, scope, client_id, rfp_requirements, rfp_requirements_extracted_at, clients!submissions_client_id_fkey(company_name, naics_codes, set_asides, license_number, business_registration_number, years_in_business, business_address, business_phone, insurance_provider, insurance_policy_number, general_liability_coverage, workers_comp_coverage, differentiators)"
     )
     .eq("id", submissionId)
     .maybeSingle();
@@ -245,11 +254,19 @@ export async function POST(request: Request) {
     .order("created_at", { ascending: false })
     .limit(3);
 
+  const submissionInfo = submission as unknown as SubmissionInfo;
+
+  // Only the compliance matrix uses this today -- skip the extraction
+  // entirely (and its real latency/cost) for every other deliverable type.
+  const rfpRequirements =
+    deliverableType === "compliance_matrix" ? await getOrExtractRfpRequirements(supabase, submissionInfo) : [];
+
   const content = buildDraft(
     deliverableType,
-    submission as unknown as SubmissionInfo,
+    submissionInfo,
     (verifiedCerts ?? []).map(certificationLabel),
-    pastPerformance ?? []
+    pastPerformance ?? [],
+    rfpRequirements
   );
   return NextResponse.json({ content });
 }
@@ -265,7 +282,8 @@ function buildDraft(
   deliverableType: string,
   submission: SubmissionInfo,
   verifiedCertLabels: string[],
-  pastPerformanceEntries: PastPerformanceEntry[]
+  pastPerformanceEntries: PastPerformanceEntry[],
+  rfpRequirements: RfpRequirement[]
 ): string {
   const client = submission.clients ?? {
     company_name: null,
@@ -371,14 +389,13 @@ function buildDraft(
     // generate a status that implies a requirement is already met (no
     // "Compliant" / "Fully Compliant" / anything like it), and never invent
     // a plausible-looking number, certification, registration ID, or
-    // coverage amount. The requirement labels below are the one exception
-    // to "nothing is sourced from the RFP" — they're lifted straight from
-    // the client's own scope text (deriveRequirementLabels only reorders
-    // words already there), never invented. The RFP itself still isn't
-    // parsed anywhere in this app (submission_documents only stores an
-    // uploaded file URL), so status and verification stay an explicit,
-    // unmistakable gap for the admin to fill in after checking the real RFP
-    // and the client's real paperwork.
+    // coverage amount. Requirement rows come from two real sources, never
+    // invented: rfpRequirements (lib/rfp-requirements.ts, extracted straight
+    // from the submission's own uploaded RFP file when one exists) and the
+    // client's own scope text (deriveRequirementLabels only reorders words
+    // already there). Status and verification stay an explicit,
+    // unmistakable gap either way — even an RFP-sourced row can misread the
+    // document, so nothing here is asserted as already confirmed.
     // Strict pipe-delimited rows, one requirement per line, nothing else on
     // the line (no numbering, no bullets) — this is what lets the packet PDF
     // (lib/pdf/deliverables-packet.ts) parse it into a real autoTable grid
@@ -386,18 +403,32 @@ function buildDraft(
     // pipe-containing line in with the rows below: the PDF's row filter
     // only excludes lines starting with "[", so a stray "|" anywhere else
     // gets rendered as a bogus table row.
+    //
+    // RFP-sourced rows (real requirements extracted from the submission's
+    // own uploaded RFP file, see lib/rfp-requirements.ts) go first -- they're
+    // the most concrete and specific rows this matrix can produce, since
+    // they're grounded in the agency's actual document rather than reordered
+    // client scope text. Status still stays NEEDS VERIFICATION, same rule as
+    // every other row: extraction can misread a document, so nothing here is
+    // asserted as already confirmed.
+    const requirementRows = rfpRequirements.map(
+      (r) => `${r.requirement} | NEEDS VERIFICATION | [From the uploaded RFP: ${r.detail} — confirm this is still accurate before submission]`
+    );
     const requirementLabels = submission.scope ? deriveRequirementLabels(submission.scope) : [];
-    const requirementRows =
-      requirementLabels.length > 0
-        ? requirementLabels.map(
-            (label) =>
-              `${label} | NEEDS VERIFICATION | [Not yet provided — confirm with the client before writing anything here]`
-          )
-        : [
-            "[Requirement from RFP — not yet identified] | NEEDS VERIFICATION | [Not yet provided — confirm with the client before writing anything here]",
-            "[Requirement from RFP — not yet identified] | NEEDS VERIFICATION | [Not yet provided — confirm with the client before writing anything here]",
-            "[Requirement from RFP — not yet identified] | NOT YET PROVIDED | [Not yet provided — confirm with the client before writing anything here]",
-          ];
+    if (requirementLabels.length > 0) {
+      requirementRows.push(
+        ...requirementLabels.map(
+          (label) =>
+            `${label} | NEEDS VERIFICATION | [Not yet provided — confirm with the client before writing anything here]`
+        )
+      );
+    } else if (requirementRows.length === 0) {
+      requirementRows.push(
+        "[Requirement from RFP — not yet identified] | NEEDS VERIFICATION | [Not yet provided — confirm with the client before writing anything here]",
+        "[Requirement from RFP — not yet identified] | NEEDS VERIFICATION | [Not yet provided — confirm with the client before writing anything here]",
+        "[Requirement from RFP — not yet identified] | NOT YET PROVIDED | [Not yet provided — confirm with the client before writing anything here]"
+      );
+    }
     requirementRows.push(...agencyTypeRequirementRows(agency));
     // Reference-library rows (lib/compliance/requirements-reference.ts): the
     // ALWAYS_MANDATORY tier always appears; CONDITIONAL_REQUIREMENTS and

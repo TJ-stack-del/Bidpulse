@@ -12,9 +12,6 @@
 -- accurate.
 -- ============================================================================
 
-
-
-
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
@@ -973,7 +970,9 @@ CREATE TABLE IF NOT EXISTS "public"."submissions" (
     "estimated_value" numeric,
     "info_attested_at" timestamp with time zone,
     "info_attested_by" "uuid",
-    "first_viewed_by_admin_at" timestamp with time zone
+    "first_viewed_by_admin_at" timestamp with time zone,
+    "rfp_requirements" "jsonb",
+    "rfp_requirements_extracted_at" timestamp with time zone
 );
 
 
