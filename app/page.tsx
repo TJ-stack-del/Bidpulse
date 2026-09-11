@@ -6,6 +6,7 @@ import { MarketingShell } from "@/components/ui/MarketingShell";
 import { KNOWN_TRADES, assertNoMissingTradeCards } from "@/lib/compliance/known-trades";
 import { FaqAccordion } from "@/app/faq/FaqAccordion";
 import { DeliverableRowsReveal } from "@/components/ui/DeliverableRowsReveal";
+import { PipelineArrow } from "@/components/ui/PipelineArrow";
 
 export const metadata: Metadata = {
   description: "We help you win local government contracts. Send us the bid papers — our team handles the paperwork so you can send in a strong bid.",
@@ -280,9 +281,7 @@ function Home() {
 
             {/* Middle: arrow */}
             <div className="flex md:flex-col items-center justify-center gap-2 py-1">
-              <div className="animate-pipeline-arrow w-12 h-12 rounded-full bg-primary-container flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-on-primary-container">arrow_forward</span>
-              </div>
+              <PipelineArrow />
               <span className="text-label-sm text-on-surface-variant font-code whitespace-nowrap">BidPulse Pipeline</span>
             </div>
 
