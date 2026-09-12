@@ -111,6 +111,53 @@ anon/publishable key) — `PGRST205` means the schema cache is stale
 (run `NOTIFY pgrst, 'reload schema';`), not necessarily that the table
 is missing.
 
+## A Supabase project's Site URL/Redirect URLs can silently route auth emails to the wrong deployment entirely
+
+**What happened (2026-09-12):** a real user report — "the password reset
+email takes me back to bidpulse, no option to reset the password," and
+separately the magic-link ("sign in without a password") flow doing the
+same thing. First hypothesis was an app-code bug (a cross-device PKCE
+code_verifier mismatch, or the callback route not handling every URL
+shape Supabase can send) — real gaps, and both got fixed
+(`app/auth/callback/route.ts` now handles both the `?code=` PKCE shape
+and the `?token_hash=&type=` OTP shape, and logs the real error instead
+of silently swallowing it), but neither was the actual root cause here.
+~25 minutes were spent watching live production logs
+(`npx vercel logs bidpulse.co --follow`) for a request that was never
+going to arrive, because the failure happened before any meaningful
+request ever reached the app.
+
+The real cause: the user was testing against **`bidpulse-dev`** from a
+Codespace's forwarded URL (`https://<id>-3000.app.github.dev`, a URL
+that's different every Codespace session). That origin was never on
+`bidpulse-dev`'s Redirect URLs allow-list, so Supabase fell back to the
+project's configured **Site URL** — which was set to
+`https://bidpulse-nine.vercel.app`. That URL isn't a dev/test URL at
+all — it's one of the **production** Vercel deployment's own aliases
+(confirmed via `npx vercel inspect`, listed right alongside
+`bidpulse.co`), wired to the **production** Supabase project. So every
+auth email issued by the dev project was redirecting straight into a
+live, working, completely unrelated production app instance, which
+naturally had no idea what to do with a token issued by a different
+Supabase project and just showed its own normal (logged-out) login
+page — reading exactly like "the link doesn't work," not like "wrong
+project entirely."
+
+**The rule going forward:** when an auth email (password reset, magic
+link, invite) redirects somewhere unexpected, check the *Supabase
+project's own Auth → URL Configuration* (Site URL + Redirect URLs)
+*before* assuming it's an app-code bug — this failure mode produces no
+error, no failed request, nothing in the app's own logs at all, because
+the request never reaches the app in a usable form. Confirm which
+Supabase project is actually in play first (this repo has confused dev
+vs. production before — see the rule below this one), then check that
+project's own dashboard settings, not just the code. For a Codespace
+dev environment specifically, whose forwarded URL changes per session,
+`bidpulse-dev`'s Site URL should point at a stable local fallback
+(`http://localhost:3000`) and its Redirect URLs should include a
+wildcard pattern (`https://*.app.github.dev/**`) rather than one
+exact, temporary URL that breaks the next time the Codespace restarts.
+
 ## When verifying a fix, test the exact query the real code runs — not a simplified proxy
 
 Directly related to the same incident: partway through debugging the
