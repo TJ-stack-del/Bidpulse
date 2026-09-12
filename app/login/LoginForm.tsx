@@ -31,6 +31,8 @@ export function LoginForm() {
   const [otpError, setOtpError] = useState<string | null>(null);
   const [otpSubmitting, setOtpSubmitting] = useState(false);
 
+  const [signedInElsewhere, setSignedInElsewhere] = useState(false);
+
   const router = useRouter();
   const supabase = createClient();
 
@@ -39,29 +41,29 @@ export function LoginForm() {
   // link was already clicked in another tab or device -- there's no
   // session change to observe here, since the session lives in that
   // *other* tab's cookies. AppShell announces once it mounts (which only
-  // happens for a signed-in user), so this tab can navigate itself into
-  // the app the moment that happens, instead of sitting on a dead end
-  // forever. Not a substitute for actually closing the tab (browsers
-  // don't allow a page to close a tab it didn't open itself), but the
-  // same practical outcome.
-  //
-  // window.focus() is a best-effort add-on, not a fix: browsers
-  // deliberately refuse to let a backgrounded tab pull itself to the
-  // foreground (the same anti-annoyance rule that blocks focus-stealing
-  // pop-unders), so this tab will keep navigating silently in the
-  // background in Chrome/Firefox/Edge no matter what we call here --
-  // there is no JS API that overrides that. It's a real no-op in most
-  // browsers, but harmless, and does work in a few (Safari, some
-  // in-app webviews).
-  useEffect(
-    () =>
-      onSignedInElsewhere(() => {
-        window.focus();
-        router.push("/");
-        router.refresh();
-      }),
-    [router]
-  );
+  // happens for a signed-in user), so this tab learns about it and shows
+  // a "continue here" banner -- deliberately not an auto-navigate: two
+  // tabs both silently landing on the dashboard was more surprising than
+  // useful, so this tab now just waits for an explicit click.
+  useEffect(() => onSignedInElsewhere(() => setSignedInElsewhere(true)), []);
+
+  function continueSignedIn() {
+    router.push("/");
+    router.refresh();
+  }
+
+  const signedInBanner = signedInElsewhere ? (
+    <div className="flex items-center justify-between gap-3 bg-primary-container text-on-primary-container rounded-xl px-4 py-3">
+      <p className="text-body-md">You're signed in on another tab.</p>
+      <button
+        type="button"
+        onClick={continueSignedIn}
+        className="text-label-md font-bold underline shrink-0"
+      >
+        Continue here
+      </button>
+    </div>
+  ) : null;
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -171,6 +173,7 @@ export function LoginForm() {
   if (mode === "forgot") {
     return (
       <div className="flex flex-col gap-5">
+        {signedInBanner}
         {forgotSent ? (
           <div className="flex flex-col gap-4 text-center">
             <p className="text-body-md text-on-surface-variant">
@@ -232,6 +235,7 @@ export function LoginForm() {
   if (mode === "passwordless") {
     return (
       <div className="flex flex-col gap-5">
+        {signedInBanner}
         {otpError && (
           <p className="text-body-md text-error bg-error-container/20 border border-error/30 rounded px-3 py-2">
             {otpError}
@@ -311,6 +315,7 @@ export function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      {signedInBanner}
       {error && (
         <p className="text-body-md text-error bg-error-container/20 border border-error/30 rounded px-3 py-2">
           {error}
