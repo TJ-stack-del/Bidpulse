@@ -136,6 +136,22 @@ export function AdminGuide() {
                   ]}
                 />
               </GuideSection>
+
+              <GuideSection title="Demoing to a prospect" icon="co_present">
+                <GuideList
+                  items={[
+                    "Use a dedicated demo account, never a real client's data. Sign up through the normal intake flow with an obviously fake company name (e.g. \"Sample Co Demo\"), then open its submission from the inbox and mark it as a test submission. Test submissions are excluded from revenue totals and queue priority, so it never pollutes real reporting.",
+                    "Set it up ahead of time, not live on the call. Move the demo submission through a couple of stages and prepare at least one real-looking deliverable beforehand, so you're not waiting on an empty checklist or a blank draft mid-pitch.",
+                    "Open on the homepage: the \"before and after\" panel under the hero is the fastest way to show the actual transformation (messy RFP in, clean package out) in one screenshot-sized moment.",
+                    "Walk the intake wizard from their seat: three short steps, plain-language questions, and the optional \"upload a document to autofill\" step. Point out there's no card required and no long form.",
+                    "Show the client dashboard next: the compliance checklist (\"What we still need from you\"), stage progress, and the messaging thread. This is what they'll actually live in after they sign up.",
+                    "If it feels right, show one screen from your own side (the submission detail page) to build trust: a real person checking off a compliance checklist reads as more credible than an all-automated process. Skip this if they're more interested in speed than process.",
+                    "Close on a real, finished deliverable: open Preview packet on the demo submission so they see an actual capability statement and compliance matrix, not a mockup.",
+                    "Wrap up with pricing (Pilot for a free first bid, One-off, Retainer) and a clear next step: send them straight to /intake, or start it together on the call.",
+                    "Never open another real client's inbox row or submission during a demo, even by accident. If the inbox is already open on your screen, filter or scroll to the demo row before you start sharing.",
+                  ]}
+                />
+              </GuideSection>
             </div>
           </div>
         </div>,
