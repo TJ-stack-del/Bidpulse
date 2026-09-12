@@ -62,12 +62,13 @@ export function EstimatedValueInput({
           placeholder="Not set"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          className="px-2 py-1 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none w-32"
+          className="px-2 py-1 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary w-32"
         />
         <button
+          type="button"
           onClick={handleSave}
           disabled={saving}
-          className="px-3 py-1 rounded border border-outline-variant text-label-md hover:bg-surface-container-high transition disabled:opacity-40 flex items-center gap-1"
+          className="px-3 py-1 rounded border border-outline-variant text-label-md hover:bg-surface-container-high transition disabled:opacity-40 flex items-center gap-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           {saving && <Spinner />}
           {saving ? "Saving…" : "Save"}

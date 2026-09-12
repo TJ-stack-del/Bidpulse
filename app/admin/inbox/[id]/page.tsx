@@ -429,7 +429,7 @@ export default async function AdminSubmissionDetailPage({
               </>
             ) : (
               <p className="text-body-md text-on-surface-variant">
-                Not run yet — this only runs automatically right after a client submits via the intake wizard.
+                Not run yet. This only runs automatically right after a client submits via the intake wizard.
               </p>
             )}
 

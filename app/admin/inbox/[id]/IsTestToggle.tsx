@@ -50,7 +50,7 @@ export function IsTestToggle({
         className="accent-secondary"
       />
       <span className={isTest ? "text-error font-bold" : ""}>
-        {isTest ? "TEST — excluded from revenue reporting" : "Mark as test submission"}
+        {isTest ? "TEST: excluded from revenue reporting" : "Mark as test submission"}
       </span>
       {saving && <Spinner />}
     </label>

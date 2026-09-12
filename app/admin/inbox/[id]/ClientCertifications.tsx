@@ -94,14 +94,14 @@ export function ClientCertifications({
           <div>
             <p className="text-body-md text-on-surface font-bold">
               {certLabel(cert)}
-              {cert.certification_number ? ` — #${cert.certification_number}` : ""}
+              {cert.certification_number ? ` (#${cert.certification_number})` : ""}
             </p>
             <p className="text-label-md text-on-surface-variant">
               {cert.expiration_date ? `Expires ${new Date(cert.expiration_date).toLocaleDateString()}` : "No expiration on file"}
               {cert.file_url && (
                 <>
                   {" · "}
-                  <a href={cert.file_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                  <a href={cert.file_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm">
                     {cert.file_name ?? "View document"}
                   </a>
                 </>
@@ -109,6 +109,7 @@ export function ClientCertifications({
             </p>
           </div>
           <button
+            type="button"
             onClick={() => handleToggle(cert)}
             disabled={saving === cert.id || (!cert.verified && !cert.file_url)}
             title={
@@ -118,14 +119,14 @@ export function ClientCertifications({
                 ? CERT_REVIEWED_TOOLTIP
                 : undefined
             }
-            className={`px-3 py-1.5 rounded text-label-md font-bold transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 disabled:cursor-not-allowed flex items-center gap-2 ${
+            className={`px-3 py-1.5 rounded text-label-md font-bold transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 disabled:cursor-not-allowed flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
               cert.verified
                 ? "border border-outline-variant text-on-surface hover:bg-surface-container-high"
                 : "bg-primary-container text-on-primary-container hover:opacity-90"
             }`}
           >
             {saving === cert.id && <Spinner />}
-            {cert.verified ? "Document Reviewed — mark unreviewed" : "Not yet reviewed — mark reviewed"}
+            {cert.verified ? "Document Reviewed: mark unreviewed" : "Not yet reviewed: mark reviewed"}
           </button>
         </li>
       ))}

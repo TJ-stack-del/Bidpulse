@@ -71,7 +71,7 @@ export function RequestInfoForm({
       if (data.sent) {
         showToast("Request sent to client.", "success");
       } else if (data.reason === "test_submission") {
-        showToast("Checklist item updated (test submission — no email sent).", "success");
+        showToast("Checklist item updated (test submission, no email sent).", "success");
       } else if (data.reason === "no_client_email") {
         showToast("Checklist item updated, but this client has no email on file.", "error");
       }
@@ -99,7 +99,7 @@ export function RequestInfoForm({
             <select
               value={selected}
               onChange={(e) => handleSelect(e.target.value)}
-              className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
+              className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
             >
               {openItems.map((item) => (
                 <option key={item.id} value={item.id}>
@@ -115,7 +115,7 @@ export function RequestInfoForm({
           onChange={(e) => setMessage(e.target.value)}
           rows={4}
           placeholder="What do you need from the client?"
-          className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
+          className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
         />
         <p className="text-label-md text-on-surface-variant">
           {selected === OTHER_VALUE
@@ -125,7 +125,7 @@ export function RequestInfoForm({
         <button
           type="submit"
           disabled={submitting || !message.trim()}
-          className="self-start py-2.5 px-5 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 transition active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="self-start py-2.5 px-5 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 hover:-translate-y-0.5 transition active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           {submitting && <Spinner />}
           {submitting ? "Sending…" : "Send request"}
