@@ -68,13 +68,6 @@ export function IntakeWizard() {
   // here (see BUILD-ORDER-BIDPULSE.md item #7). Fetched client-side once the
   // submission locks, same trigger point as the fit-check fetch above.
   const [completenessPercent, setCompletenessPercent] = useState<number | null>(null);
-  // Blocks rendering step 0 until this resolves — without it, a client who's
-  // already logged in (e.g. starting a second bid) would briefly see the
-  // signup form and could submit it, calling signUp() a second time for an
-  // account that already exists ("User already registered"), which blocked
-  // them from ever reaching "About the bid." An existing client with a
-  // clients row skips step 0 entirely and starts on "About the bid" instead.
-  const [checkingSession, setCheckingSession] = useState(true);
   const [form, setForm] = useState<FormState>({
     companyName: "",
     contactName: "",
@@ -101,9 +94,21 @@ export function IntakeWizard() {
   const supabase = createClient();
 
   // A client who's already logged in (starting a second bid, or just
-  // returned to this page) already has an account and a clients row — step
-  // 0 exists only to create both for a brand-new visitor, so it must never
-  // run for them. Skip straight to "About the bid" instead.
+  // returned to this page) already has an account and a clients row — jump
+  // straight to "About the bid" instead of making them look at (and
+  // possibly fill out) the signup form again. This used to block the
+  // wizard's entire first render behind a spinner until this async check
+  // resolved, which meant every brand-new anonymous visitor -- the common
+  // case -- sat looking at a blank spinner instead of the actual form for
+  // however long a real round-trip to Supabase's auth server took, for a
+  // check that exists purely for the much rarer "already logged in"
+  // visitor. Rendering step 0 immediately and letting this effect swap to
+  // step 1 if/when it resolves is safe either way: handleAboutYouNext's own
+  // clients insert already re-checks for an existing row first (see its
+  // comment below) and reuses it rather than duplicating, so an
+  // already-logged-in visitor who somehow submits step 0 before this
+  // effect finishes just has their freshly-typed fields ignored in favor
+  // of their real record, not corrupted or duplicated.
   //
   // getUser() is a real round-trip to Supabase's auth server (not a local
   // cache read), so on a real user's real network it can transiently fail
@@ -127,10 +132,7 @@ export function IntakeWizard() {
         if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 400 * (attempt + 1)));
       }
 
-      if (!user) {
-        if (!cancelled) setCheckingSession(false);
-        return;
-      }
+      if (!user) return;
 
       let client: { id: string } | null = null;
       for (let attempt = 0; attempt < 3; attempt++) {
@@ -149,7 +151,6 @@ export function IntakeWizard() {
         setClientId(client.id);
         setStep(1);
       }
-      setCheckingSession(false);
     })();
     return () => {
       cancelled = true;
@@ -386,14 +387,6 @@ export function IntakeWizard() {
 
     setSubmissionId(submission.id);
     setStep(2);
-  }
-
-  if (checkingSession) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <Spinner className="text-primary" />
-      </div>
-    );
   }
 
   if (submitted) {

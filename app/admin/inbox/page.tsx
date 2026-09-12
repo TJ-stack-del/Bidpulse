@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { AppShell } from "@/components/ui/AppShell";
 import { InboxBoard } from "./InboxBoard";
 
 // This replaces the old self-serve /bids list — now shows every client's
@@ -141,7 +140,7 @@ export default async function AdminInboxPage() {
   const staleCount = openSubmissions.filter((s) => s.isStale && !s.pastPromise).length;
 
   return (
-    <AppShell activePath="/admin/inbox" role="admin" viewerName={member.full_name}>
+    <>
       <div className="mt-6">
         <h1 className="text-headline-lg text-primary mb-1">Intake Inbox</h1>
         <p className="text-body-md text-on-surface-variant">
@@ -196,6 +195,6 @@ export default async function AdminInboxPage() {
           </div>
         )}
       </div>
-    </AppShell>
+    </>
   );
 }

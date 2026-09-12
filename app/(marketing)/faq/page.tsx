@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MarketingShell } from "@/components/ui/MarketingShell";
 import { FaqAccordion } from "./FaqAccordion";
 
 export const metadata: Metadata = {
@@ -48,7 +47,7 @@ const CATEGORIES = [
 
 export default function FaqPage() {
   return (
-    <MarketingShell activePath="/faq">
+    <>
       <section className="max-w-2xl mx-auto w-full flex flex-col gap-4 text-center">
         <h1 className="text-headline-lg text-primary">Frequently asked questions</h1>
         <p className="text-body-lg text-on-surface-variant">
@@ -75,6 +74,6 @@ export default function FaqPage() {
           <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
         </Link>
       </section>
-    </MarketingShell>
+    </>
   );
 }

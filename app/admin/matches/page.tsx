@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { AppShell } from "@/components/ui/AppShell";
 import { MatchesPanel } from "./MatchesPanel";
 
 // BUILD-ORDER-BIDPULSE.md Step 8: "adapt the existing scrapers
@@ -41,7 +40,7 @@ export default async function AdminMatchesPage() {
     .order("company_name", { ascending: true });
 
   return (
-    <AppShell activePath="/admin/matches" role="admin" viewerName={member.full_name}>
+    <>
       <div className="mt-6">
         <h1 className="text-headline-lg text-primary mb-1">Matched Opportunities</h1>
         <p className="text-body-md text-on-surface-variant">
@@ -55,6 +54,6 @@ export default async function AdminMatchesPage() {
         initialMatches={matches ?? []}
         clients={clients ?? []}
       />
-    </AppShell>
+    </>
   );
 }

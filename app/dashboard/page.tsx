@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { AppShell } from "@/components/ui/AppShell";
 import { BidListFilter, type BidListItem } from "@/components/ui/BidListFilter";
 import { CompleteBidFile } from "./CompleteBidFile";
 import { SubmissionCard } from "./SubmissionCard";
@@ -128,17 +127,15 @@ export default async function DashboardPage() {
       hint: submissionsError.hint,
     });
     return (
-      <AppShell activePath="/dashboard" role="client" viewerName={client.company_name}>
-        <p className="text-body-md text-error mt-6">
-          Something went wrong loading your bids. Please refresh, or contact us if this keeps happening.
-        </p>
-      </AppShell>
+      <p className="text-body-md text-error mt-6">
+        Something went wrong loading your bids. Please refresh, or contact us if this keeps happening.
+      </p>
     );
   }
 
   if (!submissions || submissions.length === 0) {
     return (
-      <AppShell activePath="/dashboard" role="client" viewerName={client.company_name}>
+      <>
         <h1 className="text-headline-lg text-primary mt-6 mb-1">Welcome, {client.company_name}.</h1>
         <p className="text-body-md text-on-surface-variant mb-4">You haven&apos;t started a bid yet.</p>
         <Link
@@ -147,7 +144,7 @@ export default async function DashboardPage() {
         >
           Start your first bid
         </Link>
-      </AppShell>
+      </>
     );
   }
 
@@ -278,7 +275,7 @@ export default async function DashboardPage() {
   ];
 
   return (
-    <AppShell activePath="/dashboard" role="client" viewerName={client.company_name}>
+    <>
       <div className="mt-6 mb-2">
         <h1 className="text-headline-lg text-primary mb-1">Welcome back, {client.company_name}.</h1>
         <p className="text-body-md text-on-surface-variant">Your active bids, in one place.</p>
@@ -435,7 +432,7 @@ export default async function DashboardPage() {
           </div>
         </div>
       </div>
-    </AppShell>
+    </>
   );
 }
 

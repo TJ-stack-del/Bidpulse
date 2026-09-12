@@ -2,9 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { MarketingShell } from "@/components/ui/MarketingShell";
 import { KNOWN_TRADES, assertNoMissingTradeCards } from "@/lib/compliance/known-trades";
-import { FaqAccordion } from "@/app/faq/FaqAccordion";
+import { FaqAccordion } from "@/app/(marketing)/faq/FaqAccordion";
 import { TransformationPipeline } from "@/components/ui/TransformationPipeline";
 
 export const metadata: Metadata = {
@@ -183,7 +182,7 @@ const FAQ_PREVIEW = [
 
 function Home() {
   return (
-    <MarketingShell activePath="/">
+    <>
       {/* ---------- Hero ---------- */}
       <section className="flex flex-col items-center text-center gap-6 py-8">
         <span className="text-label-md font-code text-tertiary uppercase tracking-wide flex items-center gap-2">
@@ -416,6 +415,6 @@ function Home() {
           Get started
         </Link>
       </section>
-    </MarketingShell>
+    </>
   );
 }

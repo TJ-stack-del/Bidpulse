@@ -1,11 +1,26 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Logo } from "./Logo";
 import { SignOutButton } from "./SignOutButton";
 import { ThemeToggle } from "./ThemeToggle";
 
 // Extracted from the <header> and mobile <nav> markup that repeats
 // near-identically across all 43 mockups/*/code.html files.
-// Every route wraps its content in this instead of copy-pasting the shell.
+//
+// Now mounted once per section, from app/dashboard/layout.tsx and
+// app/admin/layout.tsx, rather than individually by every page -- when
+// every page rendered its own AppShell instance, React had to unmount
+// and remount the whole header/sidebar/nav on every navigation within
+// the same section (see globals.css's .animate-fade-in comment, which
+// existed specifically to soften that remount's visible flash). A real
+// Next.js layout persists across navigations in the same segment
+// instead, so the shell no longer disappears and reappears at all.
+// Active-link highlighting used to come from a per-page `activePath`
+// prop for this reason -- a shared layout doesn't know which page
+// rendered it, so this now reads the real current path directly via
+// usePathname() instead.
 //
 // Nav links are role-based since BidPulse split admin (your team,
 // works every client's submissions) from client (a contractor, sees only
@@ -34,13 +49,22 @@ const SIDEBAR_LABEL: Record<Role, string> = {
   client: "Your Account",
 };
 
+// Where the logo should take a signed-in user of each role -- their own
+// section's real home, not the marketing site. "/" would technically also
+// get them there (app/page.tsx's root routing bounces a signed-in user
+// straight to one of these two), but linking directly avoids that extra
+// redirect hop and matches what clicking a logo means inside a logged-in
+// app: take me home, not out to the public site.
+const HOME_PATH: Record<Role, string> = {
+  admin: "/admin/inbox",
+  client: "/dashboard",
+};
+
 export function AppShell({
-  activePath,
   role,
   viewerName,
   children,
 }: {
-  activePath: string;
   role: Role;
   // The signed-in admin's full name (team_members.full_name) or the
   // signed-in client's business name (clients.company_name) — whichever
@@ -49,6 +73,13 @@ export function AppShell({
   children: React.ReactNode;
 }) {
   const links = NAV_LINKS[role];
+  const pathname = usePathname();
+  // Longest matching href wins so a detail/sub-route (e.g. /dashboard/profile,
+  // or an admin inbox item at /admin/inbox/<id>) doesn't also light up a
+  // shorter sibling link (e.g. /dashboard) that happens to be a path prefix.
+  const activeHref = links
+    .filter((l) => pathname === l.href || pathname.startsWith(`${l.href}/`))
+    .sort((a, b) => b.href.length - a.href.length)[0]?.href;
 
   return (
     <div className="min-h-screen flex flex-col bg-surface">
@@ -57,11 +88,7 @@ export function AppShell({
             roles) so the logo sits flush left above the sidebar, matching
             the Stitch screens' header+sidebar shell. */}
         <div className="flex items-center justify-between px-margin-mobile md:px-margin-desktop py-3">
-          {/* "/" always bounces a signed-in user straight back into the app
-              (see app/page.tsx's root routing), so this can't link there like
-              the marketing nav's logo does — /pricing is a real public page
-              that actually gets them out to the marketing site. */}
-          <Link href="/pricing" className="shrink-0 flex items-center">
+          <Link href={HOME_PATH[role]} className="shrink-0 flex items-center">
             <Logo priority />
           </Link>
           <div className="flex items-center gap-3">
@@ -86,7 +113,7 @@ export function AppShell({
               key={link.href}
               href={link.href}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition text-label-md ${
-                activePath === link.href
+                activeHref === link.href
                   ? "bg-primary-container text-on-primary-container font-bold"
                   : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
               }`}
@@ -108,7 +135,7 @@ export function AppShell({
             key={link.href}
             href={link.href}
             className={`flex flex-col items-center justify-center transition-opacity active:opacity-80 ${
-              activePath === link.href
+              activeHref === link.href
                 ? "text-primary font-bold bg-surface-container-highest rounded-xl px-3 py-1"
                 : "text-on-surface-variant"
             }`}

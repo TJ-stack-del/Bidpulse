@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { MarketingShell } from "@/components/ui/MarketingShell";
 import { assertNoMissingTradeCards } from "@/lib/compliance/known-trades";
 
 export const metadata: Metadata = {
@@ -73,7 +72,7 @@ assertNoMissingTradeCards(
 
 export default function GalleryPage() {
   return (
-    <MarketingShell activePath="/gallery">
+    <>
       <section className="text-center flex flex-col gap-2">
         <h1 className="text-headline-lg text-primary">Example deliverables</h1>
         <p className="text-body-md text-on-surface-variant max-w-lg mx-auto">
@@ -104,6 +103,6 @@ export default function GalleryPage() {
           </div>
         ))}
       </section>
-    </MarketingShell>
+    </>
   );
 }

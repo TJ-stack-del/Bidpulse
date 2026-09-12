@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { AppShell } from "@/components/ui/AppShell";
 import { LifecycleStepper, stageNumber } from "@/components/ui/LifecycleStepper";
 import { AdminSubmissionActions } from "./AdminSubmissionActions";
 import { DeliverablesPanel } from "./DeliverablesPanel";
@@ -55,11 +54,7 @@ export default async function AdminSubmissionDetailPage({
     .single();
 
   if (!submission) {
-    return (
-      <AppShell activePath="/admin/inbox" role="admin" viewerName={member.full_name}>
-        <p className="text-body-md text-error mt-6">Submission not found.</p>
-      </AppShell>
-    );
+    return <p className="text-body-md text-error mt-6">Submission not found.</p>;
   }
 
   const { data: notes } = await supabase
@@ -191,7 +186,7 @@ export default async function AdminSubmissionDetailPage({
     ) ?? null;
 
   return (
-    <AppShell activePath="/admin/inbox" role="admin" viewerName={member.full_name}>
+    <>
       {!submission.draft && (
         <AdminFirstViewTransition
           submissionId={submission.id}
@@ -530,6 +525,6 @@ export default async function AdminSubmissionDetailPage({
           </table>
         </div>
       </section>
-    </AppShell>
+    </>
   );
 }

@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { AppShell } from "@/components/ui/AppShell";
 import { CertificationsSection } from "./CertificationsSection";
 import { PastPerformanceSection } from "./PastPerformanceSection";
 import { CompanyProfileClient } from "./CompanyProfileClient";
@@ -41,7 +40,7 @@ export default async function CompanyProfilePage() {
     .order("created_at", { ascending: false });
 
   return (
-    <AppShell activePath="/dashboard/profile" role="client" viewerName={client.company_name}>
+    <>
       <div className="mt-6">
         <h1 className="text-headline-lg text-primary mb-1">Company Profile</h1>
         <p className="text-body-md text-on-surface-variant">{client.company_name}</p>
@@ -101,6 +100,6 @@ export default async function CompanyProfilePage() {
         </p>
         <PastPerformanceSection clientId={client.id} initialEntries={pastPerformance ?? []} />
       </div>
-    </AppShell>
+    </>
   );
 }

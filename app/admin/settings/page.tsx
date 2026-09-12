@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { AppShell } from "@/components/ui/AppShell";
 import { ThresholdSettingsForm } from "./ThresholdSettingsForm";
 
 export default async function AdminSettingsPage() {
@@ -26,7 +25,7 @@ export default async function AdminSettingsPage() {
     .single();
 
   return (
-    <AppShell activePath="/admin/settings" role="admin" viewerName={member.full_name}>
+    <>
       <div className="mt-6">
         <h1 className="text-headline-lg text-primary mb-1">Settings</h1>
         <p className="text-body-md text-on-surface-variant">Business-wide settings for how BidPulse works.</p>
@@ -50,6 +49,6 @@ export default async function AdminSettingsPage() {
           <p className="text-body-md text-error">Couldn&apos;t load organization settings.</p>
         )}
       </div>
-    </AppShell>
+    </>
   );
 }

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MarketingShell } from "@/components/ui/MarketingShell";
 
 export const metadata: Metadata = {
   title: "Pricing",
@@ -41,7 +40,7 @@ const PACKAGES = [
 
 export default function PricingPage() {
   return (
-    <MarketingShell activePath="/pricing">
+    <>
       <section className="text-center flex flex-col gap-2">
         <h1 className="text-headline-lg text-primary">Pricing</h1>
         <p className="text-body-md text-on-surface-variant">
@@ -110,6 +109,6 @@ export default function PricingPage() {
       <p className="text-label-sm text-on-surface-variant text-center">
         BidPulse helps you prepare a strong, compliant bid — but we can't guarantee you'll win. That decision is up to the agency.
       </p>
-    </MarketingShell>
+    </>
   );
 }

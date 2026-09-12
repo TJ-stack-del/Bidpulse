@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { MarketingShell } from "@/components/ui/MarketingShell";
 
 export const metadata: Metadata = {
   title: "Blog",
@@ -29,7 +28,7 @@ const POSTS = [
 
 export default function BlogPage() {
   return (
-    <MarketingShell activePath="/blog">
+    <>
       <section className="max-w-2xl mx-auto w-full flex flex-col gap-2 text-center">
         <h1 className="text-headline-lg text-primary">Blog</h1>
         <p className="text-body-lg text-on-surface-variant">Plain-language tips for bidding on local contracts.</p>
@@ -49,6 +48,6 @@ export default function BlogPage() {
           </article>
         ))}
       </div>
-    </MarketingShell>
+    </>
   );
 }

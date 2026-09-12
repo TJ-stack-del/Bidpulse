@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Logo } from "./Logo";
 import { TAGLINE } from "@/lib/brand";
@@ -9,6 +10,16 @@ import { TAGLINE } from "@/lib/brand";
 // AppShell, which is for the authenticated app and branches nav by role.
 // Nobody needs a role here; every visitor sees the same nav, plus
 // Log in / Get started. Visual system matches the new BidPulse mockups.
+//
+// Now mounted once for the whole site via app/(marketing)/layout.tsx
+// rather than individually by every page -- when every page rendered its
+// own MarketingShell instance, React had to unmount and remount the whole
+// header/footer on every navigation between marketing pages (see
+// globals.css's .animate-fade-in comment, which existed specifically to
+// soften that remount's visible flash). Active-link highlighting used to
+// come from a per-page `activePath` prop for this reason -- a shared
+// layout doesn't know which page rendered it, so this now reads the real
+// current path directly via usePathname() instead.
 
 const NAV_LINKS = [
   { href: "/pricing", label: "Pricing" },
@@ -18,14 +29,9 @@ const NAV_LINKS = [
   { href: "/blog", label: "Blog" },
 ];
 
-export function MarketingShell({
-  activePath,
-  children,
-}: {
-  activePath: string;
-  children: React.ReactNode;
-}) {
+export function MarketingShell({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const activePath = usePathname();
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-on-background">

@@ -159,10 +159,15 @@ body {
   @apply bg-surface text-on-surface font-sans;
 }
 
-/* Subtle page-load fade — applied to each page's <main>, which remounts on
-   every navigation since AppShell/MarketingShell are plain wrapper
-   components (not Next.js layouts), so this replays on every route change
-   without any client-side routing JS. */
+/* Subtle page-load fade — applied to AppShell's <main>. AppShell itself is
+   now mounted once per section via app/dashboard/layout.tsx and
+   app/admin/layout.tsx (a real Next.js layout, not a plain wrapper
+   component each page rendered individually), so <main> no longer
+   unmounts on every in-section navigation and this animation no longer
+   replays on each one either -- that's deliberate: the old remount (and
+   this fade meant to soften it) was the actual cause of a visible flash
+   between pages, not something worth preserving. MarketingShell's own
+   pages still render it individually, so this still plays there. */
 @keyframes fade-in {
   from {
     opacity: 0;
