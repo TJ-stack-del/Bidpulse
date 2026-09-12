@@ -152,7 +152,7 @@ export function Combobox({
                     e.preventDefault();
                     select(o);
                   }}
-                  className={`w-full text-left px-3 py-1.5 text-body-sm transition ${
+                  className={`w-full text-left px-3 py-1.5 text-body-sm transition focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary ${
                     o.id === value
                       ? "bg-primary-container/50 text-on-surface font-semibold"
                       : "text-on-surface hover:bg-surface-container-high"

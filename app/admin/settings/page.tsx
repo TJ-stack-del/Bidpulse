@@ -39,7 +39,7 @@ export default async function AdminSettingsPage() {
         <p className="text-body-md text-on-surface-variant mb-4">
           For informal quotes below this dollar value, the deliverables panel will suggest a lean package
           (Rate Sheet + Executive Cover + Certificate of Insurance) instead of the full set. The default,
-          $35,000, is the <strong>state</strong> threshold under FL Statute 287.017 Category Two — local bodies
+          $35,000, is the <strong>state</strong> threshold under FL Statute 287.017 Category Two. Local bodies
           (JEA, JAA, City of Jacksonville, Duval Schools) may set their own, so adjust this to match what
           you&apos;re actually seeing in practice.
         </p>

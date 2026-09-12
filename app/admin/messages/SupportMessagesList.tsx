@@ -48,7 +48,12 @@ export function SupportMessagesList({ messages }: { messages: Message[] }) {
                   </span>
                 )}
               </div>
-              <p className="text-label-md text-on-surface-variant break-words">{m.email}</p>
+              <a
+                href={`mailto:${m.email}`}
+                className="text-label-md text-primary hover:underline break-words focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary rounded-sm"
+              >
+                {m.email}
+              </a>
             </div>
             <div className="flex flex-col items-end gap-2 shrink-0">
               <span className="text-label-md text-on-surface-variant whitespace-nowrap">
@@ -58,7 +63,7 @@ export function SupportMessagesList({ messages }: { messages: Message[] }) {
                 type="button"
                 onClick={() => toggleRead(m.id, !m.read)}
                 disabled={!!pendingIds[m.id]}
-                className="px-3 py-1.5 rounded border border-outline-variant text-label-md font-semibold hover:bg-surface-container-high transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100"
+                className="px-3 py-1.5 rounded border border-outline-variant text-label-md font-semibold hover:bg-surface-container-high transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               >
                 {m.read ? "Mark unread" : "Mark read"}
               </button>

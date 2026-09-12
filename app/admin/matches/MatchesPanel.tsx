@@ -37,12 +37,6 @@ function dueDateInfo(dueDate: string | null): { label: string; className: string
   return { label: date, className: "text-on-surface-variant" };
 }
 
-const STATUS_ACCENT: Record<string, string> = {
-  new: "border-l-secondary",
-  assigned: "border-l-primary",
-  dismissed: "border-l-outline-variant",
-};
-
 export function MatchesPanel({
   orgId,
   actorId,
@@ -277,7 +271,7 @@ export function MatchesPanel({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
-              className="w-full border-0 bg-surface-container-low text-on-surface text-body-md px-space-md py-space-sm rounded-lg placeholder:text-outline focus:outline-none focus:ring-0 focus:bg-surface-container-highest"
+              className="w-full border-0 bg-surface-container-low text-on-surface text-body-md px-space-md py-space-sm rounded-lg placeholder:text-outline outline-none focus:bg-surface-container-highest focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
             />
           </div>
           <div className="flex-1 min-w-[160px] flex flex-col gap-space-2xs">
@@ -286,7 +280,7 @@ export function MatchesPanel({
               value={agency}
               onChange={(e) => setAgency(e.target.value)}
               required
-              className="w-full border-0 bg-surface-container-low text-on-surface text-body-md px-space-md py-space-sm rounded-lg placeholder:text-outline focus:outline-none focus:ring-0 focus:bg-surface-container-highest"
+              className="w-full border-0 bg-surface-container-low text-on-surface text-body-md px-space-md py-space-sm rounded-lg placeholder:text-outline outline-none focus:bg-surface-container-highest focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
             />
           </div>
           <div className="flex-1 min-w-[160px] flex flex-col gap-space-2xs">
@@ -294,7 +288,7 @@ export function MatchesPanel({
             <input
               value={solicitationNumber}
               onChange={(e) => setSolicitationNumber(e.target.value)}
-              className="w-full border-0 bg-surface-container-low text-on-surface text-body-md px-space-md py-space-sm rounded-lg placeholder:text-outline focus:outline-none focus:ring-0 focus:bg-surface-container-highest"
+              className="w-full border-0 bg-surface-container-low text-on-surface text-body-md px-space-md py-space-sm rounded-lg placeholder:text-outline outline-none focus:bg-surface-container-highest focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
             />
           </div>
           <div className="flex flex-col gap-space-2xs">
@@ -303,7 +297,7 @@ export function MatchesPanel({
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              className="border-0 bg-surface-container-low text-on-surface text-body-md px-space-md py-space-sm rounded-lg focus:outline-none focus:ring-0 focus:bg-surface-container-highest"
+              className="border-0 bg-surface-container-low text-on-surface text-body-md px-space-md py-space-sm rounded-lg outline-none focus:bg-surface-container-highest focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
             />
           </div>
         </div>
@@ -314,13 +308,13 @@ export function MatchesPanel({
             onChange={(e) => setScope(e.target.value)}
             rows={3}
             placeholder="What the job actually involves…"
-            className="w-full border-0 bg-surface-container-low text-on-surface text-body-md px-space-md py-space-sm rounded-lg placeholder:text-outline focus:outline-none focus:ring-0 focus:bg-surface-container-highest resize-y"
+            className="w-full border-0 bg-surface-container-low text-on-surface text-body-md px-space-md py-space-sm rounded-lg placeholder:text-outline outline-none focus:bg-surface-container-highest focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary resize-y"
           />
         </div>
         <button
           type="submit"
           disabled={logging}
-          className="self-end px-space-lg py-space-sm bg-primary-container hover:bg-primary text-on-primary-container font-headline text-[14px] font-bold uppercase tracking-wider rounded-xl shadow-md flex items-center gap-space-sm active:scale-[0.99] transition-all disabled:opacity-40 disabled:active:scale-100"
+          className="self-end px-space-lg py-space-sm bg-primary-container hover:bg-primary text-on-primary-container font-headline text-[14px] font-bold uppercase tracking-wider rounded-xl shadow-md flex items-center gap-space-sm active:scale-[0.99] transition-all disabled:opacity-40 disabled:active:scale-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           {logging && <Spinner />}
           {logging ? "Logging…" : "Log opportunity"}
@@ -335,7 +329,7 @@ export function MatchesPanel({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search title or agency…"
-          className="w-full border-0 bg-surface-container-low text-on-surface text-body-md pl-11 pr-space-md py-space-sm rounded-lg placeholder:text-outline focus:outline-none focus:ring-0 focus:bg-surface-container-highest"
+          className="w-full border-0 bg-surface-container-low text-on-surface text-body-md pl-11 pr-space-md py-space-sm rounded-lg placeholder:text-outline outline-none focus:bg-surface-container-highest focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
         />
       </div>
 
@@ -361,7 +355,7 @@ export function MatchesPanel({
               return (
                 <tr
                   key={m.id}
-                  className={`border-t border-outline-variant align-top border-l-4 ${STATUS_ACCENT[m.status] ?? "border-l-transparent"} hover:bg-surface-container-high transition`}
+                  className="border-t border-outline-variant align-top hover:bg-surface-container-high transition"
                 >
                   <td className="px-space-base py-space-base text-on-surface font-bold break-words">
                     {m.source_url ? (
@@ -369,7 +363,7 @@ export function MatchesPanel({
                         href={m.source_url}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-primary hover:underline"
+                        className="text-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm"
                       >
                         {m.source_title}
                       </a>
@@ -428,13 +422,13 @@ export function MatchesPanel({
           return (
             <div
               key={m.id}
-              className={`flex flex-col gap-3 px-space-base py-space-base border-l-4 ${STATUS_ACCENT[m.status] ?? "border-l-transparent"}`}
+              className="flex flex-col gap-3 px-space-base py-space-base"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-on-surface font-bold break-words">
                     {m.source_url ? (
-                      <a href={m.source_url} target="_blank" rel="noreferrer" className="text-primary hover:underline">
+                      <a href={m.source_url} target="_blank" rel="noreferrer" className="text-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm">
                         {m.source_title}
                       </a>
                     ) : (
@@ -488,7 +482,7 @@ export function MatchesPanel({
         title="Delete this opportunity?"
         description={
           deleteTarget?.assigned_client_id
-            ? `This permanently deletes the "${deleteTarget?.source_title}" opportunity record. It's already assigned to ${clientName(deleteTarget?.assigned_client_id ?? null)} — that client's actual submission is NOT affected, only this review-queue entry.`
+            ? `This permanently deletes the "${deleteTarget?.source_title}" opportunity record. It's already assigned to ${clientName(deleteTarget?.assigned_client_id ?? null)}: that client's actual submission is NOT affected, only this review-queue entry.`
             : `This permanently deletes the "${deleteTarget?.source_title}" opportunity record. This cannot be undone.`
         }
         busy={deleting}
@@ -591,17 +585,19 @@ function AssignControls({
       />
       <div className="flex items-center gap-2 shrink-0">
         <button
+          type="button"
           onClick={onAssign}
           disabled={busy}
-          className="px-3 py-1.5 rounded-lg bg-primary-container hover:bg-primary text-on-primary-container text-label-sm uppercase tracking-wider font-bold transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
+          className="px-3 py-1.5 rounded-lg bg-primary-container hover:bg-primary text-on-primary-container text-label-sm uppercase tracking-wider font-bold transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           {busy && <Spinner />}
           Assign
         </button>
         <button
+          type="button"
           onClick={onDismiss}
           disabled={busy}
-          className="px-3 py-1.5 rounded-lg bg-surface-container-highest text-on-surface text-label-sm uppercase tracking-wider font-bold hover:opacity-90 transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100"
+          className="px-3 py-1.5 rounded-lg bg-surface-container-highest text-on-surface text-label-sm uppercase tracking-wider font-bold hover:opacity-90 transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           Dismiss
         </button>
@@ -614,10 +610,11 @@ function AssignControls({
 function DeleteIconButton({ onClick }: { onClick: () => void }) {
   return (
     <button
+      type="button"
       onClick={onClick}
       aria-label="Delete opportunity"
       title="Delete opportunity"
-      className="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-error hover:bg-error-container/20 transition active:scale-[0.97]"
+      className="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-error hover:bg-error-container/20 transition active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-error"
     >
       <span className="material-symbols-outlined text-[18px]">delete</span>
     </button>

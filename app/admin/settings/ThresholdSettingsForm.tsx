@@ -47,13 +47,13 @@ export function ThresholdSettingsForm({ orgId, initialThreshold }: { orgId: stri
           step="1000"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none w-40"
+          className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary w-40"
         />
       </div>
       <button
         type="submit"
         disabled={saving}
-        className="py-2 px-4 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 transition active:scale-[0.97] disabled:opacity-40 flex items-center gap-2"
+        className="py-2 px-4 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 hover:-translate-y-0.5 transition active:scale-[0.97] disabled:opacity-40 flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
         {saving && <Spinner />}
         {saving ? "Saving…" : "Save"}
