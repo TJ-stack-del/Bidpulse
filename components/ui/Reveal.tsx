@@ -18,7 +18,7 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 
 type RevealProps = {
   children: ReactNode;
-  as?: "div" | "li";
+  as?: "div" | "li" | "article";
   className?: string;
   /** "view" (default) fires once the element scrolls into view; "mount" fires immediately, for above-the-fold content. */
   mode?: "view" | "mount";
@@ -34,12 +34,14 @@ export function Reveal({ children, as = "div", className, mode = "view", variant
   const reduceMotion = mounted && prefersReducedMotion;
 
   if (reduceMotion) {
-    return as === "li" ? <li className={className}>{children}</li> : <div className={className}>{children}</div>;
+    if (as === "li") return <li className={className}>{children}</li>;
+    if (as === "article") return <article className={className}>{children}</article>;
+    return <div className={className}>{children}</div>;
   }
 
   const hidden = variant === "scale" ? { opacity: 0, scale: 0.92 } : { opacity: 0, y: 16 };
   const shown = { opacity: 1, y: 0, scale: 1 };
-  const Component = as === "li" ? motion.li : motion.div;
+  const Component = as === "li" ? motion.li : as === "article" ? motion.article : motion.div;
   const trigger =
     mode === "mount"
       ? { initial: hidden, animate: shown }
