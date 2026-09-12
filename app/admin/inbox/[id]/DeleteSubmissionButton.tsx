@@ -60,8 +60,9 @@ export function DeleteSubmissionButton({
   return (
     <>
       <button
+        type="button"
         onClick={() => setOpen(true)}
-        className="w-full py-2 px-4 rounded border border-error text-error text-label-md font-bold hover:bg-error-container/20 transition active:scale-[0.97]"
+        className="w-full py-2 px-4 rounded border border-error text-error text-label-md font-bold hover:bg-error-container/20 transition active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-error"
       >
         Delete submission
       </button>

@@ -117,11 +117,11 @@ export function DeliverablesPanel({
       });
       const data = await res.json().catch(() => null);
       if (data?.advanced) {
-        showToast("All three deliverables are ready — stage moved to Deliverables ready.", "success");
+        showToast("All three deliverables are ready. Stage moved to Deliverables ready.", "success");
         router.refresh();
       } else if (data?.reason === "has_placeholders") {
         showToast(
-          "Still has [bracketed placeholders] to fill in — won't move to Deliverables ready until they're replaced with real content.",
+          "Still has [bracketed placeholders] to fill in. Won't move to Deliverables ready until they're replaced with real content.",
           "error"
         );
       }
@@ -266,12 +266,13 @@ export function DeliverablesPanel({
         <div className="mb-6 bg-surface-container-highest border border-outline-variant rounded-lg p-4 flex items-center justify-between gap-3 flex-wrap">
           <p className="text-body-md text-on-surface">
             This bid is estimated at ${estimatedValue!.toLocaleString()}, under the $
-            {leanPackageThreshold.toLocaleString()} lean-package threshold — a lean package (Rate Sheet +
+            {leanPackageThreshold.toLocaleString()} lean-package threshold. A lean package (Rate Sheet +
             Executive Cover + Certificate of Insurance) may be more appropriate than the full deliverable set.
           </p>
           <button
+            type="button"
             onClick={() => setLeanMode(true)}
-            className="px-4 py-2 rounded border border-primary text-primary text-label-md font-bold hover:bg-surface-container-low transition active:scale-[0.97] shrink-0"
+            className="px-4 py-2 rounded border border-primary text-primary text-label-md font-bold hover:bg-surface-container-low transition active:scale-[0.97] shrink-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
             Switch to lean package
           </button>
@@ -280,7 +281,7 @@ export function DeliverablesPanel({
       {leanMode && (
         <div className="mb-6 flex items-center justify-between gap-3">
           <p className="text-label-md text-on-surface-variant">Using the lean package.</p>
-          <button onClick={() => setLeanMode(false)} className="text-label-md text-primary hover:underline">
+          <button type="button" onClick={() => setLeanMode(false)} className="text-label-md text-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm">
             Use full package instead
           </button>
         </div>
@@ -312,7 +313,7 @@ export function DeliverablesPanel({
                   href={existing.file_url}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-primary font-bold hover:underline text-body-md block mb-2"
+                  className="text-primary font-bold hover:underline text-body-md block mb-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm"
                 >
                   Current file
                 </a>
@@ -326,34 +327,36 @@ export function DeliverablesPanel({
                 }}
                 rows={estimateRows(drafts[t.value] ?? "")}
                 placeholder="Paste or write the content directly…"
-                className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none mb-2"
+                className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary mb-2"
               />
 
               <div className="flex items-center gap-3 flex-wrap">
                 <button
+                  type="button"
                   onClick={() => handleAutoDraft(t.value)}
                   disabled={isBusy}
-                  className="px-4 py-2 rounded border border-outline-variant text-on-surface text-label-md font-bold hover:bg-surface-container-high transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
+                  className="px-4 py-2 rounded border border-outline-variant text-on-surface text-label-md font-bold hover:bg-surface-container-high transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 >
                   {isGenerating ? <Spinner /> : <span className="material-symbols-outlined text-[18px]">auto_awesome</span>}
                   {isGenerating ? "Generating…" : "Auto-draft"}
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleSaveText(t.value)}
                   disabled={isBusy}
-                  className="px-4 py-2 bg-primary-container text-on-primary-container rounded text-label-md hover:opacity-90 transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
+                  className="px-4 py-2 bg-primary-container text-on-primary-container rounded text-label-md hover:opacity-90 hover:-translate-y-0.5 transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 >
                   {isSaving && <Spinner />}
                   {isSaving ? "Saving…" : "Save text"}
                 </button>
-                <label className="px-4 py-2 rounded border border-primary text-primary text-label-md font-bold hover:bg-surface-container-low transition active:scale-[0.97] cursor-pointer flex items-center gap-2">
+                <label className="px-4 py-2 rounded border border-primary text-primary text-label-md font-bold hover:bg-surface-container-low transition active:scale-[0.97] cursor-pointer flex items-center gap-2 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary">
                   {isSaving && <Spinner />}
                   {isSaving ? "Saving…" : "Upload file instead"}
                   <input
                     type="file"
                     onChange={(e) => handleUpload(t.value, e)}
                     disabled={isBusy}
-                    className="hidden"
+                    className="sr-only"
                   />
                 </label>
                 <FadeMessage show={!!savedTypes[t.value]} className="text-body-md text-primary">

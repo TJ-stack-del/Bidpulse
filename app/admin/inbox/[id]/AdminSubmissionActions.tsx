@@ -20,7 +20,7 @@ const STAGES = [
 // Human text for the notify route's non-error "not sent" reasons — these
 // aren't failures, so they're shown in a neutral tone, not error red.
 const SKIP_REASON_LABELS: Record<string, string> = {
-  test_submission: "test submission — no email sent",
+  test_submission: "test submission, no email sent",
   no_client_email: "client has no email on file",
   no_template_for_stage: "no email template for this stage",
   queued_for_retry: "email queued for automatic retry",
@@ -172,9 +172,10 @@ export function AdminSubmissionActions({
           {STAGES.map((s) => (
             <button
               key={s}
+              type="button"
               onClick={() => handleStageChange(s)}
               disabled={savingStage}
-              className={`px-3 py-2 rounded text-label-md border transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 ${
+              className={`px-3 py-2 rounded text-label-md border transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                 stage === s
                   ? "bg-primary-container text-on-primary-container border-primary"
                   : "bg-surface border-outline-variant text-on-surface hover:bg-surface-container-high"
@@ -189,7 +190,7 @@ export function AdminSubmissionActions({
         </FadeMessage>
         {notifySkipReason && (
           <p className="text-body-md text-on-surface-variant mt-3">
-            Client not notified — {SKIP_REASON_LABELS[notifySkipReason] ?? notifySkipReason}.
+            Client not notified: {SKIP_REASON_LABELS[notifySkipReason] ?? notifySkipReason}.
           </p>
         )}
       </div>
@@ -207,12 +208,12 @@ export function AdminSubmissionActions({
             value={checklistLabel}
             onChange={(e) => setChecklistLabel(e.target.value)}
             placeholder="e.g. Complete your Company Profile (address, phone, insurance)…"
-            className="flex-1 px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
+            className="flex-1 px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
           />
           <button
             type="submit"
             disabled={addingChecklistItem}
-            className="px-4 py-2 bg-primary-container text-on-primary-container rounded text-label-md hover:opacity-90 transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
+            className="px-4 py-2 bg-primary-container text-on-primary-container rounded text-label-md hover:opacity-90 hover:-translate-y-0.5 transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
             {addingChecklistItem && <Spinner />}
             Add
@@ -231,7 +232,7 @@ export function AdminSubmissionActions({
                   <select
                     defaultValue={item.status}
                     onChange={(e) => handleChecklistChange(item.id, e.target.value)}
-                    className="px-2 py-1 rounded border border-outline-variant bg-surface text-body-md text-on-surface transition"
+                    className="px-2 py-1 rounded border border-outline-variant bg-surface text-body-md text-on-surface transition outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
                   >
                     <option value="not_started">Not started</option>
                     <option value="in_progress">In progress</option>
@@ -258,12 +259,12 @@ export function AdminSubmissionActions({
             value={noteText}
             onChange={(e) => setNoteText(e.target.value)}
             placeholder="Add a note…"
-            className="flex-1 px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
+            className="flex-1 px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
           />
           <button
             type="submit"
             disabled={addingNote}
-            className="px-4 py-2 bg-primary-container text-on-primary-container rounded text-label-md hover:opacity-90 transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
+            className="px-4 py-2 bg-primary-container text-on-primary-container rounded text-label-md hover:opacity-90 hover:-translate-y-0.5 transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
             {addingNote && <Spinner />}
             Add
