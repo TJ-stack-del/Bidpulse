@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { Logo } from "./Logo";
 import { SignOutButton } from "./SignOutButton";
 import { ThemeToggle } from "./ThemeToggle";
+import { AdminGuide } from "./AdminGuide";
 import { broadcastSignedIn } from "@/lib/auth-broadcast";
 
 // Extracted from the <header> and mobile <nav> markup that repeats
@@ -121,6 +122,7 @@ export function AppShell({
             <p className="hidden sm:block text-label-md uppercase tracking-wider text-on-surface-variant whitespace-nowrap">
               {formatViewerName(viewerName)} · {role === "admin" ? "Admin" : "Client view"}
             </p>
+            {role === "admin" && <AdminGuide />}
             <ThemeToggle />
             <div className="flex items-center gap-1">
               <SignOutButton />
