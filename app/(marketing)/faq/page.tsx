@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FaqAccordion } from "./FaqAccordion";
+import { Reveal } from "@/components/ui/Reveal";
 
 export const metadata: Metadata = {
   title: "FAQ",
@@ -30,7 +31,7 @@ const CATEGORIES = [
     faqs: [
       {
         q: "How does pricing work?",
-        a: "We confirm pricing with you directly before any work starts — one-off, retainer, and pilot options are on the Pricing page. No card is required to get started.",
+        a: "We confirm pricing with you directly before any work starts: one-off, retainer, and pilot options are on the Pricing page. No card is required to get started.",
       },
     ],
   },
@@ -39,7 +40,7 @@ const CATEGORIES = [
     faqs: [
       {
         q: "What do I need to get started?",
-        a: "Just the RFP itself (or a link to it) and basic company info — NAICS codes, small-business status, and set-asides if you have them.",
+        a: "Just the RFP itself (or a link to it) and basic company info: NAICS codes, small-business status, and set-asides if you have them.",
       },
     ],
   },
@@ -49,31 +50,35 @@ export default function FaqPage() {
   return (
     <>
       <section className="max-w-2xl mx-auto w-full flex flex-col gap-4 text-center">
-        <h1 className="text-headline-lg text-primary">Frequently asked questions</h1>
-        <p className="text-body-lg text-on-surface-variant">
-          Straight answers about how BidPulse works.
-        </p>
+        <Reveal mode="mount">
+          <h1 className="text-headline-lg text-primary">Frequently asked questions</h1>
+        </Reveal>
+        <Reveal mode="mount" delay={0.08}>
+          <p className="text-body-lg text-on-surface-variant">
+            Straight answers about how BidPulse works.
+          </p>
+        </Reveal>
       </section>
 
       <section className="max-w-3xl mx-auto w-full flex flex-col gap-10">
-        {CATEGORIES.map((cat) => (
-          <div key={cat.name} className="flex flex-col gap-4">
+        {CATEGORIES.map((cat, i) => (
+          <Reveal key={cat.name} delay={i * 0.08} className="flex flex-col gap-4">
             <h2 className="text-headline-md text-primary border-b border-outline-variant pb-2">{cat.name}</h2>
             <FaqAccordion faqs={cat.faqs} />
-          </div>
+          </Reveal>
         ))}
       </section>
 
-      <section className="text-center flex flex-col items-center gap-4">
+      <Reveal as="div" className="text-center flex flex-col items-center gap-4">
         <p className="text-body-lg text-on-surface-variant">Can&apos;t find the answer you&apos;re looking for?</p>
         <Link
           href="/contact"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 transition active:scale-[0.97]"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 hover:-translate-y-0.5 transition active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           Contact support
           <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
         </Link>
-      </section>
+      </Reveal>
     </>
   );
 }
