@@ -132,13 +132,6 @@ export default async function AdminInboxPage() {
   const openCount = openSubmissions.length;
   const grossValue = openSubmissions.reduce((sum, s) => sum + (s.estimated_value ?? 0), 0);
 
-  // Same pastPromise/isStale flags the daily-digest cron already emails
-  // out (app/api/daily-digest/route.ts) — this just surfaces the identical
-  // real computation as an on-screen banner instead of only a per-card
-  // badge, so it isn't missed until the next digest run.
-  const pastPromiseCount = openSubmissions.filter((s) => s.pastPromise).length;
-  const staleCount = openSubmissions.filter((s) => s.isStale && !s.pastPromise).length;
-
   return (
     <>
       <div className="mt-6">
@@ -147,27 +140,6 @@ export default async function AdminInboxPage() {
           Every client submission, across every stage.
         </p>
       </div>
-
-      {(pastPromiseCount > 0 || staleCount > 0) && (
-        <div className="w-full bg-surface-container-low px-gutter py-3 rounded-xl shadow-md flex flex-wrap items-center gap-3">
-          <span className="material-symbols-outlined text-primary-container text-lg">timer</span>
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-body-sm">
-            {pastPromiseCount > 0 && (
-              <span className="text-on-surface">
-                <strong className="font-bold">{pastPromiseCount}</strong>{" "}
-                {pastPromiseCount === 1 ? "submission" : "submissions"} past the 48-hour turnaround
-              </span>
-            )}
-            {pastPromiseCount > 0 && staleCount > 0 && <span className="text-outline-variant">•</span>}
-            {staleCount > 0 && (
-              <span className="text-error font-medium">
-                <strong className="font-bold">{staleCount}</strong> {staleCount === 1 ? "submission" : "submissions"}{" "}
-                untouched for 3+ days
-              </span>
-            )}
-          </div>
-        </div>
-      )}
 
       <InboxBoard
         submissions={submissions as any}

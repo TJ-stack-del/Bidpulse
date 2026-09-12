@@ -45,12 +45,13 @@ export default async function LoginPage({
             <span className="w-5 h-px bg-tertiary" aria-hidden="true" />
             Government bid prep · Jacksonville, FL
           </span>
-          <h1 className="font-headline text-headline-lg text-primary">
-            You run the crew. We handle <em className="italic text-tertiary">the paperwork</em>.
+          <h1 className="font-headline text-headline-lg text-primary font-bold">
+            You run the crew. We handle the paperwork.
           </h1>
           <p className="text-body-lg text-on-surface-variant">
-            Send us the bid. We turn it into a real capability statement, compliance
-            checklist, and technical narrative — ready for you to review and send.
+            Upload the RFP. We turn complex solicitations into a ready-to-submit capability
+            statement, compliance matrix, and technical narrative — ready for you to review
+            and send.
           </p>
         </div>
         <div className="relative flex flex-col gap-5 max-w-lg">

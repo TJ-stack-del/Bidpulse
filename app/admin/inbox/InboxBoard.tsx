@@ -70,6 +70,15 @@ export function InboxBoard({
   const [includeTest, setIncludeTest] = useState(true);
   const [showClosed, setShowClosed] = useState(false);
 
+  // Same pastPromise/isStale flags the daily-digest cron already emails out
+  // (app/api/daily-digest/route.ts), computed here (not passed down as
+  // separate count props from page.tsx) so the alert pill below can live
+  // next to the "Needs attention only" checkbox it drives. Test rows never
+  // contribute, same as the footer strip's own openSubmissions figures.
+  const openSubmissions = submissions.filter((s) => s.stage !== "closed" && !s.is_test);
+  const pastPromiseCount = openSubmissions.filter((s) => s.pastPromise).length;
+  const staleCount = openSubmissions.filter((s) => s.isStale && !s.pastPromise).length;
+
   const filtered = useMemo(() => {
     let rows = submissions;
     if (!includeTest) rows = rows.filter((s) => !s.is_test);
@@ -95,6 +104,39 @@ export function InboxBoard({
   }, [submissions, includeTest, needsAttentionOnly, sortBy]);
 
   const visibleStages = STAGE_ORDER.filter((s) => showClosed || ACTIVE_STAGES.has(s));
+
+  // Clicking the pill toggles the "Needs attention only" checkbox below it
+  // (part of `controls`) rather than just being an inert count -- an admin
+  // who sees "3 submissions past turnaround" can jump straight to that
+  // filtered view in one click instead of hunting for the checkbox.
+  const attentionBanner = (pastPromiseCount > 0 || staleCount > 0) && (
+    <button
+      type="button"
+      onClick={() => setNeedsAttentionOnly((v) => !v)}
+      aria-pressed={needsAttentionOnly}
+      title="Click to toggle the “Needs attention only” filter"
+      className={`w-full text-left bg-surface-container-low px-gutter py-3 rounded-xl shadow-md flex flex-wrap items-center gap-3 transition hover:bg-surface-container-high active:scale-[0.99] mt-4 ${
+        needsAttentionOnly ? "ring-2 ring-primary" : ""
+      }`}
+    >
+      <span className="material-symbols-outlined text-primary-container text-lg">timer</span>
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-body-sm">
+        {pastPromiseCount > 0 && (
+          <span className="text-on-surface">
+            <strong className="font-bold">{pastPromiseCount}</strong>{" "}
+            {pastPromiseCount === 1 ? "submission" : "submissions"} past the 48-hour turnaround
+          </span>
+        )}
+        {pastPromiseCount > 0 && staleCount > 0 && <span className="text-outline-variant">•</span>}
+        {staleCount > 0 && (
+          <span className="text-error font-medium">
+            <strong className="font-bold">{staleCount}</strong> {staleCount === 1 ? "submission" : "submissions"}{" "}
+            untouched for 3+ days
+          </span>
+        )}
+      </div>
+    </button>
+  );
 
   const controls = (
     <div className="flex flex-wrap items-center gap-3 mt-4 mb-2">
@@ -181,6 +223,7 @@ export function InboxBoard({
   if (view === "board") {
     return (
       <div>
+        {attentionBanner}
         {controls}
         {/* Stacked full-width columns below sm (horizontal scroll reads worse
             than a normal scrolling page on a ~380px phone); side-by-side with
@@ -290,6 +333,7 @@ export function InboxBoard({
 
   return (
     <div>
+      {attentionBanner}
       {controls}
       {/* Table — only once there's comfortably enough width for six columns
           of real content (long agency names, badges) without cutting

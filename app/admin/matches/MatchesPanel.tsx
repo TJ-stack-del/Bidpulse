@@ -388,7 +388,7 @@ export function MatchesPanel({
                   </td>
                   <td className="px-space-base py-space-base">
                     <div className="flex items-center gap-2 flex-wrap">
-                      {m.status === "new" && (
+                      {m.status === "new" ? (
                         <AssignControls
                           match={m}
                           clients={clients}
@@ -396,15 +396,12 @@ export function MatchesPanel({
                           onSelect={(v) => setAssignSelections((s) => ({ ...s, [m.id]: v }))}
                           onAssign={() => handleAssign(m.id)}
                           onDismiss={() => handleDismiss(m.id)}
+                          onDelete={() => setDeleteTarget(m)}
                           busy={busyId === m.id}
                         />
+                      ) : (
+                        <DeleteIconButton onClick={() => setDeleteTarget(m)} />
                       )}
-                      <button
-                        onClick={() => setDeleteTarget(m)}
-                        className="px-3 py-1.5 rounded-lg border border-error text-error text-label-sm uppercase tracking-wider font-bold hover:bg-error-container/20 transition active:scale-[0.97] shrink-0"
-                      >
-                        Delete
-                      </button>
                     </div>
                   </td>
                 </tr>
@@ -452,7 +449,7 @@ export function MatchesPanel({
                 <span className={`font-code ${due.className}`}>{due.label}</span>
                 <span className="text-on-surface-variant font-code">Score: {m.match_score ?? "—"}</span>
               </div>
-              {m.status === "new" && (
+              {m.status === "new" ? (
                 <AssignControls
                   match={m}
                   clients={clients}
@@ -460,16 +457,15 @@ export function MatchesPanel({
                   onSelect={(v) => setAssignSelections((s) => ({ ...s, [m.id]: v }))}
                   onAssign={() => handleAssign(m.id)}
                   onDismiss={() => handleDismiss(m.id)}
+                  onDelete={() => setDeleteTarget(m)}
                   busy={busyId === m.id}
                   stacked
                 />
+              ) : (
+                <div className="flex justify-end">
+                  <DeleteIconButton onClick={() => setDeleteTarget(m)} />
+                </div>
               )}
-              <button
-                onClick={() => setDeleteTarget(m)}
-                className="w-full px-3 py-1.5 rounded-lg border border-error text-error text-label-sm uppercase tracking-wider font-bold hover:bg-error-container/20 transition active:scale-[0.97]"
-              >
-                Delete
-              </button>
             </div>
           );
         })}
@@ -542,6 +538,7 @@ function AssignControls({
   onSelect,
   onAssign,
   onDismiss,
+  onDelete,
   busy,
   stacked = false,
 }: {
@@ -551,6 +548,10 @@ function AssignControls({
   onSelect: (value: string) => void;
   onAssign: () => void;
   onDismiss: () => void;
+  // Renders the small trash-icon delete button in the same row as
+  // Assign/Dismiss when provided, so a card/row never needs its own
+  // separate full-width delete bar underneath.
+  onDelete?: () => void;
   busy: boolean;
   stacked?: boolean;
 }) {
@@ -587,11 +588,25 @@ function AssignControls({
         <button
           onClick={onDismiss}
           disabled={busy}
-          className="px-3 py-1.5 rounded-lg border border-outline-variant text-on-surface text-label-sm uppercase tracking-wider font-bold hover:bg-surface-container-high transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100"
+          className="px-3 py-1.5 rounded-lg bg-surface-container-highest text-on-surface text-label-sm uppercase tracking-wider font-bold hover:opacity-90 transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100"
         >
           Dismiss
         </button>
+        {onDelete && <DeleteIconButton onClick={onDelete} />}
       </div>
     </div>
+  );
+}
+
+function DeleteIconButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      aria-label="Delete opportunity"
+      title="Delete opportunity"
+      className="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-error hover:bg-error-container/20 transition active:scale-[0.97]"
+    >
+      <span className="material-symbols-outlined text-[18px]">delete</span>
+    </button>
   );
 }
