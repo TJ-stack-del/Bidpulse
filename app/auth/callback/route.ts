@@ -26,8 +26,29 @@ import type { EmailOtpType } from "@supabase/supabase-js";
 // /reset-password with no session and no way to tell why. Logging the
 // real error here is the difference between "reproduce a live bug blind"
 // and actually knowing what failed.
+// Behind a reverse proxy (GitHub Codespaces' own port-forwarding for
+// dev/testing, and Vercel's edge network in production), the raw
+// request.url this route handler sees doesn't reliably reflect the
+// public-facing address the browser actually used — a real, reproduced
+// bug: a Codespace-forwarded request came back with an origin of
+// `https://<name>-3000.app.github.dev:3000` (a literal, invalid `:3000`
+// appended after a hostname that already encodes the port in its own
+// `-3000` prefix), which no DNS/routing actually resolves to, producing
+// a real "page can't be found" for a real user. Standard fix: prefer the
+// `x-forwarded-host`/`x-forwarded-proto` headers a well-behaved proxy
+// sets to the real public host/scheme, falling back to the request's own
+// derived origin only when neither header is present (e.g. a direct
+// request with no proxy in front at all).
+function resolveOrigin(request: Request, fallbackOrigin: string): string {
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  if (!forwardedHost) return fallbackOrigin;
+  const forwardedProto = request.headers.get("x-forwarded-proto") ?? "https";
+  return `${forwardedProto}://${forwardedHost}`;
+}
+
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
+  const { searchParams, origin: rawOrigin } = new URL(request.url);
+  const origin = resolveOrigin(request, rawOrigin);
   const code = searchParams.get("code");
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
