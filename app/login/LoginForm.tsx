@@ -58,7 +58,7 @@ export function LoginForm() {
       <button
         type="button"
         onClick={continueSignedIn}
-        className="text-label-md font-bold underline shrink-0"
+        className="text-label-md font-bold underline shrink-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-on-primary-container rounded-sm"
       >
         Continue here
       </button>
@@ -135,7 +135,7 @@ export function LoginForm() {
 
     setOtpSubmitting(false);
     if (verifyError || !data.user) {
-      setOtpError(verifyError?.message ?? "That code didn't work — check it and try again.");
+      setOtpError(verifyError?.message ?? "That code didn't work. Check it and try again.");
       return;
     }
 
@@ -187,7 +187,7 @@ export function LoginForm() {
                 setForgotSent(false);
                 setForgotEmail("");
               }}
-              className="text-body-md text-primary hover:underline"
+              className="text-body-md text-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm"
             >
               Back to sign in
             </button>
@@ -214,7 +214,7 @@ export function LoginForm() {
             <button
               type="submit"
               disabled={forgotSubmitting}
-              className="w-full h-14 bg-primary text-on-primary font-headline text-headline-sm rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-[0.99] transition-transform disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-full h-14 bg-primary text-on-primary font-headline text-headline-sm rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-[0.99] transition-transform disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             >
               {forgotSubmitting && <Spinner />}
               {forgotSubmitting ? "Sending…" : "Send reset link"}
@@ -222,7 +222,7 @@ export function LoginForm() {
             <button
               type="button"
               onClick={() => setMode("password")}
-              className="text-body-md text-primary hover:underline text-center"
+              className="text-body-md text-primary hover:underline text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm"
             >
               Back to sign in
             </button>
@@ -251,7 +251,7 @@ export function LoginForm() {
             <button
               type="submit"
               disabled={otpSubmitting}
-              className="w-full h-14 bg-primary text-on-primary font-headline text-headline-sm rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-[0.99] transition-transform disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-full h-14 bg-primary text-on-primary font-headline text-headline-sm rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-[0.99] transition-transform disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             >
               {otpSubmitting && <Spinner />}
               {otpSubmitting ? "Verifying…" : "Verify & sign in"}
@@ -259,7 +259,7 @@ export function LoginForm() {
             <button
               type="button"
               onClick={resetPasswordless}
-              className="text-body-md text-primary hover:underline text-center"
+              className="text-body-md text-primary hover:underline text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm"
             >
               Use a different email or phone
             </button>
@@ -272,7 +272,7 @@ export function LoginForm() {
             <button
               type="button"
               onClick={resetPasswordless}
-              className="text-body-md text-primary hover:underline"
+              className="text-body-md text-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm"
             >
               Use a different email or phone
             </button>
@@ -291,7 +291,7 @@ export function LoginForm() {
             <button
               type="submit"
               disabled={otpSubmitting}
-              className="w-full h-14 bg-primary text-on-primary font-headline text-headline-sm rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-[0.99] transition-transform disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-full h-14 bg-primary text-on-primary font-headline text-headline-sm rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-[0.99] transition-transform disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             >
               {otpSubmitting && <Spinner />}
               {otpSubmitting ? "Sending…" : "Send me a code or link"}
@@ -305,7 +305,7 @@ export function LoginForm() {
             setMode("password");
             resetPasswordless();
           }}
-          className="text-body-md text-primary hover:underline text-center"
+          className="text-body-md text-primary hover:underline text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm"
         >
           Use my password instead
         </button>
@@ -344,7 +344,7 @@ export function LoginForm() {
         <button
           type="button"
           onClick={() => setMode("forgot")}
-          className="text-label-md text-primary hover:underline mt-1"
+          className="text-label-md text-primary hover:underline mt-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm"
         >
           Forgot password?
         </button>
@@ -353,7 +353,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={submitting}
-        className="w-full h-14 bg-primary text-on-primary font-headline text-headline-sm rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-[0.99] transition-transform disabled:opacity-40 disabled:cursor-not-allowed"
+        className="w-full h-14 bg-primary text-on-primary font-headline text-headline-sm rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-[0.99] transition-transform disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
         {submitting && <Spinner />}
         {submitting ? "Signing in…" : "Sign In"}
@@ -363,7 +363,7 @@ export function LoginForm() {
       <button
         type="button"
         onClick={() => setMode("passwordless")}
-        className="text-body-md text-primary hover:underline text-center"
+        className="text-body-md text-primary hover:underline text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm"
       >
         Sign in without a password
       </button>
@@ -403,7 +403,7 @@ function Field({
           onChange={(e) => onChange(e.target.value)}
           autoComplete={autoComplete}
           required={required}
-          className={`w-full h-14 border-0 bg-surface-container text-on-surface placeholder:text-outline text-body-lg rounded-xl focus:outline-none focus:ring-0 focus:bg-surface-container-high transition-colors ${
+          className={`w-full h-14 border-0 bg-surface-container text-on-surface placeholder:text-outline text-body-lg rounded-xl outline-none focus:bg-surface-container-high transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary ${
             icon ? "pl-12 pr-4" : "px-4"
           }`}
         />

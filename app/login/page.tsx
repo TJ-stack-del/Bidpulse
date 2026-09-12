@@ -41,16 +41,12 @@ export default async function LoginPage({
       <div className="hidden md:flex md:w-1/2 lg:w-3/5 relative flex-col justify-center gap-10 px-16 py-12 bg-surface-container-low overflow-hidden">
         <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary-container/10 blur-3xl rounded-full pointer-events-none" />
         <div className="relative flex flex-col gap-6 max-w-lg">
-          <span className="text-label-md font-code text-tertiary uppercase tracking-wide flex items-center gap-2">
-            <span className="w-5 h-px bg-tertiary" aria-hidden="true" />
-            Government bid prep · Jacksonville, FL
-          </span>
           <h1 className="font-headline text-headline-lg text-primary font-bold">
             You run the crew. We handle the paperwork.
           </h1>
           <p className="text-body-lg text-on-surface-variant">
             Upload the RFP. We turn complex solicitations into a ready-to-submit capability
-            statement, compliance matrix, and technical narrative — ready for you to review
+            statement, compliance matrix, and technical narrative, ready for you to review
             and send.
           </p>
         </div>
@@ -74,7 +70,10 @@ export default async function LoginPage({
         <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-72 h-44 bg-primary-container/20 blur-3xl rounded-full pointer-events-none md:hidden" />
         <div className="w-full max-w-md relative">
           <div className="text-center mb-6">
-            <Link href="/" className="relative flex items-center justify-center mb-3">
+            <Link
+              href="/"
+              className="relative flex items-center justify-center mb-3 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            >
               <Image
                 src="/icon.svg"
                 alt="BidPulse"
@@ -85,7 +84,7 @@ export default async function LoginPage({
               />
             </Link>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high mb-2">
-              <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-secondary" />
               <span className="text-label-sm uppercase tracking-wider text-secondary">Client Portal</span>
             </div>
             <h1 className="font-headline text-headline-lg-mobile text-on-surface tracking-tight font-bold">
@@ -106,7 +105,10 @@ export default async function LoginPage({
 
           <p className="text-body-md text-on-surface-variant text-center mt-6">
             Submitting a bid for the first time?{" "}
-            <Link href="/intake" className="text-primary hover:underline">
+            <Link
+              href="/intake"
+              className="text-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm"
+            >
               Start here
             </Link>
           </p>
