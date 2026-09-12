@@ -177,7 +177,28 @@ non-action (see Known Issues / Recently Fixed, which includes real
    audit pass (dompurify, postcss) were fixed for real via `overrides`
    without any breaking bump — see the `fix:` commit from this date.
 
-12. **19 local commits, push/deploy/migrations — CLOSED 2026-09-11,
+12. **"Sign in with Google" — deliberately deferred, Mike's own call.**
+    Investigated 2026-09-12 after Mike noticed the toggle already sitting
+    in `bidpulse-dev`'s Auth providers panel (unconfigured, no Client
+    ID/Secret). Scoped to "existing accounts only" (not a new-signup
+    path) — the app's existing "no account found" fallback on the root
+    page already handles a Google identity with no matching
+    clients/team_members row correctly, no new code needed for that
+    case. Not built: Google Cloud's OAuth product has its own real
+    per-verification/per-user-volume fee tier, and Mike wants to wait
+    until client intake volume actually justifies it before setting up
+    the Google Cloud project, OAuth consent screen, and Client ID/Secret
+    (all steps only Mike can do, outside this codebase). When it's
+    time: register both `https://hvrwxcyqgjobrgpcequj.supabase.co/auth/v1/callback`
+    and `https://rixsgnbivayeaxbdseij.supabase.co/auth/v1/callback` as
+    authorized redirect URIs on one Google OAuth Client (both dev and
+    production can share the same Client ID/Secret), paste into each
+    Supabase project's Google provider panel, then the actual "Sign in
+    with Google" button + `supabase.auth.signInWithOAuth({ provider:
+    "google" })` wiring into LoginForm.tsx is a small, well-scoped
+    follow-up.
+
+13. **19 local commits, push/deploy/migrations — CLOSED 2026-09-11,
     including a real production-only bug found and fixed along the
     way.** All 19 commits merged with the other session's work and
     pushed (`f1413a2..14f8688`, see `HANDOFF-2026-09-10.md`); Vercel
