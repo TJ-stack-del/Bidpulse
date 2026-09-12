@@ -143,7 +143,7 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
         </div>
         <div className="border-t border-outline-variant px-margin-mobile md:px-margin-desktop py-3 max-w-container-max mx-auto">
           <p className="text-label-sm text-on-surface-variant text-center">
-            BidPulse helps you prepare a strong, compliant bid — but we can't guarantee you'll win. That decision is up to the agency.
+            BidPulse helps you prepare a strong, compliant bid, but we can't guarantee you'll win. That decision is up to the agency.
           </p>
         </div>
       </footer>

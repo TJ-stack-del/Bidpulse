@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Reveal } from "@/components/ui/Reveal";
 
 export const metadata: Metadata = {
   title: "Pricing",
-  description: "Simple, manually-confirmed pricing for done-for-you bid prep — pilot, one-off, and retainer options.",
+  description: "Simple, manually-confirmed pricing for done-for-you bid prep. Pilot, one-off, and retainer options.",
 };
 
 // Manual invoicing for now per BUILD-ORDER-BIDPULSE.md's "decisions
@@ -42,31 +43,37 @@ export default function PricingPage() {
   return (
     <>
       <section className="text-center flex flex-col gap-2">
-        <h1 className="text-headline-lg text-primary">Pricing</h1>
-        <p className="text-body-md text-on-surface-variant">
-          We confirm exact pricing with you directly before any work starts — no card
-          required today.
-        </p>
+        <Reveal mode="mount">
+          <h1 className="text-headline-lg text-primary">Pricing</h1>
+        </Reveal>
+        <Reveal mode="mount" delay={0.08}>
+          <p className="text-body-md text-on-surface-variant">
+            We confirm exact pricing with you directly before any work starts. No card
+            required today.
+          </p>
+        </Reveal>
       </section>
 
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
-        {PACKAGES.map((pkg) => (
-          <article
+      {/* One bordered ledger, not three floating cards -- matches the
+          homepage's pricing preview so a visitor doesn't land on a
+          differently-styled treatment of the identical three tiers after
+          clicking through from there. */}
+      <section>
+        <Reveal className="rounded-xl border border-outline-variant overflow-hidden grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-outline-variant">
+          {PACKAGES.map((pkg) => (
+          <div
             key={pkg.type}
-            className={`bg-surface-container-lowest dark:bg-surface-container-low rounded-lg p-gutter flex flex-col gap-6 relative overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg ${
-              pkg.highlight
-                ? "border border-primary shadow-md md:-translate-y-2"
-                : "border border-outline-variant hover:border-primary/50"
-            }`}
+            className={`p-space-base flex flex-col gap-space-md ${pkg.highlight ? "bg-primary-container/10" : ""}`}
           >
-            <div className={`absolute top-0 left-0 w-1 h-full ${pkg.highlight ? "bg-primary-container" : "bg-surface-dim"}`} />
-            {pkg.highlight && (
-              <div className="absolute top-0 right-0 bg-primary-container text-on-primary-container text-label-sm py-1 px-3 rounded-bl-lg">
-                Popular
-              </div>
-            )}
             <header className="flex flex-col gap-2">
-              <h2 className="text-headline-md text-primary">{pkg.name}</h2>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-headline-md text-primary">{pkg.name}</h2>
+                {pkg.highlight && (
+                  <span className="px-2 py-0.5 rounded bg-primary-container text-on-primary-container text-label-sm font-bold uppercase tracking-wider">
+                    Most popular
+                  </span>
+                )}
+              </div>
               <p className="text-body-sm text-on-surface-variant">{pkg.tagline}</p>
             </header>
             <ul className="flex flex-col gap-3 flex-grow">
@@ -79,36 +86,36 @@ export default function PricingPage() {
             </ul>
             <Link
               href={pkg.cta.href}
-              className={`py-3 px-4 rounded text-label-md text-center transition active:scale-[0.97] ${
+              className={`py-3 px-4 rounded text-label-md text-center transition active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                 pkg.highlight
-                  ? "bg-primary-container text-on-primary-container hover:opacity-90"
-                  : "bg-surface-container-low dark:bg-surface-container text-on-surface border border-outline hover:bg-surface-container-high"
+                  ? "bg-primary-container text-on-primary-container hover:opacity-90 hover:-translate-y-0.5"
+                  : "bg-surface-container-low dark:bg-surface-container text-on-surface border border-outline hover:bg-surface-container-high hover:-translate-y-0.5"
               }`}
             >
               {pkg.cta.label}
             </Link>
-          </article>
+          </div>
         ))}
+      </Reveal>
       </section>
 
-      <section className="p-gutter bg-surface-container-low rounded-lg border border-outline-variant flex flex-col md:flex-row items-center justify-between gap-6">
+      <Reveal
+        as="div"
+        className="p-gutter bg-surface-container-low rounded-lg border border-outline-variant flex flex-col md:flex-row items-center justify-between gap-6"
+      >
         <div className="flex-1 flex flex-col gap-2 text-center md:text-left">
           <h3 className="text-body-lg font-semibold text-on-surface">Not sure which one fits?</h3>
           <p className="text-body-sm text-on-surface-variant">
-            Just start the bid form — we'll figure out the right plan together.
+            Just start the bid form. We'll figure out the right plan together.
           </p>
         </div>
         <Link
           href="/intake"
-          className="shrink-0 py-2 px-6 border border-primary text-primary rounded text-label-md hover:bg-surface-container-high transition active:scale-[0.97]"
+          className="shrink-0 py-2 px-6 border border-primary text-primary rounded text-label-md hover:bg-surface-container-high transition active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
-          Start a bid
+          Get started
         </Link>
-      </section>
-
-      <p className="text-label-sm text-on-surface-variant text-center">
-        BidPulse helps you prepare a strong, compliant bid — but we can't guarantee you'll win. That decision is up to the agency.
-      </p>
+      </Reveal>
     </>
   );
 }
