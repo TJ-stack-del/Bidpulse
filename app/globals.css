@@ -221,16 +221,20 @@ body {
    not wash out in light mode. */
 @keyframes tp-sheet-flight {
   /* left/top percentages are measured against the real rendered layout,
-     not guessed: `top` stays in a 39-62% band throughout (never the
-     0-25% band the cards' own titles occupy) -- that vertical
-     placement is what keeps this clear of the title text. The two
-     sheets share one 4.2s cycle offset by only 1.4s (see .tp-sheet
-     below), so they're often mid-flight at once by design -- matching
-     the reference preview's timing exactly rather than the strict
-     one-at-a-time alternation an earlier pass used. */
+     not guessed. `top` was raised across the board (roughly 40-60px
+     against the section's 360px min-height) after a real reported bug:
+     the old 70%/100% stops (48%/62%) dipped well below the flight's own
+     peak, low enough that the sheet's bottom edge cleared the right
+     card's own box and, at 100%'s low position, pushed toward the
+     section's bottom edge. The right card sitting above this layer in
+     z-index (TransformationPipeline.tsx) already keeps a sheet from
+     visually blocking the card's text regardless of exact position, but
+     the trajectory itself shouldn't sink that far in the first place --
+     it should stay level with the center arrow, not aim for the card's
+     lower half. */
   0% {
     left: 12%;
-    top: 50%;
+    top: 44%;
     transform: translate3d(0, 0, 0) rotateZ(-4deg) rotateY(0deg) scale(1);
     opacity: 0;
     background-color: #1e293b;
@@ -239,7 +243,7 @@ body {
   10% { opacity: 1; }
   40% {
     left: 41%;
-    top: 39%;
+    top: 34%;
     transform: translate3d(0, -10px, 90px) rotateZ(14deg) rotateY(40deg) scale(1.08);
     background-color: #1e293b;
     border-color: rgba(244, 63, 94, 0.7);
@@ -251,7 +255,7 @@ body {
   }
   70% {
     left: 76%;
-    top: 48%;
+    top: 34%;
     transform: translate3d(0, 0, 40px) rotateZ(-5deg) rotateY(15deg) scale(0.96);
     background-color: #064e3b;
     border-color: rgba(52, 211, 153, 0.8);
@@ -260,8 +264,8 @@ body {
   90% { opacity: 1; }
   100% {
     left: 88%;
-    top: 62%;
-    transform: translate3d(0, 0, 0) rotateZ(0deg) rotateY(0deg) scale(0.92);
+    top: 46%;
+    transform: translate3d(0, 0, 0) rotateZ(0deg) rotateY(0deg) scale(0.88);
     opacity: 0;
     background-color: #064e3b;
     border-color: rgba(52, 211, 153, 0.8);

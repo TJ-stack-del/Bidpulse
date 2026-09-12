@@ -133,7 +133,7 @@ export function TransformationPipeline() {
             mid-transform at a random, potentially confusing pose). */}
         {!reduceMotion && (
           <div
-            className="hidden lg:block absolute inset-0 z-30 pointer-events-none [perspective:1200px]"
+            className="hidden lg:block absolute inset-0 z-10 pointer-events-none [perspective:1200px]"
             aria-hidden="true"
           >
             {SHEETS.map((sheet, i) => {
@@ -249,7 +249,7 @@ export function TransformationPipeline() {
 
         {/* Right: ready package */}
         <div
-          className="relative z-10 rounded-xl p-space-base sm:p-6 shadow-inner"
+          className="relative z-20 rounded-xl p-space-base sm:p-6 shadow-inner"
           style={{ backgroundColor: "#0f172a", border: "1px solid #022c2266" }}
         >
           <div className="flex items-center justify-between gap-2 mb-3 text-xs">
