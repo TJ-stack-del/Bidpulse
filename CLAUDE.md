@@ -158,6 +158,46 @@ dev environment specifically, whose forwarded URL changes per session,
 wildcard pattern (`https://*.app.github.dev/**`) rather than one
 exact, temporary URL that breaks the next time the Codespace restarts.
 
+**Same incident, continued — `bidpulse-production` turned out to have
+its own, separate version of this bug**, not fixed by anything above:
+its Site URL had never been changed from Supabase's own out-of-the-box
+default (`http://localhost:3000`) since the project was created, and
+its one Redirect URLs entry was `https://bidpulse.co.` — a trailing
+period after `.co` that very likely meant it never matched a single
+real request from the actual `https://bidpulse.co` (no dot), and even
+without the typo, a bare domain with no `/**` wildcard wouldn't match a
+path like `/auth/callback` anyway. Net effect: production's
+password-reset/magic-link emails had probably never worked for any
+real user. Fixed the same way, directly in `bidpulse-production`'s own
+dashboard: Site URL → `https://bidpulse.co`, Redirect URLs →
+`https://bidpulse.co/**`.
+
+Also found and fixed a real app-code bug on the way, specific to
+running behind a reverse proxy (GitHub Codespaces' own port-forwarding
+in dev, and equally possible in front of Vercel in some configs):
+`app/auth/callback/route.ts`'s `new URL(request.url).origin` came back
+as `https://<name>-3000.app.github.dev:3000` — a literal, invalid
+`:3000` appended after a hostname that already encodes its port in its
+own `-3000` prefix. Fixed by preferring the `x-forwarded-host`/
+`x-forwarded-proto` headers a well-behaved proxy sets, falling back to
+the request's own derived origin only when neither header is present.
+
+**Do not run `supabase config push` against either hosted project.**
+While looking into branding auth emails via Resend (this app's own
+already-verified sending domain), `supabase/config.toml` turned out to
+have a real, dangerous `[auth]` section: `site_url =
+"http://127.0.0.1:3000"` and `additional_redirect_urls =
+["https://127.0.0.1:3000"]` — the Supabase CLI's own local-dev
+defaults. `config push` pushes this file wholesale to whichever project
+is currently linked, with no flag to scope it to one section (confirmed
+via `supabase config push --help`) — running it against
+`bidpulse-production` right now would silently undo the Site URL fix
+above and re-break production auth emails immediately. This file has
+never been audited section-by-section against either hosted project's
+real settings (rate limits, JWT expiry, other providers, all
+potentially just as stale); don't trust it as a source of truth for
+either project without diffing it first.
+
 ## When verifying a fix, test the exact query the real code runs — not a simplified proxy
 
 Directly related to the same incident: partway through debugging the

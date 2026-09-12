@@ -155,6 +155,26 @@ max_indexes = 5
 enabled = true
 # The base URL of your website. Used as an allow-list for redirects and for constructing URLs used
 # in emails.
+#
+# Real incident (2026-09-12): bidpulse-production's actual Site URL had
+# never been changed from Supabase's own out-of-the-box default
+# (http://localhost:3000) since the project was created -- every
+# password-reset/magic-link email issued in production silently
+# redirected there instead of to bidpulse.co, which is indistinguishable
+# from "the auth flow is broken" to a real user (no error, no failed
+# request, just a dead end). Fixed directly in each project's own
+# dashboard (Authentication -> URL Configuration), not via this file --
+# `supabase config push` pushes this ENTIRE file wholesale to whichever
+# project is currently linked, with no way to scope it to just one
+# section (confirmed via `supabase config push --help`). This file's own
+# site_url/additional_redirect_urls below are the local-dev CLI
+# defaults, kept as such deliberately -- pushing this file to
+# bidpulse-dev or bidpulse-production would silently overwrite the real
+# fix back to these placeholder values. Don't run `config push` against
+# either hosted project without first diffing this file's full auth/
+# rate-limit/JWT settings against what's actually configured there --
+# this file has never been audited for that and almost certainly
+# doesn't match either project's own currently-correct settings.
 site_url = "http://127.0.0.1:3000"
 # The public URL that Auth serves on. Defaults to the API external URL with `/auth/v1` appended.
 # external_url = ""
@@ -232,15 +252,29 @@ otp_length = 6
 # Number of seconds before the email OTP expires (defaults to 1 hour).
 otp_expiry = 3600
 
-# Use a production-ready SMTP server
-# [auth.email.smtp]
-# enabled = true
-# host = "smtp.sendgrid.net"
-# port = 587
-# user = "apikey"
-# pass = "env(SENDGRID_API_KEY)"
-# admin_email = "admin@email.com"
-# sender_name = "Admin"
+# Real sending domain already verified on Resend and already used for
+# every other transactional email this app sends (lib/email/send.ts) --
+# without this, Supabase's auth emails (password reset, magic link) go
+# out from Supabase's own generic default sender instead of looking like
+# they came from BidPulse. `pass` resolves RESEND_API_KEY from whatever
+# shell's environment runs `supabase config push` -- the same key
+# already used elsewhere, never written here as a literal value.
+#
+# NOT applied via `config push` yet -- see this file's own [auth]
+# section for why pushing the file wholesale right now would undo the
+# real Site URL fix already applied directly in each project's
+# dashboard. Until this file's other settings are audited against both
+# projects' real config, apply this section by hand instead: each
+# project's dashboard -> Project Settings -> Authentication -> SMTP
+# Settings, using the same values below.
+[auth.email.smtp]
+enabled = true
+host = "smtp.resend.com"
+port = 465
+user = "resend"
+pass = "env(RESEND_API_KEY)"
+admin_email = "notifications@bidpulse.co"
+sender_name = "BidPulse"
 
 # Uncomment to customize email template
 # [auth.email.template.invite]
