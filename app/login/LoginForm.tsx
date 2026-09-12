@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
 import { isEmail, normalizePhone } from "@/lib/phone";
+import { onSignedInElsewhere } from "@/lib/auth-broadcast";
 
 export function LoginForm() {
   const [mode, setMode] = useState<"password" | "passwordless" | "forgot">("password");
@@ -32,6 +33,18 @@ export function LoginForm() {
 
   const router = useRouter();
   const supabase = createClient();
+
+  // A tab sitting on "check your email" (the passwordless email-sent
+  // screen, or the reset-link-sent screen below) has no way to know the
+  // link was already clicked in another tab or device -- there's no
+  // session change to observe here, since the session lives in that
+  // *other* tab's cookies. AppShell announces once it mounts (which only
+  // happens for a signed-in user), so this tab can navigate itself into
+  // the app the moment that happens, instead of sitting on a dead end
+  // forever. Not a substitute for actually closing the tab (browsers
+  // don't allow a page to close a tab it didn't open itself), but the
+  // same practical outcome.
+  useEffect(() => onSignedInElsewhere(() => { router.push("/"); router.refresh(); }), [router]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();

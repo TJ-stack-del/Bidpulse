@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 import { Logo } from "./Logo";
 import { SignOutButton } from "./SignOutButton";
 import { ThemeToggle } from "./ThemeToggle";
+import { broadcastSignedIn } from "@/lib/auth-broadcast";
 
 // Extracted from the <header> and mobile <nav> markup that repeats
 // near-identically across all 43 mockups/*/code.html files.
@@ -91,6 +93,16 @@ export function AppShell({
   const activeHref = links
     .filter((l) => pathname === l.href || pathname.startsWith(`${l.href}/`))
     .sort((a, b) => b.href.length - a.href.length)[0]?.href;
+
+  // AppShell only ever renders for a signed-in user (see
+  // app/dashboard/layout.tsx / app/admin/layout.tsx), so mounting it is
+  // itself the real "you are now signed in" signal -- announce it once so
+  // any other tab of this site left sitting on a "check your email"
+  // screen (see lib/auth-broadcast.ts) can jump straight into the app
+  // instead of sitting on a dead end.
+  useEffect(() => {
+    broadcastSignedIn();
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col bg-surface">
