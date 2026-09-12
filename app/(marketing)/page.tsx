@@ -185,10 +185,6 @@ function Home() {
     <>
       {/* ---------- Hero ---------- */}
       <section className="flex flex-col items-center text-center gap-6 py-8">
-        <span className="text-label-md font-code text-tertiary uppercase tracking-wide flex items-center gap-2">
-          <span className="w-5 h-px bg-tertiary" aria-hidden="true" />
-          Government bid prep · Jacksonville, FL
-        </span>
         <h1 className="text-display-lg text-primary font-bold max-w-3xl">
           You run the crew. We handle the paperwork.
         </h1>
@@ -200,14 +196,14 @@ function Home() {
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-center mt-2">
           <Link
             href="/intake"
-            className="w-full sm:w-auto px-8 py-4 bg-primary-container text-on-primary-container rounded text-label-md hover:opacity-90 transition active:scale-[0.97] flex items-center justify-center gap-2"
+            className="w-full sm:w-auto px-8 py-4 bg-primary-container text-on-primary-container rounded text-label-md hover:opacity-90 transition active:scale-[0.97] flex items-center justify-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
             Start your bid
             <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
           </Link>
           <a
             href="#how"
-            className="w-full sm:w-auto px-8 py-4 border border-outline-variant text-on-surface rounded text-label-md hover:bg-surface-container-low transition active:scale-[0.97] text-center"
+            className="w-full sm:w-auto px-8 py-4 border border-outline-variant text-on-surface rounded text-label-md hover:bg-surface-container-low transition active:scale-[0.97] text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
             See how it works
           </a>
@@ -265,7 +261,6 @@ function Home() {
         className="bg-primary text-on-primary -mx-margin-mobile md:-mx-margin-desktop px-margin-mobile md:px-margin-desktop py-section-gap flex flex-col gap-gutter"
       >
         <div className="flex flex-col gap-2 max-w-2xl">
-          <span className="text-label-md font-code text-tertiary uppercase tracking-wide">The process</span>
           <h2 className="text-headline-lg text-on-primary">
             Three steps. You&apos;re never the one filling out the form.
           </h2>
@@ -321,14 +316,14 @@ function Home() {
           <p className="text-body-sm text-on-surface-variant">
             We&apos;re deepest in these five — but if you&apos;re in a related trade, go
             ahead and{" "}
-            <Link href="/intake" className="text-primary font-bold hover:underline">
+            <Link href="/intake" className="text-primary font-bold hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm">
               start your bid
             </Link>
             . You&apos;ll get an honest heads-up right away if something&apos;s outside our
             sweet spot (a trade outside these five gets less tailored compliance
             guidance, but we&apos;ll tell you that up front, not after you&apos;ve paid).
             Prefer to ask first?{" "}
-            <Link href="/contact" className="text-primary font-bold hover:underline">
+            <Link href="/contact" className="text-primary font-bold hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm">
               Contact us
             </Link>
             .
@@ -339,7 +334,6 @@ function Home() {
       {/* ---------- Pricing (rate sheet, not a card grid) ---------- */}
       <section id="pricing" className="flex flex-col gap-gutter">
         <div className="flex flex-col gap-2 max-w-2xl">
-          <span className="text-label-md font-code text-tertiary uppercase tracking-wide">Working with us</span>
           <h2 className="text-headline-lg text-primary">No subscriptions. We invoice after the work&apos;s done.</h2>
           <p className="text-body-md text-on-surface-variant">
             Every deliverable is free to preview in full before anything&apos;s due. We
@@ -374,14 +368,14 @@ function Home() {
               <p className="text-label-sm font-code text-on-surface-variant uppercase tracking-wide">{tier.terms}</p>
               <Link
                 href={tier.cta.href}
-                className="mt-auto px-4 py-2.5 bg-primary-container hover:bg-primary text-on-primary-container rounded-lg text-label-md font-bold text-center transition active:scale-[0.97]"
+                className="mt-auto px-4 py-2.5 bg-primary-container hover:bg-primary text-on-primary-container rounded-lg text-label-md font-bold text-center transition active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               >
                 {tier.cta.label}
               </Link>
             </div>
           ))}
         </div>
-        <Link href="/pricing" className="text-primary font-bold hover:underline self-start">
+        <Link href="/pricing" className="text-primary font-bold hover:underline self-start focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm">
           See full pricing →
         </Link>
       </section>
@@ -389,13 +383,10 @@ function Home() {
       {/* ---------- FAQ preview ---------- */}
       <section id="faq" className="flex flex-col gap-gutter max-w-2xl mx-auto w-full">
         <div className="flex flex-col gap-2 text-center">
-          <span className="text-label-md font-code text-tertiary uppercase tracking-wide">
-            Before you send us a bid
-          </span>
           <h2 className="text-headline-lg text-primary">Questions contractors actually ask</h2>
         </div>
         <FaqAccordion faqs={FAQ_PREVIEW} />
-        <Link href="/faq" className="text-primary font-bold hover:underline text-center">
+        <Link href="/faq" className="text-primary font-bold hover:underline text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm">
           Read the full FAQ →
         </Link>
       </section>
@@ -409,7 +400,7 @@ function Home() {
         </p>
         <Link
           href="/intake"
-          className="px-8 py-4 bg-primary-container text-on-primary-container rounded text-label-md hover:opacity-90 transition active:scale-[0.97] flex items-center gap-2"
+          className="px-8 py-4 bg-surface text-primary rounded text-label-md hover:opacity-90 transition active:scale-[0.97] flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface"
         >
           <span className="material-symbols-outlined text-[18px]">assignment</span>
           Get started

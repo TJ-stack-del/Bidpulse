@@ -15,7 +15,7 @@ export function FaqAccordion({ faqs }: { faqs: { q: string; a: string }[] }) {
               type="button"
               onClick={() => setOpenIndex(isOpen ? null : i)}
               aria-expanded={isOpen}
-              className="w-full flex items-center justify-between gap-4 px-gutter py-4 text-left"
+              className="w-full flex items-center justify-between gap-4 px-gutter py-4 text-left hover:bg-surface-container-low transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
             >
               <span className="text-title-lg text-primary">{item.q}</span>
               <span className="material-symbols-outlined text-on-surface-variant shrink-0">
