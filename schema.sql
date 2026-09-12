@@ -304,6 +304,7 @@ ALTER FUNCTION "public"."is_admin"("target_org_id" "uuid") OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."is_org_member"("target_org_id" "uuid") RETURNS boolean
     LANGUAGE "sql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
   select exists (
     select 1 from team_members
@@ -1554,8 +1555,6 @@ GRANT ALL ON FUNCTION "public"."is_admin"("target_org_id" "uuid") TO "service_ro
 
 
 
-GRANT ALL ON FUNCTION "public"."is_org_member"("target_org_id" "uuid") TO "anon";
-GRANT ALL ON FUNCTION "public"."is_org_member"("target_org_id" "uuid") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."is_org_member"("target_org_id" "uuid") TO "service_role";
 
 
@@ -1566,8 +1565,6 @@ GRANT ALL ON FUNCTION "public"."is_own_client_record"("target_client_id" "uuid")
 
 
 
-GRANT ALL ON FUNCTION "public"."org_has_admin"("target_org_id" "uuid") TO "anon";
-GRANT ALL ON FUNCTION "public"."org_has_admin"("target_org_id" "uuid") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."org_has_admin"("target_org_id" "uuid") TO "service_role";
 
 

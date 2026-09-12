@@ -1,0 +1,29 @@
+-- Supabase's own security linter (anon_security_definer_function_executable /
+-- authenticated_security_definer_function_executable) flagged six
+-- SECURITY DEFINER functions as directly callable via
+-- /rest/v1/rpc/<name> by anon and authenticated. Verified each one's
+-- real usage before touching anything (grepped every migration for
+-- `using`/`with check` referencing them, and every app source file for
+-- a direct RPC call):
+--
+--   is_admin, is_own_client_record, can_access_client_object,
+--   can_access_rfp_object -- all four are genuinely wired into real,
+--   active RLS policies (organizations, client_past_performance,
+--   submissions drafts, storage.objects for rfp-documents). Revoking
+--   EXECUTE from `authenticated` on these would break those policies
+--   for every real signed-in user -- Postgres requires the querying
+--   role to hold EXECUTE on any function a policy it triggers
+--   references, regardless of that function's own SECURITY DEFINER
+--   status. NOT touched here; left as a documented, deliberate
+--   non-fix (see CLAUDE.md) pending a real schema-migration approach
+--   (moving them to a non-PostgREST-exposed schema) with its own
+--   dedicated testing pass, not a same-session blind revoke.
+--
+--   is_org_member, org_has_admin -- neither appears in any RLS policy
+--   or any app-code RPC call at all (confirmed by grep across every
+--   migration and every app/lib/components source file). Genuinely
+--   unused, safe to lock down directly: revoking EXECUTE from anon and
+--   authenticated cannot break anything that currently depends on
+--   them, because nothing does.
+revoke execute on function public.is_org_member(uuid) from anon, authenticated;
+revoke execute on function public.org_has_admin(uuid) from anon, authenticated;

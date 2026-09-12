@@ -62,7 +62,35 @@ either fully closed (see Confirmed Working) or a deliberate, decided
 non-action (see Known Issues / Recently Fixed, which includes real
 "investigated and decided not to build" entries, not just bug fixes).
 
-1. **Compliance checklist auto-population from completeness signals —
+1. **Four SECURITY DEFINER functions still directly callable via
+   `/rest/v1/rpc/<name>` by anon and authenticated — deliberately not
+   locked down yet.** Supabase's own security linter flags `is_admin`,
+   `is_own_client_record`, `can_access_client_object`, and
+   `can_access_rfp_object` (2026-09-12 pass). Verified each is
+   genuinely wired into real, active RLS policies (organizations,
+   client_past_performance, submissions drafts, storage.objects for
+   rfp-documents) — revoking EXECUTE from `authenticated` would break
+   those policies for every real signed-in user, since Postgres
+   requires the querying role to hold EXECUTE on any function a policy
+   it triggers references, regardless of that function's own SECURITY
+   DEFINER status. The real fix (moving them to a schema PostgREST
+   doesn't expose, then updating every policy that references them by
+   name) needs its own dedicated migration and testing pass, not a
+   same-session blind revoke. Actual risk today is low regardless: each
+   only returns a boolean about the caller's own access to a specific,
+   already-known resource (their own org/client/submission), no cross-
+   user data exposure. Two sibling functions with zero real usage
+   anywhere (`is_org_member`, `org_has_admin`) were the safe subset and
+   are now fully locked down (see Confirmed Working).
+
+2. **Leaked Password Protection disabled — Mike's own toggle, not a
+   code task.** Same lint pass flagged this (Supabase Auth checking new
+   passwords against HaveIBeenPwned.org). Not exposed in
+   `supabase/config.toml` in this CLI version, so it's dashboard-only:
+   both projects' **Authentication → Policies** (or Auth settings) →
+   enable "Leaked password protection." Safe, additive, no compat risk.
+
+3. **Compliance checklist auto-population from completeness signals —
    deliberately not built yet.** Needs its own schema migration (a
    `source` column on `checklist_items`, to distinguish an auto-
    generated item from an admin-created one) — deliberately not stacked
@@ -71,20 +99,20 @@ non-action (see Known Issues / Recently Fixed, which includes real
    when an auto-item should be marked done or removed once the client
    fills the corresponding field.
 
-2. **Retainer package usage tracking.** No schema yet — needs a
+4. **Retainer package usage tracking.** No schema yet — needs a
    usage-count field or derived query against `submissions`/`packages`,
    plus a decision on how resets are timed (calendar month vs. rolling
    30 days). Explicitly deferred until there's a real retainer client to
    test against.
 
-3. **Inbound bid email pipeline — code built and verified, blocked on
+5. **Inbound bid email pipeline — code built and verified, blocked on
    Mike's own setup.** `app/api/inbound-bid-email/route.ts` is done and
    verified (real extraction calls, direct DB read-backs). Not yet live
    — needs Mike's IONOS/Gmail forwarding rule, label/filter, and Apps
    Script trigger set up per `scripts/README.md`, plus the real
    `INBOUND_BID_EMAIL_SECRET` in Vercel's **production** environment.
 
-4. **Golden-set regression check for the "never invent facts"
+6. **Golden-set regression check for the "never invent facts"
    guarantee — needs real design time, not a quick add.** LLM outputs
    are non-deterministic, so a literal diff-against-expected-text script
    would be fragile and fail on harmless wording variation, not just
@@ -95,7 +123,7 @@ non-action (see Known Issues / Recently Fixed, which includes real
    repeatedly. Existing fixtures in `test-fixtures/` are a reasonable
    starting point.
 
-5. **Backup/disaster-recovery plan — Mike's own check, not a code
+7. **Backup/disaster-recovery plan — Mike's own check, not a code
    task.** Log into the Supabase dashboard for `bidpulse-production` →
    Settings → Backups, confirm what's actually available on the current
    plan tier, decide whether to upgrade given real client data now
@@ -103,19 +131,19 @@ non-action (see Known Issues / Recently Fixed, which includes real
    scheduled GitHub Action running `supabase db dump`, storing the
    result in a private repo) without requiring a plan upgrade.
 
-6. **Error monitoring and alerting — needs Mike to create a Sentry
+8. **Error monitoring and alerting — needs Mike to create a Sentry
    account first.** Sign up at sentry.io, choose Next.js, get a DSN
    key, hand it to a future session to wire in `@sentry/nextjs`. Not a
    code task until the DSN exists.
 
-7. **`client_reported_submitted_at` column — minor schema-tidiness
+9. **`client_reported_submitted_at` column — minor schema-tidiness
    item, not blocking anything.** Kept on `submissions` by Mike's
    explicit call even though the client-facing "I've submitted this"
    button itself was removed. A drop migration was written and
    verified safe but paused rather than pushed same-session. Nothing
    in the app reads or writes it either way.
 
-8. **Admin UI toggle for `is_test` — built, one click-through
+10. **Admin UI toggle for `is_test` — built, one click-through
    verification still needed.** Real finding while setting up a
    disposable test client to verify a production fix: nothing in the
    app ever wrote `is_test: true` anywhere, including the intake
@@ -129,7 +157,7 @@ non-action (see Known Issues / Recently Fixed, which includes real
    toggle, confirm the DB write) — worth doing before calling this
    fully closed.
 
-9. **jsPDF major-version upgrade (2026-09-11 npm audit) — deliberately
+11. **jsPDF major-version upgrade (2026-09-11 npm audit) — deliberately
    deferred, not a code task right now.** `npm audit` flags jsPDF as
    critical / jspdf-autotable as high — the fix requires jsPDF 2→4 and
    jspdf-autotable 3→5, both major-version bumps into the exact files
@@ -149,7 +177,7 @@ non-action (see Known Issues / Recently Fixed, which includes real
    audit pass (dompurify, postcss) were fixed for real via `overrides`
    without any breaking bump — see the `fix:` commit from this date.
 
-10. **19 local commits, push/deploy/migrations — CLOSED 2026-09-11,
+12. **19 local commits, push/deploy/migrations — CLOSED 2026-09-11,
     including a real production-only bug found and fixed along the
     way.** All 19 commits merged with the other session's work and
     pushed (`f1413a2..14f8688`, see `HANDOFF-2026-09-10.md`); Vercel
@@ -203,6 +231,30 @@ non-action (see Known Issues / Recently Fixed, which includes real
 
 
 ## Confirmed Working (tested with real evidence, not just "reported done")
+- **Supabase security-linter findings verified and safely closed where
+  possible — CLOSED 2026-09-12, applied to both dev and production.**
+  `is_org_member` was the one function (of six similar SECURITY
+  DEFINER helpers) missing a pinned `search_path` — confirmed by
+  reading all six real definitions, not just trusting the lint label;
+  fixed to match its siblings. Two of six functions flagged as
+  publicly callable via `/rest/v1/rpc/<name>`
+  (`is_org_member`, `org_has_admin`) were confirmed genuinely unused
+  anywhere (grepped every migration's RLS policies and every app
+  source file) and safely locked down. First attempt (revoking from
+  `anon`/`authenticated` only) silently failed to do anything — real
+  RPC calls against production still succeeded — because PostgreSQL
+  grants `EXECUTE` to the `PUBLIC` pseudo-role by default at function
+  creation and the original migration never revoked that; every real
+  role inherits through it regardless of role-specific revokes. Fixed
+  with an explicit `REVOKE ... FROM PUBLIC`, then re-verified with a
+  real RPC call against production returning an actual
+  `permission denied for function` error. The other four flagged
+  functions were confirmed to have real RLS-policy dependencies and
+  deliberately left unchanged (see Currently Open #1) rather than risk
+  breaking production data access same-session. Verified end-to-end
+  with disposable admin + client accounts on dev (full login,
+  dashboard, admin inbox, settings — all real RLS paths through the
+  *untouched* functions) before applying anything to production.
 - **Auto-draft now pulls real requirements from the uploaded RFP —
   CLOSED 2026-09-11.** Root cause of the user's original complaint
   ("auto draft doesn't pull all items from the RFP that was loaded"):
