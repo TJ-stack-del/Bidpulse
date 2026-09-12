@@ -29,7 +29,19 @@ export function PipelineArrow() {
       }
       transition={{ duration: 2.1, repeat: Infinity, ease: "easeInOut" }}
     >
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+      {/* Below lg the pipeline's grid stacks to one column (left card,
+          arrow, right card top-to-bottom), so the arrow needs to point
+          down instead of right to still read as "flows into the next
+          card." */}
+      <svg
+        width="28"
+        height="28"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        className="rotate-90 lg:rotate-0 transition-transform duration-300"
+      >
         <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
       </svg>
     </motion.div>

@@ -197,17 +197,17 @@ function Home() {
           statement, compliance matrix, and technical narrative — so you can review, sign,
           and send.
         </p>
-        <div className="flex flex-wrap gap-4 justify-center mt-2">
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-center mt-2">
           <Link
             href="/intake"
-            className="px-8 py-4 bg-primary-container text-on-primary-container rounded text-label-md hover:opacity-90 transition active:scale-[0.97] flex items-center gap-2"
+            className="w-full sm:w-auto px-8 py-4 bg-primary-container text-on-primary-container rounded text-label-md hover:opacity-90 transition active:scale-[0.97] flex items-center justify-center gap-2"
           >
             Start your bid
             <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
           </Link>
           <a
             href="#how"
-            className="px-8 py-4 border border-outline-variant text-on-surface rounded text-label-md hover:bg-surface-container-low transition active:scale-[0.97]"
+            className="w-full sm:w-auto px-8 py-4 border border-outline-variant text-on-surface rounded text-label-md hover:bg-surface-container-low transition active:scale-[0.97] text-center"
           >
             See how it works
           </a>
@@ -270,7 +270,7 @@ function Home() {
             Three steps. You&apos;re never the one filling out the form.
           </h2>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter max-md:space-y-6">
           {HOW_IT_WORKS.map((step, i) => (
             <div key={step.title} className="flex flex-col gap-4">
               <div className="w-12 h-12 rounded-full bg-tertiary text-on-tertiary flex items-center justify-center font-code text-body-md">
