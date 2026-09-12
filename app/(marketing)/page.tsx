@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { KNOWN_TRADES, assertNoMissingTradeCards } from "@/lib/compliance/known-trades";
 import { FaqAccordion } from "@/app/(marketing)/faq/FaqAccordion";
 import { TransformationPipeline } from "@/components/ui/TransformationPipeline";
+import { Reveal } from "@/components/ui/Reveal";
 
 export const metadata: Metadata = {
   description: "We help you win local government contracts. Send us the bid papers — our team handles the paperwork so you can send in a strong bid.",
@@ -184,32 +185,41 @@ function Home() {
   return (
     <>
       {/* ---------- Hero ---------- */}
+      {/* The page's one on-load moment: headline, subhead, CTAs, and trade
+          badges arrive as a single authored beat (mode="mount", staggered
+          by a fixed delay) rather than each having its own scroll trigger
+          -- everything below the fold uses whileInView instead, so the
+          "page just loaded" feeling only happens once, where it matters. */}
       <section className="flex flex-col items-center text-center gap-6 py-8">
-        <h1 className="text-display-lg text-primary font-bold max-w-3xl">
-          You run the crew. We handle the paperwork.
-        </h1>
-        <p className="text-body-lg text-on-surface-variant max-w-xl">
-          Upload the RFP. We turn complex solicitations into a ready-to-submit capability
-          statement, compliance matrix, and technical narrative — so you can review, sign,
-          and send.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-center mt-2">
+        <Reveal mode="mount">
+          <h1 className="text-display-lg text-primary font-bold max-w-3xl">
+            You run the crew. We handle the paperwork.
+          </h1>
+        </Reveal>
+        <Reveal mode="mount" delay={0.08}>
+          <p className="text-body-lg text-on-surface-variant max-w-xl">
+            Upload the RFP. We turn complex solicitations into a ready-to-submit capability
+            statement, compliance matrix, and technical narrative — so you can review, sign,
+            and send.
+          </p>
+        </Reveal>
+        <Reveal mode="mount" delay={0.16} className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-center mt-2">
           <Link
             href="/intake"
-            className="w-full sm:w-auto px-8 py-4 bg-primary-container text-on-primary-container rounded text-label-md hover:opacity-90 transition active:scale-[0.97] flex items-center justify-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            className="w-full sm:w-auto px-8 py-4 bg-primary-container text-on-primary-container rounded text-label-md hover:opacity-90 hover:-translate-y-0.5 transition active:scale-[0.97] flex items-center justify-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
             Start your bid
             <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
           </Link>
           <a
             href="#how"
-            className="w-full sm:w-auto px-8 py-4 border border-outline-variant text-on-surface rounded text-label-md hover:bg-surface-container-low transition active:scale-[0.97] text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            className="w-full sm:w-auto px-8 py-4 border border-outline-variant text-on-surface rounded text-label-md hover:bg-surface-container-low hover:-translate-y-0.5 transition active:scale-[0.97] text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
             See how it works
           </a>
-        </div>
+        </Reveal>
 
-        <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+        <Reveal mode="mount" delay={0.24} className="flex flex-wrap items-center justify-center gap-2 pt-2">
           {TRADES.map((trade) => (
             <span
               key={trade.id}
@@ -219,7 +229,7 @@ function Home() {
               {trade.title}
             </span>
           ))}
-        </div>
+        </Reveal>
 
         <TransformationPipeline />
       </section>
@@ -245,12 +255,12 @@ function Home() {
               title: "Built for small trades",
               body: `Not a big consulting firm — made for ${SUPPORTED_TRADES_LIST} contractors.`,
             },
-          ].map((item) => (
-            <div key={item.title} className="flex flex-col items-center text-center gap-2 p-gutter">
+          ].map((item, i) => (
+            <Reveal key={item.title} delay={i * 0.1} className="flex flex-col items-center text-center gap-2 p-gutter">
               <span className="material-symbols-outlined text-primary text-[28px]">{item.icon}</span>
               <h3 className="text-title-lg text-primary">{item.title}</h3>
               <p className="text-body-sm text-on-surface-variant">{item.body}</p>
-            </div>
+            </Reveal>
           ))}
         </div>
       </section>
@@ -267,13 +277,13 @@ function Home() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter max-md:space-y-6">
           {HOW_IT_WORKS.map((step, i) => (
-            <div key={step.title} className="flex flex-col gap-4">
+            <Reveal key={step.title} variant="scale" delay={i * 0.12} className="flex flex-col gap-4">
               <div className="w-12 h-12 rounded-full bg-tertiary text-on-tertiary flex items-center justify-center font-code text-body-md">
                 {String(i + 1).padStart(2, "0")}
               </div>
               <h3 className="text-headline-md text-on-primary">{step.title.replace(/^\d+\.\s*/, "")}</h3>
               <p className="text-body-sm text-on-primary/70">{step.body}</p>
-            </div>
+            </Reveal>
           ))}
         </div>
         <p className="text-body-sm text-on-primary/70 flex items-center gap-2">
@@ -294,10 +304,16 @@ function Home() {
             (icon + trade name) alongside a description column, divided by
             hairlines only. No per-item border/background/radius: reads as
             one continuous index rather than a shelf of same-size boxes. */}
+        {/* The section's signature moment: rows reveal top to bottom in
+            reading order (a fixed per-row delay, not a synchronized group
+            fade) -- reads like a manifest being read down the list, distinct
+            from the grouped reveals used elsewhere on the page. */}
         <ul className="flex flex-col divide-y divide-outline-variant">
-          {TRADES.map((trade) => (
-            <li
+          {TRADES.map((trade, i) => (
+            <Reveal
               key={trade.title}
+              as="li"
+              delay={i * 0.08}
               className="flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-8 py-6 first:pt-0 last:pb-0"
             >
               <div className="flex items-center gap-3 sm:w-64 shrink-0">
@@ -305,7 +321,7 @@ function Home() {
                 <h4 className="text-title-lg text-primary uppercase tracking-wide">{trade.title}</h4>
               </div>
               <p className="text-body-sm text-on-surface-variant sm:flex-1">{trade.body}</p>
-            </li>
+            </Reveal>
           ))}
         </ul>
         {/* The intake flow already accepts any trade and gives an honest
@@ -346,8 +362,11 @@ function Home() {
         </div>
         {/* One bordered ledger, not three floating cards: tiers are columns
             of a single rate sheet separated by hairlines, the popular tier
-            marked by a tint fill rather than its own shadow/ring. */}
-        <div className="rounded-xl border border-outline-variant overflow-hidden grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-outline-variant">
+            marked by a tint fill rather than its own shadow/ring. Revealed
+            as one synchronized unit (unlike the Trades list's row-by-row
+            reveal) so the three tiers stay comparable at a glance instead
+            of arriving staggered. */}
+        <Reveal className="rounded-xl border border-outline-variant overflow-hidden grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-outline-variant">
           {PRICING_PREVIEW.map((tier) => (
             <div
               key={tier.name}
@@ -375,13 +394,13 @@ function Home() {
               <p className="text-label-sm font-code text-on-surface-variant uppercase tracking-wide">{tier.terms}</p>
               <Link
                 href={tier.cta.href}
-                className="mt-auto px-4 py-2.5 bg-primary-container hover:bg-primary text-on-primary-container rounded-lg text-label-md font-bold text-center transition active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                className="mt-auto px-4 py-2.5 bg-primary-container hover:bg-primary hover:-translate-y-0.5 text-on-primary-container rounded-lg text-label-md font-bold text-center transition active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               >
                 {tier.cta.label}
               </Link>
             </div>
           ))}
-        </div>
+        </Reveal>
         <Link href="/pricing" className="text-primary font-bold hover:underline self-start focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm">
           See full pricing →
         </Link>
@@ -407,7 +426,7 @@ function Home() {
         </p>
         <Link
           href="/intake"
-          className="px-8 py-4 bg-surface text-primary rounded text-label-md hover:opacity-90 transition active:scale-[0.97] flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface"
+          className="px-8 py-4 bg-surface text-primary rounded text-label-md hover:opacity-90 hover:-translate-y-0.5 transition active:scale-[0.97] flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface"
         >
           <span className="material-symbols-outlined text-[18px]">assignment</span>
           Get started
