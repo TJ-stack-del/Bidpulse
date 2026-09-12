@@ -88,7 +88,17 @@ export function TransformationPipeline() {
       ref={containerRef}
       data-tp-paused={animating ? "false" : "true"}
       className="relative w-full max-w-5xl rounded-2xl p-space-base sm:p-10 shadow-2xl overflow-hidden mt-8"
-      style={{ backgroundColor: "#0c1427", border: "1px solid #1e293bcc" }}
+      // `overflow-hidden` alone doesn't reliably clip the flying sheets:
+      // they use `transform-style: preserve-3d` inside a `perspective`
+      // wrapper, and browsers have a long-standing rendering quirk where
+      // overflow clipping on an ancestor OUTSIDE a nested 3D transform
+      // context fails to clip descendants INSIDE it -- confirmed via a
+      // real screenshot showing a sheet's corner rendering past the
+      // card's own rounded corner, sitting directly on the page
+      // background. `clip-path` uses a separate rendering path that
+      // clips correctly regardless of descendant 3D transforms; kept
+      // alongside `overflow-hidden` (harmless) rather than replacing it.
+      style={{ backgroundColor: "#0c1427", border: "1px solid #1e293bcc", clipPath: "inset(0 round 1rem)" }}
     >
       <div
         className="flex flex-wrap items-center justify-between gap-4 pb-5 mb-8"
