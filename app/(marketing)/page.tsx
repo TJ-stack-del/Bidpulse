@@ -290,17 +290,21 @@ function Home() {
             We're set up for the kind of bids small trade businesses actually deal with.
           </p>
         </div>
-        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Manifest-style rows, not a card grid -- a fixed label column
+            (icon + trade name) alongside a description column, divided by
+            hairlines only. No per-item border/background/radius: reads as
+            one continuous index rather than a shelf of same-size boxes. */}
+        <ul className="flex flex-col divide-y divide-outline-variant">
           {TRADES.map((trade) => (
             <li
               key={trade.title}
-              className="flex items-start gap-4 p-gutter border border-outline-variant rounded bg-surface"
+              className="flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-8 py-6 first:pt-0 last:pb-0"
             >
-              <span className="material-symbols-outlined text-primary mt-1">{trade.icon}</span>
-              <div>
-                <h4 className="text-label-md text-primary uppercase tracking-wide">{trade.title}</h4>
-                <p className="text-body-sm text-on-surface-variant mt-1">{trade.body}</p>
+              <div className="flex items-center gap-3 sm:w-64 shrink-0">
+                <span className="material-symbols-outlined text-primary text-[22px]">{trade.icon}</span>
+                <h4 className="text-title-lg text-primary uppercase tracking-wide">{trade.title}</h4>
               </div>
+              <p className="text-body-sm text-on-surface-variant sm:flex-1">{trade.body}</p>
             </li>
           ))}
         </ul>
@@ -340,21 +344,24 @@ function Home() {
             confirm exact pricing with you directly before any work starts.
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+        {/* One bordered ledger, not three floating cards: tiers are columns
+            of a single rate sheet separated by hairlines, the popular tier
+            marked by a tint fill rather than its own shadow/ring. */}
+        <div className="rounded-xl border border-outline-variant overflow-hidden grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-outline-variant">
           {PRICING_PREVIEW.map((tier) => (
             <div
               key={tier.name}
-              className={`bg-surface-container-low rounded-xl p-space-base flex flex-col gap-space-md shadow-sm ${
-                tier.highlight ? "ring-2 ring-primary" : ""
-              }`}
+              className={`p-space-base flex flex-col gap-space-md ${tier.highlight ? "bg-primary-container/10" : ""}`}
             >
-              {tier.highlight && (
-                <span className="self-start px-2 py-0.5 rounded bg-primary-container text-on-primary-container text-label-sm font-bold uppercase tracking-wider">
-                  Most popular
-                </span>
-              )}
               <div>
-                <h3 className="text-headline-md text-primary">{tier.name}</h3>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="text-headline-md text-primary">{tier.name}</h3>
+                  {tier.highlight && (
+                    <span className="px-2 py-0.5 rounded bg-primary-container text-on-primary-container text-label-sm font-bold uppercase tracking-wider">
+                      Most popular
+                    </span>
+                  )}
+                </div>
                 <p className="text-body-md text-on-surface-variant mt-1">{tier.tagline}</p>
               </div>
               <ul className="flex flex-col gap-2 flex-grow">
