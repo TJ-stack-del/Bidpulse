@@ -208,7 +208,7 @@ function Home() {
             href="/intake"
             className="w-full sm:w-auto px-8 py-4 bg-primary-container text-on-primary-container rounded text-label-md hover:opacity-90 hover:-translate-y-0.5 transition active:scale-[0.97] flex items-center justify-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
-            Start your bid
+            Get started
             <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
           </Link>
           <a
