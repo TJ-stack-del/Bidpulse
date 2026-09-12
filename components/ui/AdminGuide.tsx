@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 // Admin-only in-app job aid, requested directly by Mike as something he can
 // pull up without hunting for a separate document -- a slide-over drawer
@@ -14,8 +15,19 @@ import { useEffect, useState } from "react";
 // fully keyboard- and screen-reader-operable with zero extra JS, and this
 // is a reference panel, not a marketing surface -- native disclosure is the
 // right tool, not a place to spend a custom interaction budget.
+//
+// Portalled into document.body (same pattern as Combobox.tsx's dropdown):
+// this button renders inside AppShell's <header>, which has backdrop-blur.
+// backdrop-filter establishes a containing block for position:fixed
+// descendants, same as transform/filter/perspective would -- so without
+// the portal, the drawer's "fixed inset-0" resolved against the ~65px
+// header instead of the viewport, trapping the whole overlay and panel
+// inside that sliver instead of covering the screen. A real reported bug,
+// confirmed via a real screenshot showing exactly that.
 export function AdminGuide() {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     if (!open) return;
@@ -38,8 +50,10 @@ export function AdminGuide() {
         <span className="material-symbols-outlined text-[22px]">help</span>
       </button>
 
-      {open && (
-        <div className="fixed inset-0 z-[60]" role="dialog" aria-modal="true" aria-label="Admin job aid">
+      {open &&
+        mounted &&
+        createPortal(
+          <div className="fixed inset-0 z-[60]" role="dialog" aria-modal="true" aria-label="Admin job aid">
           <div className="absolute inset-0 bg-black/50" onClick={() => setOpen(false)} />
           <div className="absolute right-0 top-0 h-full w-full sm:w-[480px] bg-surface shadow-2xl overflow-y-auto motion-reduce:transition-none">
             <div className="sticky top-0 bg-surface border-b border-outline-variant px-6 py-4 flex items-center justify-between gap-3">
@@ -124,8 +138,9 @@ export function AdminGuide() {
               </GuideSection>
             </div>
           </div>
-        </div>
-      )}
+        </div>,
+          document.body
+        )}
     </>
   );
 }
