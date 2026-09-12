@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { assertNoMissingTradeCards } from "@/lib/compliance/known-trades";
+import { Reveal } from "@/components/ui/Reveal";
 
 export const metadata: Metadata = {
   title: "Gallery",
-  description: "Example deliverables — synthetic samples showing the kind of write-ups we prepare for HVAC, janitorial, landscaping, and IT/computer support bids.",
+  description: "Example deliverables: synthetic samples showing the kind of write-ups we prepare for HVAC, janitorial, landscaping, and IT/computer support bids.",
 };
 
 // Clearly-labeled synthetic examples only — never a real client's data.
@@ -74,17 +75,22 @@ export default function GalleryPage() {
   return (
     <>
       <section className="text-center flex flex-col gap-2">
-        <h1 className="text-headline-lg text-primary">Example deliverables</h1>
-        <p className="text-body-md text-on-surface-variant max-w-lg mx-auto">
-          Illustrative samples only — synthetic company names and figures, not a real
-          client's work.
-        </p>
+        <Reveal mode="mount">
+          <h1 className="text-headline-lg text-primary">Example deliverables</h1>
+        </Reveal>
+        <Reveal mode="mount" delay={0.08}>
+          <p className="text-body-md text-on-surface-variant max-w-lg mx-auto">
+            Illustrative samples only. Synthetic company names and figures, not a real
+            client's work.
+          </p>
+        </Reveal>
       </section>
 
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
-        {EXAMPLES.map((ex) => (
-          <div
+        {EXAMPLES.map((ex, i) => (
+          <Reveal
             key={ex.trade}
+            delay={i * 0.08}
             className="bg-surface-container-lowest dark:bg-surface-container-low border border-outline-variant rounded-lg overflow-hidden flex flex-col transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-primary/50"
           >
             <div className={`h-32 flex items-center justify-center ${ex.accent}`}>
@@ -100,7 +106,7 @@ export default function GalleryPage() {
               <h3 className="text-headline-md text-primary">{ex.title}</h3>
               <p className="text-body-sm text-on-surface-variant">{ex.excerpt}</p>
             </div>
-          </div>
+          </Reveal>
         ))}
       </section>
     </>
