@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ResetPasswordForm } from "./ResetPasswordForm";
+import { Reveal } from "@/components/ui/Reveal";
 
 export const metadata: Metadata = {
   title: "Reset Password",
@@ -15,7 +16,10 @@ export default function ResetPasswordPage() {
     <main className="animate-fade-in min-h-screen flex items-center justify-center bg-surface px-margin-mobile py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link href="/" className="block w-fit mx-auto mb-4">
+          <Link
+            href="/"
+            className="block w-fit mx-auto mb-4 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >
             <Image
               src="/login-logo.svg"
               alt="BidPulse"
@@ -33,8 +37,10 @@ export default function ResetPasswordPage() {
               priority
             />
           </Link>
-          <span className="font-bold text-headline-lg text-primary">Reset your password</span>
-          <p className="text-body-md text-on-surface-variant mt-2">Choose a new password below.</p>
+          <Reveal mode="mount" as="div">
+            <span className="font-bold text-headline-lg text-primary">Reset your password</span>
+            <p className="text-body-md text-on-surface-variant mt-2">Choose a new password below.</p>
+          </Reveal>
         </div>
 
         {/* dark:bg-surface-container-low override -- see app/login/page.tsx
@@ -42,9 +48,9 @@ export default function ResetPasswordPage() {
             tiers for genuine elevation; -lowest is correct in light mode,
             -low is correct in dark mode). Kept in sync with the login
             card's same fix. */}
-        <div className="bg-surface-container-lowest dark:bg-surface-container-low border border-outline-variant rounded-xl p-8">
+        <Reveal mode="mount" delay={0.08} className="bg-surface-container-lowest dark:bg-surface-container-low border border-outline-variant rounded-xl p-8">
           <ResetPasswordForm />
-        </div>
+        </Reveal>
       </div>
     </main>
   );

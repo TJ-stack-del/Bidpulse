@@ -82,7 +82,10 @@ export function ResetPasswordForm() {
         <p className="text-body-md text-on-surface-variant">
           This reset link is invalid or has expired. Request a new one from the login page.
         </p>
-        <Link href="/login" className="text-body-md text-primary hover:underline">
+        <Link
+          href="/login"
+          className="text-body-md text-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm"
+        >
           Back to login
         </Link>
       </div>
@@ -116,7 +119,7 @@ export function ResetPasswordForm() {
           onChange={(e) => setPassword(e.target.value)}
           autoComplete="new-password"
           required
-          className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
+          className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
         />
       </label>
       <label className="flex flex-col gap-1">
@@ -127,14 +130,14 @@ export function ResetPasswordForm() {
           onChange={(e) => setConfirmPassword(e.target.value)}
           autoComplete="new-password"
           required
-          className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
+          className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
         />
       </label>
 
       <button
         type="submit"
         disabled={submitting}
-        className="w-full py-3 px-4 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 transition active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        className="w-full py-3 px-4 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 hover:-translate-y-0.5 transition active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
         {submitting && <Spinner />}
         {submitting ? "Updating…" : "Update password"}
