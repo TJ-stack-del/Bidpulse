@@ -118,7 +118,7 @@ export function AdminGuide() {
               <GuideSection title="Settings" icon="settings">
                 <GuideList
                   items={[
-                    "One control today: Lean package threshold, the dollar amount below which the Deliverables panel suggests the lean 3-document package instead of the full set. Defaults to $35,000 (Florida's own state Category Two threshold) — adjust it if a local agency you deal with often uses a different number.",
+                    "One control today: Lean package threshold, the dollar amount below which the Deliverables panel suggests the lean 3-document package instead of the full set. Defaults to $35,000 (Florida's own state Category Two threshold): adjust it if a local agency you deal with often uses a different number.",
                   ]}
                 />
               </GuideSection>
