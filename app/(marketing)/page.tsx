@@ -8,7 +8,7 @@ import { TransformationPipeline } from "@/components/ui/TransformationPipeline";
 import { Reveal } from "@/components/ui/Reveal";
 
 export const metadata: Metadata = {
-  description: "We help you win local government contracts. Send us the bid papers — our team handles the paperwork so you can send in a strong bid.",
+  description: "We help you win local government contracts. Send us the bid papers. Our team handles the paperwork so you can send in a strong bid.",
 };
 
 // Also the one place that decides where a signed-in user actually lands —
@@ -173,11 +173,11 @@ const FAQ_PREVIEW = [
   },
   {
     q: "Why do I submit the bid myself instead of BidPulse submitting it?",
-    a: "You hold the reins. Government procurement portals tie submissions to your own company's registered vendor credentials, so you're the one who uploads and hits submit — we prepare the package, you stay in control of your own account.",
+    a: "You hold the reins. Government procurement portals tie submissions to your own company's registered vendor credentials, so you're the one who uploads and hits submit. We prepare the package, you stay in control of your own account.",
   },
   {
     q: "How does pricing work?",
-    a: "We confirm pricing with you directly before any work starts — one-off, retainer, and pilot options are on the Pricing page. No card is required to get started. Every deliverable is free to preview before anything's due.",
+    a: "We confirm pricing with you directly before any work starts: one-off, retainer, and pilot options are on the Pricing page. No card is required to get started. Every deliverable is free to preview before anything's due.",
   },
 ];
 
@@ -199,7 +199,7 @@ function Home() {
         <Reveal mode="mount" delay={0.08}>
           <p className="text-body-lg text-on-surface-variant max-w-xl">
             Upload the RFP. We turn complex solicitations into a ready-to-submit capability
-            statement, compliance matrix, and technical narrative — so you can review, sign,
+            statement, compliance matrix, and technical narrative, so you can review, sign,
             and send.
           </p>
         </Reveal>
@@ -243,7 +243,7 @@ function Home() {
             {
               icon: "chat",
               title: "Plain-language process",
-              body: "No confusing paperwork jargon — we explain everything in plain English.",
+              body: "No confusing paperwork jargon. We explain everything in plain English.",
             },
             {
               icon: "construction",
@@ -253,7 +253,7 @@ function Home() {
             {
               icon: "storefront",
               title: "Built for small trades",
-              body: `Not a big consulting firm — made for ${SUPPORTED_TRADES_LIST} contractors.`,
+              body: `Not a big consulting firm, made for ${SUPPORTED_TRADES_LIST} contractors.`,
             },
           ].map((item, i) => (
             <Reveal key={item.title} delay={i * 0.1} className="flex flex-col items-center text-center gap-2 p-gutter">
@@ -288,7 +288,7 @@ function Home() {
         </div>
         <p className="text-body-sm text-on-primary/70 flex items-center gap-2">
           <span className="material-symbols-outlined text-on-primary text-[18px] shrink-0">verified_user</span>
-          We never submit on your behalf — you stay in control of your own agency portal account.
+          We never submit on your behalf. You stay in control of your own agency portal account.
         </p>
       </section>
 
@@ -334,7 +334,7 @@ function Home() {
             BidPulse — the product already answers the question for free. */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 max-w-2xl">
           <p className="text-body-sm text-on-surface-variant">
-            We&apos;re deepest in these five — but if you&apos;re in a related trade, go
+            We&apos;re deepest in these five, but if you&apos;re in a related trade, go
             ahead and{" "}
             <Link href="/intake" className="text-primary font-bold hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm">
               start your bid
