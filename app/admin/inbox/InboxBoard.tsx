@@ -115,7 +115,7 @@ export function InboxBoard({
       onClick={() => setNeedsAttentionOnly((v) => !v)}
       aria-pressed={needsAttentionOnly}
       title="Click to toggle the “Needs attention only” filter"
-      className={`w-full text-left bg-surface-container-low px-gutter py-3 rounded-xl shadow-md flex flex-wrap items-center gap-3 transition hover:bg-surface-container-high active:scale-[0.99] mt-4 ${
+      className={`w-full text-left bg-surface-container-low px-gutter py-3 rounded-xl shadow-md flex flex-wrap items-center gap-3 transition hover:bg-surface-container-high active:scale-[0.99] mt-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
         needsAttentionOnly ? "ring-2 ring-primary" : ""
       }`}
     >
@@ -144,7 +144,7 @@ export function InboxBoard({
         <button
           type="button"
           onClick={() => setView("board")}
-          className={`px-3 py-1.5 text-label-md font-semibold transition active:scale-[0.97] ${
+          className={`px-3 py-1.5 text-label-md font-semibold transition active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary ${
             view === "board" ? "bg-primary-container text-on-primary-container" : "bg-surface-container-lowest dark:bg-surface-container-low text-on-surface hover:bg-surface-container-low dark:hover:bg-surface-container"
           }`}
         >
@@ -153,7 +153,7 @@ export function InboxBoard({
         <button
           type="button"
           onClick={() => setView("list")}
-          className={`px-3 py-1.5 text-label-md font-semibold transition active:scale-[0.97] border-l border-outline-variant ${
+          className={`px-3 py-1.5 text-label-md font-semibold transition active:scale-[0.97] border-l border-outline-variant focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary ${
             view === "list" ? "bg-primary-container text-on-primary-container" : "bg-surface-container-lowest dark:bg-surface-container-low text-on-surface hover:bg-surface-container-low dark:hover:bg-surface-container"
           }`}
         >
@@ -193,7 +193,7 @@ export function InboxBoard({
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value as "fifo" | "due")}
-          className="bg-surface-container-lowest dark:bg-surface-container-low border border-outline-variant rounded px-2 py-1 text-label-md text-on-surface"
+          className="bg-surface-container-lowest dark:bg-surface-container-low border border-outline-variant rounded px-2 py-1 text-label-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
         >
           <option value="fifo">Submission order</option>
           <option value="due">Due date</option>
@@ -257,7 +257,7 @@ export function InboxBoard({
                       <Link
                         key={sub.id}
                         href={`/admin/inbox/${sub.id}`}
-                        className={`bg-surface-container p-3 rounded-lg shadow-sm hover:bg-surface-container-high transition-all flex flex-col gap-2 group ${
+                        className={`bg-surface-container p-3 rounded-lg shadow-sm hover:bg-surface-container-high transition-all flex flex-col gap-2 group focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                           sub.is_test ? "opacity-80" : ""
                         }`}
                       >
@@ -394,7 +394,7 @@ export function InboxBoard({
                 <td className="px-4 py-3">
                   <Link
                     href={`/admin/inbox/${sub.id}`}
-                    className="inline-flex px-3 py-1.5 rounded bg-primary-container text-on-primary-container text-label-md font-semibold hover:opacity-90 transition active:scale-[0.97]"
+                    className="inline-flex px-3 py-1.5 rounded bg-primary-container text-on-primary-container text-label-md font-semibold hover:opacity-90 hover:-translate-y-0.5 transition active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                   >
                     Open
                   </Link>
@@ -420,7 +420,7 @@ export function InboxBoard({
           <Link
             key={sub.id}
             href={`/admin/inbox/${sub.id}`}
-            className="flex flex-col gap-3 px-4 py-4 hover:bg-surface-container-low dark:hover:bg-surface-container transition"
+            className="flex flex-col gap-3 px-4 py-4 hover:bg-surface-container-low dark:hover:bg-surface-container transition focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">

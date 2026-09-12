@@ -113,7 +113,7 @@ export default async function AdminInboxPage() {
     in_review: "Admin preparing deliverables",
     deliverables_ready: "Ready for the client to review",
     client_review: "Contractor reviewing the packet",
-    closed: "Finished — won, lost, or closed out",
+    closed: "Finished: won, lost, or closed out",
   };
 
   const stageDotColor: Record<string, string> = {
