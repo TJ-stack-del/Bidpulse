@@ -144,7 +144,7 @@ export function CompanyInfoForm({
               type={f.type ?? "text"}
               value={values[f.key] ?? ""}
               onChange={(e) => setField(f.key, e.target.value)}
-              className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
+              className="w-full px-3 py-2.5 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
             />
           </div>
         ))}
@@ -168,7 +168,7 @@ export function CompanyInfoForm({
             setNaicsOther(e.target.value);
             setSaved(false);
           }}
-          className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
+          className="w-full px-3 py-2.5 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
         />
       </div>
 
@@ -202,7 +202,7 @@ export function CompanyInfoForm({
             setSetAsideOther(e.target.value);
             setSaved(false);
           }}
-          className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
+          className="w-full px-3 py-2.5 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
         />
       </div>
 
@@ -215,7 +215,7 @@ export function CompanyInfoForm({
           onChange={(e) => setField("differentiators", e.target.value)}
           rows={4}
           placeholder="What sets your company apart — track record, capacity, notable prior contracts…"
-          className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
+          className="w-full px-3 py-2.5 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
         />
       </div>
 

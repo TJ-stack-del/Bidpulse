@@ -62,9 +62,9 @@ export function RfpDocumentUpload({ onExtracted }: { onExtracted: (data: Extract
         find below — review it before continuing, especially the due date.
       </p>
       <div className="flex items-center gap-3">
-        <label className="py-2 px-4 border border-outline-variant rounded text-label-md text-on-surface hover:bg-surface-container transition active:scale-[0.97] cursor-pointer w-fit flex items-center gap-2">
+        <label className="w-full min-h-[52px] bg-primary-fixed hover:bg-primary-fixed-dim text-on-primary-fixed font-headline text-[16px] font-bold uppercase tracking-wider rounded-xl shadow-lg cursor-pointer active:scale-[0.99] transition-all flex items-center justify-center gap-2">
           {uploading && <Spinner />}
-          {uploading ? "Reading document…" : "Upload the RFP"}
+          {uploading ? "Reading document…" : "Upload RFP / Solicitation"}
           <input
             ref={inputRef}
             type="file"

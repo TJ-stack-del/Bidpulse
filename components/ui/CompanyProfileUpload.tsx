@@ -37,6 +37,7 @@ export function CompanyProfileUpload({
 }) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   async function handleFile(file: File) {
@@ -80,28 +81,51 @@ export function CompanyProfileUpload({
   }
 
   return (
-    <div className="bg-surface-container-low border border-outline-variant rounded-lg p-4 flex flex-col gap-2">
-      <p className="text-body-md text-on-surface">
-        Have a capability statement, license packet, or insurance certificates handy? Upload it and
-        we&apos;ll fill in what we can find below — review it before saving.
-      </p>
-      <div className="flex items-center gap-3">
-        <label className="py-2 px-4 border border-outline-variant rounded text-label-md text-on-surface hover:bg-surface-container transition active:scale-[0.97] cursor-pointer w-fit flex items-center gap-2">
-          {uploading && <Spinner />}
-          {uploading ? "Reading document…" : "Upload a document"}
-          <input
-            ref={inputRef}
-            type="file"
-            accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) handleFile(file);
-            }}
-            disabled={uploading}
-            className="hidden"
-          />
-        </label>
-      </div>
+    <div className="flex flex-col gap-2">
+      <label
+        onDragOver={(e) => {
+          e.preventDefault();
+          if (!uploading) setIsDragging(true);
+        }}
+        onDragLeave={() => setIsDragging(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setIsDragging(false);
+          const file = e.dataTransfer.files?.[0];
+          if (file && !uploading) handleFile(file);
+        }}
+        className={`rounded-2xl border-2 border-dashed p-6 flex flex-col items-center gap-2 text-center transition cursor-pointer ${
+          isDragging
+            ? "border-primary bg-primary-container/40"
+            : "border-primary/40 bg-surface-container-low hover:border-primary/70 hover:bg-surface-container"
+        } ${uploading ? "opacity-70 pointer-events-none" : ""}`}
+      >
+        {uploading ? (
+          <Spinner />
+        ) : (
+          <span className="material-symbols-outlined text-primary text-[32px]">upload_file</span>
+        )}
+        <span className="text-label-md font-bold text-on-surface">
+          {uploading ? "Reading document…" : "Upload a document to autofill"}
+        </span>
+        {!uploading && (
+          <p className="text-body-sm text-on-surface-variant max-w-sm">
+            Drag and drop a capability statement, license packet, or insurance certificates here, or
+            click to browse — we&apos;ll fill in what we can find below.
+          </p>
+        )}
+        <input
+          ref={inputRef}
+          type="file"
+          accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) handleFile(file);
+          }}
+          disabled={uploading}
+          className="hidden"
+        />
+      </label>
       {error && <p className="text-body-md text-error">{error}</p>}
     </div>
   );

@@ -591,10 +591,20 @@ export function IntakeWizard() {
           <button
             type="button"
             onClick={() => setShowBidUpload(false)}
-            className="w-full min-h-[52px] bg-primary-container hover:bg-primary text-on-primary-container font-headline text-[16px] font-bold uppercase tracking-wider rounded-xl shadow-lg flex items-center justify-center gap-space-sm active:scale-[0.99] transition-all"
+            className={
+              bidUploadDone
+                ? "w-full min-h-[52px] bg-primary-container hover:bg-primary text-on-primary-container font-headline text-[16px] font-bold uppercase tracking-wider rounded-xl shadow-lg flex items-center justify-center gap-space-sm active:scale-[0.99] transition-all"
+                : "w-full py-2 text-body-md text-on-surface-variant hover:text-primary underline underline-offset-2 flex items-center justify-center gap-1 transition-colors"
+            }
           >
-            {bidUploadDone ? "Continue" : "Skip and type it myself"}
-            <span className="material-symbols-outlined font-bold">arrow_forward</span>
+            {bidUploadDone ? (
+              <>
+                Continue
+                <span className="material-symbols-outlined font-bold">arrow_forward</span>
+              </>
+            ) : (
+              "Or enter bid details manually"
+            )}
           </button>
         </section>
       )}
