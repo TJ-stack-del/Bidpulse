@@ -202,7 +202,7 @@ export function IntakeWizard() {
         setError(
           usingEmail
             ? "Check your email to confirm your account, then come back and sign in to finish."
-            : "We texted a code to confirm that number. Phone verification isn't supported in this signup step yet — please use an email instead, or contact us for help."
+            : "We texted a code to confirm that number. Phone verification isn't supported in this signup step yet: please use an email instead, or contact us for help."
         );
         setSaving(false);
         return;
@@ -223,7 +223,7 @@ export function IntakeWizard() {
 
       if (confirmError || !confirmedUser) {
         setError(
-          "Your account was created, but we couldn't confirm your session yet. Please try submitting this step again — you won't need to sign up a second time."
+          "Your account was created, but we couldn't confirm your session yet. Please try submitting this step again. You won't need to sign up a second time."
         );
         setSaving(false);
         return;
@@ -397,7 +397,7 @@ export function IntakeWizard() {
         </div>
         <h1 className="text-headline-md text-primary mb-2">We've got it.</h1>
         <p className="text-body-lg text-on-surface-variant">
-          Thanks — we'll review your bid and be in touch. You can check on
+          Thanks. We'll review your bid and be in touch. You can check on
           progress any time by logging in.
         </p>
 
@@ -430,7 +430,7 @@ export function IntakeWizard() {
             <span className="material-symbols-outlined text-error text-[20px] shrink-0">warning</span>
             <div>
               <p className="text-label-md text-error font-bold uppercase tracking-wide mb-1">
-                Mandatory site visit — read this
+                Mandatory site visit: read this
               </p>
               <p className="text-body-md text-on-surface">{fitCheck.mandatorySiteVisitExplanation}</p>
             </div>
@@ -443,13 +443,13 @@ export function IntakeWizard() {
         <div className="flex flex-col items-center gap-3 mt-8">
           <Link
             href="/dashboard/profile"
-            className="py-3 px-6 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 transition active:scale-[0.97]"
+            className="py-3 px-6 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 hover:-translate-y-0.5 transition active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
             Complete your Company Profile
           </Link>
           <Link
             href="/dashboard"
-            className="py-3 px-6 border border-outline-variant text-on-surface rounded text-label-md hover:bg-surface-container-high transition active:scale-[0.97]"
+            className="py-3 px-6 border border-outline-variant text-on-surface rounded text-label-md hover:bg-surface-container-high transition active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
             Go to your dashboard
           </Link>
@@ -477,7 +477,7 @@ export function IntakeWizard() {
           Client Intake
         </h1>
         <p className="text-body-md text-on-surface-variant">
-          Tell us about the bid — we handle the technical paperwork from here.
+          Tell us about the bid. We handle the technical paperwork from here.
         </p>
       </div>
 
@@ -520,16 +520,16 @@ export function IntakeWizard() {
           </div>
           <p className="text-body-md text-on-surface-variant">
             Upload a company document (capability statement, license packet, insurance certificates) and
-            we&apos;ll fill in your Company Profile — you can always add or fix details there later.
+            we&apos;ll fill in your Company Profile. You can always add or fix details there later.
           </p>
           <CompanyProfileUpload onExtracted={handleProfileExtracted} />
           {profileUploadDone && (
-            <p className="text-body-md text-primary">Got it — filled in what we found.</p>
+            <p className="text-body-md text-primary">Got it. Filled in what we found.</p>
           )}
           <button
             type="button"
             onClick={() => setStep(1)}
-            className="w-full min-h-[52px] bg-primary-container hover:bg-primary text-on-primary-container font-headline text-[16px] font-bold uppercase tracking-wider rounded-xl shadow-lg flex items-center justify-center gap-space-sm active:scale-[0.99] transition-all"
+            className="w-full min-h-[52px] bg-primary-container hover:bg-primary text-on-primary-container font-headline text-[16px] font-bold uppercase tracking-wider rounded-xl shadow-lg flex items-center justify-center gap-space-sm active:scale-[0.99] transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
             {profileUploadDone ? "Continue" : "Skip for now"}
             <span className="material-symbols-outlined font-bold">arrow_forward</span>
@@ -560,7 +560,7 @@ export function IntakeWizard() {
           <button
             type="submit"
             disabled={saving}
-            className="w-full min-h-[52px] bg-primary-container hover:bg-primary text-on-primary-container font-headline text-[16px] font-bold uppercase tracking-wider rounded-xl shadow-lg flex items-center justify-center gap-space-sm active:scale-[0.99] transition-all disabled:opacity-40 disabled:active:scale-100"
+            className="w-full min-h-[52px] bg-primary-container hover:bg-primary text-on-primary-container font-headline text-[16px] font-bold uppercase tracking-wider rounded-xl shadow-lg flex items-center justify-center gap-space-sm active:scale-[0.99] transition-all disabled:opacity-40 disabled:active:scale-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
             {saving && <Spinner />}
             {saving ? "Saving…" : "Next"}
@@ -578,7 +578,7 @@ export function IntakeWizard() {
           <RfpDocumentUpload onExtracted={handleBidExtracted} />
           {bidUploadDone && (
             <p className="text-body-md text-primary">
-              Got it — filled in what we found. Double-check the due date before continuing.
+              Got it. Filled in what we found. Double-check the due date before continuing.
             </p>
           )}
           <button
@@ -586,8 +586,8 @@ export function IntakeWizard() {
             onClick={() => setShowBidUpload(false)}
             className={
               bidUploadDone
-                ? "w-full min-h-[52px] bg-primary-container hover:bg-primary text-on-primary-container font-headline text-[16px] font-bold uppercase tracking-wider rounded-xl shadow-lg flex items-center justify-center gap-space-sm active:scale-[0.99] transition-all"
-                : "w-full py-2 text-body-md text-on-surface-variant hover:text-primary underline underline-offset-2 flex items-center justify-center gap-1 transition-colors"
+                ? "w-full min-h-[52px] bg-primary-container hover:bg-primary text-on-primary-container font-headline text-[16px] font-bold uppercase tracking-wider rounded-xl shadow-lg flex items-center justify-center gap-space-sm active:scale-[0.99] transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                : "w-full py-2 text-body-md text-on-surface-variant hover:text-primary underline underline-offset-2 flex items-center justify-center gap-1 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             }
           >
             {bidUploadDone ? (
@@ -634,14 +634,14 @@ export function IntakeWizard() {
                 value={form.scope}
                 onChange={(e) => update("scope", e.target.value)}
                 rows={4}
-                className="w-full border-0 bg-surface-container-low text-on-surface text-body-md px-space-md py-space-sm rounded-lg placeholder:text-outline focus:outline-none focus:ring-0 focus:bg-surface-container-highest"
+                className="w-full border-0 bg-surface-container-low text-on-surface text-body-md px-space-md py-space-sm rounded-lg placeholder:text-outline outline-none focus:bg-surface-container-highest focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
               />
             </div>
           </section>
           <button
             type="submit"
             disabled={saving}
-            className="w-full min-h-[52px] bg-primary-container hover:bg-primary text-on-primary-container font-headline text-[16px] font-bold uppercase tracking-wider rounded-xl shadow-lg flex items-center justify-center gap-space-sm active:scale-[0.99] transition-all disabled:opacity-40 disabled:active:scale-100"
+            className="w-full min-h-[52px] bg-primary-container hover:bg-primary text-on-primary-container font-headline text-[16px] font-bold uppercase tracking-wider rounded-xl shadow-lg flex items-center justify-center gap-space-sm active:scale-[0.99] transition-all disabled:opacity-40 disabled:active:scale-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
             {saving && <Spinner />}
             {saving ? "Saving…" : "Next"}
@@ -733,7 +733,7 @@ function Input({
         required={required}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full border-0 bg-surface-container-low text-on-surface text-body-md px-space-md py-space-sm rounded-lg placeholder:text-outline focus:outline-none focus:ring-0 focus:bg-surface-container-highest"
+        className="w-full border-0 bg-surface-container-low text-on-surface text-body-md px-space-md py-space-sm rounded-lg placeholder:text-outline outline-none focus:bg-surface-container-highest focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
       />
     </div>
   );

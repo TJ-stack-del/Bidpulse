@@ -10,7 +10,7 @@ import { IntakeWizard } from "./IntakeWizard";
 
 export const metadata: Metadata = {
   title: "Get Started",
-  description: "Tell us about your bid — we'll take it from there.",
+  description: "Tell us about your bid. We'll take it from there.",
 };
 
 export default function IntakePage() {
@@ -22,7 +22,10 @@ export default function IntakePage() {
               user (this flow creates an account partway through step 1)
               straight back into the app, same reason AppShell's logo does
               the same thing. */}
-          <Link href="/pricing" className="flex items-center">
+          <Link
+            href="/pricing"
+            className="flex items-center rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >
             <Logo priority />
           </Link>
         </div>
