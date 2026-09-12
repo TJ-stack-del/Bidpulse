@@ -60,6 +60,17 @@ const HOME_PATH: Record<Role, string> = {
   client: "/dashboard",
 };
 
+// Defensive display-only cleanup, not a data fix: a stored full_name of
+// "Michaal_Coleman" (a real typo'd value, not code) rendered here with
+// this header's own `uppercase` class as the literal "MICHAAL_COLEMAN" --
+// underscores should never appear in a human display name regardless of
+// whose name it is, so they're normalized to spaces here. This does NOT
+// fix the actual spelling typo, which lives in team_members.full_name
+// itself and needs a real UPDATE to that row, not a code change.
+function formatViewerName(name: string): string {
+  return name.replace(/_/g, " ").replace(/\s+/g, " ").trim();
+}
+
 export function AppShell({
   role,
   viewerName,
@@ -93,7 +104,7 @@ export function AppShell({
           </Link>
           <div className="flex items-center gap-3">
             <p className="hidden sm:block text-label-md uppercase tracking-wider text-on-surface-variant whitespace-nowrap">
-              {viewerName} · {role === "admin" ? "Admin" : "Client view"}
+              {formatViewerName(viewerName)} · {role === "admin" ? "Admin" : "Client view"}
             </p>
             <ThemeToggle />
             <div className="flex items-center gap-1">

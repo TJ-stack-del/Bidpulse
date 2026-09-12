@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
+import { Combobox } from "@/components/ui/Combobox";
 import { ConfirmDeleteDialog } from "@/components/ui/ConfirmDeleteDialog";
 import { RfpDocumentUpload, type ExtractedBidFields } from "@/components/ui/RfpDocumentUpload";
+import { opportunityTradeTag } from "@/lib/opportunity-trade-tag";
 import { useToast } from "@/components/Toast";
 
 type Match = {
@@ -376,9 +378,10 @@ export function MatchesPanel({
                     )}
                   </td>
                   <td className="px-space-base py-space-base text-on-surface-variant break-words">
-                    <span className="inline-flex items-center gap-space-xs">
+                    <span className="inline-flex items-center gap-space-xs flex-wrap">
                       <span className="material-symbols-outlined text-outline text-[16px]">account_balance</span>
                       {m.source_agency}
+                      <TradeTagBadge title={m.source_title} scope={m.scope} />
                     </span>
                   </td>
                   <td className={`px-space-base py-space-base font-code ${due.className}`}>{due.label}</td>
@@ -438,9 +441,10 @@ export function MatchesPanel({
                       m.source_title
                     )}
                   </p>
-                  <p className="text-label-md text-on-surface-variant break-words flex items-center gap-1 mt-0.5">
+                  <p className="text-label-md text-on-surface-variant break-words flex items-center gap-1 flex-wrap mt-0.5">
                     <span className="material-symbols-outlined text-outline text-[14px]">account_balance</span>
                     {m.source_agency}
+                    <TradeTagBadge title={m.source_title} scope={m.scope} />
                   </p>
                 </div>
                 <StatusPill match={m} clientName={clientName} className="shrink-0" />
@@ -490,6 +494,20 @@ export function MatchesPanel({
         busy={deleting}
       />
     </div>
+  );
+}
+
+// Best-effort category tag (see lib/opportunity-trade-tag.ts) so an admin
+// can tell what kind of client a listing might fit without reading the
+// full scope -- renders nothing when nothing actually matches, same
+// never-guess rule as the rest of this app.
+function TradeTagBadge({ title, scope }: { title: string; scope: string | null }) {
+  const tag = opportunityTradeTag({ title, scope });
+  if (!tag) return null;
+  return (
+    <span className="inline-flex px-2 py-0.5 rounded text-label-sm font-bold uppercase tracking-wider bg-tertiary-container text-on-tertiary-container">
+      {tag}
+    </span>
   );
 }
 
@@ -557,25 +575,20 @@ function AssignControls({
 }) {
   return (
     <div className={`flex ${stacked ? "flex-col" : "items-center"} gap-2 min-w-0`}>
-      <select
+      <Combobox
+        options={clients.map((c) => ({ id: c.id, label: c.company_name }))}
         value={selected}
-        onChange={(e) => onSelect(e.target.value)}
-        // A <select> sizes itself to its longest option by default, ignoring
-        // a flex/table-cell parent's width — a long client name here (e.g.
-        // "River City Janitorial Partners LLC") was blowing the whole row
-        // past the table's own 100% width. min-w-0 lets it actually shrink;
-        // the fixed max-w keeps it from doing this again with more clients.
-        className={`px-2 py-1.5 rounded border border-outline-variant bg-surface text-body-sm text-on-surface min-w-0 ${
-          stacked ? "w-full" : "w-32 max-w-[9rem] shrink"
-        }`}
-      >
-        <option value="">Assign to…</option>
-        {clients.map((c) => (
-          <option key={c.id} value={c.id}>
-            {c.company_name}
-          </option>
-        ))}
-      </select>
+        onChange={onSelect}
+        placeholder="Assign to…"
+        emptyMessage="No client matches"
+        // A native <select> sizes itself to its longest option by default,
+        // ignoring a flex/table-cell parent's width — a long client name
+        // here (e.g. "River City Janitorial Partners LLC") was blowing the
+        // whole row past the table's own 100% width. min-w-0 lets the
+        // Combobox's own input actually shrink; the fixed max-w keeps it
+        // from doing this again with more clients.
+        className={stacked ? "w-full" : "w-32 max-w-[9rem] shrink"}
+      />
       <div className="flex items-center gap-2 shrink-0">
         <button
           onClick={onAssign}

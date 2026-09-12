@@ -33,11 +33,30 @@ export default async function AdminMatchesPage() {
     .eq("org_id", member.org_id)
     .order("created_at", { ascending: false });
 
-  const { data: clients } = await supabase
+  const { data: clientsRaw } = await supabase
     .from("clients")
-    .select("id, company_name")
+    .select("id, company_name, created_at")
     .eq("org_id", member.org_id)
-    .order("company_name", { ascending: true });
+    .order("created_at", { ascending: false });
+
+  // The same business can end up with more than one row here (duplicate
+  // test signups being the common real case an admin actually hit) --
+  // keep only the most recently created row per distinct name (trimmed,
+  // case-insensitive, so " Coastal Clean..." and "Coastal Clean... "
+  // don't count as different names either) so the assign dropdown doesn't
+  // show indistinguishable repeats. Nothing is deleted -- an older
+  // duplicate's own data (its dashboard, any submissions already tied to
+  // its own id) is untouched; it just isn't offered a second time here.
+  const seenClientNames = new Set<string>();
+  const clients = (clientsRaw ?? [])
+    .filter((c) => {
+      const key = c.company_name.trim().toLowerCase();
+      if (seenClientNames.has(key)) return false;
+      seenClientNames.add(key);
+      return true;
+    })
+    .sort((a, b) => a.company_name.trim().localeCompare(b.company_name.trim()))
+    .map((c) => ({ id: c.id, company_name: c.company_name }));
 
   return (
     <>
@@ -52,7 +71,7 @@ export default async function AdminMatchesPage() {
         orgId={member.org_id}
         actorId={member.id}
         initialMatches={matches ?? []}
-        clients={clients ?? []}
+        clients={clients}
       />
     </>
   );
