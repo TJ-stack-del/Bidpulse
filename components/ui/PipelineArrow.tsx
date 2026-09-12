@@ -2,28 +2,28 @@
 
 import { motion, useReducedMotion } from "motion/react";
 
-// Landing page "Transformation pipeline" portal circle -- a fixed
-// amber/slate palette (not this app's theme-reactive tokens) to match
-// the reference preview's "console" aesthetic exactly, which is
-// intentionally the same in both site themes. The glow is an inset +
-// outset box-shadow pulse plus a slight scale, matching the reference's
-// own portalGlow keyframe rather than a separate expanding ring.
+// Landing page "Transformation pipeline" portal circle. Used a fixed
+// amber/slate palette until this redesign brought it onto the site's
+// own theme-reactive primary token (which is itself a warm amber/brown
+// in both themes, so the accent feel carries over) instead of a
+// hardcoded hex disconnected from the rest of the page. The glow is an
+// inset + outset box-shadow pulse plus a slight scale, now built from
+// primary at a reduced, less "neon" intensity than the original.
 export function PipelineArrow() {
   const reduceMotion = useReducedMotion();
 
   return (
     <motion.div
-      className="relative flex h-16 w-16 items-center justify-center rounded-full"
-      style={{ backgroundColor: "#f59e0b", color: "#0f172a" }}
+      className="relative flex h-16 w-16 items-center justify-center rounded-full bg-primary-container text-on-primary-container"
       animate={
         reduceMotion
           ? undefined
           : {
               scale: [1, 1.05, 1],
               boxShadow: [
-                "0 0 20px rgba(245, 158, 11, 0.4), inset 0 0 15px rgba(245, 158, 11, 0.2)",
-                "0 0 35px rgba(245, 158, 11, 0.7), inset 0 0 25px rgba(245, 158, 11, 0.4)",
-                "0 0 20px rgba(245, 158, 11, 0.4), inset 0 0 15px rgba(245, 158, 11, 0.2)",
+                "0 0 14px rgb(var(--color-primary) / 0.25), inset 0 0 10px rgb(var(--color-primary) / 0.12)",
+                "0 0 24px rgb(var(--color-primary) / 0.4), inset 0 0 16px rgb(var(--color-primary) / 0.2)",
+                "0 0 14px rgb(var(--color-primary) / 0.25), inset 0 0 10px rgb(var(--color-primary) / 0.12)",
               ],
             }
       }

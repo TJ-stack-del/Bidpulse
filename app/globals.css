@@ -207,23 +207,23 @@ body {
    longhand rule earlier in the file loses regardless of source order. */
 
 /* Flying document sheets: peel off the left card, arc up and forward in
-   3D space through the portal (the amber arrow), and land in the right
-   card, picking up a natural in-flight paper tilt (rotateZ skew plus a
+   3D space through the portal (the arrow), and land in the right card,
+   picking up a natural in-flight paper tilt (rotateZ skew plus a
    partial rotateY, not a full spin) along the way. background-color/
    border-color are animated directly in the same keyframe as the
    position -- CSS interpolates color changes smoothly on its own, so
    the "morph" from raw to clean is a real color transition, not a
    cross-fade of two differently-colored copies, and it passes through
-   a transitional slate/amber tint at 50% as it crosses the portal
-   rather than jumping straight from rose to green. The two text layers
-   (tp-sheet-raw / tp-sheet-clean) stacked inside DO cross-fade via
-   opacity, timed to the same 45-55% window the shell's color finishes
-   changing in, so the label swap reads as part of the same
-   transformation instant. Colors are fixed hex/rgba, not this app's
-   usual theme-reactive tokens -- deliberately, the same reasoning
-   tailwind.config.ts's own "-fixed" tokens document: a raw-vs-clean
-   contrast this dramatic should look the same regardless of site theme,
-   not wash out in light mode. */
+   a transitional primary-tinted midpoint at 50% as it crosses the
+   portal rather than jumping straight from error to secondary. The two
+   text layers (tp-sheet-raw / tp-sheet-clean) stacked inside DO
+   cross-fade via opacity, timed to the same 45-55% window the shell's
+   color finishes changing in, so the label swap reads as part of the
+   same transformation instant. Colors reference this app's real
+   theme-reactive tokens (rgb(var(--color-x)) -- CSS keyframes resolve
+   custom properties before interpolating, so this animates correctly
+   and automatically follows the current site theme, replacing an
+   earlier fixed dark-slate/rose/emerald palette that didn't. */
 @keyframes tp-sheet-flight {
   /* left/top percentages are measured against the real rendered layout,
      not guessed. `top` was raised across the board (roughly 40-60px
@@ -242,29 +242,29 @@ body {
     top: 44%;
     transform: translate3d(0, 0, 0) rotateZ(-4deg) rotateY(0deg) scale(1);
     opacity: 0;
-    background-color: #1e293b;
-    border-color: rgba(244, 63, 94, 0.4);
+    background-color: rgb(var(--color-surface-container-high));
+    border-color: rgb(var(--color-error) / 0.4);
   }
   10% { opacity: 1; }
   40% {
     left: 41%;
     top: 34%;
     transform: translate3d(0, -10px, 90px) rotateZ(14deg) rotateY(40deg) scale(1.08);
-    background-color: #1e293b;
-    border-color: rgba(244, 63, 94, 0.7);
-    box-shadow: 0 20px 30px rgba(0, 0, 0, 0.6);
+    background-color: rgb(var(--color-surface-container-high));
+    border-color: rgb(var(--color-error) / 0.7);
+    box-shadow: 0 20px 30px rgb(0 0 0 / 0.35);
   }
   50% {
-    background-color: #0f172a;
-    border-color: rgba(245, 158, 11, 0.9);
+    background-color: rgb(var(--color-surface-container-high));
+    border-color: rgb(var(--color-primary) / 0.8);
   }
   70% {
     left: 76%;
     top: 34%;
     transform: translate3d(0, 0, 40px) rotateZ(-5deg) rotateY(15deg) scale(0.96);
-    background-color: #064e3b;
-    border-color: rgba(52, 211, 153, 0.8);
-    box-shadow: 0 15px 25px rgba(16, 185, 129, 0.25);
+    background-color: rgb(var(--color-secondary-container));
+    border-color: rgb(var(--color-secondary) / 0.7);
+    box-shadow: 0 15px 25px rgb(0 0 0 / 0.2);
   }
   90% { opacity: 1; }
   100% {
@@ -272,8 +272,8 @@ body {
     top: 46%;
     transform: translate3d(0, 0, 0) rotateZ(0deg) rotateY(0deg) scale(0.88);
     opacity: 0;
-    background-color: #064e3b;
-    border-color: rgba(52, 211, 153, 0.8);
+    background-color: rgb(var(--color-secondary-container));
+    border-color: rgb(var(--color-secondary) / 0.7);
   }
 }
 /* One shared 4.2s cycle, the second sheet offset by 1.4s -- matching
@@ -314,7 +314,7 @@ body {
 
 @keyframes tp-badge-breathe {
   0%, 100% { opacity: 1; filter: drop-shadow(0 0 0 transparent); }
-  50% { opacity: 0.7; filter: drop-shadow(0 0 4px rgba(52, 211, 153, 0.7)); }
+  50% { opacity: 0.7; filter: drop-shadow(0 0 4px rgb(var(--color-secondary) / 0.6)); }
 }
 .tp-badge {
   animation: tp-badge-breathe 2.6s ease-in-out infinite backwards;
