@@ -63,7 +63,7 @@ export function CompanyProfileClient({
     setVersion((v) => v + 1);
 
     if (data.certifications.length === 0) {
-      showToast("Filled in what we found — review it below before saving.", "success");
+      showToast("Filled in what we found. Review it below before saving.", "success");
       return;
     }
 

@@ -84,17 +84,19 @@ export function BidFileStep({
 
       <div className="flex gap-3">
         <button
+          type="button"
           onClick={handleSaveDraft}
           disabled={saving}
-          className="flex-1 py-3 px-4 bg-surface border border-outline-variant rounded text-label-md hover:bg-surface-container-high transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center justify-center gap-2"
+          className="flex-1 py-3 px-4 bg-surface border border-outline-variant rounded text-label-md hover:bg-surface-container-high transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center justify-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           {saving && <Spinner />}
           {saving ? "Saving…" : "Save & finish later"}
         </button>
         <button
+          type="button"
           onClick={handleFinalSubmit}
           disabled={saving || !acknowledged || !infoAttested}
-          className="flex-1 py-3 px-4 bg-primary-container text-on-primary-container rounded text-label-md hover:opacity-90 transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center justify-center gap-2"
+          className="flex-1 py-3 px-4 bg-primary-container text-on-primary-container rounded text-label-md hover:opacity-90 transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center justify-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           {saving && <Spinner />}
           {saving ? "Sending…" : "Send it to us"}
@@ -102,7 +104,7 @@ export function BidFileStep({
         </button>
       </div>
       <FadeMessage show={saved} className="text-body-md text-primary block">
-        Saved — you can come back anytime.
+        Saved. You can come back anytime.
       </FadeMessage>
     </div>
   );

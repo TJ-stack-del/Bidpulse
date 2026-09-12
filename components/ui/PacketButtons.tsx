@@ -166,7 +166,7 @@ export function PacketButtons({
           (d: any) => !d.file_url && hasUnresolvedPlaceholders(d.content)
         );
         if (unresolved) {
-          setError("This packet isn't ready yet — please check back soon or contact us if it's been a while.");
+          setError("This packet isn't ready yet. Please check back soon or contact us if it's been a while.");
           return;
         }
       }
@@ -228,16 +228,18 @@ export function PacketButtons({
     <div className="flex flex-col gap-2">
       <div className="flex gap-3">
         <button
+          type="button"
           onClick={handlePreview}
           disabled={generating !== null}
-          className="px-4 py-2 rounded border border-primary text-primary text-label-md font-bold hover:bg-surface-container-low transition-colors disabled:opacity-40"
+          className="px-4 py-2 rounded border border-primary text-primary text-label-md font-bold hover:bg-surface-container-low transition-colors disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           {generating === "preview" ? "Loading…" : "Preview packet"}
         </button>
         <button
+          type="button"
           onClick={handleDownload}
           disabled={generating !== null}
-          className="px-4 py-2 rounded bg-primary-container text-on-primary-container text-label-md font-bold hover:opacity-90 transition-colors disabled:opacity-40"
+          className="px-4 py-2 rounded bg-primary-container text-on-primary-container text-label-md font-bold hover:opacity-90 transition-colors disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           {generating === "download" ? "Building…" : "Download packet"}
         </button>
@@ -281,7 +283,7 @@ export function PacketButtons({
               <div className="absolute inset-0 flex flex-wrap content-center justify-center gap-x-10 gap-y-6 rotate-[-30deg] scale-150 opacity-[0.07]">
                 {Array.from({ length: 24 }).map((_, i) => (
                   <span key={i} className="text-on-surface text-label-sm font-bold whitespace-nowrap">
-                    PREVIEW — {previewData.submission.clients?.company_name ?? "BidPulse"} —{" "}
+                    PREVIEW · {previewData.submission.clients?.company_name ?? "BidPulse"} ·{" "}
                     {new Date().toLocaleDateString()}
                   </span>
                 ))}
@@ -290,13 +292,14 @@ export function PacketButtons({
 
             <div className="max-h-[80vh] overflow-y-auto p-8">
               <button
+                type="button"
                 onClick={() => setPreviewData(null)}
-                className="absolute top-4 right-4 text-on-surface-variant hover:text-on-surface text-label-md font-bold"
+                className="absolute top-4 right-4 text-on-surface-variant hover:text-on-surface text-label-md font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm"
               >
                 Close
               </button>
               <p className="text-label-md text-error font-bold mb-4 uppercase tracking-wide">
-                Preview only — not for distribution
+                Preview only, not for distribution
               </p>
               <h2 className="text-headline-md text-on-surface mb-1">
                 {previewData.submission.clients?.company_name}
@@ -352,20 +355,22 @@ export function PacketButtons({
             {error && <p className="text-body-md text-error">{error}</p>}
             <div className="flex gap-3 justify-end">
               <button
+                type="button"
                 onClick={() => {
                   setPendingDownload(null);
                   setDownloadAttested(false);
                   setError(null);
                 }}
                 disabled={generating !== null}
-                className="px-4 py-2 rounded border border-outline-variant text-on-surface text-label-md font-bold hover:bg-surface-container-high transition-colors disabled:opacity-40"
+                className="px-4 py-2 rounded border border-outline-variant text-on-surface text-label-md font-bold hover:bg-surface-container-high transition-colors disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               >
                 Cancel
               </button>
               <button
+                type="button"
                 onClick={handleConfirmDownload}
                 disabled={generating !== null || !downloadAttested}
-                className="px-4 py-2 rounded bg-primary-container text-on-primary-container text-label-md font-bold hover:opacity-90 transition-colors disabled:opacity-40"
+                className="px-4 py-2 rounded bg-primary-container text-on-primary-container text-label-md font-bold hover:opacity-90 transition-colors disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               >
                 {generating === "download" ? "Building…" : "Confirm & download"}
               </button>

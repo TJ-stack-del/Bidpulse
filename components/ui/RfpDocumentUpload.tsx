@@ -35,7 +35,7 @@ export function RfpDocumentUpload({ onExtracted }: { onExtracted: (data: Extract
       } catch {
         setError(
           res.status === 504
-            ? "That document took too long to process — try a smaller or simpler file."
+            ? "That document took too long to process. Try a smaller or simpler file."
             : `Something went wrong reading that document (server error ${res.status}). Try again in a moment.`
         );
         return;
@@ -48,7 +48,7 @@ export function RfpDocumentUpload({ onExtracted }: { onExtracted: (data: Extract
 
       onExtracted(data as ExtractedBidFields, file);
     } catch {
-      setError("Couldn't reach the server — check your connection and try again.");
+      setError("Couldn't reach the server. Check your connection and try again.");
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -59,10 +59,10 @@ export function RfpDocumentUpload({ onExtracted }: { onExtracted: (data: Extract
     <div className="bg-surface-container-low border border-outline-variant rounded-lg p-4 flex flex-col gap-2">
       <p className="text-body-md text-on-surface">
         Have the RFP or solicitation document from the agency? Upload it and we&apos;ll fill in what we can
-        find below — review it before continuing, especially the due date.
+        find below. Review it before continuing, especially the due date.
       </p>
       <div className="flex items-center gap-3">
-        <label className="w-full min-h-[52px] bg-primary-fixed hover:bg-primary-fixed-dim text-on-primary-fixed font-headline text-[16px] font-bold uppercase tracking-wider rounded-xl shadow-lg cursor-pointer active:scale-[0.99] transition-all flex items-center justify-center gap-2">
+        <label className="w-full min-h-[52px] bg-primary-fixed hover:bg-primary-fixed-dim text-on-primary-fixed font-headline text-[16px] font-bold uppercase tracking-wider rounded-xl shadow-lg cursor-pointer active:scale-[0.99] transition-all flex items-center justify-center gap-2 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary">
           {uploading && <Spinner />}
           {uploading ? "Reading document…" : "Upload RFP / Solicitation"}
           <input
@@ -74,7 +74,7 @@ export function RfpDocumentUpload({ onExtracted }: { onExtracted: (data: Extract
               if (file) handleFile(file);
             }}
             disabled={uploading}
-            className="hidden"
+            className="sr-only"
           />
         </label>
       </div>

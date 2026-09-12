@@ -144,7 +144,7 @@ export function CompanyInfoForm({
               type={f.type ?? "text"}
               value={values[f.key] ?? ""}
               onChange={(e) => setField(f.key, e.target.value)}
-              className="w-full px-3 py-2.5 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
+              className="w-full px-3 py-2.5 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
             />
           </div>
         ))}
@@ -152,7 +152,7 @@ export function CompanyInfoForm({
 
       <CheckboxGroup
         legend="NAICS codes that apply"
-        options={COMMON_NAICS_CODES.map((n) => ({ value: n.code, label: `${n.code} — ${n.label}` }))}
+        options={COMMON_NAICS_CODES.map((n) => ({ value: n.code, label: `${n.code}: ${n.label}` }))}
         selected={naicsCodes}
         onChange={(v) => {
           setNaicsCodes(v);
@@ -168,7 +168,7 @@ export function CompanyInfoForm({
             setNaicsOther(e.target.value);
             setSaved(false);
           }}
-          className="w-full px-3 py-2.5 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
+          className="w-full px-3 py-2.5 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
         />
       </div>
 
@@ -202,7 +202,7 @@ export function CompanyInfoForm({
             setSetAsideOther(e.target.value);
             setSaved(false);
           }}
-          className="w-full px-3 py-2.5 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
+          className="w-full px-3 py-2.5 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
         />
       </div>
 
@@ -214,8 +214,8 @@ export function CompanyInfoForm({
           value={values.differentiators ?? ""}
           onChange={(e) => setField("differentiators", e.target.value)}
           rows={4}
-          placeholder="What sets your company apart — track record, capacity, notable prior contracts…"
-          className="w-full px-3 py-2.5 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
+          placeholder="What sets your company apart: track record, capacity, notable prior contracts…"
+          className="w-full px-3 py-2.5 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
         />
       </div>
 
@@ -223,7 +223,7 @@ export function CompanyInfoForm({
         <button
           type="submit"
           disabled={saving}
-          className="py-2 px-4 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2 w-fit"
+          className="py-2 px-4 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 hover:-translate-y-0.5 transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2 w-fit focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           {saving && <Spinner />}
           {saving ? "Saving…" : "Save company info"}

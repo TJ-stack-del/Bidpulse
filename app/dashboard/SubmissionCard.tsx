@@ -82,7 +82,7 @@ export function SubmissionCard({
               onClick={() => setOpen((o) => !o)}
               aria-expanded={open}
               aria-label={open ? "Collapse bid details" : "Expand bid details"}
-              className="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
             >
               <span className="material-symbols-outlined text-[20px]">{open ? "expand_less" : "expand_more"}</span>
             </button>
@@ -92,11 +92,11 @@ export function SubmissionCard({
         <LifecycleStepper currentStage={stageNumber(submission.stage)} />
 
         {submission.mandatory_site_visit_concern && (
-          <div className="bg-error-container/10 rounded-xl p-space-base flex gap-space-md border-l-4 border-l-error">
+          <div className="bg-error-container/10 border border-error/30 rounded-xl p-space-base flex gap-space-md">
             <span className="material-symbols-outlined text-error text-[20px] shrink-0">warning</span>
             <div>
               <p className="text-label-sm text-error font-bold uppercase tracking-wider mb-1">
-                Mandatory site visit — read this
+                Mandatory site visit: read this
               </p>
               <p className="text-body-md text-on-surface">{submission.mandatory_site_visit_explanation}</p>
             </div>
@@ -121,7 +121,7 @@ export function SubmissionCard({
         {open && (
           <>
             {!tradeKnown && (
-              <div className="bg-surface-container-high rounded-xl p-space-base flex gap-space-md border-l-4 border-l-tertiary">
+              <div className="bg-surface-container-high border border-tertiary/30 rounded-xl p-space-base flex gap-space-md">
                 <span className="material-symbols-outlined text-tertiary text-[20px] shrink-0">info</span>
                 <div>
                   <p className="text-label-sm text-on-surface font-bold uppercase tracking-wider mb-1">
@@ -162,12 +162,8 @@ export function SubmissionCard({
                   {checklist.map((item) => (
                     <div
                       key={item.id}
-                      className={`flex items-center justify-between px-space-md py-space-sm border-t border-outline-variant border-l-4 ${
-                        item.status === "done"
-                          ? "border-l-secondary opacity-70"
-                          : item.status === "in_progress"
-                          ? "border-l-secondary"
-                          : "border-l-transparent"
+                      className={`flex items-center justify-between px-space-md py-space-sm border-t border-outline-variant ${
+                        item.status === "done" ? "opacity-70" : ""
                       }`}
                     >
                       <span className={`text-body-md text-on-surface ${item.status === "done" ? "line-through" : ""}`}>

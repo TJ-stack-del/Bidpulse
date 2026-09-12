@@ -92,7 +92,7 @@ export function PastPerformanceSection({
             value={referenceClientName}
             onChange={(e) => setReferenceClientName(e.target.value)}
             placeholder="e.g. City of Round Rock"
-            className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
+            className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
           />
         </div>
 
@@ -102,7 +102,7 @@ export function PastPerformanceSection({
             value={scopeOfWork}
             onChange={(e) => setScopeOfWork(e.target.value)}
             placeholder="e.g. HVAC preventive maintenance, 3 buildings"
-            className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
+            className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
           />
         </div>
 
@@ -112,7 +112,7 @@ export function PastPerformanceSection({
             value={contractValue}
             onChange={(e) => setContractValue(e.target.value)}
             placeholder="e.g. $185,000"
-            className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
+            className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
           />
         </div>
 
@@ -122,14 +122,14 @@ export function PastPerformanceSection({
             value={outcome}
             onChange={(e) => setOutcome(e.target.value)}
             placeholder="e.g. Completed on time, renewed 2 years"
-            className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
+            className="w-full px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
           />
         </div>
 
         <button
           type="submit"
           disabled={submitting}
-          className="py-2 px-4 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
+          className="py-2 px-4 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 hover:-translate-y-0.5 transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           {submitting && <Spinner />}
           {submitting ? "Adding…" : "Add project"}
@@ -150,14 +150,18 @@ export function PastPerformanceSection({
               <div>
                 <p className="text-body-md text-on-surface font-bold">
                   {entry.reference_client_name}
-                  {entry.contract_value ? ` — ${entry.contract_value}` : ""}
+                  {entry.contract_value ? ` · ${entry.contract_value}` : ""}
                 </p>
                 <p className="text-label-md text-on-surface-variant">
                   {entry.scope_of_work}
                   {entry.outcome ? ` · ${entry.outcome}` : ""}
                 </p>
               </div>
-              <button onClick={() => handleRemove(entry.id)} className="text-error text-label-md hover:underline">
+              <button
+                type="button"
+                onClick={() => handleRemove(entry.id)}
+                className="text-error text-label-md hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-error rounded-sm"
+              >
                 Remove
               </button>
             </li>

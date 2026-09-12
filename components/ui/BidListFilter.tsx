@@ -38,7 +38,7 @@ export function BidListFilter({ items, emptyMessage }: { items: BidListItem[]; e
             key={tab.key}
             type="button"
             onClick={() => setFilter(tab.key)}
-            className={`px-3.5 py-1.5 rounded-full text-label-md font-bold transition ${
+            className={`px-3.5 py-1.5 rounded-full text-label-md font-bold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
               filter === tab.key
                 ? "bg-primary-container text-on-primary-container"
                 : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high"

@@ -110,7 +110,7 @@ export function SubmissionDocuments({ submissionId }: { submissionId: string }) 
         <select
           value={docType}
           onChange={(e) => setDocType(e.target.value)}
-          className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface"
+          className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
         >
           {DOC_TYPES.map((t) => (
             <option key={t.value} value={t.value}>
@@ -118,9 +118,9 @@ export function SubmissionDocuments({ submissionId }: { submissionId: string }) 
             </option>
           ))}
         </select>
-        <label className="px-4 py-2 rounded border border-primary text-primary text-label-md font-bold hover:bg-surface-container-low transition cursor-pointer">
+        <label className="px-4 py-2 rounded border border-primary text-primary text-label-md font-bold hover:bg-surface-container-low transition cursor-pointer focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary">
           {uploading ? "Uploading…" : "Choose file"}
-          <input type="file" onChange={handleUpload} disabled={uploading} className="hidden" />
+          <input type="file" onChange={handleUpload} disabled={uploading} className="sr-only" />
         </label>
       </div>
 
@@ -140,7 +140,7 @@ export function SubmissionDocuments({ submissionId }: { submissionId: string }) 
                   href={doc.file_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-body-md text-primary hover:underline"
+                  className="text-body-md text-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm"
                 >
                   {doc.file_name}
                 </a>
@@ -148,8 +148,9 @@ export function SubmissionDocuments({ submissionId }: { submissionId: string }) 
                 <span className="text-body-md text-on-surface-variant">{doc.file_name}</span>
               )}
               <button
+                type="button"
                 onClick={() => handleDelete(doc.id)}
-                className="text-error text-label-md hover:underline"
+                className="text-error text-label-md hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-error rounded-sm"
               >
                 Remove
               </button>

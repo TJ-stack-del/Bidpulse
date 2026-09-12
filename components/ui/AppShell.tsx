@@ -111,7 +111,10 @@ export function AppShell({
             roles) so the logo sits flush left above the sidebar, matching
             the Stitch screens' header+sidebar shell. */}
         <div className="flex items-center justify-between px-margin-mobile md:px-margin-desktop py-3">
-          <Link href={HOME_PATH[role]} className="shrink-0 flex items-center">
+          <Link
+            href={HOME_PATH[role]}
+            className="shrink-0 flex items-center rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >
             <Logo priority />
           </Link>
           <div className="flex items-center gap-3">
@@ -135,7 +138,7 @@ export function AppShell({
             <Link
               key={link.href}
               href={link.href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition text-label-md ${
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition text-label-md focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary ${
                 activeHref === link.href
                   ? "bg-primary-container text-on-primary-container font-bold"
                   : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
@@ -157,7 +160,7 @@ export function AppShell({
           <Link
             key={link.href}
             href={link.href}
-            className={`flex flex-col items-center justify-center transition-opacity active:opacity-80 ${
+            className={`flex flex-col items-center justify-center transition-opacity active:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-xl ${
               activeHref === link.href
                 ? "text-primary font-bold bg-surface-container-highest rounded-xl px-3 py-1"
                 : "text-on-surface-variant"

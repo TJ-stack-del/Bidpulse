@@ -125,7 +125,7 @@ export function CertificationsSection({
           <select
             value={certType}
             onChange={(e) => setCertType(e.target.value)}
-            className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface"
+            className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
           >
             {CERT_TYPES.map((t) => (
               <option key={t} value={t}>
@@ -142,7 +142,7 @@ export function CertificationsSection({
               value={otherLabel}
               onChange={(e) => setOtherLabel(e.target.value)}
               placeholder="e.g. MBE, DBE"
-              className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
+              className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
             />
           </div>
         )}
@@ -152,7 +152,7 @@ export function CertificationsSection({
           <input
             value={certNumber}
             onChange={(e) => setCertNumber(e.target.value)}
-            className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
+            className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
           />
         </div>
 
@@ -162,18 +162,18 @@ export function CertificationsSection({
             type="date"
             value={expirationDate}
             onChange={(e) => setExpirationDate(e.target.value)}
-            className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface focus:border-primary outline-none"
+            className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
           />
         </div>
 
         <div className="flex-1 min-w-[160px]">
           <label className="text-label-md text-on-surface-variant block mb-1">Certificate document (optional)</label>
-          <label className="px-4 py-2 rounded border border-primary text-primary text-label-md font-bold hover:bg-surface-container-low transition cursor-pointer inline-block">
+          <label className="px-4 py-2 rounded border border-primary text-primary text-label-md font-bold hover:bg-surface-container-low transition cursor-pointer inline-block focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary">
             {file ? file.name : "Choose file"}
             <input
               type="file"
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-              className="hidden"
+              className="sr-only"
             />
           </label>
         </div>
@@ -181,7 +181,7 @@ export function CertificationsSection({
         <button
           type="submit"
           disabled={submitting}
-          className="py-2 px-4 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2"
+          className="py-2 px-4 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 hover:-translate-y-0.5 transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           {submitting && <Spinner />}
           {submitting ? "Adding…" : "Add certification"}
@@ -202,14 +202,14 @@ export function CertificationsSection({
               <div>
                 <p className="text-body-md text-on-surface font-bold">
                   {certLabel(cert)}
-                  {cert.certification_number ? ` — #${cert.certification_number}` : ""}
+                  {cert.certification_number ? ` (#${cert.certification_number})` : ""}
                 </p>
                 <p className="text-label-md text-on-surface-variant">
                   {cert.expiration_date ? `Expires ${new Date(cert.expiration_date).toLocaleDateString()}` : "No expiration on file"}
                   {cert.file_url && (
                     <>
                       {" · "}
-                      <a href={cert.file_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                      <a href={cert.file_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm">
                         {cert.file_name ?? "View document"}
                       </a>
                     </>
@@ -227,7 +227,7 @@ export function CertificationsSection({
                 >
                   {cert.verified ? "Document Reviewed" : "Not yet reviewed"}
                 </span>
-                <button onClick={() => handleRemove(cert.id)} className="text-error text-label-md hover:underline">
+                <button type="button" onClick={() => handleRemove(cert.id)} className="text-error text-label-md hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-error rounded-sm">
                   Remove
                 </button>
               </div>

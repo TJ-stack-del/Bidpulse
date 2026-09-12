@@ -30,7 +30,7 @@ export function ThemeToggle() {
           aria-label={opt.label}
           aria-pressed={mounted && theme === opt.value}
           title={opt.label}
-          className={`w-10 h-10 flex items-center justify-center rounded-md transition ${
+          className={`w-10 h-10 flex items-center justify-center rounded-md transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary ${
             mounted && theme === opt.value
               ? "bg-secondary-container text-on-secondary-container"
               : "text-on-surface-variant hover:bg-surface-container-high"

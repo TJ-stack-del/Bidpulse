@@ -140,7 +140,7 @@ export default async function DashboardPage() {
         <p className="text-body-md text-on-surface-variant mb-4">You haven&apos;t started a bid yet.</p>
         <Link
           href="/intake"
-          className="inline-block py-3 px-4 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 transition active:scale-[0.97] w-fit"
+          className="inline-block py-3 px-4 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 hover:-translate-y-0.5 transition active:scale-[0.97] w-fit focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           Start your first bid
         </Link>
@@ -302,12 +302,12 @@ export default async function DashboardPage() {
 
       <Link
         href="/intake"
-        className="bg-primary-container/10 hover:bg-primary-container/20 border border-primary-container/30 rounded-xl p-space-base flex items-center gap-space-md transition"
+        className="bg-primary-container/10 hover:bg-primary-container/20 border border-primary-container/30 rounded-xl p-space-base flex items-center gap-space-md transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
         <span className="material-symbols-outlined text-primary text-[28px] shrink-0">add_circle</span>
         <div className="flex-1 min-w-0">
           <p className="text-body-lg text-on-surface font-bold">Start a new bid</p>
-          <p className="text-body-sm text-on-surface-variant">Send us the RFP — we&apos;ll take it from there.</p>
+          <p className="text-body-sm text-on-surface-variant">Send us the RFP. We&apos;ll take it from there.</p>
         </div>
         <span className="material-symbols-outlined text-primary shrink-0">arrow_forward</span>
       </Link>
@@ -371,7 +371,10 @@ export default async function DashboardPage() {
                   )}
                 </div>
               )}
-              <Link href="/dashboard/profile" className="text-primary text-label-sm font-bold hover:underline mt-1">
+              <Link
+                href="/dashboard/profile"
+                className="text-primary text-label-sm font-bold hover:underline mt-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm"
+              >
                 Edit your profile →
               </Link>
             </div>
@@ -414,7 +417,10 @@ export default async function DashboardPage() {
             ) : (
               <p className="text-body-md text-on-surface-variant px-space-base py-4">
                 No certifications on file yet.{" "}
-                <Link href="/dashboard/profile" className="text-primary font-bold hover:underline">
+                <Link
+                  href="/dashboard/profile"
+                  className="text-primary font-bold hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm"
+                >
                   Add one
                 </Link>
               </p>

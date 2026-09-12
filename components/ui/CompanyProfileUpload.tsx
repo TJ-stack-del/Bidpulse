@@ -60,7 +60,7 @@ export function CompanyProfileUpload({
       } catch {
         setError(
           res.status === 504
-            ? "That document took too long to process — try a smaller or simpler file."
+            ? "That document took too long to process. Try a smaller or simpler file."
             : `Something went wrong reading that document (server error ${res.status}). Try again in a moment.`
         );
         return;
@@ -73,7 +73,7 @@ export function CompanyProfileUpload({
 
       onExtracted(data as ExtractedCompanyProfile, file);
     } catch {
-      setError("Couldn't reach the server — check your connection and try again.");
+      setError("Couldn't reach the server. Check your connection and try again.");
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -94,7 +94,7 @@ export function CompanyProfileUpload({
           const file = e.dataTransfer.files?.[0];
           if (file && !uploading) handleFile(file);
         }}
-        className={`rounded-2xl border-2 border-dashed p-6 flex flex-col items-center gap-2 text-center transition cursor-pointer ${
+        className={`rounded-2xl border-2 border-dashed p-6 flex flex-col items-center gap-2 text-center transition cursor-pointer focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary ${
           isDragging
             ? "border-primary bg-primary-container/40"
             : "border-primary/40 bg-surface-container-low hover:border-primary/70 hover:bg-surface-container"
@@ -111,7 +111,7 @@ export function CompanyProfileUpload({
         {!uploading && (
           <p className="text-body-sm text-on-surface-variant max-w-sm">
             Drag and drop a capability statement, license packet, or insurance certificates here, or
-            click to browse — we&apos;ll fill in what we can find below.
+            click to browse. We&apos;ll fill in what we can find below.
           </p>
         )}
         <input
@@ -123,7 +123,7 @@ export function CompanyProfileUpload({
             if (file) handleFile(file);
           }}
           disabled={uploading}
-          className="hidden"
+          className="sr-only"
         />
       </label>
       {error && <p className="text-body-md text-error">{error}</p>}

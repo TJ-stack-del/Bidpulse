@@ -19,7 +19,7 @@ export function CompleteBidFile({ submissionId, clientId }: { submissionId: stri
       </h2>
       <p className="text-body-md text-on-surface-variant mb-4">
         We already have the agency and job details for this one. Add the bid file, if you have it, and send it
-        our way — or save it for later.
+        our way, or save it for later.
       </p>
       <BidFileStep submissionId={submissionId} clientId={clientId} onSubmitted={() => router.refresh()} />
     </div>

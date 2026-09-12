@@ -52,7 +52,7 @@ export default async function CompanyProfilePage() {
           Company Info
         </h2>
         <p className="text-body-md text-on-surface-variant mb-4">
-          Fill this in once — we reuse it as real facts in every capability statement and readiness check we
+          Fill this in once. We reuse it as real facts in every capability statement and readiness check we
           prepare for you, so you don&apos;t have to re-enter it on every bid.
         </p>
         <CompanyProfileClient
@@ -83,7 +83,7 @@ export default async function CompanyProfilePage() {
         </h2>
         <p className="text-body-md text-on-surface-variant mb-4">
           Add each small-business or socioeconomic certification you hold, with its certificate document. Our
-          team reviews the document before a certification is used in anything we prepare for you — you&apos;ll
+          team reviews the document before a certification is used in anything we prepare for you. You&apos;ll
           see its status change to &quot;Document Reviewed&quot; here once that happens.
         </p>
         <CertificationsSection clientId={client.id} initialCertifications={certifications} />
@@ -95,7 +95,7 @@ export default async function CompanyProfilePage() {
           Past Performance
         </h2>
         <p className="text-body-md text-on-surface-variant mb-4">
-          Add a few past projects — client/agency name, scope, contract value, and outcome. We use these as real
+          Add a few past projects: client/agency name, scope, contract value, and outcome. We use these as real
           references in your capability statement instead of leaving that section blank.
         </p>
         <PastPerformanceSection clientId={client.id} initialEntries={pastPerformance ?? []} />
