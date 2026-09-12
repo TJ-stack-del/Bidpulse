@@ -44,7 +44,24 @@ export function LoginForm() {
   // forever. Not a substitute for actually closing the tab (browsers
   // don't allow a page to close a tab it didn't open itself), but the
   // same practical outcome.
-  useEffect(() => onSignedInElsewhere(() => { router.push("/"); router.refresh(); }), [router]);
+  //
+  // window.focus() is a best-effort add-on, not a fix: browsers
+  // deliberately refuse to let a backgrounded tab pull itself to the
+  // foreground (the same anti-annoyance rule that blocks focus-stealing
+  // pop-unders), so this tab will keep navigating silently in the
+  // background in Chrome/Firefox/Edge no matter what we call here --
+  // there is no JS API that overrides that. It's a real no-op in most
+  // browsers, but harmless, and does work in a few (Safari, some
+  // in-app webviews).
+  useEffect(
+    () =>
+      onSignedInElsewhere(() => {
+        window.focus();
+        router.push("/");
+        router.refresh();
+      }),
+    [router]
+  );
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
