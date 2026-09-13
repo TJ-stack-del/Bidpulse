@@ -1,0 +1,34 @@
+// Single source of truth for "which deliverable types does this submission
+// need" -- pure, deterministic, no I/O. Previously this decision lived
+// inline in DeliverablesPanel.tsx (a boolean expression mixed into JSX);
+// pulling it out here makes it testable and gives the new estimate-driven
+// suggestion (DeliverablesPanel's "Estimate from RFP" button) and the
+// existing manual toggle the same one definition to agree on.
+//
+// Deliberately does NOT decide automatically which mode a submission is
+// in -- estimated_value is often a rough guess (admin-entered or, now,
+// extracted-then-admin-confirmed), so switching the actual deliverable set
+// always stays a manual admin action (DeliverablesPanel's "Switch to lean
+// package" button). isLeanEligible only answers "should we suggest it."
+
+export const FULL_DELIVERABLE_TYPES = [
+  "capability_statement",
+  "compliance_matrix",
+  "technical_narrative",
+] as const;
+
+export const LEAN_DELIVERABLE_TYPES = [
+  "rate_sheet",
+  "executive_cover",
+  "certificate_of_insurance",
+] as const;
+
+export type PackageMode = "full" | "lean";
+
+export function getRequiredDeliverableTypes(mode: PackageMode): readonly string[] {
+  return mode === "lean" ? LEAN_DELIVERABLE_TYPES : FULL_DELIVERABLE_TYPES;
+}
+
+export function isLeanEligible(estimatedValue: number | null, leanPackageThreshold: number): boolean {
+  return estimatedValue != null && estimatedValue > 0 && estimatedValue < leanPackageThreshold;
+}

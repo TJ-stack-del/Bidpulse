@@ -387,6 +387,7 @@ export default async function AdminSubmissionDetailPage({
             lastPacketView={lastPacketView}
             estimatedValue={submission.estimated_value}
             leanPackageThreshold={org?.lean_package_threshold ?? 35000}
+            rfpRequirements={submission.rfp_requirements ?? []}
           />
         </div>
 

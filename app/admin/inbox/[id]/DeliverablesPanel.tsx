@@ -8,6 +8,11 @@ import { FadeMessage } from "@/components/ui/FadeMessage";
 import { PacketButtons } from "@/components/ui/PacketButtons";
 import { signRfpDocumentUrl } from "@/lib/storage";
 import { useToast } from "@/components/Toast";
+import {
+  FULL_DELIVERABLE_TYPES as FULL_TYPE_VALUES,
+  LEAN_DELIVERABLE_TYPES as LEAN_TYPE_VALUES,
+  isLeanEligible,
+} from "@/lib/deliverables/package-routing";
 
 type Deliverable = {
   id: string;
@@ -17,24 +22,31 @@ type Deliverable = {
   created_at: string;
 };
 
-const FULL_DELIVERABLE_TYPES: { value: string; label: string }[] = [
-  { value: "capability_statement", label: "Capability statement" },
-  { value: "compliance_matrix", label: "Compliance matrix" },
-  { value: "technical_narrative", label: "Technical narrative" },
-];
+type RfpRequirement = {
+  requirement: string;
+  detail: string;
+  quote: string;
+  page: number | null;
+};
 
-// For informal quotes under the org's lean_package_threshold — the full
-// 3-deliverable set is overkill for a small job. Admin-confirmed, never
-// automatic: estimated_value is often a rough guess, not authoritative, so
-// silently swapping the whole deliverable set on a save would be surprising.
-const LEAN_DELIVERABLE_TYPES: { value: string; label: string }[] = [
-  { value: "rate_sheet", label: "Rate sheet" },
-  { value: "executive_cover", label: "Executive cover" },
-  { value: "certificate_of_insurance", label: "Certificate of insurance" },
-];
+const DELIVERABLE_LABELS: Record<string, string> = {
+  capability_statement: "Capability statement",
+  compliance_matrix: "Compliance matrix",
+  technical_narrative: "Technical narrative",
+  rate_sheet: "Rate sheet",
+  executive_cover: "Executive cover",
+  certificate_of_insurance: "Certificate of insurance",
+};
+
+// {value, label} pairs, built from the shared source-of-truth type lists in
+// lib/deliverables/package-routing.ts -- see that file's header comment for
+// why the actual mode switch stays a manual admin action rather than
+// something estimated_value flips on its own.
+const FULL_DELIVERABLE_TYPES = FULL_TYPE_VALUES.map((value) => ({ value, label: DELIVERABLE_LABELS[value] }));
+const LEAN_DELIVERABLE_TYPES = LEAN_TYPE_VALUES.map((value) => ({ value, label: DELIVERABLE_LABELS[value] }));
 
 function deliverableLabel(type: string) {
-  return [...FULL_DELIVERABLE_TYPES, ...LEAN_DELIVERABLE_TYPES].find((d) => d.value === type)?.label ?? type;
+  return DELIVERABLE_LABELS[type] ?? type;
 }
 
 // A fixed rows={3} box hid most of a real capability statement or technical
@@ -61,6 +73,7 @@ export function DeliverablesPanel({
   lastPacketView,
   estimatedValue,
   leanPackageThreshold,
+  rfpRequirements,
 }: {
   submissionId: string;
   orgId: string;
@@ -69,6 +82,7 @@ export function DeliverablesPanel({
   lastPacketView: { event_type: string; created_at: string } | null;
   estimatedValue: number | null;
   leanPackageThreshold: number;
+  rfpRequirements: RfpRequirement[];
 }) {
   const [byType, setByType] = useState<Record<string, Deliverable | undefined>>(() => {
     const map: Record<string, Deliverable | undefined> = {};
@@ -81,8 +95,7 @@ export function DeliverablesPanel({
     initialDeliverables.some((d) => LEAN_DELIVERABLE_TYPES.some((t) => t.value === d.deliverable_type))
   );
   const DELIVERABLE_TYPES = leanMode ? LEAN_DELIVERABLE_TYPES : FULL_DELIVERABLE_TYPES;
-  const showLeanSuggestion =
-    !leanMode && estimatedValue != null && estimatedValue > 0 && estimatedValue < leanPackageThreshold;
+  const showLeanSuggestion = !leanMode && isLeanEligible(estimatedValue, leanPackageThreshold);
   const [drafts, setDrafts] = useState<Record<string, string>>(() => {
     const map: Record<string, string> = {};
     for (const d of initialDeliverables) map[d.deliverable_type] = d.content ?? "";
@@ -215,6 +228,11 @@ export function DeliverablesPanel({
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error ?? "Couldn't generate a draft.");
       setDrafts((d) => ({ ...d, [type]: data.content }));
+      // A compliance-matrix draft caches fresh rfp_requirements (with
+      // source quotes) on the submission row server-side -- refresh so the
+      // "RFP source references" panel below picks it up without the admin
+      // needing to reload the page themselves.
+      if (type === "compliance_matrix") router.refresh();
     } catch (err) {
       const message = err instanceof Error ? err.message : "Couldn't generate a draft.";
       showToast(`${deliverableLabel(type)}: ${message}`, "error");
@@ -363,6 +381,38 @@ export function DeliverablesPanel({
                   Saved
                 </FadeMessage>
               </div>
+
+              {t.value === "compliance_matrix" && rfpRequirements.some((r) => r.quote) && (
+                <details className="group mt-3 border border-outline-variant rounded-lg">
+                  <summary className="flex items-center gap-2 px-3 py-2 bg-surface-container-low cursor-pointer select-none text-label-md text-on-surface-variant font-bold list-none focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary">
+                    <span className="material-symbols-outlined text-[18px] transition-transform group-open:rotate-90">
+                      chevron_right
+                    </span>
+                    RFP source references ({rfpRequirements.filter((r) => r.quote).length})
+                  </summary>
+                  <div className="px-3 py-3 flex flex-col gap-3 border-t border-outline-variant">
+                    <p className="text-label-md text-on-surface-variant">
+                      Where each RFP-sourced row above came from. Search the real document for the quoted
+                      text to confirm it, rather than re-reading the whole thing.
+                    </p>
+                    <ul className="flex flex-col gap-3">
+                      {rfpRequirements
+                        .filter((r) => r.quote)
+                        .map((r, i) => (
+                          <li key={i} className="text-body-sm text-on-surface">
+                            <span className="font-bold">{r.requirement}</span>
+                            {r.page != null && (
+                              <span className="text-on-surface-variant"> (p.{r.page})</span>
+                            )}
+                            <blockquote className="mt-1 pl-3 border-l-2 border-outline-variant text-on-surface-variant italic">
+                              &ldquo;{r.quote}&rdquo;
+                            </blockquote>
+                          </li>
+                        ))}
+                    </ul>
+                  </div>
+                </details>
+              )}
             </div>
           );
         })}

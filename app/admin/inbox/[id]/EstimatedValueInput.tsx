@@ -23,8 +23,41 @@ export function EstimatedValueInput({
   const [value, setValue] = useState(initialValue != null ? String(initialValue) : "");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [estimating, setEstimating] = useState(false);
   const supabase = createClient();
   const { showToast } = useToast();
+
+  // Fills the field with a real, agency-stated contract ceiling pulled from
+  // the uploaded RFP, when there is one -- never writes it, and never
+  // invents a number when the RFP doesn't state one. See
+  // lib/bid-estimation.ts for why this can't yet fall back to a
+  // benchmark-derived guess (no verified rate-table data exists).
+  async function handleEstimateFromRfp() {
+    setEstimating(true);
+    setSaved(false);
+    try {
+      const res = await fetch("/api/estimate-bid-value", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ submissionId }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(data?.error ?? "Couldn't estimate a value.");
+
+      if (data.estimatedValue != null) {
+        setValue(String(data.estimatedValue));
+        showToast("Filled in from the RFP's stated contract ceiling. Review, then Save.", "success");
+      } else if (data.reason === "no_rfp_document") {
+        showToast("No RFP document uploaded yet to estimate from.", "error");
+      } else {
+        showToast("The RFP doesn't state a contract ceiling. Enter a value manually if you have one.", "error");
+      }
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Couldn't estimate a value.", "error");
+    } finally {
+      setEstimating(false);
+    }
+  }
 
   async function handleSave() {
     setSaved(false);
@@ -72,6 +105,15 @@ export function EstimatedValueInput({
         >
           {saving && <Spinner />}
           {saving ? "Saving…" : "Save"}
+        </button>
+        <button
+          type="button"
+          onClick={handleEstimateFromRfp}
+          disabled={estimating}
+          className="px-3 py-1 rounded border border-outline-variant text-label-md text-on-surface-variant hover:bg-surface-container-high transition disabled:opacity-40 flex items-center gap-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        >
+          {estimating && <Spinner />}
+          {estimating ? "Checking RFP…" : "Estimate from RFP"}
         </button>
         <FadeMessage show={saved} className="text-label-md text-primary">
           Saved

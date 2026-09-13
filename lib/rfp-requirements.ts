@@ -1,7 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
-import mammoth from "mammoth";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { detectDocumentKind, type DocumentKind } from "@/lib/document-parsing";
+import { getSubmissionRfpDocuments } from "@/lib/rfp-documents";
 
 // Real fix for the "auto-draft doesn't pull items from the loaded RFP" gap:
 // generate-draft/route.ts otherwise only ever sees the client's own short
@@ -17,6 +16,15 @@ import { detectDocumentKind, type DocumentKind } from "@/lib/document-parsing";
 export type RfpRequirement = {
   requirement: string;
   detail: string;
+  // Added for the admin-review bottleneck: reviewing a compliance-matrix
+  // row used to mean re-reading the whole source document to confirm it.
+  // quote is the exact sentence the requirement was pulled from (never
+  // paraphrased, so it's Ctrl+F-able in the real RFP); page is a
+  // best-effort locator on top of that -- trust the quote first, since a
+  // wrong page number is a minor inconvenience but a paraphrased "quote"
+  // would defeat the whole point.
+  quote: string;
+  page: number | null;
 };
 
 const SYSTEM_PROMPT = `You extract concrete, compliance-relevant requirements from US government solicitation documents (RFPs, RFQs, sources-sought notices, task orders, etc.) for a small-business bidding platform. This platform never fabricates facts in anything it generates -- only extract a requirement if the document actually states it.
@@ -24,6 +32,8 @@ const SYSTEM_PROMPT = `You extract concrete, compliance-relevant requirements fr
 Read the provided document(s) and respond with ONLY a JSON array of objects, each with exactly these keys:
 - "requirement": a short label for the requirement (under 10 words), e.g. "Bid bond", "General liability insurance minimum", "Page limit", "Required certification"
 - "detail": the specific detail as stated in the document -- the actual percentage, dollar amount, page count, certification name, deadline, or format rule. Quote or closely paraphrase the document's own language. Never invent a plausible-sounding number or fact that isn't actually in the document.
+- "quote": the exact sentence (or short span, under 300 characters) from the document that this requirement is based on. Copy it VERBATIM, character-for-character -- do not paraphrase, summarize, or clean it up. A human will search the original document for this exact text, so it must match. Never fabricate a quote.
+- "page": your best-effort page number (an integer, 1-indexed) where that quote appears. If you genuinely cannot determine the page, use null -- never guess a number you're not reasonably confident in.
 
 Only include requirements that are concrete and actionable for bid preparation: bonding/insurance minimums and types, required certifications or licenses, page/format limits, required forms or attachments, evaluation criteria categories, small-business/set-aside participation goals, submission deadline and method, and any other explicit compliance condition. Do NOT include generic background/history content or anything not stated as an actual requirement.
 
@@ -35,30 +45,15 @@ function coerceRequirements(parsed: unknown): RfpRequirement[] {
   const out: RfpRequirement[] = [];
   for (const entry of parsed) {
     if (typeof entry !== "object" || entry === null) continue;
-    const requirement = asString((entry as Record<string, unknown>).requirement);
-    const detail = asString((entry as Record<string, unknown>).detail);
-    if (requirement && detail) out.push({ requirement, detail });
+    const record = entry as Record<string, unknown>;
+    const requirement = asString(record.requirement);
+    const detail = asString(record.detail);
+    const quote = asString(record.quote) ?? "";
+    const page = typeof record.page === "number" && Number.isInteger(record.page) && record.page > 0 ? record.page : null;
+    if (requirement && detail) out.push({ requirement, detail, quote, page });
   }
   return out;
 }
-
-type ContentBlock = Anthropic.TextBlockParam | Anthropic.DocumentBlockParam;
-
-async function fileToContentBlock(kind: DocumentKind, buffer: Buffer): Promise<ContentBlock[] | null> {
-  if (kind === "pdf") {
-    return [
-      {
-        type: "document",
-        source: { type: "base64", media_type: "application/pdf", data: buffer.toString("base64") },
-      },
-    ];
-  }
-  const text = kind === "docx" ? (await mammoth.extractRawText({ buffer })).value : buffer.toString("utf-8");
-  if (!text.trim()) return null;
-  return [{ type: "text", text: text.trim() }];
-}
-
-type RfpFileRow = { file_name: string; file_url: string; created_at: string };
 
 // Best-effort throughout: any failure (a file that won't download, an
 // unsupported type, a bad LLM response) just means fewer/no RFP-sourced
@@ -68,17 +63,9 @@ export async function getOrExtractRfpRequirements(
   supabase: SupabaseClient,
   submission: { id: string; rfp_requirements: RfpRequirement[] | null; rfp_requirements_extracted_at: string | null }
 ): Promise<RfpRequirement[]> {
-  const { data: rfpDocs } = await supabase
-    .from("submission_documents")
-    .select("file_name, file_url, created_at")
-    .eq("submission_id", submission.id)
-    .eq("document_type", "rfp_file")
-    .order("created_at", { ascending: true });
+  const { blocks: content, newestDocAt } = await getSubmissionRfpDocuments(supabase, submission.id);
+  if (newestDocAt === null) return [];
 
-  const docs = (rfpDocs ?? []) as RfpFileRow[];
-  if (docs.length === 0) return [];
-
-  const newestDocAt = docs.reduce((max, d) => (d.created_at > max ? d.created_at : max), docs[0].created_at);
   if (
     submission.rfp_requirements &&
     submission.rfp_requirements_extracted_at &&
@@ -87,18 +74,6 @@ export async function getOrExtractRfpRequirements(
     return submission.rfp_requirements;
   }
 
-  const content: ContentBlock[] = [];
-  for (const doc of docs) {
-    const kind = detectDocumentKind("", doc.file_name);
-    if (!kind) continue;
-    const { data: blob, error } = await supabase.storage.from("rfp-documents").download(doc.file_url);
-    if (error || !blob) continue;
-    const buffer = Buffer.from(await blob.arrayBuffer());
-    const block = await fileToContentBlock(kind, buffer);
-    if (!block) continue;
-    content.push({ type: "text", text: `--- Document: ${doc.file_name} ---` });
-    content.push(...block);
-  }
   if (content.length === 0) return [];
   content.push({ type: "text", text: "Extract the requirements described in the system prompt from the document(s) above." });
 
