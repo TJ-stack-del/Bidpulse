@@ -3,7 +3,7 @@
 import { useId, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
-import { signRfpDocumentUrl, uploadRfpDocument, removeRfpDocument } from "@/lib/storage";
+import { uploadAndInsertRecord, removeRfpDocument } from "@/lib/storage";
 import { CERT_REVIEWED_TOOLTIP } from "@/lib/brand";
 
 type RecordType = "trade_license" | "small_business_cert" | "field_certification";
@@ -99,23 +99,11 @@ export function CertificationsSection({
     // (ClientCertifications.tsx's toggle enforces that, backed by a DB
     // constraint) — that's the actual gate on being treated as fact
     // anywhere generated paperwork reads client_certifications.
-    let path: string | null = null;
-    if (file) {
-      const uploaded = await uploadRfpDocument(supabase, `${clientId}/certifications/${Date.now()}-${file.name}`, file);
-      if (uploaded.error) {
-        setError(uploaded.error);
-        setSubmitting(false);
-        return;
-      }
-      path = uploaded.path;
-    }
-
-    // The bucket is private — the DB stores the bare path, and every read
-    // site (including this one, right after upload) generates its own
-    // signed URL rather than persisting one, since a signed URL expires.
-    const { data: newCert, error: insertError } = await supabase
-      .from("client_certifications")
-      .insert({
+    const result = await uploadAndInsertRecord<Certification>(supabase, {
+      path: file ? `${clientId}/certifications/${Date.now()}-${file.name}` : "",
+      file,
+      table: "client_certifications",
+      payload: {
         client_id: clientId,
         record_type: recordType,
         cert_type: isSmallBusinessCert ? certType : licenseName.trim(),
@@ -124,23 +112,16 @@ export function CertificationsSection({
         jurisdiction_state: recordType === "trade_license" ? jurisdictionState.trim() || null : null,
         licensing_board: recordType === "trade_license" ? licensingBoard.trim() || null : null,
         expiration_date: expirationDate || null,
-        file_url: path,
-        file_name: file ? file.name : null,
-      })
-      .select()
-      .single();
+      },
+    });
 
-    if (insertError || !newCert) {
-      // Upload already succeeded above -- without this, a failed insert
-      // here left the file permanently orphaned in storage.
-      await removeRfpDocument(supabase, path);
-      setError(insertError?.message ?? "Couldn't record the certification.");
+    if (result.error) {
+      setError(result.error === "Couldn't save the record." ? "Couldn't record the certification." : result.error);
       setSubmitting(false);
       return;
     }
 
-    const signedUrl = path ? await signRfpDocumentUrl(supabase, path) : null;
-    setCertifications((c) => [{ ...newCert, file_url: signedUrl }, ...c]);
+    setCertifications((c) => [{ ...result.row, file_url: result.signedUrl }, ...c]);
     resetForm();
     setSubmitting(false);
   }

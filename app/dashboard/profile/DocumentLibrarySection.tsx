@@ -3,7 +3,7 @@
 import { useId, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
-import { signRfpDocumentUrl, uploadRfpDocument, removeRfpDocument } from "@/lib/storage";
+import { uploadAndInsertRecord, removeRfpDocument } from "@/lib/storage";
 
 type ClientDocument = {
   id: string;
@@ -22,17 +22,19 @@ const DOC_TYPES: { value: string; label: string }[] = [
   { value: "other", label: "Other" },
 ];
 
+// `doc.label` is only ever set for custom_rider/other (see handleAdd's
+// `needsLabel` gate below) -- every other doc_type has label: null, so
+// this single fallback chain covers both cases without a separate branch.
 function docLabel(doc: Pick<ClientDocument, "doc_type" | "label">) {
-  if (doc.doc_type === "custom_rider" || doc.doc_type === "other") return doc.label || DOC_TYPES.find((d) => d.value === doc.doc_type)?.label || doc.doc_type;
-  return DOC_TYPES.find((d) => d.value === doc.doc_type)?.label ?? doc.doc_type;
+  return doc.label || DOC_TYPES.find((d) => d.value === doc.doc_type)?.label || doc.doc_type;
 }
 
 // Reusable RFP boilerplate a client keeps current themselves -- no verify
 // workflow here (client_documents has no verified column at all, unlike
 // certifications/insurance/bonding), a row's presence with a file IS
 // "synced" for the UI's purposes. Every upload/list/remove call goes
-// through the same rfp-documents bucket and uploadRfpDocument/
-// signRfpDocumentUrl helpers as every other document feature in the app.
+// through the same rfp-documents bucket and the shared lib/storage.ts
+// helpers as every other document feature in the app.
 export function DocumentLibrarySection({
   clientId,
   initialDocuments,
@@ -72,36 +74,24 @@ export function DocumentLibrarySection({
 
     setSubmitting(true);
 
-    const uploaded = await uploadRfpDocument(supabase, `${clientId}/documents/${docType}/${Date.now()}-${file.name}`, file);
-    if (uploaded.error) {
-      setError(uploaded.error);
-      setSubmitting(false);
-      return;
-    }
-
-    const { data: newDoc, error: insertError } = await supabase
-      .from("client_documents")
-      .insert({
+    const result = await uploadAndInsertRecord<ClientDocument>(supabase, {
+      path: `${clientId}/documents/${docType}/${Date.now()}-${file.name}`,
+      file,
+      table: "client_documents",
+      payload: {
         client_id: clientId,
         doc_type: docType,
         label: needsLabel ? label.trim() : null,
-        file_url: uploaded.path,
-        file_name: file.name,
-      })
-      .select()
-      .single();
+      },
+    });
 
-    if (insertError || !newDoc) {
-      // Upload already succeeded above -- without this, a failed insert
-      // here left the file permanently orphaned in storage.
-      await removeRfpDocument(supabase, uploaded.path);
-      setError(insertError?.message ?? "Couldn't record the document.");
+    if (result.error) {
+      setError(result.error === "Couldn't save the record." ? "Couldn't record the document." : result.error);
       setSubmitting(false);
       return;
     }
 
-    const signedUrl = await signRfpDocumentUrl(supabase, uploaded.path);
-    setDocuments((d) => [{ ...newDoc, file_url: signedUrl }, ...d]);
+    setDocuments((d) => [{ ...result.row, file_url: result.signedUrl }, ...d]);
     resetForm();
     setSubmitting(false);
   }
@@ -119,7 +109,7 @@ export function DocumentLibrarySection({
     <div className="flex flex-col gap-6">
       <form onSubmit={handleAdd} className="border border-outline-variant rounded-xl p-4 flex flex-col md:flex-row gap-3 items-start md:items-end flex-wrap">
         <div>
-          <label htmlFor={`${idPrefix}-doc-type`} className="text-label-md text-on-surface-variant block mb-1">Document type</label>
+          <label htmlFor={`${idPrefix}-doc-type`} className="text-label-md text-on-surface-variant block mb-1">Category</label>
           <select
             id={`${idPrefix}-doc-type`}
             value={docType}

@@ -63,3 +63,49 @@ export async function removeRfpDocument(supabase: SupabaseClient, path: string |
   if (!path) return;
   await supabase.storage.from(RFP_DOCUMENTS_BUCKET).remove([path]);
 }
+
+export type UploadAndInsertResult<T> =
+  | { row: T; signedUrl: string | null; error: null }
+  | { row: null; signedUrl: null; error: string };
+
+// The real "add a record with an optional document" sequence -- upload
+// (skipped entirely when there's no file), insert, roll the upload back on
+// a failed insert (removeRfpDocument), sign the stored path for immediate
+// display -- was duplicated near-identically across CertificationsSection,
+// InsuranceBondingSection (twice, once per record type it manages), and
+// DocumentLibrarySection. Collapsed here since a code review flagged the
+// triplication; each caller still owns its own field validation and local
+// state update, just not this sequence.
+export async function uploadAndInsertRecord<T = Record<string, unknown>>(
+  supabase: SupabaseClient,
+  params: {
+    // Where to store the file, e.g. `${clientId}/certifications/${Date.now()}-${file.name}`.
+    // Ignored when `file` is null (an optional-document record with none attached).
+    path: string;
+    file: File | null;
+    table: string;
+    // Fields besides file_url/file_name, which are set automatically.
+    payload: Record<string, unknown>;
+  }
+): Promise<UploadAndInsertResult<T>> {
+  let storedPath: string | null = null;
+  if (params.file) {
+    const uploaded = await uploadRfpDocument(supabase, params.path, params.file);
+    if (uploaded.error) return { row: null, signedUrl: null, error: uploaded.error };
+    storedPath = uploaded.path;
+  }
+
+  const { data: newRow, error: insertError } = await supabase
+    .from(params.table)
+    .insert({ ...params.payload, file_url: storedPath, file_name: params.file?.name ?? null })
+    .select()
+    .single();
+
+  if (insertError || !newRow) {
+    await removeRfpDocument(supabase, storedPath);
+    return { row: null, signedUrl: null, error: insertError?.message ?? "Couldn't save the record." };
+  }
+
+  const signedUrl = storedPath ? await signRfpDocumentUrl(supabase, storedPath) : null;
+  return { row: newRow as T, signedUrl, error: null };
+}
