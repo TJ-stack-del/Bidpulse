@@ -33,7 +33,11 @@ import { broadcastSignedIn } from "@/lib/auth-broadcast";
 
 type Role = "admin" | "client";
 
-const NAV_LINKS: Record<Role, { href: string; label: string; icon: string }[]> = {
+// mobileLabel overrides `label` only on the bottom-bar nav (below) -- the
+// mobile label has no truncate/nowrap and a two-word label like
+// "Compliance Vault" was a real two-line-wrap risk on narrow phones that
+// its single-word siblings don't share, breaking the row's alignment.
+const NAV_LINKS: Record<Role, { href: string; label: string; mobileLabel?: string; icon: string }[]> = {
   admin: [
     { href: "/admin/inbox", label: "Inbox", icon: "inbox" },
     { href: "/admin/matches", label: "Matches", icon: "insights" },
@@ -42,15 +46,25 @@ const NAV_LINKS: Record<Role, { href: string; label: string; icon: string }[]> =
   ],
   client: [
     { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
-    { href: "/intake", label: "New Bid", icon: "add_circle" },
-    { href: "/dashboard/compliance", label: "Compliance Vault", icon: "shield" },
+    // "New Bid" (-> /intake) was dropped per explicit user direction: the
+    // Dashboard itself already has two entry points into /intake (a
+    // "Start a new bid" CTA card, and a "Start your first bid" button in
+    // the zero-submissions empty state) -- a persistent nav tab for a
+    // one-off action, sitting next to three destinations you navigate to
+    // and stay on, was both a real duplicate entry point and a visual
+    // register mismatch (its icon, add_circle, was the only "verb" icon
+    // among three "noun" icons). Two independent reviews confirmed
+    // removing it outright, not replacing it with a lighter treatment.
+    { href: "/dashboard/compliance", label: "Compliance Vault", mobileLabel: "Compliance", icon: "shield" },
     { href: "/dashboard/profile", label: "Profile", icon: "badge" },
   ],
 };
 
 const SIDEBAR_LABEL: Record<Role, string> = {
   admin: "Operational Modules",
-  client: "Your Account",
+  // Was "Your Account" -- a mismatch once this list is mostly product
+  // sections (Dashboard, Compliance Vault) rather than account settings.
+  client: "Menu",
 };
 
 // Where the logo should take a signed-in user of each role -- their own
@@ -170,7 +184,7 @@ export function AppShell({
             }`}
           >
             <span className="material-symbols-outlined">{link.icon}</span>
-            <span className="text-label-md-mobile uppercase tracking-wider mt-1">{link.label}</span>
+            <span className="text-label-md-mobile uppercase tracking-wider mt-1">{link.mobileLabel ?? link.label}</span>
           </Link>
         ))}
       </nav>
