@@ -28,7 +28,9 @@ export default async function CompanyProfilePage() {
 
   const { data: certificationsRaw } = await supabase
     .from("client_certifications")
-    .select("id, cert_type, other_label, certification_number, expiration_date, file_url, file_name, verified, created_at")
+    .select(
+      "id, cert_type, other_label, certification_number, expiration_date, file_url, file_name, verified, created_at, record_type, jurisdiction_state, licensing_board"
+    )
     .eq("client_id", client.id)
     .order("created_at", { ascending: false });
   const certifications = await signRfpDocumentUrls(supabase, certificationsRaw ?? []);

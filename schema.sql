@@ -1,16 +1,5 @@
--- ============================================================================
--- BidPulse — Schema (generated reference, do not run by hand)
--- ============================================================================
--- This file is a snapshot of the live Supabase schema, generated via
--- `npx supabase db dump --schema public`. It documents current structure for
--- reference (code comments across the app point here for RLS policies, enum
--- values, etc.) — it is NOT the mechanism for changing the schema.
---
--- Schema changes go through supabase/migrations/ (`npx supabase migration new
--- <name>`, then `npx supabase db push`). After applying migrations, regenerate
--- this file with the same dump command and commit the diff so it stays
--- accurate.
--- ============================================================================
+
+
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -797,11 +786,27 @@ CREATE TABLE IF NOT EXISTS "public"."client_certifications" (
     "verified_at" timestamp with time zone,
     "verified_by" "uuid",
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "record_type" "text" DEFAULT 'small_business_cert'::"text" NOT NULL,
+    "jurisdiction_state" "text",
+    "licensing_board" "text",
+    CONSTRAINT "client_certifications_record_type_check" CHECK (("record_type" = ANY (ARRAY['trade_license'::"text", 'small_business_cert'::"text", 'field_certification'::"text"]))),
     CONSTRAINT "client_certifications_verified_requires_file" CHECK (((NOT "verified") OR ("file_url" IS NOT NULL)))
 );
 
 
 ALTER TABLE "public"."client_certifications" OWNER TO "postgres";
+
+
+COMMENT ON COLUMN "public"."client_certifications"."record_type" IS 'Groups rows for the client-facing Compliance Vault UI: trade_license (a state-issued trade license like Master Electrician), small_business_cert (8(a)/WOSB/etc.), or field_certification (e.g. OSHA 30, EPA 608). Does not change the verify workflow, which applies uniformly across all three.';
+
+
+
+COMMENT ON COLUMN "public"."client_certifications"."jurisdiction_state" IS 'State that issued the license, only meaningful when record_type = trade_license.';
+
+
+
+COMMENT ON COLUMN "public"."client_certifications"."licensing_board" IS 'Issuing board/authority (e.g. "State DBPR Div. 4"), only meaningful when record_type = trade_license.';
+
 
 
 CREATE TABLE IF NOT EXISTS "public"."client_past_performance" (
@@ -973,7 +978,9 @@ CREATE TABLE IF NOT EXISTS "public"."submissions" (
     "info_attested_by" "uuid",
     "first_viewed_by_admin_at" timestamp with time zone,
     "rfp_requirements" "jsonb",
-    "rfp_requirements_extracted_at" timestamp with time zone
+    "rfp_requirements_extracted_at" timestamp with time zone,
+    "bid_estimation_facts" "jsonb",
+    "bid_estimation_facts_extracted_at" timestamp with time zone
 );
 
 
@@ -1555,6 +1562,7 @@ GRANT ALL ON FUNCTION "public"."is_admin"("target_org_id" "uuid") TO "service_ro
 
 
 
+REVOKE ALL ON FUNCTION "public"."is_org_member"("target_org_id" "uuid") FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."is_org_member"("target_org_id" "uuid") TO "service_role";
 
 
@@ -1565,6 +1573,7 @@ GRANT ALL ON FUNCTION "public"."is_own_client_record"("target_client_id" "uuid")
 
 
 
+REVOKE ALL ON FUNCTION "public"."org_has_admin"("target_org_id" "uuid") FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."org_has_admin"("target_org_id" "uuid") TO "service_role";
 
 

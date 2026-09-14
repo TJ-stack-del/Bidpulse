@@ -6,6 +6,8 @@ import { Spinner } from "@/components/ui/Spinner";
 import { signRfpDocumentUrl } from "@/lib/storage";
 import { CERT_REVIEWED_TOOLTIP } from "@/lib/brand";
 
+type RecordType = "trade_license" | "small_business_cert" | "field_certification";
+
 type Certification = {
   id: string;
   cert_type: string;
@@ -16,12 +18,27 @@ type Certification = {
   file_name: string | null;
   verified: boolean;
   created_at: string;
+  record_type: RecordType;
+  jurisdiction_state: string | null;
+  licensing_board: string | null;
 };
 
 const CERT_TYPES = ["8(a)", "WOSB", "EDWOSB", "HUBZone", "SDVOSB", "VOSB", "JSEB", "DBE/SDB", "Other"];
 
-function certLabel(cert: Pick<Certification, "cert_type" | "other_label">) {
-  return cert.cert_type === "Other" ? cert.other_label || "Other" : cert.cert_type;
+// Trade licenses (a Master Electrician license, a Low Voltage Contractor
+// license) and field certifications (OSHA 30, EPA Section 608) don't have a
+// fixed federal/local program list the way small-business certs do -- their
+// "type" is whatever the license/certification is actually called, so those
+// two record types take a free-text name instead of the CERT_TYPES select.
+const RECORD_TYPES: { value: RecordType; label: string; sectionTitle: string }[] = [
+  { value: "trade_license", label: "Trade license", sectionTitle: "State Licensing & Trade Boards" },
+  { value: "small_business_cert", label: "Small business / socioeconomic cert", sectionTitle: "Small Business & Socioeconomic Certifications" },
+  { value: "field_certification", label: "Field certification", sectionTitle: "Field Certifications" },
+];
+
+function certLabel(cert: Pick<Certification, "cert_type" | "other_label" | "record_type">) {
+  if (cert.record_type === "small_business_cert" && cert.cert_type === "Other") return cert.other_label || "Other";
+  return cert.cert_type;
 }
 
 // Upload mechanics (bucket, path convention, upload -> save row) mirror
@@ -35,9 +52,13 @@ export function CertificationsSection({
   initialCertifications: Certification[];
 }) {
   const [certifications, setCertifications] = useState(initialCertifications);
+  const [recordType, setRecordType] = useState<RecordType>("small_business_cert");
   const [certType, setCertType] = useState(CERT_TYPES[0]);
+  const [licenseName, setLicenseName] = useState("");
   const [otherLabel, setOtherLabel] = useState("");
   const [certNumber, setCertNumber] = useState("");
+  const [jurisdictionState, setJurisdictionState] = useState("");
+  const [licensingBoard, setLicensingBoard] = useState("");
   const [expirationDate, setExpirationDate] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -46,8 +67,11 @@ export function CertificationsSection({
 
   function resetForm() {
     setCertType(CERT_TYPES[0]);
+    setLicenseName("");
     setOtherLabel("");
     setCertNumber("");
+    setJurisdictionState("");
+    setLicensingBoard("");
     setExpirationDate("");
     setFile(null);
   }
@@ -56,8 +80,13 @@ export function CertificationsSection({
     e.preventDefault();
     setError(null);
 
-    if (certType === "Other" && !otherLabel.trim()) {
+    const isSmallBusinessCert = recordType === "small_business_cert";
+    if (isSmallBusinessCert && certType === "Other" && !otherLabel.trim()) {
       setError("Enter the certification name (e.g. MBE, DBE) for \"Other\".");
+      return;
+    }
+    if (!isSmallBusinessCert && !licenseName.trim()) {
+      setError(recordType === "trade_license" ? "Enter the license name (e.g. Master Electrician License)." : "Enter the certification name (e.g. OSHA 30).");
       return;
     }
 
@@ -87,9 +116,12 @@ export function CertificationsSection({
       .from("client_certifications")
       .insert({
         client_id: clientId,
-        cert_type: certType,
-        other_label: certType === "Other" ? otherLabel.trim() : null,
+        record_type: recordType,
+        cert_type: isSmallBusinessCert ? certType : licenseName.trim(),
+        other_label: isSmallBusinessCert && certType === "Other" ? otherLabel.trim() : null,
         certification_number: certNumber.trim() || null,
+        jurisdiction_state: recordType === "trade_license" ? jurisdictionState.trim() || null : null,
+        licensing_board: recordType === "trade_license" ? licensingBoard.trim() || null : null,
         expiration_date: expirationDate || null,
         file_url: path,
         file_name: file ? file.name : null,
@@ -121,21 +153,50 @@ export function CertificationsSection({
         className="border border-outline-variant rounded-xl p-4 flex flex-col md:flex-row gap-3 items-start md:items-end flex-wrap"
       >
         <div>
-          <label className="text-label-md text-on-surface-variant block mb-1">Certification type</label>
+          <label className="text-label-md text-on-surface-variant block mb-1">Category</label>
           <select
-            value={certType}
-            onChange={(e) => setCertType(e.target.value)}
+            value={recordType}
+            onChange={(e) => setRecordType(e.target.value as RecordType)}
             className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
           >
-            {CERT_TYPES.map((t) => (
-              <option key={t} value={t}>
-                {t}
+            {RECORD_TYPES.map((rt) => (
+              <option key={rt.value} value={rt.value}>
+                {rt.label}
               </option>
             ))}
           </select>
         </div>
 
-        {certType === "Other" && (
+        {recordType === "small_business_cert" ? (
+          <div>
+            <label className="text-label-md text-on-surface-variant block mb-1">Certification type</label>
+            <select
+              value={certType}
+              onChange={(e) => setCertType(e.target.value)}
+              className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
+            >
+              {CERT_TYPES.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : (
+          <div>
+            <label className="text-label-md text-on-surface-variant block mb-1">
+              {recordType === "trade_license" ? "License name" : "Certification name"}
+            </label>
+            <input
+              value={licenseName}
+              onChange={(e) => setLicenseName(e.target.value)}
+              placeholder={recordType === "trade_license" ? "e.g. Master Electrician License" : "e.g. OSHA 30"}
+              className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
+            />
+          </div>
+        )}
+
+        {recordType === "small_business_cert" && certType === "Other" && (
           <div>
             <label className="text-label-md text-on-surface-variant block mb-1">Certification name</label>
             <input
@@ -145,6 +206,29 @@ export function CertificationsSection({
               className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
             />
           </div>
+        )}
+
+        {recordType === "trade_license" && (
+          <>
+            <div>
+              <label className="text-label-md text-on-surface-variant block mb-1">State</label>
+              <input
+                value={jurisdictionState}
+                onChange={(e) => setJurisdictionState(e.target.value)}
+                placeholder="e.g. FL"
+                className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary w-20"
+              />
+            </div>
+            <div>
+              <label className="text-label-md text-on-surface-variant block mb-1">Issuing board (optional)</label>
+              <input
+                value={licensingBoard}
+                onChange={(e) => setLicensingBoard(e.target.value)}
+                placeholder="e.g. State DBPR Div. 4"
+                className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
+              />
+            </div>
+          </>
         )}
 
         <div>
@@ -193,47 +277,69 @@ export function CertificationsSection({
       {certifications.length === 0 ? (
         <p className="text-body-md text-on-surface-variant">No certifications added yet.</p>
       ) : (
-        <ul className="flex flex-col gap-2">
-          {certifications.map((cert) => (
-            <li
-              key={cert.id}
-              className="flex items-center justify-between gap-3 px-4 py-3 rounded border border-outline-variant bg-surface flex-wrap"
-            >
-              <div>
-                <p className="text-body-md text-on-surface font-bold">
-                  {certLabel(cert)}
-                  {cert.certification_number ? ` (#${cert.certification_number})` : ""}
-                </p>
-                <p className="text-label-md text-on-surface-variant">
-                  {cert.expiration_date ? `Expires ${new Date(cert.expiration_date).toLocaleDateString()}` : "No expiration on file"}
-                  {cert.file_url && (
-                    <>
-                      {" · "}
-                      <a href={cert.file_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm">
-                        {cert.file_name ?? "View document"}
-                      </a>
-                    </>
-                  )}
-                </p>
+        <div className="flex flex-col gap-6">
+          {RECORD_TYPES.map((rt) => {
+            const rows = certifications.filter((c) => c.record_type === rt.value);
+            if (rows.length === 0) return null;
+            return (
+              <div key={rt.value}>
+                <h3 className="text-label-md font-bold text-on-surface-variant uppercase tracking-wider mb-2">
+                  {rt.sectionTitle}
+                </h3>
+                <ul className="flex flex-col gap-2">
+                  {rows.map((cert) => (
+                    <li
+                      key={cert.id}
+                      className="flex items-center justify-between gap-3 px-4 py-3 rounded border border-outline-variant bg-surface flex-wrap"
+                    >
+                      <div>
+                        <p className="text-body-md text-on-surface font-bold">
+                          {certLabel(cert)}
+                          {cert.certification_number ? ` (#${cert.certification_number})` : ""}
+                        </p>
+                        <p className="text-label-md text-on-surface-variant">
+                          {[
+                            cert.jurisdiction_state || cert.licensing_board
+                              ? [cert.jurisdiction_state, cert.licensing_board].filter(Boolean).join(" / ")
+                              : null,
+                            cert.expiration_date
+                              ? `Expires ${new Date(cert.expiration_date).toLocaleDateString()}`
+                              : "No expiration on file",
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")}
+                          {cert.file_url && (
+                            <>
+                              {" · "}
+                              <a href={cert.file_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm">
+                                {cert.file_name ?? "View document"}
+                              </a>
+                            </>
+                          )}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span
+                          title={cert.verified ? CERT_REVIEWED_TOOLTIP : undefined}
+                          className={`text-[10px] px-2 py-0.5 rounded border font-bold uppercase ${
+                            cert.verified
+                              ? "bg-secondary-container text-on-secondary-container border-primary/20"
+                              : "bg-surface-container-low text-on-surface-variant border-outline-variant"
+                          }`}
+                        >
+                          {cert.verified ? "Document Reviewed" : "Not yet reviewed"}
+                        </span>
+                        <button type="button" onClick={() => handleRemove(cert.id)} className="text-error text-label-md hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-error rounded-sm">
+                          Remove
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <div className="flex items-center gap-3">
-                <span
-                  title={cert.verified ? CERT_REVIEWED_TOOLTIP : undefined}
-                  className={`text-[10px] px-2 py-0.5 rounded border font-bold uppercase ${
-                    cert.verified
-                      ? "bg-secondary-container text-on-secondary-container border-primary/20"
-                      : "bg-surface-container-low text-on-surface-variant border-outline-variant"
-                  }`}
-                >
-                  {cert.verified ? "Document Reviewed" : "Not yet reviewed"}
-                </span>
-                <button type="button" onClick={() => handleRemove(cert.id)} className="text-error text-label-md hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-error rounded-sm">
-                  Remove
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
+            );
+          })}
+        </div>
       )}
     </div>
   );

@@ -15,10 +15,14 @@ type Certification = {
   file_url: string | null;
   file_name: string | null;
   verified: boolean;
+  record_type: "trade_license" | "small_business_cert" | "field_certification";
+  jurisdiction_state: string | null;
+  licensing_board: string | null;
 };
 
-function certLabel(cert: Pick<Certification, "cert_type" | "other_label">) {
-  return cert.cert_type === "Other" ? cert.other_label || "Other" : cert.cert_type;
+function certLabel(cert: Pick<Certification, "cert_type" | "other_label" | "record_type">) {
+  if (cert.record_type === "small_business_cert" && cert.cert_type === "Other") return cert.other_label || "Other";
+  return cert.cert_type;
 }
 
 // Admin's half of the certifications feature: the client uploads the
@@ -97,7 +101,14 @@ export function ClientCertifications({
               {cert.certification_number ? ` (#${cert.certification_number})` : ""}
             </p>
             <p className="text-label-md text-on-surface-variant">
-              {cert.expiration_date ? `Expires ${new Date(cert.expiration_date).toLocaleDateString()}` : "No expiration on file"}
+              {[
+                cert.jurisdiction_state || cert.licensing_board
+                  ? [cert.jurisdiction_state, cert.licensing_board].filter(Boolean).join(" / ")
+                  : null,
+                cert.expiration_date ? `Expires ${new Date(cert.expiration_date).toLocaleDateString()}` : "No expiration on file",
+              ]
+                .filter(Boolean)
+                .join(" · ")}
               {cert.file_url && (
                 <>
                   {" · "}

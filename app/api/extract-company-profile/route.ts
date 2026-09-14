@@ -3,6 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { COMMON_NAICS_CODES } from "@/lib/business-options";
 import { detectDocumentKind, buildDocumentContent, UNSUPPORTED_FILE_TYPE_MESSAGE } from "@/lib/document-parsing";
+import { parseLlmJson } from "@/lib/llm-json";
 
 export const runtime = "nodejs";
 // See extract-from-document/route.ts's identical comment -- Vercel's
@@ -49,19 +50,31 @@ Read the provided document and respond with ONLY a single JSON object with exact
 - "generalLiabilityCoverage": the General Liability coverage amount as written in the document (e.g. "$1,000,000 per occurrence / $2,000,000 aggregate"), or null if not found.
 - "workersCompCoverage": the Workers' Compensation coverage description as written, or null if not found.
 - "commercialAutoCoverage": the Commercial Auto coverage description as written, or null if not found.
-- "certifications": an array of objects, one per small-business/socioeconomic certification or industry accreditation actually stated in the document, each with:
-  - "certType": exactly one of ${CERT_TYPES.join(", ")}. Use "JSEB" for a local/regional Jacksonville-area small or emerging business certification. Use "DBE/SDB" when the document states a Disadvantaged Business Enterprise and/or Small Disadvantaged Business certification (either term, or both). Use "Other" for anything else (a state MBE/WBE, an industry accreditation, any other local program).
-  - "otherLabel": required when certType is "Other" — the certification's actual name/abbreviation (e.g. "MBE", "CIMS-GB"), otherwise null
-  - "certificationNumber": the certification number if stated, otherwise null
+- "certifications": an array of objects, one per state trade license, small-business/socioeconomic certification, or field certification (e.g. OSHA 30, EPA Section 608) actually stated in the document, each with:
+  - "recordType": exactly one of "trade_license" (a state-issued trade/occupational license like a Master Electrician or Low Voltage Contractor license), "small_business_cert" (a small-business or socioeconomic program certification), or "field_certification" (a safety/technical card like OSHA 30 or EPA Section 608).
+  - "certType": if recordType is "small_business_cert", exactly one of ${CERT_TYPES.join(", ")} (use "JSEB" for a local/regional Jacksonville-area small or emerging business certification; use "DBE/SDB" when the document states a Disadvantaged Business Enterprise and/or Small Disadvantaged Business certification, either term or both; use "Other" for anything else, e.g. a state MBE/WBE). If recordType is "trade_license" or "field_certification", certType is instead the license/certification's actual name exactly as stated (e.g. "Master Electrician License", "Low Voltage Contractor License", "OSHA 30", "EPA Section 608 Universal") — do NOT force it into the small-business list.
+  - "otherLabel": required when recordType is "small_business_cert" and certType is "Other" — the certification's actual name/abbreviation (e.g. "MBE", "CIMS-GB"), otherwise null
+  - "certificationNumber": the license or certification number if stated, otherwise null
+  - "jurisdictionState": only for recordType "trade_license" — the two-letter state that issued the license if stated, otherwise null
+  - "licensingBoard": only for recordType "trade_license" — the issuing board/authority name if stated (e.g. "State DBPR Div. 4"), otherwise null
   - "expirationDate": the expiration date in YYYY-MM-DD format if stated, otherwise null
-  Empty array if no certifications are mentioned. Include EVERY certification actually stated — a document commonly lists more than one.
+  Empty array if none are mentioned. Include EVERY license/certification actually stated — a document commonly lists more than one.
 
 Only fill a field if the document actually states it — never guess or infer from context. Respond with nothing but that JSON object — no markdown code fences, no commentary.`;
 
+const RECORD_TYPES = ["trade_license", "small_business_cert", "field_certification"] as const;
+
 type ExtractedCertification = {
-  certType: (typeof CERT_TYPES)[number];
+  recordType: (typeof RECORD_TYPES)[number];
+  // Constrained to CERT_TYPES only when recordType is "small_business_cert"
+  // (enforced in coerceFields below); a free-text name for the other two
+  // record types, since a trade license's "type" is whatever it's actually
+  // called, not a fixed federal/local program list.
+  certType: string;
   otherLabel: string | null;
   certificationNumber: string | null;
+  jurisdictionState: string | null;
+  licensingBoard: string | null;
   expirationDate: string | null;
 };
 
@@ -101,14 +114,29 @@ function coerceFields(parsed: unknown): ExtractedProfile {
         .map((c): ExtractedCertification | null => {
           if (typeof c !== "object" || c === null) return null;
           const cc = c as Record<string, unknown>;
-          const certType = typeof cc.certType === "string" && (CERT_TYPES as readonly string[]).includes(cc.certType)
-            ? (cc.certType as ExtractedCertification["certType"])
-            : null;
-          if (!certType) return null;
+          const recordType =
+            typeof cc.recordType === "string" && (RECORD_TYPES as readonly string[]).includes(cc.recordType)
+              ? (cc.recordType as ExtractedCertification["recordType"])
+              : "small_business_cert"; // matches the DB column's own default
+
+          // Only small_business_cert is constrained to the fixed program
+          // list -- a trade_license/field_certification with a certType the
+          // model didn't format as expected still has a real, useful name,
+          // so it's kept as free text rather than dropping the whole entry.
+          const rawCertType = asString(cc.certType);
+          if (recordType === "small_business_cert") {
+            if (!rawCertType || !(CERT_TYPES as readonly string[]).includes(rawCertType)) return null;
+          } else if (!rawCertType) {
+            return null;
+          }
+
           return {
-            certType,
-            otherLabel: asString(cc.otherLabel),
+            recordType,
+            certType: rawCertType as string,
+            otherLabel: recordType === "small_business_cert" ? asString(cc.otherLabel) : null,
             certificationNumber: asString(cc.certificationNumber),
+            jurisdictionState: recordType === "trade_license" ? asString(cc.jurisdictionState) : null,
+            licensingBoard: recordType === "trade_license" ? asString(cc.licensingBoard) : null,
             expirationDate: asString(cc.expirationDate),
           };
         })
@@ -189,10 +217,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Couldn't extract anything from that document." }, { status: 502 });
   }
 
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(textBlock.text.trim());
-  } catch {
+  // See lib/llm-json.ts -- tolerates a literal newline inside a JSON string
+  // value, which a plain JSON.parse would reject outright.
+  const parsed = parseLlmJson<unknown>(textBlock.text);
+  if (parsed === null) {
     return NextResponse.json({ error: "Couldn't parse the extraction result." }, { status: 502 });
   }
 

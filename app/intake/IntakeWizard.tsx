@@ -323,9 +323,12 @@ export function IntakeWizard() {
         await supabase.from("client_certifications").insert(
           data.certifications.map((c) => ({
             client_id: clientId,
+            record_type: c.recordType,
             cert_type: c.certType,
-            other_label: c.certType === "Other" ? c.otherLabel : null,
+            other_label: c.recordType === "small_business_cert" && c.certType === "Other" ? c.otherLabel : null,
             certification_number: c.certificationNumber,
+            jurisdiction_state: c.jurisdictionState,
+            licensing_board: c.licensingBoard,
             expiration_date: c.expirationDate,
             file_url: path,
             file_name: file.name,

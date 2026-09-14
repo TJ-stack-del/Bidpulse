@@ -19,9 +19,18 @@ export type ExtractedCompanyProfile = {
   workersCompCoverage: string | null;
   commercialAutoCoverage: string | null;
   certifications: {
-    certType: "8(a)" | "WOSB" | "EDWOSB" | "HUBZone" | "SDVOSB" | "VOSB" | "Other";
+    recordType: "trade_license" | "small_business_cert" | "field_certification";
+    // For recordType "small_business_cert" this is one of the fixed program
+    // values (8(a), WOSB, ...); for "trade_license"/"field_certification"
+    // it's the license/certification's actual name as stated in the
+    // document (e.g. "Master Electrician License") -- see
+    // app/api/extract-company-profile/route.ts for why this can't be a
+    // fixed enum for those two record types.
+    certType: string;
     otherLabel: string | null;
     certificationNumber: string | null;
+    jurisdictionState: string | null;
+    licensingBoard: string | null;
     expirationDate: string | null;
   }[];
 };
