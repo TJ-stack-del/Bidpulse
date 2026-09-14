@@ -50,3 +50,16 @@ export async function uploadRfpDocument(
   if (error) return { path: null, error: error.message };
   return { path, error: null };
 }
+
+// Real gap a code review caught: every "remove this record" button across
+// certifications/insurance/bonding/documents only ever deleted the DB row,
+// never the file it pointed at -- same gap on a failed insert right after a
+// successful upload (the file lands in storage, the row never does).
+// Best-effort by design: if the remove itself is what the user asked for,
+// a failure to also delete the now-orphaned file shouldn't block that or
+// surface as an error -- storage cost, not data integrity, is what's at
+// stake here.
+export async function removeRfpDocument(supabase: SupabaseClient, path: string | null | undefined): Promise<void> {
+  if (!path) return;
+  await supabase.storage.from(RFP_DOCUMENTS_BUCKET).remove([path]);
+}

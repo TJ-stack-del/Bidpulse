@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
-import { signRfpDocumentUrl, uploadRfpDocument } from "@/lib/storage";
+import { signRfpDocumentUrl, uploadRfpDocument, removeRfpDocument } from "@/lib/storage";
 import { CERT_REVIEWED_TOOLTIP } from "@/lib/brand";
 
 type InsurancePolicy = {
@@ -77,6 +77,7 @@ export function InsuranceBondingSection({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
+  const idPrefix = useId();
 
   function resetForm() {
     setCarrierName("");
@@ -135,6 +136,10 @@ export function InsuranceBondingSection({
         .single();
 
       if (insertError || !newRow) {
+        // The upload above already succeeded -- without this, a failed
+        // insert here left the file permanently orphaned in storage with
+        // no row ever pointing to it.
+        await removeRfpDocument(supabase, path);
         setError(insertError?.message ?? "Couldn't record the policy.");
         setSubmitting(false);
         return;
@@ -160,6 +165,7 @@ export function InsuranceBondingSection({
         .single();
 
       if (insertError || !newRow) {
+        await removeRfpDocument(supabase, path);
         setError(insertError?.message ?? "Couldn't record the bonding capacity.");
         setSubmitting(false);
         return;
@@ -172,12 +178,21 @@ export function InsuranceBondingSection({
     setSubmitting(false);
   }
 
+  // The local `file_url` on each row is always a signed URL (from
+  // signRfpDocumentUrl, both on initial load and right after an insert
+  // above) -- never the raw storage path removeRfpDocument needs, so this
+  // re-reads the real path straight from the DB rather than trying to
+  // derive it from a signed URL.
   async function handleRemovePolicy(id: string) {
+    const { data: row } = await supabase.from("client_insurance_policies").select("file_url").eq("id", id).single();
     await supabase.from("client_insurance_policies").delete().eq("id", id);
+    await removeRfpDocument(supabase, row?.file_url ?? null);
     setPolicies((p) => p.filter((row) => row.id !== id));
   }
   async function handleRemoveBonding(id: string) {
+    const { data: row } = await supabase.from("client_bonding_capacity").select("file_url").eq("id", id).single();
     await supabase.from("client_bonding_capacity").delete().eq("id", id);
+    await removeRfpDocument(supabase, row?.file_url ?? null);
     setBonding((b) => b.filter((row) => row.id !== id));
   }
 
@@ -186,8 +201,8 @@ export function InsuranceBondingSection({
       <form onSubmit={handleAdd} className="border border-outline-variant rounded-xl p-4 flex flex-col gap-3">
         <div className="flex flex-col md:flex-row gap-3 items-start md:items-end flex-wrap">
           <div>
-            <label className="text-label-md text-on-surface-variant block mb-1">Type</label>
-            <select value={kind} onChange={(e) => setKind(e.target.value as "insurance" | "bonding")} className={inputClass}>
+            <label htmlFor={`${idPrefix}-kind`} className="text-label-md text-on-surface-variant block mb-1">Category</label>
+            <select id={`${idPrefix}-kind`} value={kind} onChange={(e) => setKind(e.target.value as "insurance" | "bonding")} className={inputClass}>
               <option value="insurance">Insurance policy</option>
               <option value="bonding">Bonding capacity</option>
             </select>
@@ -196,8 +211,8 @@ export function InsuranceBondingSection({
           {kind === "insurance" ? (
             <>
               <div>
-                <label className="text-label-md text-on-surface-variant block mb-1">Policy type</label>
-                <select value={policyType} onChange={(e) => setPolicyType(e.target.value)} className={inputClass}>
+                <label htmlFor={`${idPrefix}-policy-type`} className="text-label-md text-on-surface-variant block mb-1">Policy type</label>
+                <select id={`${idPrefix}-policy-type`} value={policyType} onChange={(e) => setPolicyType(e.target.value)} className={inputClass}>
                   {POLICY_TYPES.map((pt) => (
                     <option key={pt.value} value={pt.value}>
                       {pt.label}
@@ -206,57 +221,62 @@ export function InsuranceBondingSection({
                 </select>
               </div>
               <div>
-                <label className="text-label-md text-on-surface-variant block mb-1">Carrier</label>
-                <input value={carrierName} onChange={(e) => setCarrierName(e.target.value)} className={inputClass} />
+                <label htmlFor={`${idPrefix}-carrier`} className="text-label-md text-on-surface-variant block mb-1">Carrier</label>
+                <input id={`${idPrefix}-carrier`} value={carrierName} onChange={(e) => setCarrierName(e.target.value)} className={inputClass} />
               </div>
               <div>
-                <label className="text-label-md text-on-surface-variant block mb-1">Policy # (optional)</label>
-                <input value={policyNumber} onChange={(e) => setPolicyNumber(e.target.value)} className={inputClass} />
+                <label htmlFor={`${idPrefix}-policy-number`} className="text-label-md text-on-surface-variant block mb-1">Policy # (optional)</label>
+                <input id={`${idPrefix}-policy-number`} value={policyNumber} onChange={(e) => setPolicyNumber(e.target.value)} className={inputClass} />
               </div>
               <div>
-                <label className="text-label-md text-on-surface-variant block mb-1">Per-occurrence limit</label>
-                <input value={perOccurrenceLimit} onChange={(e) => setPerOccurrenceLimit(e.target.value)} placeholder="e.g. $1,000,000" className={inputClass} />
+                <label htmlFor={`${idPrefix}-occ-limit`} className="text-label-md text-on-surface-variant block mb-1">Per-occurrence limit</label>
+                <input id={`${idPrefix}-occ-limit`} value={perOccurrenceLimit} onChange={(e) => setPerOccurrenceLimit(e.target.value)} placeholder="e.g. $1,000,000" className={inputClass} />
               </div>
               <div>
-                <label className="text-label-md text-on-surface-variant block mb-1">Aggregate limit</label>
-                <input value={aggregateLimit} onChange={(e) => setAggregateLimit(e.target.value)} placeholder="e.g. $2,000,000" className={inputClass} />
+                <label htmlFor={`${idPrefix}-agg-limit`} className="text-label-md text-on-surface-variant block mb-1">Aggregate limit</label>
+                <input id={`${idPrefix}-agg-limit`} value={aggregateLimit} onChange={(e) => setAggregateLimit(e.target.value)} placeholder="e.g. $2,000,000" className={inputClass} />
               </div>
             </>
           ) : (
             <>
               <div>
-                <label className="text-label-md text-on-surface-variant block mb-1">Surety</label>
-                <input value={suretyName} onChange={(e) => setSuretyName(e.target.value)} className={inputClass} />
+                <label htmlFor={`${idPrefix}-surety`} className="text-label-md text-on-surface-variant block mb-1">Surety</label>
+                <input id={`${idPrefix}-surety`} value={suretyName} onChange={(e) => setSuretyName(e.target.value)} className={inputClass} />
               </div>
               <div>
-                <label className="text-label-md text-on-surface-variant block mb-1">Bond # (optional)</label>
-                <input value={bondNumber} onChange={(e) => setBondNumber(e.target.value)} className={inputClass} />
+                <label htmlFor={`${idPrefix}-bond-number`} className="text-label-md text-on-surface-variant block mb-1">Bond # (optional)</label>
+                <input id={`${idPrefix}-bond-number`} value={bondNumber} onChange={(e) => setBondNumber(e.target.value)} className={inputClass} />
               </div>
               <div>
-                <label className="text-label-md text-on-surface-variant block mb-1">Single-project capacity</label>
-                <input value={singleProjectCapacity} onChange={(e) => setSingleProjectCapacity(e.target.value)} className={inputClass} />
+                <label htmlFor={`${idPrefix}-single-capacity`} className="text-label-md text-on-surface-variant block mb-1">Single-project capacity</label>
+                <input id={`${idPrefix}-single-capacity`} value={singleProjectCapacity} onChange={(e) => setSingleProjectCapacity(e.target.value)} className={inputClass} />
               </div>
               <div>
-                <label className="text-label-md text-on-surface-variant block mb-1">Aggregate capacity</label>
-                <input value={aggregateCapacity} onChange={(e) => setAggregateCapacity(e.target.value)} className={inputClass} />
+                <label htmlFor={`${idPrefix}-agg-capacity`} className="text-label-md text-on-surface-variant block mb-1">Aggregate capacity</label>
+                <input id={`${idPrefix}-agg-capacity`} value={aggregateCapacity} onChange={(e) => setAggregateCapacity(e.target.value)} className={inputClass} />
               </div>
               <div>
-                <label className="text-label-md text-on-surface-variant block mb-1">Obligee (optional)</label>
-                <input value={obligee} onChange={(e) => setObligee(e.target.value)} className={inputClass} />
+                <label htmlFor={`${idPrefix}-obligee`} className="text-label-md text-on-surface-variant block mb-1">Obligee (optional)</label>
+                <input id={`${idPrefix}-obligee`} value={obligee} onChange={(e) => setObligee(e.target.value)} className={inputClass} />
               </div>
             </>
           )}
 
           <div>
-            <label className="text-label-md text-on-surface-variant block mb-1">Expires (optional)</label>
-            <input type="date" value={expirationDate} onChange={(e) => setExpirationDate(e.target.value)} className={inputClass} />
+            <label htmlFor={`${idPrefix}-effective`} className="text-label-md text-on-surface-variant block mb-1">Effective (optional)</label>
+            <input id={`${idPrefix}-effective`} type="date" value={effectiveDate} onChange={(e) => setEffectiveDate(e.target.value)} className={inputClass} />
+          </div>
+
+          <div>
+            <label htmlFor={`${idPrefix}-expires`} className="text-label-md text-on-surface-variant block mb-1">Expires (optional)</label>
+            <input id={`${idPrefix}-expires`} type="date" value={expirationDate} onChange={(e) => setExpirationDate(e.target.value)} className={inputClass} />
           </div>
 
           <div className="flex-1 min-w-[160px]">
-            <label className="text-label-md text-on-surface-variant block mb-1">Document (optional)</label>
-            <label className="px-4 py-2 rounded border border-primary text-primary text-label-md font-bold hover:bg-surface-container-low transition cursor-pointer inline-block focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary">
+            <label htmlFor={`${idPrefix}-file`} className="text-label-md text-on-surface-variant block mb-1">Document (optional)</label>
+            <label htmlFor={`${idPrefix}-file`} className="px-4 py-2 rounded border border-primary text-primary text-label-md font-bold hover:bg-surface-container-low transition cursor-pointer inline-block focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary">
               {file ? file.name : "Choose file"}
-              <input type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="sr-only" />
+              <input id={`${idPrefix}-file`} type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="sr-only" />
             </label>
           </div>
 

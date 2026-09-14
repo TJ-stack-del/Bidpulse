@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
-import { signRfpDocumentUrl, uploadRfpDocument } from "@/lib/storage";
+import { signRfpDocumentUrl, uploadRfpDocument, removeRfpDocument } from "@/lib/storage";
 import { CERT_REVIEWED_TOOLTIP } from "@/lib/brand";
 
 type RecordType = "trade_license" | "small_business_cert" | "field_certification";
@@ -64,6 +64,7 @@ export function CertificationsSection({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
+  const idPrefix = useId();
 
   function resetForm() {
     setCertType(CERT_TYPES[0]);
@@ -130,6 +131,9 @@ export function CertificationsSection({
       .single();
 
     if (insertError || !newCert) {
+      // Upload already succeeded above -- without this, a failed insert
+      // here left the file permanently orphaned in storage.
+      await removeRfpDocument(supabase, path);
       setError(insertError?.message ?? "Couldn't record the certification.");
       setSubmitting(false);
       return;
@@ -141,8 +145,13 @@ export function CertificationsSection({
     setSubmitting(false);
   }
 
+  // `file_url` in local state is always a signed URL (signRfpDocumentUrl,
+  // both on initial load and right after insert) -- re-reads the real
+  // storage path from the DB rather than trying to derive it from that.
   async function handleRemove(id: string) {
+    const { data: row } = await supabase.from("client_certifications").select("file_url").eq("id", id).single();
     await supabase.from("client_certifications").delete().eq("id", id);
+    await removeRfpDocument(supabase, row?.file_url ?? null);
     setCertifications((c) => c.filter((cert) => cert.id !== id));
   }
 
@@ -153,8 +162,9 @@ export function CertificationsSection({
         className="border border-outline-variant rounded-xl p-4 flex flex-col md:flex-row gap-3 items-start md:items-end flex-wrap"
       >
         <div>
-          <label className="text-label-md text-on-surface-variant block mb-1">Category</label>
+          <label htmlFor={`${idPrefix}-record-type`} className="text-label-md text-on-surface-variant block mb-1">Category</label>
           <select
+            id={`${idPrefix}-record-type`}
             value={recordType}
             onChange={(e) => setRecordType(e.target.value as RecordType)}
             className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
@@ -169,8 +179,9 @@ export function CertificationsSection({
 
         {recordType === "small_business_cert" ? (
           <div>
-            <label className="text-label-md text-on-surface-variant block mb-1">Certification type</label>
+            <label htmlFor={`${idPrefix}-cert-type`} className="text-label-md text-on-surface-variant block mb-1">Certification type</label>
             <select
+              id={`${idPrefix}-cert-type`}
               value={certType}
               onChange={(e) => setCertType(e.target.value)}
               className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
@@ -184,10 +195,11 @@ export function CertificationsSection({
           </div>
         ) : (
           <div>
-            <label className="text-label-md text-on-surface-variant block mb-1">
+            <label htmlFor={`${idPrefix}-license-name`} className="text-label-md text-on-surface-variant block mb-1">
               {recordType === "trade_license" ? "License name" : "Certification name"}
             </label>
             <input
+              id={`${idPrefix}-license-name`}
               value={licenseName}
               onChange={(e) => setLicenseName(e.target.value)}
               placeholder={recordType === "trade_license" ? "e.g. Master Electrician License" : "e.g. OSHA 30"}
@@ -198,8 +210,9 @@ export function CertificationsSection({
 
         {recordType === "small_business_cert" && certType === "Other" && (
           <div>
-            <label className="text-label-md text-on-surface-variant block mb-1">Certification name</label>
+            <label htmlFor={`${idPrefix}-other-label`} className="text-label-md text-on-surface-variant block mb-1">Certification name</label>
             <input
+              id={`${idPrefix}-other-label`}
               value={otherLabel}
               onChange={(e) => setOtherLabel(e.target.value)}
               placeholder="e.g. MBE, DBE"
@@ -211,8 +224,9 @@ export function CertificationsSection({
         {recordType === "trade_license" && (
           <>
             <div>
-              <label className="text-label-md text-on-surface-variant block mb-1">State</label>
+              <label htmlFor={`${idPrefix}-state`} className="text-label-md text-on-surface-variant block mb-1">State</label>
               <input
+                id={`${idPrefix}-state`}
                 value={jurisdictionState}
                 onChange={(e) => setJurisdictionState(e.target.value)}
                 placeholder="e.g. FL"
@@ -220,8 +234,9 @@ export function CertificationsSection({
               />
             </div>
             <div>
-              <label className="text-label-md text-on-surface-variant block mb-1">Issuing board (optional)</label>
+              <label htmlFor={`${idPrefix}-board`} className="text-label-md text-on-surface-variant block mb-1">Issuing board (optional)</label>
               <input
+                id={`${idPrefix}-board`}
                 value={licensingBoard}
                 onChange={(e) => setLicensingBoard(e.target.value)}
                 placeholder="e.g. State DBPR Div. 4"
@@ -232,8 +247,9 @@ export function CertificationsSection({
         )}
 
         <div>
-          <label className="text-label-md text-on-surface-variant block mb-1">Certification # (optional)</label>
+          <label htmlFor={`${idPrefix}-cert-number`} className="text-label-md text-on-surface-variant block mb-1">Certification # (optional)</label>
           <input
+            id={`${idPrefix}-cert-number`}
             value={certNumber}
             onChange={(e) => setCertNumber(e.target.value)}
             className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
@@ -241,8 +257,9 @@ export function CertificationsSection({
         </div>
 
         <div>
-          <label className="text-label-md text-on-surface-variant block mb-1">Expires (optional)</label>
+          <label htmlFor={`${idPrefix}-expires`} className="text-label-md text-on-surface-variant block mb-1">Expires (optional)</label>
           <input
+            id={`${idPrefix}-expires`}
             type="date"
             value={expirationDate}
             onChange={(e) => setExpirationDate(e.target.value)}
@@ -251,10 +268,11 @@ export function CertificationsSection({
         </div>
 
         <div className="flex-1 min-w-[160px]">
-          <label className="text-label-md text-on-surface-variant block mb-1">Certificate document (optional)</label>
-          <label className="px-4 py-2 rounded border border-primary text-primary text-label-md font-bold hover:bg-surface-container-low transition cursor-pointer inline-block focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary">
+          <label htmlFor={`${idPrefix}-file`} className="text-label-md text-on-surface-variant block mb-1">Certificate document (optional)</label>
+          <label htmlFor={`${idPrefix}-file`} className="px-4 py-2 rounded border border-primary text-primary text-label-md font-bold hover:bg-surface-container-low transition cursor-pointer inline-block focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary">
             {file ? file.name : "Choose file"}
             <input
+              id={`${idPrefix}-file`}
               type="file"
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
               className="sr-only"

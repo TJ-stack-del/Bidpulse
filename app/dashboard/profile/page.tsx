@@ -1,15 +1,15 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { CertificationsSection } from "./CertificationsSection";
-import { PastPerformanceSection } from "./PastPerformanceSection";
-import { InsuranceBondingSection } from "./InsuranceBondingSection";
-import { DocumentLibrarySection } from "./DocumentLibrarySection";
 import { CompanyProfileClient } from "./CompanyProfileClient";
-import { signRfpDocumentUrls } from "@/lib/storage";
 
 // Same cookies()-forces-dynamic reasoning as app/dashboard/page.tsx.
 export const dynamic = "force-dynamic";
 
+// Trimmed to just Company Info per explicit user direction -- Certifications,
+// Insurance & Bonding, Document Library, and Past Performance moved to
+// app/dashboard/compliance/page.tsx (the "Compliance Vault" tab in the
+// target mockup), which had gotten crowded here after landing all of it on
+// this one page across Phases 1-3 of that build.
 export default async function CompanyProfilePage() {
   const supabase = await createClient();
 
@@ -27,42 +27,6 @@ export default async function CompanyProfilePage() {
     .maybeSingle();
 
   if (!client) redirect("/");
-
-  const { data: certificationsRaw } = await supabase
-    .from("client_certifications")
-    .select(
-      "id, cert_type, other_label, certification_number, expiration_date, file_url, file_name, verified, created_at, record_type, jurisdiction_state, licensing_board"
-    )
-    .eq("client_id", client.id)
-    .order("created_at", { ascending: false });
-  const certifications = await signRfpDocumentUrls(supabase, certificationsRaw ?? []);
-
-  const { data: pastPerformance } = await supabase
-    .from("client_past_performance")
-    .select("id, reference_client_name, scope_of_work, contract_value, outcome, created_at")
-    .eq("client_id", client.id)
-    .order("created_at", { ascending: false });
-
-  const { data: insurancePoliciesRaw } = await supabase
-    .from("client_insurance_policies")
-    .select("id, policy_type, carrier_name, policy_number, per_occurrence_limit, aggregate_limit, expiration_date, file_url, file_name, verified")
-    .eq("client_id", client.id)
-    .order("created_at", { ascending: false });
-  const insurancePolicies = await signRfpDocumentUrls(supabase, insurancePoliciesRaw ?? []);
-
-  const { data: bondingRaw } = await supabase
-    .from("client_bonding_capacity")
-    .select("id, surety_name, bond_number, aggregate_bonding_capacity, single_project_bonding_capacity, expiration_date, file_url, file_name, verified")
-    .eq("client_id", client.id)
-    .order("created_at", { ascending: false });
-  const bondingRecords = await signRfpDocumentUrls(supabase, bondingRaw ?? []);
-
-  const { data: documentsRaw } = await supabase
-    .from("client_documents")
-    .select("id, doc_type, label, file_url, file_name, created_at")
-    .eq("client_id", client.id)
-    .order("created_at", { ascending: false });
-  const documents = await signRfpDocumentUrls(supabase, documentsRaw ?? []);
 
   return (
     <>
@@ -99,55 +63,6 @@ export default async function CompanyProfilePage() {
             set_asides: client.set_asides ?? [],
           }}
         />
-      </div>
-
-      <div className="bg-surface-container-lowest dark:bg-surface-container-low border border-outline-variant rounded-xl p-6 mt-4">
-        <h2 className="text-title-lg text-primary mb-4 flex items-center gap-2">
-          <span className="material-symbols-outlined text-primary text-[20px]">verified</span>
-          Certifications
-        </h2>
-        <p className="text-body-md text-on-surface-variant mb-4">
-          Add each small-business or socioeconomic certification you hold, with its certificate document. Our
-          team reviews the document before a certification is used in anything we prepare for you. You&apos;ll
-          see its status change to &quot;Document Reviewed&quot; here once that happens.
-        </p>
-        <CertificationsSection clientId={client.id} initialCertifications={certifications} />
-      </div>
-
-      <div className="bg-surface-container-lowest dark:bg-surface-container-low border border-outline-variant rounded-xl p-6 mt-4">
-        <h2 className="text-title-lg text-primary mb-4 flex items-center gap-2">
-          <span className="material-symbols-outlined text-primary text-[20px]">shield</span>
-          Insurance & Bonding
-        </h2>
-        <p className="text-body-md text-on-surface-variant mb-4">
-          Add each insurance policy and, if you carry one, your surety bonding capacity, with its document. Our
-          team reviews the document before it&apos;s used in anything we prepare for you.
-        </p>
-        <InsuranceBondingSection clientId={client.id} initialPolicies={insurancePolicies} initialBonding={bondingRecords} />
-      </div>
-
-      <div className="bg-surface-container-lowest dark:bg-surface-container-low border border-outline-variant rounded-xl p-6 mt-4">
-        <h2 className="text-title-lg text-primary mb-4 flex items-center gap-2">
-          <span className="material-symbols-outlined text-primary text-[20px]">folder_copy</span>
-          Document Library
-        </h2>
-        <p className="text-body-md text-on-surface-variant mb-4">
-          Keep your standard paperwork here (W-9, non-collusion affidavit, capability statement, any custom
-          RFP riders) so it&apos;s ready to reuse instead of hunting it down for every bid.
-        </p>
-        <DocumentLibrarySection clientId={client.id} initialDocuments={documents} />
-      </div>
-
-      <div className="bg-surface-container-lowest dark:bg-surface-container-low border border-outline-variant rounded-xl p-6 mt-4">
-        <h2 className="text-title-lg text-primary mb-4 flex items-center gap-2">
-          <span className="material-symbols-outlined text-primary text-[20px]">work_history</span>
-          Past Performance
-        </h2>
-        <p className="text-body-md text-on-surface-variant mb-4">
-          Add a few past projects: client/agency name, scope, contract value, and outcome. We use these as real
-          references in your capability statement instead of leaving that section blank.
-        </p>
-        <PastPerformanceSection clientId={client.id} initialEntries={pastPerformance ?? []} />
       </div>
     </>
   );

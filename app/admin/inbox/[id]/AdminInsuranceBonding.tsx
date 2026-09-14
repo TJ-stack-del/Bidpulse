@@ -138,6 +138,7 @@ export function AdminInsuranceBonding({
                   type="button"
                   onClick={() => toggleVerify("client_insurance_policies", p, setPolicies, "insurance_policy")}
                   disabled={saving === p.id || (!p.verified && !p.file_url)}
+                  title={!p.verified && !p.file_url ? "Can't verify without a document on file" : undefined}
                   className={`px-3 py-1.5 rounded text-label-md font-bold transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 disabled:cursor-not-allowed flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                     p.verified
                       ? "border border-outline-variant text-on-surface hover:bg-surface-container-high"
@@ -189,6 +190,7 @@ export function AdminInsuranceBonding({
                   type="button"
                   onClick={() => toggleVerify("client_bonding_capacity", b, setBonding, "bonding_capacity")}
                   disabled={saving === b.id || (!b.verified && !b.file_url)}
+                  title={!b.verified && !b.file_url ? "Can't verify without a document on file" : undefined}
                   className={`px-3 py-1.5 rounded text-label-md font-bold transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 disabled:cursor-not-allowed flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                     b.verified
                       ? "border border-outline-variant text-on-surface hover:bg-surface-container-high"

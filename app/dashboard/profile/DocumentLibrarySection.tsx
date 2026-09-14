@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
-import { signRfpDocumentUrl, uploadRfpDocument } from "@/lib/storage";
+import { signRfpDocumentUrl, uploadRfpDocument, removeRfpDocument } from "@/lib/storage";
 
 type ClientDocument = {
   id: string;
@@ -47,6 +47,7 @@ export function DocumentLibrarySection({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
+  const idPrefix = useId();
 
   const needsLabel = docType === "custom_rider" || docType === "other";
 
@@ -91,6 +92,9 @@ export function DocumentLibrarySection({
       .single();
 
     if (insertError || !newDoc) {
+      // Upload already succeeded above -- without this, a failed insert
+      // here left the file permanently orphaned in storage.
+      await removeRfpDocument(supabase, uploaded.path);
       setError(insertError?.message ?? "Couldn't record the document.");
       setSubmitting(false);
       return;
@@ -102,8 +106,12 @@ export function DocumentLibrarySection({
     setSubmitting(false);
   }
 
+  // `file_url` in local state is always a signed URL -- re-reads the real
+  // storage path from the DB rather than trying to derive it from that.
   async function handleRemove(id: string) {
+    const { data: row } = await supabase.from("client_documents").select("file_url").eq("id", id).single();
     await supabase.from("client_documents").delete().eq("id", id);
+    await removeRfpDocument(supabase, row?.file_url ?? null);
     setDocuments((d) => d.filter((doc) => doc.id !== id));
   }
 
@@ -111,8 +119,9 @@ export function DocumentLibrarySection({
     <div className="flex flex-col gap-6">
       <form onSubmit={handleAdd} className="border border-outline-variant rounded-xl p-4 flex flex-col md:flex-row gap-3 items-start md:items-end flex-wrap">
         <div>
-          <label className="text-label-md text-on-surface-variant block mb-1">Document type</label>
+          <label htmlFor={`${idPrefix}-doc-type`} className="text-label-md text-on-surface-variant block mb-1">Document type</label>
           <select
+            id={`${idPrefix}-doc-type`}
             value={docType}
             onChange={(e) => setDocType(e.target.value)}
             className="px-3 py-2 rounded border border-outline-variant bg-surface text-body-md text-on-surface outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
@@ -127,8 +136,9 @@ export function DocumentLibrarySection({
 
         {needsLabel && (
           <div>
-            <label className="text-label-md text-on-surface-variant block mb-1">Name</label>
+            <label htmlFor={`${idPrefix}-label`} className="text-label-md text-on-surface-variant block mb-1">Name</label>
             <input
+              id={`${idPrefix}-label`}
               value={label}
               onChange={(e) => setLabel(e.target.value)}
               placeholder="e.g. Prevailing Wage Rider"
@@ -138,10 +148,10 @@ export function DocumentLibrarySection({
         )}
 
         <div className="flex-1 min-w-[160px]">
-          <label className="text-label-md text-on-surface-variant block mb-1">File</label>
-          <label className="px-4 py-2 rounded border border-primary text-primary text-label-md font-bold hover:bg-surface-container-low transition cursor-pointer inline-block focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary">
+          <label htmlFor={`${idPrefix}-file`} className="text-label-md text-on-surface-variant block mb-1">File</label>
+          <label htmlFor={`${idPrefix}-file`} className="px-4 py-2 rounded border border-primary text-primary text-label-md font-bold hover:bg-surface-container-low transition cursor-pointer inline-block focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary">
             {file ? file.name : "Choose file"}
-            <input type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="sr-only" />
+            <input id={`${idPrefix}-file`} type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="sr-only" />
           </label>
         </div>
 

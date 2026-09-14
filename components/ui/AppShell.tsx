@@ -43,6 +43,7 @@ const NAV_LINKS: Record<Role, { href: string; label: string; icon: string }[]> =
   client: [
     { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
     { href: "/intake", label: "New Bid", icon: "add_circle" },
+    { href: "/dashboard/compliance", label: "Compliance Vault", icon: "shield" },
     { href: "/dashboard/profile", label: "Profile", icon: "badge" },
   ],
 };
