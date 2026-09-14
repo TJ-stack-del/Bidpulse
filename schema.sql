@@ -890,11 +890,27 @@ CREATE TABLE IF NOT EXISTS "public"."client_past_performance" (
     "scope_of_work" "text" NOT NULL,
     "contract_value" "text",
     "outcome" "text",
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "photo_url" "text",
+    "photo_file_name" "text",
+    "prime_gc_name" "text",
+    "on_time_percentage" numeric,
+    "verification_status" "text" DEFAULT 'self_reported'::"text" NOT NULL,
+    "verification_source" "text",
+    "verification_checked_at" timestamp with time zone,
+    CONSTRAINT "client_past_performance_verification_status_check" CHECK (("verification_status" = ANY (ARRAY['self_reported'::"text", 'confirmed_federal_award'::"text", 'unconfirmed'::"text"])))
 );
 
 
 ALTER TABLE "public"."client_past_performance" OWNER TO "postgres";
+
+
+COMMENT ON COLUMN "public"."client_past_performance"."verification_status" IS 'self_reported (default, no check attempted or no match found -- never shown as "Verified"), confirmed_federal_award (a real USASpending.gov match was found), unconfirmed (a check was attempted against USASpending but the request itself failed, distinct from a clean no-match).';
+
+
+
+COMMENT ON COLUMN "public"."client_past_performance"."verification_source" IS 'e.g. "usaspending.gov" -- which public source, if any, produced a confirmed_federal_award status.';
+
 
 
 CREATE TABLE IF NOT EXISTS "public"."clients" (

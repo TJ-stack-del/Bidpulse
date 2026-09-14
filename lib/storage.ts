@@ -84,10 +84,19 @@ export async function uploadAndInsertRecord<T = Record<string, unknown>>(
     path: string;
     file: File | null;
     table: string;
-    // Fields besides file_url/file_name, which are set automatically.
+    // Fields besides the file columns, which are set automatically.
     payload: Record<string, unknown>;
+    // Defaults to "file_url"/"file_name" -- client_past_performance's
+    // photo evidence uses photo_url/photo_file_name instead, since it's a
+    // different concept (a project photo, not a compliance document) on a
+    // table that isn't otherwise document-shaped.
+    fileUrlColumn?: string;
+    fileNameColumn?: string;
   }
 ): Promise<UploadAndInsertResult<T>> {
+  const fileUrlColumn = params.fileUrlColumn ?? "file_url";
+  const fileNameColumn = params.fileNameColumn ?? "file_name";
+
   let storedPath: string | null = null;
   if (params.file) {
     const uploaded = await uploadRfpDocument(supabase, params.path, params.file);
@@ -97,7 +106,7 @@ export async function uploadAndInsertRecord<T = Record<string, unknown>>(
 
   const { data: newRow, error: insertError } = await supabase
     .from(params.table)
-    .insert({ ...params.payload, file_url: storedPath, file_name: params.file?.name ?? null })
+    .insert({ ...params.payload, [fileUrlColumn]: storedPath, [fileNameColumn]: params.file?.name ?? null })
     .select()
     .single();
 

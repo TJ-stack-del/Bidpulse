@@ -4,7 +4,7 @@ import { CertificationsSection } from "../profile/CertificationsSection";
 import { InsuranceBondingSection } from "../profile/InsuranceBondingSection";
 import { DocumentLibrarySection } from "../profile/DocumentLibrarySection";
 import { PastPerformanceSection } from "../profile/PastPerformanceSection";
-import { signRfpDocumentUrls } from "@/lib/storage";
+import { signRfpDocumentUrls, signRfpDocumentUrl } from "@/lib/storage";
 
 // Split out of app/dashboard/profile/page.tsx per explicit user direction:
 // the target mockup (a Stitch-designed "Compliance Vault" screen) has this
@@ -65,11 +65,22 @@ export default async function ComplianceVaultPage() {
     .order("created_at", { ascending: false });
   const documents = await signRfpDocumentUrls(supabase, documentsRaw ?? []);
 
-  const { data: pastPerformance } = await supabase
+  const { data: pastPerformanceRaw } = await supabase
     .from("client_past_performance")
-    .select("id, reference_client_name, scope_of_work, contract_value, outcome, created_at")
+    .select(
+      "id, reference_client_name, scope_of_work, contract_value, outcome, created_at, photo_url, photo_file_name, prime_gc_name, on_time_percentage, verification_status"
+    )
     .eq("client_id", client.id)
     .order("created_at", { ascending: false });
+  // signRfpDocumentUrls signs `file_url` specifically -- past performance's
+  // evidence photo uses photo_url instead (see lib/storage.ts's comment on
+  // why), so this signs it directly rather than through that helper.
+  const pastPerformance = await Promise.all(
+    (pastPerformanceRaw ?? []).map(async (row) => ({
+      ...row,
+      photo_url: await signRfpDocumentUrl(supabase, row.photo_url),
+    }))
+  );
 
   return (
     <>
