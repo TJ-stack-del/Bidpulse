@@ -92,6 +92,12 @@ export async function uploadAndInsertRecord<T = Record<string, unknown>>(
     // table that isn't otherwise document-shaped.
     fileUrlColumn?: string;
     fileNameColumn?: string;
+    // Shown when the insert fails with no more specific Supabase message --
+    // a caller-supplied string here, used directly, rather than every
+    // caller string-matching this function's own generic text afterward
+    // (a real fragility a review caught: the match silently breaks the
+    // moment this default wording changes).
+    genericErrorMessage?: string;
   }
 ): Promise<UploadAndInsertResult<T>> {
   const fileUrlColumn = params.fileUrlColumn ?? "file_url";
@@ -111,10 +117,37 @@ export async function uploadAndInsertRecord<T = Record<string, unknown>>(
     .single();
 
   if (insertError || !newRow) {
+    // Best-effort: the insert genuinely failed here (a real Postgrest
+    // error came back), so the upload above is now truly orphaned. This
+    // does NOT run on a request that times out client-side after actually
+    // succeeding server-side -- that's a real, separate edge case (the
+    // network response is lost, not the insert) with no clean fix from
+    // this side of the request; flagged, not solved, by design.
     await removeRfpDocument(supabase, storedPath);
-    return { row: null, signedUrl: null, error: insertError?.message ?? "Couldn't save the record." };
+    return { row: null, signedUrl: null, error: insertError?.message ?? params.genericErrorMessage ?? "Couldn't save the record." };
   }
 
   const signedUrl = storedPath ? await signRfpDocumentUrl(supabase, storedPath) : null;
   return { row: newRow as T, signedUrl, error: null };
+}
+
+// The mirror of uploadAndInsertRecord for removal: delete the row and, only
+// once that's actually confirmed (not assumed), remove its file. Using
+// `.delete().select(fileUrlColumn)` returns the deleted row's own data in
+// the same round trip -- both fixes a real bug a follow-up review caught
+// (the previous per-component code deleted the storage file unconditionally,
+// even when the DB delete itself had failed, silently leaving a live row
+// with a now-broken link) and removes the separate SELECT every caller did
+// beforehand.
+export async function deleteRecordAndFile(
+  supabase: SupabaseClient,
+  table: string,
+  id: string,
+  fileUrlColumn: string = "file_url"
+): Promise<{ error: string | null }> {
+  const { data, error } = await supabase.from(table).delete().eq("id", id).select(fileUrlColumn).single();
+  if (error) return { error: error.message };
+  const path = (data as unknown as Record<string, unknown> | null)?.[fileUrlColumn];
+  await removeRfpDocument(supabase, typeof path === "string" ? path : null);
+  return { error: null };
 }

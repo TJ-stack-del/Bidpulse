@@ -3,8 +3,9 @@
 import { useId, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
-import { uploadAndInsertRecord, removeRfpDocument } from "@/lib/storage";
-import { CERT_REVIEWED_TOOLTIP } from "@/lib/brand";
+import { uploadAndInsertRecord, deleteRecordAndFile } from "@/lib/storage";
+import { VerifiedBadge, DocLink } from "@/components/ui/DocumentBadges";
+import { AddTriggerButton } from "@/components/ui/AddTriggerButton";
 
 type RecordType = "trade_license" | "small_business_cert" | "field_certification";
 
@@ -52,6 +53,7 @@ export function CertificationsSection({
   initialCertifications: Certification[];
 }) {
   const [certifications, setCertifications] = useState(initialCertifications);
+  const [showForm, setShowForm] = useState(initialCertifications.length === 0);
   const [recordType, setRecordType] = useState<RecordType>("small_business_cert");
   const [certType, setCertType] = useState(CERT_TYPES[0]);
   const [licenseName, setLicenseName] = useState("");
@@ -62,6 +64,7 @@ export function CertificationsSection({
   const [expirationDate, setExpirationDate] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [removingId, setRemovingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
   const idPrefix = useId();
@@ -103,6 +106,7 @@ export function CertificationsSection({
       path: file ? `${clientId}/certifications/${Date.now()}-${file.name}` : "",
       file,
       table: "client_certifications",
+      genericErrorMessage: "Couldn't record the certification.",
       payload: {
         client_id: clientId,
         record_type: recordType,
@@ -116,7 +120,7 @@ export function CertificationsSection({
     });
 
     if (result.error) {
-      setError(result.error === "Couldn't save the record." ? "Couldn't record the certification." : result.error);
+      setError(result.error);
       setSubmitting(false);
       return;
     }
@@ -126,18 +130,18 @@ export function CertificationsSection({
     setSubmitting(false);
   }
 
-  // `file_url` in local state is always a signed URL (signRfpDocumentUrl,
-  // both on initial load and right after insert) -- re-reads the real
-  // storage path from the DB rather than trying to derive it from that.
   async function handleRemove(id: string) {
-    const { data: row } = await supabase.from("client_certifications").select("file_url").eq("id", id).single();
-    await supabase.from("client_certifications").delete().eq("id", id);
-    await removeRfpDocument(supabase, row?.file_url ?? null);
-    setCertifications((c) => c.filter((cert) => cert.id !== id));
+    setRemovingId(id);
+    const { error: deleteError } = await deleteRecordAndFile(supabase, "client_certifications", id);
+    if (!deleteError) {
+      setCertifications((c) => c.filter((cert) => cert.id !== id));
+    }
+    setRemovingId(null);
   }
 
   return (
     <div className="flex flex-col gap-6">
+      {showForm ? (
       <form
         onSubmit={handleAdd}
         className="border border-outline-variant rounded-xl p-4 flex flex-col md:flex-row gap-3 items-start md:items-end flex-wrap"
@@ -261,20 +265,32 @@ export function CertificationsSection({
           </label>
         </div>
 
-        <button
-          type="submit"
-          disabled={submitting}
-          className="py-2 px-4 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 hover:-translate-y-0.5 transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-        >
-          {submitting && <Spinner />}
-          {submitting ? "Adding…" : "Add certification"}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="py-2 px-4 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 hover:-translate-y-0.5 transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >
+            {submitting && <Spinner />}
+            {submitting ? "Adding…" : "Add certification"}
+          </button>
+          {certifications.length > 0 && (
+            <button type="button" onClick={() => setShowForm(false)} className="text-label-md text-on-surface-variant hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm">
+              Cancel
+            </button>
+          )}
+        </div>
       </form>
+      ) : (
+        <div>
+          <AddTriggerButton label="Add certification" onClick={() => setShowForm(true)} />
+        </div>
+      )}
 
       {error && <p className="text-body-md text-error">{error}</p>}
 
       {certifications.length === 0 ? (
-        <p className="text-body-md text-on-surface-variant">No certifications added yet.</p>
+        !showForm && <p className="text-body-md text-on-surface-variant">No certifications added yet.</p>
       ) : (
         <div className="flex flex-col gap-6">
           {RECORD_TYPES.map((rt) => {
@@ -307,28 +323,18 @@ export function CertificationsSection({
                           ]
                             .filter(Boolean)
                             .join(" · ")}
-                          {cert.file_url && (
-                            <>
-                              {" · "}
-                              <a href={cert.file_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm">
-                                {cert.file_name ?? "View document"}
-                              </a>
-                            </>
-                          )}
+                          <DocLink url={cert.file_url} name={cert.file_name} />
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span
-                          title={cert.verified ? CERT_REVIEWED_TOOLTIP : undefined}
-                          className={`text-[10px] px-2 py-0.5 rounded border font-bold uppercase ${
-                            cert.verified
-                              ? "bg-secondary-container text-on-secondary-container border-primary/20"
-                              : "bg-surface-container-low text-on-surface-variant border-outline-variant"
-                          }`}
+                        <VerifiedBadge verified={cert.verified} />
+                        <button
+                          type="button"
+                          onClick={() => handleRemove(cert.id)}
+                          disabled={removingId === cert.id}
+                          className="text-error text-label-md hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-error rounded-sm disabled:opacity-40 flex items-center gap-2"
                         >
-                          {cert.verified ? "Document Reviewed" : "Not yet reviewed"}
-                        </span>
-                        <button type="button" onClick={() => handleRemove(cert.id)} className="text-error text-label-md hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-error rounded-sm">
+                          {removingId === cert.id && <Spinner />}
                           Remove
                         </button>
                       </div>

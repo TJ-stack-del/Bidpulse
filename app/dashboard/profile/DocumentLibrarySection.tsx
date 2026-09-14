@@ -3,7 +3,8 @@
 import { useId, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
-import { uploadAndInsertRecord, removeRfpDocument } from "@/lib/storage";
+import { uploadAndInsertRecord, deleteRecordAndFile } from "@/lib/storage";
+import { AddTriggerButton } from "@/components/ui/AddTriggerButton";
 
 type ClientDocument = {
   id: string;
@@ -43,10 +44,12 @@ export function DocumentLibrarySection({
   initialDocuments: ClientDocument[];
 }) {
   const [documents, setDocuments] = useState(initialDocuments);
+  const [showForm, setShowForm] = useState(initialDocuments.length === 0);
   const [docType, setDocType] = useState(DOC_TYPES[0].value);
   const [label, setLabel] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [removingId, setRemovingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
   const idPrefix = useId();
@@ -78,6 +81,7 @@ export function DocumentLibrarySection({
       path: `${clientId}/documents/${docType}/${Date.now()}-${file.name}`,
       file,
       table: "client_documents",
+      genericErrorMessage: "Couldn't record the document.",
       payload: {
         client_id: clientId,
         doc_type: docType,
@@ -86,7 +90,7 @@ export function DocumentLibrarySection({
     });
 
     if (result.error) {
-      setError(result.error === "Couldn't save the record." ? "Couldn't record the document." : result.error);
+      setError(result.error);
       setSubmitting(false);
       return;
     }
@@ -96,17 +100,18 @@ export function DocumentLibrarySection({
     setSubmitting(false);
   }
 
-  // `file_url` in local state is always a signed URL -- re-reads the real
-  // storage path from the DB rather than trying to derive it from that.
   async function handleRemove(id: string) {
-    const { data: row } = await supabase.from("client_documents").select("file_url").eq("id", id).single();
-    await supabase.from("client_documents").delete().eq("id", id);
-    await removeRfpDocument(supabase, row?.file_url ?? null);
-    setDocuments((d) => d.filter((doc) => doc.id !== id));
+    setRemovingId(id);
+    const { error: deleteError } = await deleteRecordAndFile(supabase, "client_documents", id);
+    if (!deleteError) {
+      setDocuments((d) => d.filter((doc) => doc.id !== id));
+    }
+    setRemovingId(null);
   }
 
   return (
     <div className="flex flex-col gap-6">
+      {showForm ? (
       <form onSubmit={handleAdd} className="border border-outline-variant rounded-xl p-4 flex flex-col md:flex-row gap-3 items-start md:items-end flex-wrap">
         <div>
           <label htmlFor={`${idPrefix}-doc-type`} className="text-label-md text-on-surface-variant block mb-1">Category</label>
@@ -145,20 +150,32 @@ export function DocumentLibrarySection({
           </label>
         </div>
 
-        <button
-          type="submit"
-          disabled={submitting}
-          className="py-2 px-4 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 hover:-translate-y-0.5 transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-        >
-          {submitting && <Spinner />}
-          {submitting ? "Uploading…" : "Add document"}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="py-2 px-4 bg-primary-container text-on-primary-container rounded text-label-md font-semibold hover:opacity-90 hover:-translate-y-0.5 transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >
+            {submitting && <Spinner />}
+            {submitting ? "Uploading…" : "Add document"}
+          </button>
+          {documents.length > 0 && (
+            <button type="button" onClick={() => setShowForm(false)} className="text-label-md text-on-surface-variant hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm">
+              Cancel
+            </button>
+          )}
+        </div>
       </form>
+      ) : (
+        <div>
+          <AddTriggerButton label="Add document" onClick={() => setShowForm(true)} />
+        </div>
+      )}
 
       {error && <p className="text-body-md text-error">{error}</p>}
 
       {documents.length === 0 ? (
-        <p className="text-body-md text-on-surface-variant">No documents added yet.</p>
+        !showForm && <p className="text-body-md text-on-surface-variant">No documents added yet.</p>
       ) : (
         <ul className="flex flex-col gap-2">
           {documents.map((doc) => (
@@ -175,7 +192,13 @@ export function DocumentLibrarySection({
                 <span className="text-[10px] px-2 py-0.5 rounded border font-bold uppercase bg-secondary-container text-on-secondary-container border-primary/20">
                   Synced
                 </span>
-                <button type="button" onClick={() => handleRemove(doc.id)} className="text-error text-label-md hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-error rounded-sm">
+                <button
+                  type="button"
+                  onClick={() => handleRemove(doc.id)}
+                  disabled={removingId === doc.id}
+                  className="text-error text-label-md hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-error rounded-sm disabled:opacity-40 flex items-center gap-2"
+                >
+                  {removingId === doc.id && <Spinner />}
                   Remove
                 </button>
               </div>
