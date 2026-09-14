@@ -5,7 +5,7 @@ import { AdminSubmissionActions } from "./AdminSubmissionActions";
 import { DeliverablesPanel } from "./DeliverablesPanel";
 import { PaymentStatus } from "./PaymentStatus";
 import { ClientCertifications } from "./ClientCertifications";
-import { signRfpDocumentUrls } from "@/lib/storage";
+import { signRfpDocumentUrl, signRfpDocumentUrls } from "@/lib/storage";
 import { EstimatedValueInput } from "./EstimatedValueInput";
 import { RequestInfoForm } from "./RequestInfoForm";
 import { buildClientInfoRequestDraft } from "@/lib/client-info-request";
@@ -76,7 +76,9 @@ export default async function AdminSubmissionDetailPage({
 
   const { data: certificationsRaw } = await supabase
     .from("client_certifications")
-    .select("id, cert_type, other_label, certification_number, expiration_date, file_url, file_name, verified")
+    .select(
+      "id, cert_type, other_label, certification_number, expiration_date, file_url, file_name, verified, record_type, jurisdiction_state, licensing_board"
+    )
     .eq("client_id", submission.client_id)
     .order("created_at", { ascending: false });
   const certifications = await signRfpDocumentUrls(supabase, certificationsRaw ?? []);
@@ -106,6 +108,22 @@ export default async function AdminSubmissionDetailPage({
     .select("lean_package_threshold")
     .eq("id", member.org_id)
     .single();
+
+  // For the compliance matrix's "View in RFP" links: each extracted
+  // requirement (lib/rfp-requirements.ts) names the source file it came
+  // from, but only as a bare filename -- the bucket is private, so turning
+  // that into something clickable needs the same signed-URL treatment as
+  // every other file on this page.
+  const { data: rfpDocs } = await supabase
+    .from("submission_documents")
+    .select("file_name, file_url")
+    .eq("submission_id", id)
+    .eq("document_type", "rfp_file");
+  const rfpDocumentUrls: Record<string, string> = {};
+  for (const doc of rfpDocs ?? []) {
+    const signed = await signRfpDocumentUrl(supabase, doc.file_url);
+    if (signed) rfpDocumentUrls[doc.file_name] = signed;
+  }
 
   const { data: auditLog } = await supabase
     .from("audit_log")
@@ -388,6 +406,7 @@ export default async function AdminSubmissionDetailPage({
             estimatedValue={submission.estimated_value}
             leanPackageThreshold={org?.lean_package_threshold ?? 35000}
             rfpRequirements={submission.rfp_requirements ?? []}
+            rfpDocumentUrls={rfpDocumentUrls}
           />
         </div>
 

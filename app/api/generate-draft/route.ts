@@ -164,6 +164,22 @@ function agencyTypeRequirementRows(agency: string): string[] {
   return rows;
 }
 
+// Core Competencies used to jam the whole scope string into a single
+// bracketed placeholder plus a literal leftover "[Add one short bullet...]"
+// instruction line -- indistinguishable from a broken generation to an
+// admin who has no way to know this deliverable is a template fill-in, not
+// a model call. Reuses scopeSegments (already relied on for the compliance
+// matrix) so a real client's own scope text becomes one bullet per service
+// line instead of one unreadable blob. Never invents a bullet: only reorders
+// text the client actually wrote.
+function coreCompetencyLines(scopeText: string): string[] {
+  if (scopeText === "[scope of work — see the RFP]") {
+    return ["- [Core service line — no scope on file for this submission yet]"];
+  }
+  const segments = scopeSegments(scopeText).slice(0, 6);
+  return segments.length > 0 ? segments.map((s) => `- ${s}`) : [`- ${scopeText}`];
+}
+
 function deriveRequirementLabels(scopeText: string): string[] {
   const labels: string[] = [];
   for (const segment of scopeSegments(scopeText)) {
@@ -373,8 +389,7 @@ function buildDraft(
       `Primary NAICS Codes: ${naics}`,
       "",
       "Core Competencies:",
-      `- [Core service line relevant to: ${scope}]`,
-      "- [Add one short bullet per additional core service line — no paragraphs]",
+      ...coreCompetencyLines(scope),
       "",
       "Past Performance:",
       ...pastPerformanceLines,
@@ -411,9 +426,15 @@ function buildDraft(
     // client scope text. Status still stays NEEDS VERIFICATION, same rule as
     // every other row: extraction can misread a document, so nothing here is
     // asserted as already confirmed.
-    const requirementRows = rfpRequirements.map(
-      (r) => `${r.requirement} | NEEDS VERIFICATION | [From the uploaded RFP: ${r.detail} — confirm this is still accurate before submission]`
-    );
+    const requirementRows = rfpRequirements.map((r) => {
+      // Page number was already being extracted (lib/rfp-requirements.ts)
+      // but never made it into the row text itself -- it only showed up in
+      // the separate, collapsed "RFP source references" panel below the
+      // matrix, easy to miss. Citing it inline is what actually answers
+      // "where do I find this in the document."
+      const pageLabel = r.page != null ? `p.${r.page}` : "page not determined";
+      return `${r.requirement} | NEEDS VERIFICATION | [From the uploaded RFP (${pageLabel}): ${r.detail} — confirm this is still accurate before submission]`;
+    });
     const requirementLabels = submission.scope ? deriveRequirementLabels(submission.scope) : [];
     if (requirementLabels.length > 0) {
       requirementRows.push(

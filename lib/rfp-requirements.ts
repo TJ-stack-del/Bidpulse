@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSubmissionRfpDocuments } from "@/lib/rfp-documents";
+import { parseLlmJson } from "@/lib/llm-json";
 
 // Real fix for the "auto-draft doesn't pull items from the loaded RFP" gap:
 // generate-draft/route.ts otherwise only ever sees the client's own short
@@ -25,6 +26,14 @@ export type RfpRequirement = {
   // would defeat the whole point.
   quote: string;
   page: number | null;
+  // Which uploaded file this requirement came from (matches a real
+  // submission_documents.file_name) -- a submission can have more than one
+  // RFP file, so `page` alone is ambiguous without this. Lets the admin UI
+  // link straight to the right document at the right page instead of
+  // leaving "go find it yourself" as the only option once the quote/page
+  // are already known. Null only if the model couldn't attribute it (still
+  // shown to the admin as page-only, same as before).
+  source_file: string | null;
 };
 
 const SYSTEM_PROMPT = `You extract concrete, compliance-relevant requirements from US government solicitation documents (RFPs, RFQs, sources-sought notices, task orders, etc.) for a small-business bidding platform. This platform never fabricates facts in anything it generates -- only extract a requirement if the document actually states it.
@@ -34,6 +43,7 @@ Read the provided document(s) and respond with ONLY a JSON array of objects, eac
 - "detail": the specific detail as stated in the document -- the actual percentage, dollar amount, page count, certification name, deadline, or format rule. Quote or closely paraphrase the document's own language. Never invent a plausible-sounding number or fact that isn't actually in the document.
 - "quote": the exact sentence (or short span, under 300 characters) from the document that this requirement is based on. Copy it VERBATIM, character-for-character -- do not paraphrase, summarize, or clean it up. A human will search the original document for this exact text, so it must match. Never fabricate a quote.
 - "page": your best-effort page number (an integer, 1-indexed) where that quote appears. If you genuinely cannot determine the page, use null -- never guess a number you're not reasonably confident in.
+- "source_file": the exact filename of the document this quote came from, copied verbatim from that document's "--- Document: <filename> ---" marker below. If only one document was provided, use its filename. Use null only if you genuinely cannot tell which document it came from.
 
 Only include requirements that are concrete and actionable for bid preparation: bonding/insurance minimums and types, required certifications or licenses, page/format limits, required forms or attachments, evaluation criteria categories, small-business/set-aside participation goals, submission deadline and method, and any other explicit compliance condition. Do NOT include generic background/history content or anything not stated as an actual requirement.
 
@@ -50,7 +60,8 @@ function coerceRequirements(parsed: unknown): RfpRequirement[] {
     const detail = asString(record.detail);
     const quote = asString(record.quote) ?? "";
     const page = typeof record.page === "number" && Number.isInteger(record.page) && record.page > 0 ? record.page : null;
-    if (requirement && detail) out.push({ requirement, detail, quote, page });
+    const source_file = asString(record.source_file);
+    if (requirement && detail) out.push({ requirement, detail, quote, page, source_file });
   }
   return out;
 }
@@ -82,7 +93,15 @@ export async function getOrExtractRfpRequirements(
   try {
     message = await anthropic.messages.create({
       model: "claude-opus-5",
-      max_tokens: 2048,
+      // Bumped from 2048 -- adding source_file (needed for the "View in
+      // RFP" page links) means every one of up to 15 requirement objects
+      // now repeats the uploaded file's own name, which for a real
+      // solicitation's actual filename (can easily be 100+ characters) was
+      // enough on its own to blow the old cap and truncate the JSON
+      // mid-string -- a real, observed failure: a Jacksonville RFP
+      // extraction that produced 15 good requirements came back empty
+      // because the response got cut off before its closing bracket.
+      max_tokens: 4096,
       output_config: { effort: "low" },
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content }],
@@ -94,12 +113,12 @@ export async function getOrExtractRfpRequirements(
   const textBlock = message.content.find((b): b is Anthropic.TextBlock => b.type === "text");
   if (!textBlock) return [];
 
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(textBlock.text.trim());
-  } catch {
-    return [];
-  }
+  // See lib/llm-json.ts -- a verbatim multi-line quote from the source PDF
+  // (very common: table cells, wrapped labels) routinely comes back with a
+  // literal newline inside the JSON string, which plain JSON.parse rejects.
+  // Real requirements were being silently thrown away by this before.
+  const parsed = parseLlmJson<unknown>(textBlock.text);
+  if (parsed === null) return [];
 
   const requirements = coerceRequirements(parsed);
 

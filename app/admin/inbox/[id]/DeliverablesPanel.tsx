@@ -27,6 +27,7 @@ type RfpRequirement = {
   detail: string;
   quote: string;
   page: number | null;
+  source_file: string | null;
 };
 
 const DELIVERABLE_LABELS: Record<string, string> = {
@@ -74,6 +75,7 @@ export function DeliverablesPanel({
   estimatedValue,
   leanPackageThreshold,
   rfpRequirements,
+  rfpDocumentUrls,
 }: {
   submissionId: string;
   orgId: string;
@@ -83,6 +85,11 @@ export function DeliverablesPanel({
   estimatedValue: number | null;
   leanPackageThreshold: number;
   rfpRequirements: RfpRequirement[];
+  // Signed URL per uploaded RFP filename, keyed the same way as each
+  // requirement's own source_file -- lets "View in RFP" jump straight to
+  // the right document (a submission can have more than one) instead of
+  // just naming a page number and leaving the admin to find the file.
+  rfpDocumentUrls: Record<string, string>;
 }) {
   const [byType, setByType] = useState<Record<string, Deliverable | undefined>>(() => {
     const map: Record<string, Deliverable | undefined> = {};
@@ -398,17 +405,30 @@ export function DeliverablesPanel({
                     <ul className="flex flex-col gap-3">
                       {rfpRequirements
                         .filter((r) => r.quote)
-                        .map((r, i) => (
-                          <li key={i} className="text-body-sm text-on-surface">
-                            <span className="font-bold">{r.requirement}</span>
-                            {r.page != null && (
-                              <span className="text-on-surface-variant"> (p.{r.page})</span>
-                            )}
-                            <blockquote className="mt-1 pl-3 border-l-2 border-outline-variant text-on-surface-variant italic">
-                              &ldquo;{r.quote}&rdquo;
-                            </blockquote>
-                          </li>
-                        ))}
+                        .map((r, i) => {
+                          const docUrl = r.source_file ? rfpDocumentUrls[r.source_file] : undefined;
+                          return (
+                            <li key={i} className="text-body-sm text-on-surface">
+                              <span className="font-bold">{r.requirement}</span>
+                              {r.page != null && (
+                                <span className="text-on-surface-variant"> (p.{r.page})</span>
+                              )}
+                              {docUrl && r.page != null && (
+                                <a
+                                  href={`${docUrl}#page=${r.page}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="ml-2 text-primary font-bold hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm"
+                                >
+                                  View in RFP →
+                                </a>
+                              )}
+                              <blockquote className="mt-1 pl-3 border-l-2 border-outline-variant text-on-surface-variant italic">
+                                &ldquo;{r.quote}&rdquo;
+                              </blockquote>
+                            </li>
+                          );
+                        })}
                     </ul>
                   </div>
                 </details>

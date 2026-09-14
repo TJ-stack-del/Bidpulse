@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSubmissionRfpDocuments } from "@/lib/rfp-documents";
+import { parseLlmJson } from "@/lib/llm-json";
 
 // Stage 1 of the bid-estimation pipeline (extraction only, never arithmetic):
 // pulls structured, factual sizing data out of a submission's uploaded RFP
@@ -137,12 +138,12 @@ export async function getOrExtractBidEstimationFacts(
   const textBlock = message.content.find((b): b is Anthropic.TextBlock => b.type === "text");
   if (!textBlock) return null;
 
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(textBlock.text.trim());
-  } catch {
-    return null;
-  }
+  // See lib/llm-json.ts -- a plain JSON.parse throws on a literal newline
+  // inside a string value, which a verbatim multi-line quote from the
+  // source PDF can easily produce; that used to silently discard the whole
+  // extraction.
+  const parsed = parseLlmJson<unknown>(textBlock.text);
+  if (parsed === null) return null;
 
   const facts = coerceFacts(parsed);
 

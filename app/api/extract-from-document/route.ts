@@ -3,6 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { SMALL_BUSINESS_STATUSES, COMMON_SET_ASIDES, COMMON_NAICS_CODES } from "@/lib/business-options";
 import { detectDocumentKind, buildDocumentContent, UNSUPPORTED_FILE_TYPE_MESSAGE } from "@/lib/document-parsing";
+import { parseLlmJson } from "@/lib/llm-json";
 
 export const runtime = "nodejs";
 // Vercel's default serverless timeout (10s) is real and was silently
@@ -143,10 +144,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Couldn't extract anything from that document." }, { status: 502 });
   }
 
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(textBlock.text.trim());
-  } catch {
+  // See lib/llm-json.ts -- tolerates a literal newline inside a JSON string
+  // value (common when a quote is copied verbatim from a wrapped PDF
+  // label), which a plain JSON.parse would reject outright.
+  const parsed = parseLlmJson<unknown>(textBlock.text);
+  if (parsed === null) {
     return NextResponse.json({ error: "Couldn't parse the extraction result." }, { status: 502 });
   }
 

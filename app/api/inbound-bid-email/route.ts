@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import Anthropic from "@anthropic-ai/sdk";
+import { parseLlmJson } from "@/lib/llm-json";
 
 export const runtime = "nodejs";
 // See extract-from-document/route.ts's identical comment -- Vercel's
@@ -114,10 +115,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Couldn't extract anything from that email." }, { status: 502 });
   }
 
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(textBlock.text.trim());
-  } catch {
+  // See lib/llm-json.ts -- tolerates a literal newline inside a JSON string
+  // value, which a plain JSON.parse would reject outright.
+  const parsed = parseLlmJson<unknown>(textBlock.text);
+  if (parsed === null) {
     return NextResponse.json({ error: "Couldn't parse the extraction result." }, { status: 502 });
   }
 
