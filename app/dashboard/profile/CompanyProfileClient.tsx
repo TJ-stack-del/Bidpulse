@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { CompanyProfileUpload, type ExtractedCompanyProfile } from "@/components/ui/CompanyProfileUpload";
 import { useToast } from "@/components/Toast";
+import { uploadRfpDocument } from "@/lib/storage";
 import { CompanyInfoForm } from "./CompanyInfoForm";
 
 type CompanyInfo = {
@@ -68,14 +69,14 @@ export function CompanyProfileClient({
     }
 
     setSavingCerts(true);
-    const path = `${clientId}/certifications/${Date.now()}-${file.name}`;
-    const { error: uploadError } = await supabase.storage.from("rfp-documents").upload(path, file);
+    const uploaded = await uploadRfpDocument(supabase, `${clientId}/certifications/${Date.now()}-${file.name}`, file);
 
-    if (uploadError) {
-      showToast(`Filled in what we found, but couldn't attach the document to certifications: ${uploadError.message}`, "error");
+    if (uploaded.error) {
+      showToast(`Filled in what we found, but couldn't attach the document to certifications: ${uploaded.error}`, "error");
       setSavingCerts(false);
       return;
     }
+    const path = uploaded.path;
 
     const rows = data.certifications.map((c) => ({
       client_id: clientId,

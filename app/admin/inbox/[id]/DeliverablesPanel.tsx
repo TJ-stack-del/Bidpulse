@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
 import { FadeMessage } from "@/components/ui/FadeMessage";
 import { PacketButtons } from "@/components/ui/PacketButtons";
-import { signRfpDocumentUrl } from "@/lib/storage";
+import { signRfpDocumentUrl, uploadRfpDocument } from "@/lib/storage";
 import { useToast } from "@/components/Toast";
 import {
   FULL_DELIVERABLE_TYPES as FULL_TYPE_VALUES,
@@ -255,9 +255,12 @@ export function DeliverablesPanel({
     setSavedTypes((s) => ({ ...s, [type]: false }));
 
     try {
-      const path = `${submissionId}/deliverables/${type}-${Date.now()}-${file.name}`;
-      const { error: uploadError } = await supabase.storage.from("rfp-documents").upload(path, file);
-      if (uploadError) throw new Error(uploadError.message);
+      const { path, error: uploadError } = await uploadRfpDocument(
+        supabase,
+        `${submissionId}/deliverables/${type}-${Date.now()}-${file.name}`,
+        file
+      );
+      if (uploadError) throw new Error(uploadError);
 
       // The bucket is private — the DB stores the bare path (`saved.file_url`
       // below), and every read site (including this one, right after upload)

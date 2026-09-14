@@ -836,6 +836,25 @@ COMMENT ON COLUMN "public"."client_certifications"."licensing_board" IS 'Issuing
 
 
 
+CREATE TABLE IF NOT EXISTS "public"."client_documents" (
+    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+    "client_id" "uuid" NOT NULL,
+    "doc_type" "text" NOT NULL,
+    "label" "text",
+    "file_url" "text" NOT NULL,
+    "file_name" "text",
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    CONSTRAINT "client_documents_doc_type_check" CHECK (("doc_type" = ANY (ARRAY['w9'::"text", 'non_collusion_affidavit'::"text", 'capability_statement'::"text", 'custom_rider'::"text", 'other'::"text"])))
+);
+
+
+ALTER TABLE "public"."client_documents" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."client_documents" IS 'Reusable RFP boilerplate a client keeps current themselves (W-9, non-collusion affidavit, capability statement, custom riders) -- distinct from client_certifications/client_insurance_policies/client_bonding_capacity, which are admin-verified facts. No verified gate here by design.';
+
+
+
 CREATE TABLE IF NOT EXISTS "public"."client_insurance_policies" (
     "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
     "client_id" "uuid" NOT NULL,
@@ -1098,6 +1117,11 @@ ALTER TABLE ONLY "public"."client_certifications"
 
 
 
+ALTER TABLE ONLY "public"."client_documents"
+    ADD CONSTRAINT "client_documents_pkey" PRIMARY KEY ("id");
+
+
+
 ALTER TABLE ONLY "public"."client_insurance_policies"
     ADD CONSTRAINT "client_insurance_policies_pkey" PRIMARY KEY ("id");
 
@@ -1234,6 +1258,11 @@ ALTER TABLE ONLY "public"."client_certifications"
 
 ALTER TABLE ONLY "public"."client_certifications"
     ADD CONSTRAINT "client_certifications_verified_by_fkey" FOREIGN KEY ("verified_by") REFERENCES "public"."team_members"("id");
+
+
+
+ALTER TABLE ONLY "public"."client_documents"
+    ADD CONSTRAINT "client_documents_client_id_fkey" FOREIGN KEY ("client_id") REFERENCES "public"."clients"("id") ON DELETE CASCADE;
 
 
 
@@ -1415,6 +1444,12 @@ CREATE POLICY "admins manage client_certifications" ON "public"."client_certific
 
 
 
+CREATE POLICY "admins manage client_documents" ON "public"."client_documents" USING ((EXISTS ( SELECT 1
+   FROM "public"."clients" "c"
+  WHERE (("c"."id" = "client_documents"."client_id") AND "public"."is_admin"("c"."org_id")))));
+
+
+
 CREATE POLICY "admins manage client_insurance_policies" ON "public"."client_insurance_policies" USING ((EXISTS ( SELECT 1
    FROM "public"."clients" "c"
   WHERE (("c"."id" = "client_insurance_policies"."client_id") AND "public"."is_admin"("c"."org_id")))));
@@ -1514,6 +1549,9 @@ ALTER TABLE "public"."client_bonding_capacity" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."client_certifications" ENABLE ROW LEVEL SECURITY;
 
 
+ALTER TABLE "public"."client_documents" ENABLE ROW LEVEL SECURITY;
+
+
 ALTER TABLE "public"."client_insurance_policies" ENABLE ROW LEVEL SECURITY;
 
 
@@ -1532,6 +1570,10 @@ CREATE POLICY "clients manage their own bonding capacity" ON "public"."client_bo
 
 
 CREATE POLICY "clients manage their own certifications" ON "public"."client_certifications" USING ("public"."is_own_client_record"("client_id")) WITH CHECK (("public"."is_own_client_record"("client_id") AND ("verified" = false)));
+
+
+
+CREATE POLICY "clients manage their own documents" ON "public"."client_documents" USING ("public"."is_own_client_record"("client_id")) WITH CHECK ("public"."is_own_client_record"("client_id"));
 
 
 
@@ -1726,6 +1768,12 @@ GRANT ALL ON TABLE "public"."client_bonding_capacity" TO "service_role";
 GRANT ALL ON TABLE "public"."client_certifications" TO "anon";
 GRANT ALL ON TABLE "public"."client_certifications" TO "authenticated";
 GRANT ALL ON TABLE "public"."client_certifications" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."client_documents" TO "anon";
+GRANT ALL ON TABLE "public"."client_documents" TO "authenticated";
+GRANT ALL ON TABLE "public"."client_documents" TO "service_role";
 
 
 

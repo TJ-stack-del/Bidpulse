@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
-import { signRfpDocumentUrl } from "@/lib/storage";
+import { signRfpDocumentUrl, uploadRfpDocument } from "@/lib/storage";
 import { CERT_REVIEWED_TOOLTIP } from "@/lib/brand";
 
 type RecordType = "trade_license" | "small_business_cert" | "field_certification";
@@ -100,13 +100,13 @@ export function CertificationsSection({
     // anywhere generated paperwork reads client_certifications.
     let path: string | null = null;
     if (file) {
-      path = `${clientId}/certifications/${Date.now()}-${file.name}`;
-      const { error: uploadError } = await supabase.storage.from("rfp-documents").upload(path, file);
-      if (uploadError) {
-        setError(uploadError.message);
+      const uploaded = await uploadRfpDocument(supabase, `${clientId}/certifications/${Date.now()}-${file.name}`, file);
+      if (uploaded.error) {
+        setError(uploaded.error);
         setSubmitting(false);
         return;
       }
+      path = uploaded.path;
     }
 
     // The bucket is private — the DB stores the bare path, and every read

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
-import { signRfpDocumentUrl } from "@/lib/storage";
+import { signRfpDocumentUrl, uploadRfpDocument } from "@/lib/storage";
 import { CERT_REVIEWED_TOOLTIP } from "@/lib/brand";
 
 type InsurancePolicy = {
@@ -103,13 +103,17 @@ export function InsuranceBondingSection({
     // by the same CHECK constraint client_certifications already proved).
     let path: string | null = null;
     if (file) {
-      path = `${clientId}/${kind === "insurance" ? "insurance" : "bonding"}/${Date.now()}-${file.name}`;
-      const { error: uploadError } = await supabase.storage.from("rfp-documents").upload(path, file);
-      if (uploadError) {
-        setError(uploadError.message);
+      const uploaded = await uploadRfpDocument(
+        supabase,
+        `${clientId}/${kind === "insurance" ? "insurance" : "bonding"}/${Date.now()}-${file.name}`,
+        file
+      );
+      if (uploaded.error) {
+        setError(uploaded.error);
         setSubmitting(false);
         return;
       }
+      path = uploaded.path;
     }
 
     if (kind === "insurance") {

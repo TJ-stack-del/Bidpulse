@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CertificationsSection } from "./CertificationsSection";
 import { PastPerformanceSection } from "./PastPerformanceSection";
 import { InsuranceBondingSection } from "./InsuranceBondingSection";
+import { DocumentLibrarySection } from "./DocumentLibrarySection";
 import { CompanyProfileClient } from "./CompanyProfileClient";
 import { signRfpDocumentUrls } from "@/lib/storage";
 
@@ -55,6 +56,13 @@ export default async function CompanyProfilePage() {
     .eq("client_id", client.id)
     .order("created_at", { ascending: false });
   const bondingRecords = await signRfpDocumentUrls(supabase, bondingRaw ?? []);
+
+  const { data: documentsRaw } = await supabase
+    .from("client_documents")
+    .select("id, doc_type, label, file_url, file_name, created_at")
+    .eq("client_id", client.id)
+    .order("created_at", { ascending: false });
+  const documents = await signRfpDocumentUrls(supabase, documentsRaw ?? []);
 
   return (
     <>
@@ -116,6 +124,18 @@ export default async function CompanyProfilePage() {
           team reviews the document before it&apos;s used in anything we prepare for you.
         </p>
         <InsuranceBondingSection clientId={client.id} initialPolicies={insurancePolicies} initialBonding={bondingRecords} />
+      </div>
+
+      <div className="bg-surface-container-lowest dark:bg-surface-container-low border border-outline-variant rounded-xl p-6 mt-4">
+        <h2 className="text-title-lg text-primary mb-4 flex items-center gap-2">
+          <span className="material-symbols-outlined text-primary text-[20px]">folder_copy</span>
+          Document Library
+        </h2>
+        <p className="text-body-md text-on-surface-variant mb-4">
+          Keep your standard paperwork here (W-9, non-collusion affidavit, capability statement, any custom
+          RFP riders) so it&apos;s ready to reuse instead of hunting it down for every bid.
+        </p>
+        <DocumentLibrarySection clientId={client.id} initialDocuments={documents} />
       </div>
 
       <div className="bg-surface-container-lowest dark:bg-surface-container-low border border-outline-variant rounded-xl p-6 mt-4">

@@ -12,6 +12,7 @@ import { RfpDocumentUpload, type ExtractedBidFields } from "@/components/ui/RfpD
 import { isEmail, normalizePhone } from "@/lib/phone";
 import type { FitCheckResult } from "@/lib/submissions";
 import { computeProfileCompleteness } from "@/lib/compliance/profile-completeness";
+import { uploadRfpDocument } from "@/lib/storage";
 
 // NAICS codes, small business status, and set-asides used to be collected
 // here too — moved to Company Profile (app/dashboard/profile) instead, so a
@@ -317,8 +318,11 @@ export function IntakeWizard() {
       .eq("id", clientId);
 
     if (data.certifications.length > 0) {
-      const path = `${clientId}/certifications/${Date.now()}-${file.name}`;
-      const { error: uploadError } = await supabase.storage.from("rfp-documents").upload(path, file);
+      const { path, error: uploadError } = await uploadRfpDocument(
+        supabase,
+        `${clientId}/certifications/${Date.now()}-${file.name}`,
+        file
+      );
       if (!uploadError) {
         await supabase.from("client_certifications").insert(
           data.certifications.map((c) => ({
