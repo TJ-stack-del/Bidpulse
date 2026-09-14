@@ -7,6 +7,7 @@ import { Combobox } from "@/components/ui/Combobox";
 import { ConfirmDeleteDialog } from "@/components/ui/ConfirmDeleteDialog";
 import { RfpDocumentUpload, type ExtractedBidFields } from "@/components/ui/RfpDocumentUpload";
 import { opportunityTradeTag } from "@/lib/opportunity-trade-tag";
+import { clientTradeLabel } from "@/lib/business-options";
 import { useToast } from "@/components/Toast";
 
 type Match = {
@@ -23,7 +24,19 @@ type Match = {
   created_at: string;
 };
 
-type Client = { id: string; company_name: string };
+type Client = { id: string; company_name: string; naics_codes: string[] };
+
+// "Acme Electric" tells an admin nothing about what Acme Electric does --
+// this is the real gap a user reported: the assign picker had no way to
+// tell an electrician apart from a janitorial company. Falls back to
+// flagging the gap explicitly (rather than silently showing the name
+// alone) when a client's own Company Profile never set a NAICS code, so
+// an incomplete profile is visible instead of looking the same as "no
+// trade info available at all."
+function clientOptionLabel(client: Client): string {
+  const trade = clientTradeLabel(client.naics_codes);
+  return trade ? `${client.company_name} — ${trade}` : `${client.company_name} (no trade set)`;
+}
 
 // Real urgency signal computed from the real due_date -- no invented SLA
 // countdown, just how many days out the actual deadline is.
@@ -570,7 +583,7 @@ function AssignControls({
   return (
     <div className={`flex ${stacked ? "flex-col" : "items-center"} gap-2 min-w-0`}>
       <Combobox
-        options={clients.map((c) => ({ id: c.id, label: c.company_name }))}
+        options={clients.map((c) => ({ id: c.id, label: clientOptionLabel(c) }))}
         value={selected}
         onChange={onSelect}
         placeholder="Assign to…"

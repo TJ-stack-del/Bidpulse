@@ -35,7 +35,7 @@ export default async function AdminMatchesPage() {
 
   const { data: clientsRaw } = await supabase
     .from("clients")
-    .select("id, company_name, created_at")
+    .select("id, company_name, naics_codes, created_at")
     .eq("org_id", member.org_id)
     .order("created_at", { ascending: false });
 
@@ -56,7 +56,7 @@ export default async function AdminMatchesPage() {
       return true;
     })
     .sort((a, b) => a.company_name.trim().localeCompare(b.company_name.trim()))
-    .map((c) => ({ id: c.id, company_name: c.company_name }));
+    .map((c) => ({ id: c.id, company_name: c.company_name, naics_codes: c.naics_codes ?? [] }));
 
   return (
     <>
