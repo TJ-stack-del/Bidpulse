@@ -141,7 +141,15 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
             ))}
           </nav>
         </div>
-        <div className="border-t border-outline-variant px-margin-mobile md:px-margin-desktop py-3 max-w-container-max mx-auto">
+        <div className="border-t border-outline-variant px-margin-mobile md:px-margin-desktop py-3 max-w-container-max mx-auto flex flex-col items-center gap-2">
+          <nav className="flex items-center gap-4">
+            <Link href="/privacy" className="text-label-sm text-on-surface-variant hover:text-primary transition">
+              Privacy
+            </Link>
+            <Link href="/terms" className="text-label-sm text-on-surface-variant hover:text-primary transition">
+              Terms
+            </Link>
+          </nav>
           <p className="text-label-sm text-on-surface-variant text-center">
             BidPulse helps you prepare a strong, compliant bid, but we can't guarantee you'll win. That decision is up to the agency.
           </p>
