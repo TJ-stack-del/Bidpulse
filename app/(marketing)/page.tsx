@@ -3,7 +3,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { KNOWN_TRADES, assertNoMissingTradeCards } from "@/lib/compliance/known-trades";
-import { FaqAccordion } from "@/app/(marketing)/faq/FaqAccordion";
 import { TransformationPipeline } from "@/components/ui/TransformationPipeline";
 import { Reveal } from "@/components/ui/Reveal";
 
@@ -190,7 +189,13 @@ function Home() {
           by a fixed delay) rather than each having its own scroll trigger
           -- everything below the fold uses whileInView instead, so the
           "page just loaded" feeling only happens once, where it matters. */}
-      <section className="flex flex-col items-center text-center gap-6 py-8">
+      {/* Left-aligned rather than the fully centered/symmetric block this
+          used to be -- a design review flagged the hero as safe but generic
+          in isolation, especially once the Trades section below proves the
+          page already breaks symmetry well. TransformationPipeline stays
+          full-width regardless (it's its own w-full panel), so only the
+          text/CTA/pills column's alignment actually changes here. */}
+      <section className="flex flex-col items-start text-left gap-6 py-8">
         <Reveal mode="mount">
           <h1 className="text-display-lg text-primary font-bold max-w-3xl">
             You run the crew. We handle the paperwork.
@@ -203,7 +208,7 @@ function Home() {
             and send.
           </p>
         </Reveal>
-        <Reveal mode="mount" delay={0.16} className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-center mt-2">
+        <Reveal mode="mount" delay={0.16} className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-start mt-2">
           <Link
             href="/intake"
             className="w-full sm:w-auto px-8 py-4 bg-primary-container text-on-primary-container rounded text-label-md hover:opacity-90 hover:-translate-y-0.5 transition active:scale-[0.97] flex items-center justify-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
@@ -219,7 +224,7 @@ function Home() {
           </a>
         </Reveal>
 
-        <Reveal mode="mount" delay={0.24} className="flex flex-wrap items-center justify-center gap-2 pt-2">
+        <Reveal mode="mount" delay={0.24} className="flex flex-wrap items-center justify-start gap-2 pt-2">
           {TRADES.map((trade) => (
             <span
               key={trade.id}
@@ -275,14 +280,25 @@ function Home() {
             Three steps. You&apos;re never the one filling out the form.
           </h2>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter max-md:space-y-6">
+        {/* A vertical stepped list, not another 3-column grid -- a design
+            review flagged this section landing immediately after the
+            "Plain-language process / You focus on the job / Built for small
+            trades" trio above with the identical 3-equal-column rhythm,
+            reading as the same layout twice in a row. Each badge now also
+            uses its own step.badge token (primary-fixed / secondary-container
+            / tertiary-fixed) instead of every badge hardcoding bg-tertiary --
+            that per-step color distinction was already defined in
+            HOW_IT_WORKS but never actually wired into the render before. */}
+        <div className="flex flex-col gap-8 max-w-2xl">
           {HOW_IT_WORKS.map((step, i) => (
-            <Reveal key={step.title} variant="scale" delay={i * 0.12} className="flex flex-col gap-4">
-              <div className="w-12 h-12 rounded-full bg-tertiary text-on-tertiary flex items-center justify-center font-code text-body-md">
+            <Reveal key={step.title} variant="scale" delay={i * 0.12} className="flex items-start gap-4">
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center font-code text-body-md shrink-0 ${step.badge}`}>
                 {String(i + 1).padStart(2, "0")}
               </div>
-              <h3 className="text-headline-md text-on-primary">{step.title.replace(/^\d+\.\s*/, "")}</h3>
-              <p className="text-body-sm text-on-primary/70">{step.body}</p>
+              <div className="flex flex-col gap-1 pt-2">
+                <h3 className="text-headline-md text-on-primary">{step.title.replace(/^\d+\.\s*/, "")}</h3>
+                <p className="text-body-sm text-on-primary/70">{step.body}</p>
+              </div>
             </Reveal>
           ))}
         </div>
@@ -407,11 +423,23 @@ function Home() {
       </section>
 
       {/* ---------- FAQ preview ---------- */}
+      {/* Four questions shown in full, not an accordion -- a design review
+          flagged the click-to-expand pattern as the generic template
+          treatment when there's this little to hide. The real /faq page
+          (dozens of questions across categories) keeps FaqAccordion, where
+          progressive disclosure actually earns its place. */}
       <section id="faq" className="flex flex-col gap-gutter max-w-2xl mx-auto w-full">
         <div className="flex flex-col gap-2 text-center">
           <h2 className="text-headline-lg text-primary">Questions contractors actually ask</h2>
         </div>
-        <FaqAccordion faqs={FAQ_PREVIEW} />
+        <div className="flex flex-col divide-y divide-outline-variant border-y border-outline-variant">
+          {FAQ_PREVIEW.map((item, i) => (
+            <Reveal key={item.q} delay={i * 0.08} className="flex flex-col gap-1.5 py-5">
+              <h3 className="text-title-lg text-primary">{item.q}</h3>
+              <p className="text-body-md text-on-surface-variant">{item.a}</p>
+            </Reveal>
+          ))}
+        </div>
         <Link href="/faq" className="text-primary font-bold hover:underline text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm">
           Read the full FAQ →
         </Link>
