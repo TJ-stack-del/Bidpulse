@@ -189,13 +189,11 @@ function Home() {
           by a fixed delay) rather than each having its own scroll trigger
           -- everything below the fold uses whileInView instead, so the
           "page just loaded" feeling only happens once, where it matters. */}
-      {/* Left-aligned rather than the fully centered/symmetric block this
-          used to be -- a design review flagged the hero as safe but generic
-          in isolation, especially once the Trades section below proves the
-          page already breaks symmetry well. TransformationPipeline stays
-          full-width regardless (it's its own w-full panel), so only the
-          text/CTA/pills column's alignment actually changes here. */}
-      <section className="flex flex-col items-start text-left gap-6 py-8">
+      {/* A design review suggested left-aligning this (flagged as "safe but
+          generic" centered) -- tried it, but per explicit user direction it
+          killed the hero's actual vibe, so this stays centered/symmetric.
+          Not every audit finding is worth taking; this one wasn't. */}
+      <section className="flex flex-col items-center text-center gap-6 py-8">
         <Reveal mode="mount">
           <h1 className="text-display-lg text-primary font-bold max-w-3xl">
             You run the crew. We handle the paperwork.
@@ -208,7 +206,7 @@ function Home() {
             and send.
           </p>
         </Reveal>
-        <Reveal mode="mount" delay={0.16} className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-start mt-2">
+        <Reveal mode="mount" delay={0.16} className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-center mt-2">
           <Link
             href="/intake"
             className="w-full sm:w-auto px-8 py-4 bg-primary-container text-on-primary-container rounded text-label-md hover:opacity-90 hover:-translate-y-0.5 transition active:scale-[0.97] flex items-center justify-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
@@ -224,7 +222,7 @@ function Home() {
           </a>
         </Reveal>
 
-        <Reveal mode="mount" delay={0.24} className="flex flex-wrap items-center justify-start gap-2 pt-2">
+        <Reveal mode="mount" delay={0.24} className="flex flex-wrap items-center justify-center gap-2 pt-2">
           {TRADES.map((trade) => (
             <span
               key={trade.id}
