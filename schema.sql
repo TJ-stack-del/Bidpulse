@@ -773,6 +773,33 @@ CREATE TABLE IF NOT EXISTS "public"."checklist_items" (
 ALTER TABLE "public"."checklist_items" OWNER TO "postgres";
 
 
+CREATE TABLE IF NOT EXISTS "public"."client_bonding_capacity" (
+    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+    "client_id" "uuid" NOT NULL,
+    "surety_name" "text",
+    "bond_number" "text",
+    "aggregate_bonding_capacity" "text",
+    "single_project_bonding_capacity" "text",
+    "obligee" "text",
+    "effective_date" "date",
+    "expiration_date" "date",
+    "file_url" "text",
+    "file_name" "text",
+    "verified" boolean DEFAULT false NOT NULL,
+    "verified_at" timestamp with time zone,
+    "verified_by" "uuid",
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    CONSTRAINT "client_bonding_capacity_verified_requires_file" CHECK (((NOT "verified") OR ("file_url" IS NOT NULL)))
+);
+
+
+ALTER TABLE "public"."client_bonding_capacity" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."client_bonding_capacity" IS 'Structured surety bonding capacity tracking for the Compliance Vault. No equivalent free-text column existed on clients before this -- bonding capacity was not tracked anywhere in the app.';
+
+
+
 CREATE TABLE IF NOT EXISTS "public"."client_certifications" (
     "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
     "client_id" "uuid" NOT NULL,
@@ -806,6 +833,34 @@ COMMENT ON COLUMN "public"."client_certifications"."jurisdiction_state" IS 'Stat
 
 
 COMMENT ON COLUMN "public"."client_certifications"."licensing_board" IS 'Issuing board/authority (e.g. "State DBPR Div. 4"), only meaningful when record_type = trade_license.';
+
+
+
+CREATE TABLE IF NOT EXISTS "public"."client_insurance_policies" (
+    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+    "client_id" "uuid" NOT NULL,
+    "policy_type" "text" NOT NULL,
+    "carrier_name" "text",
+    "policy_number" "text",
+    "per_occurrence_limit" "text",
+    "aggregate_limit" "text",
+    "effective_date" "date",
+    "expiration_date" "date",
+    "file_url" "text",
+    "file_name" "text",
+    "verified" boolean DEFAULT false NOT NULL,
+    "verified_at" timestamp with time zone,
+    "verified_by" "uuid",
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    CONSTRAINT "client_insurance_policies_policy_type_check" CHECK (("policy_type" = ANY (ARRAY['general_liability'::"text", 'workers_comp'::"text", 'commercial_auto'::"text", 'professional_liability'::"text", 'umbrella'::"text"]))),
+    CONSTRAINT "client_insurance_policies_verified_requires_file" CHECK (((NOT "verified") OR ("file_url" IS NOT NULL)))
+);
+
+
+ALTER TABLE "public"."client_insurance_policies" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."client_insurance_policies" IS 'Structured insurance tracking for the Compliance Vault -- deliberately separate from clients.insurance_provider/general_liability_coverage/etc (free text), which are left untouched and still read by generate-draft/generate-fit-check until those are deliberately migrated to prefer this table.';
 
 
 
@@ -1033,8 +1088,18 @@ ALTER TABLE ONLY "public"."checklist_items"
 
 
 
+ALTER TABLE ONLY "public"."client_bonding_capacity"
+    ADD CONSTRAINT "client_bonding_capacity_pkey" PRIMARY KEY ("id");
+
+
+
 ALTER TABLE ONLY "public"."client_certifications"
     ADD CONSTRAINT "client_certifications_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."client_insurance_policies"
+    ADD CONSTRAINT "client_insurance_policies_pkey" PRIMARY KEY ("id");
 
 
 
@@ -1152,6 +1217,16 @@ ALTER TABLE ONLY "public"."checklist_items"
 
 
 
+ALTER TABLE ONLY "public"."client_bonding_capacity"
+    ADD CONSTRAINT "client_bonding_capacity_client_id_fkey" FOREIGN KEY ("client_id") REFERENCES "public"."clients"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."client_bonding_capacity"
+    ADD CONSTRAINT "client_bonding_capacity_verified_by_fkey" FOREIGN KEY ("verified_by") REFERENCES "public"."team_members"("id");
+
+
+
 ALTER TABLE ONLY "public"."client_certifications"
     ADD CONSTRAINT "client_certifications_client_id_fkey" FOREIGN KEY ("client_id") REFERENCES "public"."clients"("id") ON DELETE CASCADE;
 
@@ -1159,6 +1234,16 @@ ALTER TABLE ONLY "public"."client_certifications"
 
 ALTER TABLE ONLY "public"."client_certifications"
     ADD CONSTRAINT "client_certifications_verified_by_fkey" FOREIGN KEY ("verified_by") REFERENCES "public"."team_members"("id");
+
+
+
+ALTER TABLE ONLY "public"."client_insurance_policies"
+    ADD CONSTRAINT "client_insurance_policies_client_id_fkey" FOREIGN KEY ("client_id") REFERENCES "public"."clients"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."client_insurance_policies"
+    ADD CONSTRAINT "client_insurance_policies_verified_by_fkey" FOREIGN KEY ("verified_by") REFERENCES "public"."team_members"("id");
 
 
 
@@ -1318,9 +1403,21 @@ CREATE POLICY "admins manage checklist_items" ON "public"."checklist_items" USIN
 
 
 
+CREATE POLICY "admins manage client_bonding_capacity" ON "public"."client_bonding_capacity" USING ((EXISTS ( SELECT 1
+   FROM "public"."clients" "c"
+  WHERE (("c"."id" = "client_bonding_capacity"."client_id") AND "public"."is_admin"("c"."org_id")))));
+
+
+
 CREATE POLICY "admins manage client_certifications" ON "public"."client_certifications" USING ((EXISTS ( SELECT 1
    FROM "public"."clients" "c"
   WHERE (("c"."id" = "client_certifications"."client_id") AND "public"."is_admin"("c"."org_id")))));
+
+
+
+CREATE POLICY "admins manage client_insurance_policies" ON "public"."client_insurance_policies" USING ((EXISTS ( SELECT 1
+   FROM "public"."clients" "c"
+  WHERE (("c"."id" = "client_insurance_policies"."client_id") AND "public"."is_admin"("c"."org_id")))));
 
 
 
@@ -1411,7 +1508,13 @@ CREATE POLICY "authenticated users can read organizations" ON "public"."organiza
 ALTER TABLE "public"."checklist_items" ENABLE ROW LEVEL SECURITY;
 
 
+ALTER TABLE "public"."client_bonding_capacity" ENABLE ROW LEVEL SECURITY;
+
+
 ALTER TABLE "public"."client_certifications" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."client_insurance_policies" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."client_past_performance" ENABLE ROW LEVEL SECURITY;
@@ -1424,6 +1527,10 @@ CREATE POLICY "clients insert their own submissions" ON "public"."submissions" F
 
 
 
+CREATE POLICY "clients manage their own bonding capacity" ON "public"."client_bonding_capacity" USING ("public"."is_own_client_record"("client_id")) WITH CHECK (("public"."is_own_client_record"("client_id") AND ("verified" = false)));
+
+
+
 CREATE POLICY "clients manage their own certifications" ON "public"."client_certifications" USING ("public"."is_own_client_record"("client_id")) WITH CHECK (("public"."is_own_client_record"("client_id") AND ("verified" = false)));
 
 
@@ -1433,6 +1540,10 @@ CREATE POLICY "clients manage their own download_attestations" ON "public"."down
   WHERE (("s"."id" = "download_attestations"."submission_id") AND "public"."is_own_client_record"("s"."client_id"))))) WITH CHECK (((EXISTS ( SELECT 1
    FROM "public"."submissions" "s"
   WHERE (("s"."id" = "download_attestations"."submission_id") AND "public"."is_own_client_record"("s"."client_id")))) AND "public"."is_own_client_record"("attested_by")));
+
+
+
+CREATE POLICY "clients manage their own insurance policies" ON "public"."client_insurance_policies" USING ("public"."is_own_client_record"("client_id")) WITH CHECK (("public"."is_own_client_record"("client_id") AND ("verified" = false)));
 
 
 
@@ -1606,9 +1717,21 @@ GRANT ALL ON TABLE "public"."checklist_items" TO "service_role";
 
 
 
+GRANT ALL ON TABLE "public"."client_bonding_capacity" TO "anon";
+GRANT ALL ON TABLE "public"."client_bonding_capacity" TO "authenticated";
+GRANT ALL ON TABLE "public"."client_bonding_capacity" TO "service_role";
+
+
+
 GRANT ALL ON TABLE "public"."client_certifications" TO "anon";
 GRANT ALL ON TABLE "public"."client_certifications" TO "authenticated";
 GRANT ALL ON TABLE "public"."client_certifications" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."client_insurance_policies" TO "anon";
+GRANT ALL ON TABLE "public"."client_insurance_policies" TO "authenticated";
+GRANT ALL ON TABLE "public"."client_insurance_policies" TO "service_role";
 
 
 

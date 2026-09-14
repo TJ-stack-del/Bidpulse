@@ -5,6 +5,7 @@ import { AdminSubmissionActions } from "./AdminSubmissionActions";
 import { DeliverablesPanel } from "./DeliverablesPanel";
 import { PaymentStatus } from "./PaymentStatus";
 import { ClientCertifications } from "./ClientCertifications";
+import { AdminInsuranceBonding } from "./AdminInsuranceBonding";
 import { signRfpDocumentUrl, signRfpDocumentUrls } from "@/lib/storage";
 import { EstimatedValueInput } from "./EstimatedValueInput";
 import { RequestInfoForm } from "./RequestInfoForm";
@@ -82,6 +83,20 @@ export default async function AdminSubmissionDetailPage({
     .eq("client_id", submission.client_id)
     .order("created_at", { ascending: false });
   const certifications = await signRfpDocumentUrls(supabase, certificationsRaw ?? []);
+
+  const { data: insurancePoliciesRaw } = await supabase
+    .from("client_insurance_policies")
+    .select("id, policy_type, carrier_name, policy_number, per_occurrence_limit, aggregate_limit, expiration_date, file_url, file_name, verified")
+    .eq("client_id", submission.client_id)
+    .order("created_at", { ascending: false });
+  const insurancePolicies = await signRfpDocumentUrls(supabase, insurancePoliciesRaw ?? []);
+
+  const { data: bondingRaw } = await supabase
+    .from("client_bonding_capacity")
+    .select("id, surety_name, bond_number, aggregate_bonding_capacity, single_project_bonding_capacity, expiration_date, file_url, file_name, verified")
+    .eq("client_id", submission.client_id)
+    .order("created_at", { ascending: false });
+  const bondingRecords = await signRfpDocumentUrls(supabase, bondingRaw ?? []);
 
   const preflightChecks = computePreflightSummary({ deliverables, certifications });
 
@@ -373,6 +388,16 @@ export default async function AdminSubmissionDetailPage({
               orgId={member.org_id}
               actorId={member.id}
               certifications={certifications}
+            />
+
+            <h3 className="text-label-md text-on-surface-variant uppercase tracking-wider mt-6 mb-2">
+              Insurance & Bonding
+            </h3>
+            <AdminInsuranceBonding
+              orgId={member.org_id}
+              actorId={member.id}
+              insurancePolicies={insurancePolicies}
+              bondingRecords={bondingRecords}
             />
           </div>
 

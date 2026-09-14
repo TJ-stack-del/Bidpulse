@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { CertificationsSection } from "./CertificationsSection";
 import { PastPerformanceSection } from "./PastPerformanceSection";
+import { InsuranceBondingSection } from "./InsuranceBondingSection";
 import { CompanyProfileClient } from "./CompanyProfileClient";
 import { signRfpDocumentUrls } from "@/lib/storage";
 
@@ -40,6 +41,20 @@ export default async function CompanyProfilePage() {
     .select("id, reference_client_name, scope_of_work, contract_value, outcome, created_at")
     .eq("client_id", client.id)
     .order("created_at", { ascending: false });
+
+  const { data: insurancePoliciesRaw } = await supabase
+    .from("client_insurance_policies")
+    .select("id, policy_type, carrier_name, policy_number, per_occurrence_limit, aggregate_limit, expiration_date, file_url, file_name, verified")
+    .eq("client_id", client.id)
+    .order("created_at", { ascending: false });
+  const insurancePolicies = await signRfpDocumentUrls(supabase, insurancePoliciesRaw ?? []);
+
+  const { data: bondingRaw } = await supabase
+    .from("client_bonding_capacity")
+    .select("id, surety_name, bond_number, aggregate_bonding_capacity, single_project_bonding_capacity, expiration_date, file_url, file_name, verified")
+    .eq("client_id", client.id)
+    .order("created_at", { ascending: false });
+  const bondingRecords = await signRfpDocumentUrls(supabase, bondingRaw ?? []);
 
   return (
     <>
@@ -89,6 +104,18 @@ export default async function CompanyProfilePage() {
           see its status change to &quot;Document Reviewed&quot; here once that happens.
         </p>
         <CertificationsSection clientId={client.id} initialCertifications={certifications} />
+      </div>
+
+      <div className="bg-surface-container-lowest dark:bg-surface-container-low border border-outline-variant rounded-xl p-6 mt-4">
+        <h2 className="text-title-lg text-primary mb-4 flex items-center gap-2">
+          <span className="material-symbols-outlined text-primary text-[20px]">shield</span>
+          Insurance & Bonding
+        </h2>
+        <p className="text-body-md text-on-surface-variant mb-4">
+          Add each insurance policy and, if you carry one, your surety bonding capacity, with its document. Our
+          team reviews the document before it&apos;s used in anything we prepare for you.
+        </p>
+        <InsuranceBondingSection clientId={client.id} initialPolicies={insurancePolicies} initialBonding={bondingRecords} />
       </div>
 
       <div className="bg-surface-container-lowest dark:bg-surface-container-low border border-outline-variant rounded-xl p-6 mt-4">
