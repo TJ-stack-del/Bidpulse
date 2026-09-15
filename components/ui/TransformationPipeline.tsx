@@ -43,7 +43,7 @@ const DELIVERABLES = [
 // abstracted away.
 export function TransformationPipeline() {
   return (
-    <div className="relative w-full max-w-5xl rounded-2xl p-space-base sm:p-10 shadow-2xl shadow-primary/5 overflow-hidden mt-8 bg-surface-container-low border border-outline-variant">
+    <div className="relative w-full max-w-5xl rounded-2xl p-space-base sm:p-10 shadow-2xl shadow-primary/5 mt-8 bg-surface-container-low border border-outline-variant">
       <div className="flex flex-wrap items-center justify-between gap-4 pb-5 mb-8 border-b border-outline-variant">
         <span className="flex items-center gap-2.5 text-title-sm font-bold text-primary">
           <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
@@ -60,45 +60,59 @@ export function TransformationPipeline() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-space-lg lg:gap-8 items-center">
-        {/* Left: incoming RFP -- real illustrative prose with the actual
-            flagged phrases highlighted inline, not abstract skeleton
-            bars standing in for "there's text here." */}
-        <Reveal className="rounded-xl p-space-base sm:p-6 shadow-md shadow-error/5 bg-surface border border-outline-variant">
-          <div className="flex items-center justify-between gap-2 mb-3 text-xs">
-            <span className="inline-flex items-center gap-1 rounded px-2 py-0.5 font-bold tracking-wide text-[11px] bg-error/10 text-error border border-error/25">
-              <span className="material-symbols-outlined text-[13px]" aria-hidden="true">
+        {/* Left: incoming RFP, rendered as an actual sheet of paper (sharp
+            corners, a faint stack of pages behind it, a slight lie-on-the-
+            desk tilt) rather than a bordered dashboard card -- a stamped
+            tag instead of a boxed header row, real illustrative prose
+            directly on the page with the flagged phrases highlighted like
+            real highlighter marks, not boxed off in its own sub-card. */}
+        <Reveal className="relative mt-4">
+          <div
+            className="absolute inset-0 rotate-[4deg] translate-x-2 translate-y-2 rounded-sm bg-surface-container-high border border-outline-variant"
+            aria-hidden="true"
+          />
+          <div
+            className="absolute inset-0 rotate-[2deg] translate-x-1 translate-y-1 rounded-sm bg-surface-container border border-outline-variant"
+            aria-hidden="true"
+          />
+          <div className="relative rotate-[-1.5deg] rounded-sm p-space-base sm:p-6 shadow-xl shadow-error/10 bg-surface border border-outline-variant">
+            <span className="absolute -top-3 -left-3 z-10 inline-flex items-center gap-1 rounded px-2 py-1 text-[10px] font-bold tracking-wide -rotate-3 bg-error text-on-error shadow-md">
+              <span className="material-symbols-outlined text-[12px]" aria-hidden="true">
                 description
               </span>
               Incoming raw RFP
             </span>
-            <span className="text-on-surface-variant">Sample PDF</span>
-          </div>
-          <h3 className="text-base sm:text-lg font-bold mb-2 text-primary">Sample Solicitation</h3>
-          <p className="text-xs leading-relaxed rounded-lg p-3.5 mb-4 bg-surface-container-high border border-outline-variant text-on-surface-variant">
-            Contractor shall maintain commercial general liability coverage of not less than
-            $2,000,000 per occurrence. All work performed under this agreement is subject to{" "}
-            <mark className="rounded-sm bg-error/15 px-1 py-0.5 text-error font-semibold">
-              prevailing wage determinations
-            </mark>{" "}
-            issued by the Department of Labor. Contractor shall furnish a{" "}
-            <mark className="rounded-sm bg-primary/15 px-1 py-0.5 text-primary font-semibold">
-              100% performance and payment bond
-            </mark>{" "}
-            prior to notice to proceed.
-          </p>
-          <div className="flex items-center flex-wrap gap-2 text-[11px] font-bold">
-            <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-surface-container-high text-on-surface-variant">
-              <span className="material-symbols-outlined text-[13px]" aria-hidden="true">
-                visibility
+            <div className="flex items-start justify-between gap-2 mb-1">
+              <h3 className="text-base sm:text-lg font-bold text-primary">Sample Solicitation</h3>
+              <span className="shrink-0 text-[10px] text-on-surface-variant">Sample PDF</span>
+            </div>
+            <div className="h-px w-full bg-outline-variant mb-3" aria-hidden="true" />
+            <p className="text-xs leading-relaxed mb-4 text-on-surface-variant">
+              Contractor shall maintain commercial general liability coverage of not less than
+              $2,000,000 per occurrence. All work performed under this agreement is subject to{" "}
+              <mark className="rounded-sm bg-error/20 px-1 py-0.5 text-error font-semibold">
+                prevailing wage determinations
+              </mark>{" "}
+              issued by the Department of Labor. Contractor shall furnish a{" "}
+              <mark className="rounded-sm bg-primary/20 px-1 py-0.5 text-primary font-semibold">
+                100% performance and payment bond
+              </mark>{" "}
+              prior to notice to proceed.
+            </p>
+            <div className="flex items-center flex-wrap gap-2 text-[11px] font-bold">
+              <span className="inline-flex items-center gap-1 rounded px-2 py-1 bg-surface-container-high text-on-surface-variant">
+                <span className="material-symbols-outlined text-[13px]" aria-hidden="true">
+                  visibility
+                </span>
+                Needs review
               </span>
-              Needs review
-            </span>
-            <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-error/10 text-error">
-              <span className="material-symbols-outlined text-[13px]" aria-hidden="true">
-                flag
+              <span className="inline-flex items-center gap-1 rounded px-2 py-1 bg-error/10 text-error">
+                <span className="material-symbols-outlined text-[13px]" aria-hidden="true">
+                  flag
+                </span>
+                Prevailing wage flagged
               </span>
-              Prevailing wage flagged
-            </span>
+            </div>
           </div>
         </Reveal>
 
@@ -112,47 +126,59 @@ export function TransformationPipeline() {
           <span className="text-xs font-bold tracking-wide text-primary text-center">Prepared by our team</span>
         </Reveal>
 
-        {/* Right: ready package */}
-        <Reveal delay={0.3} className="rounded-xl p-space-base sm:p-6 shadow-md shadow-secondary/5 bg-surface border border-outline-variant">
-          <div className="flex items-center justify-between gap-2 mb-3 text-xs">
-            <span className="inline-flex items-center gap-1 rounded px-2 py-0.5 font-bold tracking-wide text-[11px] bg-secondary-container text-on-secondary-container">
-              <span className="material-symbols-outlined text-[13px]" aria-hidden="true">
+        {/* Right: the finished package, same sheet-of-paper treatment,
+            tilted the opposite way -- reads as "landed," not "in transit." */}
+        <Reveal delay={0.3} className="relative mt-4">
+          <div
+            className="absolute inset-0 rotate-[-3deg] translate-x-2 translate-y-2 rounded-sm bg-surface-container-high border border-outline-variant"
+            aria-hidden="true"
+          />
+          <div
+            className="absolute inset-0 rotate-[-1.5deg] translate-x-1 translate-y-1 rounded-sm bg-surface-container border border-outline-variant"
+            aria-hidden="true"
+          />
+          <div className="relative rotate-[1deg] rounded-sm p-space-base sm:p-6 shadow-xl shadow-secondary/10 bg-surface border border-outline-variant">
+            <span className="absolute -top-3 -left-3 z-10 inline-flex items-center gap-1 rounded px-2 py-1 text-[10px] font-bold tracking-wide rotate-3 bg-secondary text-on-secondary shadow-md">
+              <span className="material-symbols-outlined text-[12px]" aria-hidden="true">
                 check_circle
               </span>
               Ready to submit
             </span>
-            <span className="text-on-surface-variant">3 clean files</span>
-          </div>
-          <h3 className="text-base sm:text-lg font-bold mb-4 text-primary">Tailored Bid Submission Package</h3>
-          {/* Hairline-divided rows, not separately boxed ones -- matches
-              the same manifest/ledger convention the Trades and Pricing
-              sections use elsewhere on this page. */}
-          <div className="flex flex-col divide-y divide-outline-variant mb-4">
-            {DELIVERABLES.map((d) => (
-              <div key={d.label} className="flex items-center justify-between py-2.5 text-xs">
-                <span className="flex items-center gap-2.5 text-on-surface">
-                  <span className="material-symbols-outlined text-primary text-[16px]" aria-hidden="true">
-                    {d.icon}
+            <div className="flex items-start justify-between gap-2 mb-1">
+              <h3 className="text-base sm:text-lg font-bold text-primary">Tailored Bid Submission Package</h3>
+              <span className="shrink-0 text-[10px] text-on-surface-variant">3 clean files</span>
+            </div>
+            <div className="h-px w-full bg-outline-variant mb-3" aria-hidden="true" />
+            {/* Hairline-divided rows, not separately boxed ones -- matches
+                the same manifest/ledger convention the Trades and Pricing
+                sections use elsewhere on this page. */}
+            <div className="flex flex-col divide-y divide-outline-variant mb-4">
+              {DELIVERABLES.map((d) => (
+                <div key={d.label} className="flex items-center justify-between py-2.5 text-xs">
+                  <span className="flex items-center gap-2.5 text-on-surface">
+                    <span className="material-symbols-outlined text-primary text-[16px]" aria-hidden="true">
+                      {d.icon}
+                    </span>
+                    <span className="font-medium">{d.label}</span>
                   </span>
-                  <span className="font-medium">{d.label}</span>
-                </span>
-                <span className="inline-flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-bold bg-secondary-container text-on-secondary-container">
-                  <span className="material-symbols-outlined text-[12px]" aria-hidden="true">
-                    check
+                  <span className="inline-flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-bold bg-secondary-container text-on-secondary-container">
+                    <span className="material-symbols-outlined text-[12px]" aria-hidden="true">
+                      check
+                    </span>
+                    Ready
                   </span>
-                  Ready
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center justify-between text-[11px] font-bold">
+              <span className="inline-flex items-center gap-1 text-secondary">
+                <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
+                  task_alt
                 </span>
-              </div>
-            ))}
-          </div>
-          <div className="flex items-center justify-between text-[11px] font-bold">
-            <span className="inline-flex items-center gap-1 text-secondary">
-              <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-                task_alt
+                You submit it
               </span>
-              You submit it
-            </span>
-            <span className="text-on-surface-variant">No jargon</span>
+              <span className="text-on-surface-variant">No jargon</span>
+            </div>
           </div>
         </Reveal>
       </div>
