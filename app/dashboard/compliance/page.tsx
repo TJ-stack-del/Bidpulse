@@ -9,6 +9,7 @@ import { computeReadinessScore } from "@/lib/compliance/readiness-score";
 import { getExpiringSoon, parseLocalDate } from "@/lib/compliance/expiring-soon";
 import { ComplianceReadinessGauge } from "@/components/ui/ComplianceReadinessGauge";
 import { ExpiringSoonBanner } from "@/components/ui/ExpiringSoonBanner";
+import { ExportVaultButton } from "@/components/ui/ExportVaultButton";
 
 // Split out of app/dashboard/profile/page.tsx per explicit user direction:
 // the target mockup (a Stitch-designed "Compliance Vault" screen) has this
@@ -119,9 +120,12 @@ export default async function ComplianceVaultPage() {
 
   return (
     <>
-      <div className="mt-6">
-        <h1 className="text-headline-lg text-primary mb-1">Compliance Vault</h1>
-        <p className="text-body-md text-on-surface-variant">{client.company_name}</p>
+      <div className="mt-6 flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-headline-lg text-primary mb-1">Compliance Vault</h1>
+          <p className="text-body-md text-on-surface-variant">{client.company_name}</p>
+        </div>
+        <ExportVaultButton />
       </div>
 
       <div className="mt-4">
