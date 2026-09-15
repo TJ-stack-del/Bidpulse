@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Logo } from "./Logo";
 import { TAGLINE } from "@/lib/brand";
 
@@ -33,9 +33,28 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const activePath = usePathname();
 
+  // The mobile dropdown below used to sit in the header's normal document
+  // flow, so opening it grew the (sticky) header's height in place. That's
+  // invisible when scrolled to the very top, but scroll partway down the
+  // page first and the sticky header is already pinned mid-document -- its
+  // sudden height increase then overlaps whatever content was sitting
+  // right below it, instead of the menu presenting cleanly. Locking body
+  // scroll while the menu is open is the other half of the same fix: an
+  // absolutely-positioned overlay still leaves the page scrollable behind
+  // it otherwise, which reintroduces the same "content peeking through"
+  // problem the position change was meant to solve.
+  useEffect(() => {
+    if (!menuOpen) return;
+    const original = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = original;
+    };
+  }, [menuOpen]);
+
   return (
     <div className="min-h-screen flex flex-col bg-background text-on-background">
-      <header className="sticky top-0 z-50 bg-surface border-b border-outline-variant">
+      <header className="sticky top-0 z-50 bg-surface border-b border-outline-variant relative">
         <div className="flex items-center justify-between w-full px-margin-mobile md:px-margin-desktop py-4 max-w-container-max mx-auto">
           <Link href="/" onClick={() => setMenuOpen(false)} className="flex flex-col justify-center">
             <Logo priority />
@@ -81,7 +100,7 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
         </div>
 
         {menuOpen && (
-          <nav className="md:hidden border-t border-outline-variant bg-surface px-margin-mobile py-4 flex flex-col gap-2">
+          <nav className="md:hidden absolute top-full inset-x-0 z-40 border-t border-outline-variant bg-surface px-margin-mobile py-4 flex flex-col gap-2 max-h-[calc(100vh-4.5rem)] overflow-y-auto shadow-lg">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
