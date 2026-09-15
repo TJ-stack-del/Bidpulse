@@ -1621,6 +1621,34 @@ worth flagging that the trademark question is still open, so this
 represents committing real design/engineering time to a name that might
 still change.
 
+## Package Pricing (target, internal only — set 2026-09-16)
+**One-off: $399/bid. Retainer: $649/mo (up to 2 bids/month, ~$325/bid
+effective).** These are the actual numbers to quote when confirming
+pricing directly with a real client through the existing manual-invoicing
+flow — deliberately **not** published on the public pricing page
+(`app/(marketing)/pricing/page.tsx`), which by design shows no dollar
+amounts ("we confirm exact pricing with you directly before any work
+starts"). Mike explicitly chose to keep it that way rather than publish
+these figures.
+
+**Not a modeled number — a starting bet, by design.** BidPulse is
+pre-revenue with zero completed bids, so there's no real labor-hours data
+to price against yet. Built from: a real, measured LLM API cost floor of
+~$1.35–$2.00 per submission (via actual Anthropic API calls against a
+real 34-page municipal janitorial RFP, run this session — see the
+Confirmed Working entry on the COJ forecast scraper for the methodology),
+a reasoned but unmeasured assumption of 3-5 hours of real founder labor
+per bid, and real market context that traditional bid-writing consultants
+charge $500–$2,500+ per proposal for small-business government bids.
+Deliberately priced well above the ~$2 API floor — pricing near it would
+read as "cheap AI tool" and undermine the real differentiator (a real
+person prepares and reviews every deliverable, nothing is fully
+automated).
+
+**Revisit as soon as a real bid is completed and Mike tracks his actual
+hours on it** — that one data point turns this from a reasoned estimate
+into a real, measured cost floor worth re-pricing against.
+
 ## Working Style Notes (for continuity)
 - Always verify fixes with real regenerated output/evidence, not just "done"
 - Auto-draft content must never invent specific facts (registration numbers,
