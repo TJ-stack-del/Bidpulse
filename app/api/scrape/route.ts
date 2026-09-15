@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { scrapeJaa, type ScrapedOpportunity } from "@/lib/scrapers/jaa";
 import { scrapeCoj } from "@/lib/scrapers/coj";
+import { scrapeCojForecast } from "@/lib/scrapers/coj-forecast";
 
 // coj.ts no longer needs a real browser (see that file's own comment —
 // the "JS-rendered" table turned out to be a plain Oracle ADF loopback
@@ -28,6 +29,7 @@ export const maxDuration = 60;
 const SCRAPERS: { name: string; run: () => Promise<ScrapedOpportunity[]> }[] = [
   { name: "jaa", run: scrapeJaa },
   { name: "coj", run: scrapeCoj },
+  { name: "coj-forecast", run: scrapeCojForecast },
 ];
 
 function isAuthorized(request: NextRequest): boolean {
@@ -95,6 +97,7 @@ export async function GET(request: NextRequest) {
           source_url: item.source_url,
           due_date: item.due_date,
           solicitation_number: item.solicitation_number ?? null,
+          scope: item.scope ?? null,
           status: "new",
         });
 

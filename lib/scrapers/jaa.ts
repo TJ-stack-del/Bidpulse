@@ -12,6 +12,11 @@ export type ScrapedOpportunity = {
   // which maps to matched_opportunities' dedicated solicitation_number
   // column (schema.sql), not a text field JAA has any equivalent of.
   solicitation_number?: string | null;
+  // Optional — neither jaa.ts nor coj.ts's own listing pages show a real
+  // scope description, only a title. Added for coj-forecast.ts, whose PDFs
+  // do carry one; matched_opportunities.scope already existed in the
+  // schema but no scraper populated it before this.
+  scope?: string | null;
 };
 
 // flyjacksonville.com/bids.aspx is a plain server-rendered ASP.NET page —
