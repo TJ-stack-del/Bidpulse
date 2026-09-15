@@ -71,6 +71,25 @@ export function getNewMessageEmail(agency: string, companyName: string) {
   };
 }
 
+// Fires when an admin assigns a matched opportunity to a client
+// (MatchesPanel.tsx's handleAssign), which already creates a real draft
+// submission -- no email went out for that at all before this, for any
+// client, active or lapsed. Doubling as the win-back touch for a client
+// who hasn't had a submission in a while is deliberate: it's a real,
+// specific reason to reach out ("we found a bid that fits your trade"),
+// not a generic "we miss you" -- matches the product's own "a real person
+// found this for you" positioning instead of an automated drip sequence.
+export function getMatchedOpportunityEmail(agency: string, companyName: string) {
+  return {
+    subject: `We found a ${agency} bid that fits your trade`,
+    html: `
+      <p>Hi ${companyName},</p>
+      <p>We came across a ${agency} bid that looks like a fit for your trade and started a draft for it. Log in to your dashboard to take a look and let us know if you want to move forward.</p>
+      <p>— BidPulse</p>
+    `,
+  };
+}
+
 export function getContactMessageEmail(name: string, email: string, message: string) {
   return {
     subject: `New contact form message from ${name}`,

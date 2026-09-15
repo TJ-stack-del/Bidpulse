@@ -210,6 +210,17 @@ export function MatchesPanel({
       body: JSON.stringify({ submissionId: submission.id }),
     }).catch(() => {});
 
+    // No email went out for this at all before -- a client (lapsed or
+    // active) had no way to know a draft was waiting unless they happened
+    // to log in. Doubles as the win-back touch for a client who hasn't had
+    // a submission in a while: a real, specific reason to reach out, not a
+    // generic "we miss you."
+    fetch("/api/notify-matched-opportunity", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ submissionId: submission.id }),
+    }).catch(() => {});
+
     setMatches((m) =>
       m.map((x) => (x.id === matchId ? { ...x, status: "assigned", assigned_client_id: clientId } : x))
     );
