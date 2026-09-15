@@ -147,6 +147,16 @@ export function DeliverablesPanel({
   const [generating, setGenerating] = useState<string | null>(null);
   const [savedTypes, setSavedTypes] = useState<Record<string, boolean>>({});
   const [confirmReplaceType, setConfirmReplaceType] = useState<string | null>(null);
+  // technical_narrative has no discrete RFP-sourced rows to string-match
+  // against the way compliance_matrix does (see markRowVerified/
+  // findRowStatus above) -- it's prose an admin writes themselves, so
+  // there's nothing in its actual saved content to encode a per-requirement
+  // status into. This is deliberately a lightweight, session-local writing
+  // aid (an "addressed this while drafting" checklist), not a persisted
+  // fact-verification record the way compliance_matrix's is -- per two
+  // reviews, reusing the "Verified" label/mechanism here would imply an
+  // extracted claim was confirmed when nothing here was ever extracted.
+  const [addressedRequirements, setAddressedRequirements] = useState<Record<string, boolean>>({});
   const supabase = createClient();
   const { showToast } = useToast();
   const router = useRouter();
@@ -497,6 +507,77 @@ export function DeliverablesPanel({
                               <blockquote className="mt-1 pl-3 border-l-2 border-outline-variant text-on-surface-variant italic">
                                 &ldquo;{r.quote}&rdquo;
                               </blockquote>
+                            </li>
+                          );
+                        })}
+                    </ul>
+                  </div>
+                </details>
+              )}
+
+              {/* A real gap two reviews confirmed: technical_narrative never
+                  fetches RFP-sourced data at all (see generate-draft/route.ts's
+                  own "Only the compliance matrix uses this today" comment), so
+                  it can't get the same per-row "Mark verified" treatment --
+                  there's no extracted claim here to verify. But rfpRequirements
+                  is already sitting in this component's own props regardless of
+                  which deliverable type is open, at no extra extraction cost --
+                  this surfaces it as a passive coverage checklist ("Addressed",
+                  not "Verified") instead of leaving an admin writing this
+                  narrative with zero visibility into what the RFP actually
+                  asked for on technical approach/methodology. */}
+              {t.value === "technical_narrative" && rfpRequirements.some((r) => r.quote) && (
+                <details className="group mt-3 border border-outline-variant rounded-lg">
+                  <summary className="flex items-center gap-2 px-3 py-2 bg-surface-container-low cursor-pointer select-none text-label-md text-on-surface-variant font-bold list-none focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary">
+                    <span className="material-symbols-outlined text-[18px] transition-transform group-open:rotate-90">
+                      chevron_right
+                    </span>
+                    RFP requirements to address ({rfpRequirements.filter((r) => r.quote).length})
+                  </summary>
+                  <div className="px-3 py-3 flex flex-col gap-3 border-t border-outline-variant">
+                    <p className="text-label-md text-on-surface-variant">
+                      What the RFP actually asked for — check these off as you write to make sure the
+                      narrative doesn&apos;t drift from what the solicitation requires. This is a writing aid,
+                      not a saved record: it resets on reload.
+                    </p>
+                    <ul className="flex flex-col gap-3">
+                      {rfpRequirements
+                        .filter((r) => r.quote)
+                        .map((r, i) => {
+                          const docUrl = r.source_file ? rfpDocumentUrls[r.source_file] : undefined;
+                          const addressed = !!addressedRequirements[r.requirement];
+                          return (
+                            <li key={i} className="text-body-sm text-on-surface">
+                              <label className="flex items-start gap-2 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={addressed}
+                                  onChange={(e) =>
+                                    setAddressedRequirements((a) => ({ ...a, [r.requirement]: e.target.checked }))
+                                  }
+                                  className="mt-1 shrink-0"
+                                />
+                                <span className={addressed ? "line-through text-on-surface-variant" : undefined}>
+                                  <span className="font-bold">{r.requirement}</span>
+                                  {r.page != null && (
+                                    <span className="text-on-surface-variant"> (p.{r.page})</span>
+                                  )}
+                                  {docUrl && r.page != null && (
+                                    <a
+                                      href={`${docUrl}#page=${r.page}`}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="ml-2 text-primary font-bold hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm"
+                                    >
+                                      View in RFP →
+                                    </a>
+                                  )}
+                                  <blockquote className="mt-1 pl-3 border-l-2 border-outline-variant text-on-surface-variant italic">
+                                    &ldquo;{r.quote}&rdquo;
+                                  </blockquote>
+                                </span>
+                              </label>
                             </li>
                           );
                         })}
