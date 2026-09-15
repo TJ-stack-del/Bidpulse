@@ -6,7 +6,7 @@ import { DocumentLibrarySection } from "../profile/DocumentLibrarySection";
 import { PastPerformanceSection } from "../profile/PastPerformanceSection";
 import { signRfpDocumentUrls, signRfpDocumentUrl } from "@/lib/storage";
 import { computeReadinessScore } from "@/lib/compliance/readiness-score";
-import { getExpiringSoon } from "@/lib/compliance/expiring-soon";
+import { getExpiringSoon, parseLocalDate } from "@/lib/compliance/expiring-soon";
 import { ComplianceReadinessGauge } from "@/components/ui/ComplianceReadinessGauge";
 import { ExpiringSoonBanner } from "@/components/ui/ExpiringSoonBanner";
 
@@ -115,7 +115,7 @@ export default async function ComplianceVaultPage() {
     ...getExpiringSoon(certifications, certLabel),
     ...getExpiringSoon(insurancePolicies, policyLabel),
     ...getExpiringSoon(bondingRecords, bondingLabel),
-  ].sort((a, b) => new Date(a.expiration_date).getTime() - new Date(b.expiration_date).getTime());
+  ].sort((a, b) => parseLocalDate(a.expiration_date).getTime() - parseLocalDate(b.expiration_date).getTime());
 
   return (
     <>

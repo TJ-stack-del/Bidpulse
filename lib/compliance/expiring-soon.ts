@@ -11,12 +11,30 @@ export type ExpiringRecord = {
   expiration_date: string;
 };
 
+// expiration_date is a DATE column ("2026-09-20", no time/zone) -- parsing
+// it with plain `new Date(str)` reads it as UTC midnight, which silently
+// shifts "today" by a day for any timezone behind UTC (this app's whole US
+// market). Parsing the y/m/d parts directly and building a local-midnight
+// Date keeps "expires today" meaning the viewer's own calendar day.
+export function parseLocalDate(dateStr: string): Date {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+export function daysUntil(dateStr: string): number {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const target = parseLocalDate(dateStr);
+  return Math.round((target.getTime() - today.getTime()) / (24 * 60 * 60 * 1000));
+}
+
+// Callers (app/dashboard/compliance/page.tsx) concatenate this across
+// several tables and sort once over the combined list -- sorting here too
+// would be redundant work over a list that's about to be re-sorted anyway.
 export function getExpiringSoon<
   T extends { id: string; verified: boolean; expiration_date: string | null }
 >(records: T[], toLabel: (record: T) => string, windowDays = DEFAULT_WINDOW_DAYS): ExpiringRecord[] {
-  const horizon = Date.now() + windowDays * 24 * 60 * 60 * 1000;
   return records
-    .filter((r) => r.verified && !!r.expiration_date && new Date(r.expiration_date).getTime() <= horizon)
-    .map((r) => ({ id: r.id, label: toLabel(r), expiration_date: r.expiration_date as string }))
-    .sort((a, b) => new Date(a.expiration_date).getTime() - new Date(b.expiration_date).getTime());
+    .filter((r) => r.verified && !!r.expiration_date && daysUntil(r.expiration_date) <= windowDays)
+    .map((r) => ({ id: r.id, label: toLabel(r), expiration_date: r.expiration_date as string }));
 }
