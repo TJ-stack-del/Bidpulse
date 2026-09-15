@@ -14,36 +14,50 @@ using AI-assisted drafting, then the client pays and downloads the package.
 (Postgres + Auth + Storage), Vercel (now deployed at bidpulse-nine.vercel.app).
 GitHub Codespaces for development.
 
-**Deploy status (2026-09-09, updated — see item #10 in Currently
-Open):** `origin/main` is at `fb688a4`. Local `main` is **19 commits
-ahead**, ending at `58a3279` — none of it pushed, so none of it is
-live. Covers the Stitch "Industrial Precision" redesign, Past
-Performance / placeholder-gate work, a reverted compliance-matrix
-editor experiment (built, then explicitly undone per Mike's own
-feedback — see Known Issues), the RFP extraction pipeline's Phase 1 +
-Phase 2 (standalone, not wired into the app either way), and a rewrite
-of the City of Jacksonville scraper that removes a real dependency
-(`@sparticuz/chromium`) from what would ship. **Push and deploy before
-treating any of it as done from a user's perspective.** Get a fresh
-`git log origin/main..HEAD --oneline | wc -l` before relying on any
-specific count here — this number goes stale fast in a session doing
-this much work per sitting. Vercel auto-deploy from Git was confirmed
-genuinely working via a real empirical test in an earlier session (a
-harmless commit produced an automatic deployment, no manual
-`vercel --prod` needed) — see Confirmed Working for that story,
-including an earlier false "no Git integration" finding that was later
-corrected. That mechanism should still apply once these commits are
-actually pushed.
+**Deploy status (2026-09-15, updated — supersedes the 2026-09-09 entry
+below, which is stale and should not be trusted):** `origin/main` and
+local `main` are in sync at `3c2f63f`, confirmed live on
+`bidpulse.co` (real `curl` checks against the production domain, not
+just a Vercel dashboard status). The 19-commit gap and parallel-
+cloud-session risk described in the paragraph below this one were both
+resolved at some point between 2026-09-09 and now (untracked by which
+session/commit) — the redesign, Past Performance, RFP extraction
+Phase 1/2, and scraper rewrite this entry originally warned about are
+all confirmed merged into current `main`. Get a fresh `git log
+origin/main..HEAD --oneline | wc -l` before trusting "in sync" as
+still true — this drifts fast. Vercel auto-deploy from Git is
+confirmed still working as of 2026-09-15 (real push → real new
+Production deployment observed via `vercel ls`, `Ready` in ~40s, live
+site verified with `curl` afterward).
 
-**Known parallel-work risk, not yet resolved:** a separate cloud Claude
-Code session has also been working on this same repo, on a separate
-checkout, including its own "revised Stitch redesign... replacing the
-earlier `626cf4f` pass" that this session has no visibility into beyond
-a status doc the user shared. Neither side has pushed, so this is a
-real, live divergence risk — whichever side pushes first may silently
-discard the other's work. Not a code task to fix; needs Mike to decide
-which checkout's redesign work is authoritative before either side
-pushes.
+*(Original 2026-09-09 entry, kept for history — no longer describes
+current reality, see above):* `origin/main` was at `fb688a4`, local
+`main` was 19 commits ahead at `58a3279`, unpushed. A separate cloud
+Claude Code session was also working on this same repo with its own
+unpushed redesign work — a live divergence risk pending Mike's
+decision on which checkout was authoritative. Neither condition holds
+today.
+
+**Recurring lesson, 2026-09-15:** a *second*, independent instance of
+this exact "code deployed, migrations weren't" gap was found and
+fixed this session — 5 migrations (the bid-estimation-facts cache and
+all 4 Compliance Vault schema migrations) were live in application
+code on `bidpulse-production` for days with their backing schema never
+applied there, silently breaking the Compliance Vault page for every
+real client who clicked the nav tab. Caught only by deliberately
+running `supabase migration list` against the *actual* linked
+production project (confirmed via the live site's own served JS
+embedding `rixsgnbivayeaxbdseij`, not trusted from `.env.local` — see
+`CLAUDE.md`'s existing rule on this). Fixed via `supabase db push`
+against production, verified with real REST calls against every
+affected table (see Confirmed Working). **This is now the second time
+this exact class of gap has bitten this project** (see the first
+instance elsewhere in this file, `client_past_performance`) — pushing
+app code to `origin/main` does not imply the migrations it depends on
+are live anywhere except whichever Supabase project was linked at
+`db push` time. Worth treating "push code" and "push migrations" as
+two separate, both-required steps in any future deploy checklist,
+not one bundled mental step.
 
 ## How schema changes get made now
 As of 2026-08-31, all schema changes go through Supabase CLI migrations —
@@ -252,6 +266,52 @@ non-action (see Known Issues / Recently Fixed, which includes real
 
 
 ## Confirmed Working (tested with real evidence, not just "reported done")
+- **Compliance & Licensing Vault Phases 1-5 and 7 shipped and live —
+  CLOSED 2026-09-15.** Phases 1-4 (trade licenses, structured insurance/
+  bonding, RFP-boilerplate document library, past performance + hybrid
+  USASpending.gov federal-award check) plus the page split and two
+  review-driven cleanup passes were already committed from earlier
+  sessions. This session added Phase 5 (a derived readiness score +
+  expiring-soon banner, `lib/compliance/readiness-score.ts` /
+  `expiring-soon.ts`) and Phase 7 (an authenticated `/api/compliance/
+  export` route zipping every verified document + the document library
+  into one download, using `archiver` 8.x's `ZipArchive` class — its
+  older docs' factory-function API no longer exists in that version).
+  Phase 6 (public share-link + QR code) was explicitly skipped per
+  direct instruction — the plan at
+  `/home/codespace/.claude/plans/enchanted-greeting-twilight.md` still
+  has its full spec if picked back up later. Both new phases were each
+  independently run through an architecture review and a UX/UI review
+  (fresh agents, not self-review); every should-fix finding was fixed
+  and re-verified, not just logged — real bugs caught this way: a
+  timezone off-by-one in expiration-date math (DATE columns parsed as
+  UTC midnight instead of local calendar days), an already-expired
+  document rendering identically to one merely expiring soon, a zip
+  export that silently dropped failed files with zero indication
+  (now a `MISSING_FILES.txt` manifest inside the zip itself), and an
+  always-enabled export button guaranteed to 404 on a brand-new
+  client's first click (now hidden until there's something real to
+  export). Deployed and smoke-tested live on `bidpulse.co` — see the
+  Deploy status note above this section for the separate production-
+  migration gap this surfaced and fixed along the way.
+- **Matched-opportunity notification email — CLOSED 2026-09-15.**
+  `MatchesPanel.tsx`'s admin "assign this opportunity to a client"
+  action already created a real draft submission but sent no email at
+  all, to any client, active or lapsed — a real gap surfaced while
+  working through how BidPulse should handle client offboarding/
+  win-back (run through the `churn-prevention` and `emails` skills,
+  translated against the actual business model: no subscription
+  object exists anywhere in the schema, billing is manually invoiced,
+  matching is admin-curated not automated). New
+  `getMatchedOpportunityEmail()` template + `/api/notify-matched-
+  opportunity` route, mirroring `notify-new-message`'s exact pattern.
+  Deliberately one real, specific email tied to an actual admin action
+  rather than an automated multi-email drip sequence. Offboarding-
+  reason capture (the other half of that discussion) was scoped and
+  explicitly deferred — no admin Clients page exists yet and
+  `audit_log` has no `client_id` column, so it needs a real schema/UI
+  decision once a real Retainer client actually churns to design it
+  against (same call already made for Currently Open item #4).
 - **Supabase security-linter findings verified and safely closed where
   possible — CLOSED 2026-09-12, applied to both dev and production.**
   `is_org_member` was the one function (of six similar SECURITY
