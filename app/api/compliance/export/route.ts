@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import { ZipArchive } from "archiver";
 import { createClient } from "@/lib/supabase/server";
 import { signRfpDocumentUrl } from "@/lib/storage";
+import { certificationLabel, policyLabel, bondingLabel } from "@/lib/compliance/labels";
 
 export const runtime = "nodejs";
 // archiver streams through Node's zlib -- needs the Node runtime, not edge.
@@ -19,6 +20,14 @@ export const maxDuration = 60;
 // with more documents than this needs a real streaming rewrite, not a
 // silent timeout.
 const MAX_FILES = 40;
+
+// Row count alone doesn't bound memory -- none of the three real upload
+// flows that feed this route (CertificationsSection, InsuranceBondingSection,
+// DocumentLibrarySection, all via uploadAndInsertRecord/lib/storage.ts) enforce
+// a per-file size limit, and the rfp-documents bucket itself has no
+// file_size_limit set. A running byte budget across the whole export is the
+// real backstop MAX_FILES alone doesn't provide.
+const MAX_TOTAL_BYTES = 150 * 1024 * 1024; // 150MB
 
 type ExportRow = { folder: string; file_url: string | null; file_name: string | null; fallbackName: string };
 
@@ -35,7 +44,7 @@ async function collectExportRows(
   const [{ data: certs }, { data: policies }, { data: bonds }, { data: docs }] = await Promise.all([
     supabase
       .from("client_certifications")
-      .select("cert_type, other_label, file_url, file_name")
+      .select("cert_type, other_label, record_type, file_url, file_name")
       .eq("client_id", clientId)
       .eq("verified", true),
     supabase
@@ -56,19 +65,19 @@ async function collectExportRows(
       folder: "Certifications",
       file_url: c.file_url,
       file_name: c.file_name,
-      fallbackName: (c.other_label || c.cert_type) ?? "Certification",
+      fallbackName: certificationLabel(c),
     })),
     ...(policies ?? []).map((p) => ({
       folder: "Insurance",
       file_url: p.file_url,
       file_name: p.file_name,
-      fallbackName: p.policy_type ?? "Policy",
+      fallbackName: policyLabel(p),
     })),
     ...(bonds ?? []).map((b) => ({
       folder: "Bonding",
       file_url: b.file_url,
       file_name: b.file_name,
-      fallbackName: b.surety_name ?? "Bond",
+      fallbackName: bondingLabel(b),
     })),
     ...(docs ?? []).map((d) => ({
       folder: "Documents",
@@ -81,8 +90,13 @@ async function collectExportRows(
 
 // Every entry needs a distinct name inside its folder -- two "General
 // Liability" policies (a renewal replacing an expired one, say) would
-// otherwise silently collide and overwrite each other in the zip.
-function uniqueZipPath(folder: string, name: string, used: Set<string>): string {
+// otherwise silently collide and overwrite each other in the zip. Also
+// strips path separators out of free-text fields (other_label, surety_name,
+// a document library label) before they reach the zip -- archiver's own
+// sanitizePath already prevents any real path-traversal risk, but an
+// unescaped "/" in a label would still create an unintended nested folder.
+function uniqueZipPath(folder: string, rawName: string, used: Set<string>): string {
+  const name = rawName.replace(/[/\\]+/g, "-");
   let path = `${folder}/${name}`;
   let n = 2;
   while (used.has(path)) {
@@ -123,10 +137,17 @@ export async function GET() {
   }
   if (rows.length > MAX_FILES) {
     return NextResponse.json(
-      { error: `Too many documents to export at once (${rows.length}, limit ${MAX_FILES}). Contact us for a manual export.` },
+      { error: "You have more documents than we can bundle in one export right now. Contact us and we'll put together a manual export for you." },
       { status: 413 }
     );
   }
+
+  // Rows a file couldn't actually be included for (failed to sign, failed
+  // to fetch, or pushed the export past the size budget) -- a compliance
+  // export that's silently missing a document is a real trust problem, not
+  // just a logging nicety, so this ships inside the zip itself as a
+  // manifest rather than only server-side.
+  const skipped: { name: string; reason: string }[] = [];
 
   const zipBuffer = await new Promise<Buffer>((resolve, reject) => {
     const chunks: Buffer[] = [];
@@ -137,15 +158,43 @@ export async function GET() {
 
     (async () => {
       const used = new Set<string>();
+      let totalBytes = 0;
       for (const row of rows) {
+        const label = row.file_name || row.fallbackName;
         const signedUrl = await signRfpDocumentUrl(supabase, row.file_url);
-        if (!signedUrl) continue;
+        if (!signedUrl) {
+          skipped.push({ name: `${row.folder}/${label}`, reason: "couldn't generate a download link" });
+          continue;
+        }
         const res = await fetch(signedUrl);
-        if (!res.ok) continue;
+        if (!res.ok) {
+          skipped.push({ name: `${row.folder}/${label}`, reason: "couldn't be downloaded from storage" });
+          continue;
+        }
         const buf = Buffer.from(await res.arrayBuffer());
-        const name = row.file_name || row.fallbackName;
-        archive.append(buf, { name: uniqueZipPath(row.folder, name, used) });
+        if (totalBytes + buf.length > MAX_TOTAL_BYTES) {
+          skipped.push({ name: `${row.folder}/${label}`, reason: "skipped -- export size limit reached" });
+          continue;
+        }
+        totalBytes += buf.length;
+        archive.append(buf, { name: uniqueZipPath(row.folder, label, used) });
       }
+
+      if (skipped.length > 0) {
+        console.error(
+          `[compliance/export] client ${client.id}: ${skipped.length} of ${rows.length} file(s) skipped`,
+          skipped
+        );
+        const manifest = [
+          "The following documents could NOT be included in this export:",
+          "",
+          ...skipped.map((s) => `- ${s.name} (${s.reason})`),
+          "",
+          "Contact us if you need these included.",
+        ].join("\n");
+        archive.append(Buffer.from(manifest, "utf-8"), { name: "MISSING_FILES.txt" });
+      }
+
       archive.finalize();
     })().catch(reject);
   });

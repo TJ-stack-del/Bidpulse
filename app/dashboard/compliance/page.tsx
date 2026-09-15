@@ -10,6 +10,7 @@ import { getExpiringSoon, parseLocalDate } from "@/lib/compliance/expiring-soon"
 import { ComplianceReadinessGauge } from "@/components/ui/ComplianceReadinessGauge";
 import { ExpiringSoonBanner } from "@/components/ui/ExpiringSoonBanner";
 import { ExportVaultButton } from "@/components/ui/ExportVaultButton";
+import { certificationLabel, policyLabel, bondingLabel } from "@/lib/compliance/labels";
 
 // Split out of app/dashboard/profile/page.tsx per explicit user direction:
 // the target mockup (a Stitch-designed "Compliance Vault" screen) has this
@@ -19,17 +20,6 @@ import { ExportVaultButton } from "@/components/ui/ExportVaultButton";
 // build initially landed them) was cramming four substantial sections onto
 // one page instead of matching that structure.
 export const dynamic = "force-dynamic";
-
-// Mirrors InsuranceBondingSection.tsx's own POLICY_TYPES labels -- kept as a
-// plain lookup here rather than importing that "use client" module's array,
-// since this file only needs the label strings, not the form component.
-const POLICY_TYPE_LABELS: Record<string, string> = {
-  general_liability: "General Liability",
-  workers_comp: "Workers' Comp",
-  commercial_auto: "Commercial Auto",
-  professional_liability: "Professional Liability",
-  umbrella: "Umbrella",
-};
 
 export default async function ComplianceVaultPage() {
   const supabase = await createClient();
@@ -106,17 +96,23 @@ export default async function ComplianceVaultPage() {
   // no admin-verification workflow at all).
   const readiness = computeReadinessScore([...certifications, ...insurancePolicies, ...bondingRecords]);
 
-  const certLabel = (c: (typeof certifications)[number]) =>
-    c.record_type === "small_business_cert" && c.cert_type === "Other" ? c.other_label || "Other" : c.cert_type;
-  const policyLabel = (p: (typeof insurancePolicies)[number]) =>
-    POLICY_TYPE_LABELS[p.policy_type] ?? p.policy_type;
-  const bondingLabel = (b: (typeof bondingRecords)[number]) => `Bond${b.surety_name ? ` — ${b.surety_name}` : ""}`;
-
   const expiringSoon = [
-    ...getExpiringSoon(certifications, certLabel),
+    ...getExpiringSoon(certifications, certificationLabel),
     ...getExpiringSoon(insurancePolicies, policyLabel),
     ...getExpiringSoon(bondingRecords, bondingLabel),
   ].sort((a, b) => parseLocalDate(a.expiration_date).getTime() - parseLocalDate(b.expiration_date).getTime());
+
+  // Gates ExportVaultButton's own visibility -- a brand-new client with
+  // nothing verified yet and an empty document library would otherwise see
+  // an always-enabled button whose first click is guaranteed to 404
+  // (flagged by review; DeliverablesSection.tsx hides its own action the
+  // same way when there's nothing ready instead of leaving a button that's
+  // certain to fail).
+  const hasExportableDocuments =
+    certifications.some((c) => c.verified) ||
+    insurancePolicies.some((p) => p.verified) ||
+    bondingRecords.some((b) => b.verified) ||
+    documents.length > 0;
 
   return (
     <>
@@ -125,7 +121,7 @@ export default async function ComplianceVaultPage() {
           <h1 className="text-headline-lg text-primary mb-1">Compliance Vault</h1>
           <p className="text-body-md text-on-surface-variant">{client.company_name}</p>
         </div>
-        <ExportVaultButton />
+        {hasExportableDocuments && <ExportVaultButton />}
       </div>
 
       <div className="mt-4">

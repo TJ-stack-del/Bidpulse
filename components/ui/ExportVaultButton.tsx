@@ -1,13 +1,23 @@
 "use client";
 
 import { useState } from "react";
+import { Spinner } from "@/components/ui/Spinner";
 
-// Same button/error-state convention as PacketButtons.tsx's "Download
-// packet" -- a bare secondary-style button, disabled while in flight, with
-// the error (if any) as plain text beneath it rather than a toast/modal.
-// The zip itself is built server-side (app/api/compliance/export/route.ts,
-// scoped to the requesting user's own client_id) -- this component only
-// fetches it and hands the browser a real file to save.
+// Filled/primary treatment (same as PacketButtons.tsx's "Download packet"),
+// not the outline "Preview packet" one -- review found the outline style
+// undersold what's arguably the single most useful action on this page.
+// Real <Spinner /> instead of a bare text swap, matching this app's own
+// convention for async buttons (CertificationsSection's "Add
+// certification"/"Remove") -- the underlying route fetches and re-zips
+// files serially with a 60s budget, so this can run for several real
+// seconds, not the near-instant single-row writes those other buttons
+// cover.
+//
+// Rendering is gated by the caller (app/dashboard/compliance/page.tsx only
+// mounts this once there's at least one exportable document) rather than
+// this component disabling itself -- a brand-new client with nothing
+// verified yet and an empty document library never sees a button whose
+// first click is guaranteed to 404.
 export function ExportVaultButton() {
   const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,9 +55,9 @@ export function ExportVaultButton() {
         type="button"
         onClick={handleExport}
         disabled={downloading}
-        className="self-start flex items-center gap-2 px-4 py-2 rounded border border-primary text-primary text-label-md font-bold hover:bg-surface-container-low transition-colors disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        className="self-start flex items-center gap-2 px-4 py-2 rounded bg-primary-container text-on-primary-container text-label-md font-bold hover:opacity-90 transition-colors disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
-        <span className="material-symbols-outlined text-[18px]">folder_zip</span>
+        {downloading ? <Spinner /> : <span className="material-symbols-outlined text-[18px]">folder_zip</span>}
         {downloading ? "Building…" : "Export Full Vault (.zip)"}
       </button>
       {error && <p className="text-body-md text-error">{error}</p>}
