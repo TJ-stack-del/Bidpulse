@@ -53,7 +53,17 @@ export function DeliverablesSection({
   // only ever shows core-type rows it actually finds, never invents a
   // "pending" row for a type this submission was never going to produce).
   const present = CORE_TYPES.filter((t) => deliverables.some((d) => d.deliverable_type === t));
-  const readyCount = present.length;
+
+  // A row existing is not the same as it being done -- DeliverablesPanel.tsx's
+  // own admin-side auto-advance check already treats an empty save as
+  // incomplete (maybeAutoAdvance requires file_url or non-empty trimmed
+  // content); this used to just check row existence, meaning an admin
+  // could save a blank textarea and a client would see "Ready" on a
+  // document with nothing in it. Same completeness rule, both sides now.
+  function isComplete(type: string): boolean {
+    return deliverables.some((d) => d.deliverable_type === type && (!!d.file_url || !!d.content?.trim()));
+  }
+  const readyCount = present.filter(isComplete).length;
 
   return (
     <div className="bg-surface-container-low rounded-xl shadow-sm overflow-hidden">
@@ -78,9 +88,15 @@ export function DeliverablesSection({
             >
               <span className="material-symbols-outlined text-secondary text-[20px]">{CORE_ICONS[type]}</span>
               <span className="flex-1 text-body-md text-on-surface font-semibold">{CORE_LABELS[type]}</span>
-              <span className="inline-flex px-2 py-0.5 rounded text-label-sm font-bold uppercase tracking-wider bg-secondary-container text-on-secondary-container">
-                Ready
-              </span>
+              {isComplete(type) ? (
+                <span className="inline-flex px-2 py-0.5 rounded text-label-sm font-bold uppercase tracking-wider bg-secondary-container text-on-secondary-container">
+                  Ready
+                </span>
+              ) : (
+                <span className="inline-flex px-2 py-0.5 rounded text-label-sm font-bold uppercase tracking-wider bg-tertiary-container text-on-tertiary-container">
+                  In progress
+                </span>
+              )}
             </div>
           ))}
           <div className="pt-space-xs flex flex-col gap-space-xs">

@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
 import { FadeMessage } from "@/components/ui/FadeMessage";
 import { PacketButtons } from "@/components/ui/PacketButtons";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { signRfpDocumentUrl, uploadRfpDocument } from "@/lib/storage";
 import { useToast } from "@/components/Toast";
 import {
@@ -111,9 +112,11 @@ export function DeliverablesPanel({
   const [saving, setSaving] = useState<string | null>(null);
   const [generating, setGenerating] = useState<string | null>(null);
   const [savedTypes, setSavedTypes] = useState<Record<string, boolean>>({});
+  const [confirmReplaceType, setConfirmReplaceType] = useState<string | null>(null);
   const supabase = createClient();
   const { showToast } = useToast();
   const router = useRouter();
+  const idPrefix = useId();
 
   // Mirrors advance-if-deliverables-complete's own REQUIRED_TYPES check —
   // duplicated rather than imported so this file doesn't need a shared
@@ -152,13 +155,18 @@ export function DeliverablesPanel({
   }
 
   async function logPrepared(type: string, mode: "file" | "text") {
-    await supabase.from("audit_log").insert({
+    // Best-effort: the save itself already succeeded by the time this runs
+    // (see handleSaveText/handleUpload) -- a failed audit-log write
+    // shouldn't surface as a save error, but shouldn't vanish silently
+    // either if audit logs are ever relied on for compliance purposes.
+    const { error } = await supabase.from("audit_log").insert({
       submission_id: submissionId,
       org_id: orgId,
       actor_id: actorId,
       event_type: "deliverable_prepared",
       event_detail: { deliverable_type: type, mode },
     });
+    if (error) console.error("[DeliverablesPanel] audit_log insert failed", error);
   }
 
   async function upsert(type: string, fields: { file_url?: string | null; content?: string | null }) {
@@ -212,17 +220,20 @@ export function DeliverablesPanel({
   // Fills the text box with a generated starting draft — doesn't touch the
   // deliverables table itself, so nothing is saved until the admin hits
   // "Save text" as usual. Confirms first if there's existing content, since
-  // this replaces the box wholesale rather than appending.
-  async function handleAutoDraft(type: string) {
-    const label = DELIVERABLE_TYPES.find((d) => d.value === type)?.label ?? type;
+  // this replaces the box wholesale rather than appending -- via the app's
+  // own ConfirmDialog rather than the browser-native window.confirm() this
+  // used to call, which was inconsistent with every other confirmation in
+  // the app and couldn't be styled.
+  function handleAutoDraft(type: string) {
     const existingText = (drafts[type] ?? "").trim();
     if (existingText) {
-      const confirmed = window.confirm(
-        `This will replace the current ${label.toLowerCase()} text with a generated draft. Continue?`
-      );
-      if (!confirmed) return;
+      setConfirmReplaceType(type);
+      return;
     }
+    runAutoDraft(type);
+  }
 
+  async function runAutoDraft(type: string) {
     setGenerating(type);
     setSavedTypes((s) => ({ ...s, [type]: false }));
 
@@ -324,7 +335,7 @@ export function DeliverablesPanel({
           return (
             <div key={t.value} className="border-t border-outline-variant pt-4 first:border-t-0 first:pt-0">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-label-md text-on-surface-variant uppercase tracking-wider">{t.label}</h3>
+                <h3 id={`${idPrefix}-${t.value}-label`} className="text-label-md text-on-surface-variant uppercase tracking-wider">{t.label}</h3>
                 <span
                   className={`text-[10px] px-2 py-0.5 rounded border font-bold uppercase ${
                     existing
@@ -348,6 +359,7 @@ export function DeliverablesPanel({
               )}
 
               <textarea
+                aria-labelledby={`${idPrefix}-${t.value}-label`}
                 value={drafts[t.value] ?? ""}
                 onChange={(e) => {
                   setDrafts((d) => ({ ...d, [t.value]: e.target.value }));
@@ -454,6 +466,21 @@ export function DeliverablesPanel({
           </p>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={confirmReplaceType !== null}
+        onClose={() => setConfirmReplaceType(null)}
+        onConfirm={() => {
+          const type = confirmReplaceType;
+          setConfirmReplaceType(null);
+          if (type) runAutoDraft(type);
+        }}
+        title="Replace current text?"
+        description={`This will replace the current ${
+          confirmReplaceType ? deliverableLabel(confirmReplaceType).toLowerCase() : ""
+        } text with a generated draft.`}
+        confirmLabel="Replace with generated draft"
+      />
     </div>
   );
 }
