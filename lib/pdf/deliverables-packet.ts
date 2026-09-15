@@ -261,6 +261,21 @@ export function generateDeliverablesPacket(
             alternateRowStyles: { fillColor: COLOR.paperDim },
             margin: { left: marginX, right: marginX, bottom: 24 },
             didDrawPage: () => stampChrome(doc),
+            // A hand-verified row (an admin replaced "NEEDS VERIFICATION"
+            // with "VERIFIED" -- see DeliverablesPanel.tsx's "Mark verified"
+            // button) used to render identically to an unverified
+            // placeholder in the actual downloaded PDF -- the one document
+            // this whole checklist exists to produce. Real, visible
+            // distinction for the Status column only.
+            didParseCell: (data) => {
+              if (data.section === "body" && data.column.index === 1) {
+                const status = String(data.cell.raw ?? "").trim().toUpperCase();
+                if (status === "VERIFIED") {
+                  data.cell.styles.textColor = COLOR.green;
+                  data.cell.styles.fontStyle = "bold";
+                }
+              }
+            },
           });
           renderedAnyTable = true;
           // jspdf-autotable attaches this at runtime; not in the plugin's

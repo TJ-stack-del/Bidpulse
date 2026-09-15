@@ -51,6 +51,40 @@ function deliverableLabel(type: string) {
   return DELIVERABLE_LABELS[type] ?? type;
 }
 
+// The compliance matrix stays one freeform pipe-delimited text blob (an
+// admin can hand-edit/reformat/add rows) rather than real structured
+// per-row data -- restructuring it would cost that editing freedom for a
+// need nobody's hit yet. This is the smallest real fix instead: find the
+// one row whose Requirement cell exactly matches (generate-draft/route.ts
+// always writes `r.requirement` verbatim as that cell, so an exact match
+// is reliable for RFP-sourced rows specifically) and rewrite just its
+// Status cell -- same row format lib/pdf/deliverables-packet.ts's own
+// parser expects (`Requirement | Status | Detail`).
+function findRowStatus(content: string, requirement: string): string | null {
+  for (const line of content.split("\n")) {
+    const trimmed = line.trim();
+    if (!trimmed.includes("|") || trimmed.startsWith("[")) continue;
+    const cells = trimmed.split("|").map((c) => c.trim());
+    if (cells[0] === requirement) return cells[1] ?? null;
+  }
+  return null;
+}
+
+function markRowVerified(content: string, requirement: string): string {
+  const lines = content.split("\n");
+  const index = lines.findIndex((line) => {
+    const trimmed = line.trim();
+    if (!trimmed.includes("|") || trimmed.startsWith("[")) return false;
+    return trimmed.split("|")[0]?.trim() === requirement;
+  });
+  if (index === -1) return content;
+  const cells = lines[index].split("|");
+  if (cells.length < 2) return content;
+  cells[1] = " VERIFIED ";
+  lines[index] = cells.join("|");
+  return lines.join("\n");
+}
+
 // A fixed rows={3} box hid most of a real capability statement or technical
 // narrative (both can run several hundred words) behind an internal
 // scrollbar -- same complaint as the compliance matrix's old fixed-height
@@ -422,22 +456,44 @@ export function DeliverablesPanel({
                         .filter((r) => r.quote)
                         .map((r, i) => {
                           const docUrl = r.source_file ? rfpDocumentUrls[r.source_file] : undefined;
+                          const rowStatus = findRowStatus(drafts[t.value] ?? "", r.requirement);
+                          const isVerified = rowStatus?.trim().toUpperCase() === "VERIFIED";
                           return (
                             <li key={i} className="text-body-sm text-on-surface">
-                              <span className="font-bold">{r.requirement}</span>
-                              {r.page != null && (
-                                <span className="text-on-surface-variant"> (p.{r.page})</span>
-                              )}
-                              {docUrl && r.page != null && (
-                                <a
-                                  href={`${docUrl}#page=${r.page}`}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="ml-2 text-primary font-bold hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm"
-                                >
-                                  View in RFP →
-                                </a>
-                              )}
+                              <div className="flex items-center justify-between gap-3 flex-wrap">
+                                <span>
+                                  <span className="font-bold">{r.requirement}</span>
+                                  {r.page != null && (
+                                    <span className="text-on-surface-variant"> (p.{r.page})</span>
+                                  )}
+                                  {docUrl && r.page != null && (
+                                    <a
+                                      href={`${docUrl}#page=${r.page}`}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="ml-2 text-primary font-bold hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm"
+                                    >
+                                      View in RFP →
+                                    </a>
+                                  )}
+                                </span>
+                                {isVerified ? (
+                                  <span className="shrink-0 text-[10px] px-2 py-0.5 rounded border font-bold uppercase bg-secondary-container text-on-secondary-container border-primary/20">
+                                    Verified
+                                  </span>
+                                ) : rowStatus ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setDrafts((d) => ({ ...d, [t.value]: markRowVerified(d[t.value] ?? "", r.requirement) }));
+                                      setSavedTypes((s) => ({ ...s, [t.value]: false }));
+                                    }}
+                                    className="shrink-0 text-label-sm text-primary font-bold hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm"
+                                  >
+                                    Mark verified
+                                  </button>
+                                ) : null}
+                              </div>
                               <blockquote className="mt-1 pl-3 border-l-2 border-outline-variant text-on-surface-variant italic">
                                 &ldquo;{r.quote}&rdquo;
                               </blockquote>
