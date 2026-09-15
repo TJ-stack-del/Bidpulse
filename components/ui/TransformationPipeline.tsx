@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { PipelineArrow } from "./PipelineArrow";
 import { Reveal } from "./Reveal";
 
@@ -5,11 +6,16 @@ import { Reveal } from "./Reveal";
 // uses for them on the client dashboard -- reusing the exact mapping here
 // (rather than inventing a second one) is what makes this landing-page
 // visual read as "the same product" instead of a disconnected marketing
-// mockup.
+// mockup. `gloss` is new -- an impeccable critique pass (2026-09-16) found
+// "Compliance matrix"/"Technical narrative" sat completely unglossed on
+// this page's very first proof section, real jargon for an audience of
+// trade contractors who may never have prepared one -- a real irony given
+// the same card's own footer says "No jargon." Every row gets a gloss now,
+// including "Capability statement," so the list doesn't read unevenly.
 const DELIVERABLES = [
-  { label: "Capability statement", icon: "badge" },
-  { label: "Compliance matrix", icon: "fact_check" },
-  { label: "Technical narrative", icon: "description" },
+  { label: "Capability statement", gloss: "Who you are, what you've done", icon: "badge" },
+  { label: "Compliance matrix", gloss: "Proof you meet every requirement", icon: "fact_check" },
+  { label: "Technical narrative", gloss: "How the work gets done", icon: "description" },
 ];
 
 // Landing page "before/after" panel: messy RFP in, clean 3-file package
@@ -169,12 +175,15 @@ export function TransformationPipeline() {
                 sections use elsewhere on this page. */}
             <div className="flex flex-col divide-y divide-outline-variant">
               {DELIVERABLES.map((d) => (
-                <div key={d.label} className="flex items-center justify-between py-2.5 text-xs">
-                  <span className="flex items-center gap-2 text-on-surface">
-                    <span className="material-symbols-outlined text-primary text-[16px]" aria-hidden="true">
+                <div key={d.label} className="flex items-center justify-between gap-2 py-2.5 text-xs">
+                  <span className="flex items-start gap-2 min-w-0">
+                    <span className="material-symbols-outlined text-primary text-[16px] mt-0.5" aria-hidden="true">
                       {d.icon}
                     </span>
-                    <span className="font-medium">{d.label}</span>
+                    <span className="flex flex-col min-w-0">
+                      <span className="font-medium text-on-surface">{d.label}</span>
+                      <span className="text-[10px] text-on-surface-variant">{d.gloss}</span>
+                    </span>
                   </span>
                   <span className="inline-flex shrink-0 items-center gap-1 rounded px-2 py-0.5 text-[10px] font-bold bg-secondary-container text-on-secondary-container">
                     <span className="material-symbols-outlined text-[12px]" aria-hidden="true">
@@ -197,6 +206,23 @@ export function TransformationPipeline() {
           </div>
         </Reveal>
       </div>
+
+      {/* An impeccable critique pass (2026-09-16) flagged this as the
+          homepage's strongest concrete proof point with nowhere for a
+          visitor's now-peaked interest to go -- Gallery already exists for
+          exactly this (real synthetic sample deliverables), just wasn't
+          linked from the one place trust is highest. */}
+      <Reveal delay={0.45} className="flex justify-center mt-8">
+        <Link
+          href="/gallery"
+          className="inline-flex items-center gap-1.5 text-label-md text-primary font-bold hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm"
+        >
+          See a full sample packet
+          <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+            arrow_forward
+          </span>
+        </Link>
+      </Reveal>
     </div>
   );
 }

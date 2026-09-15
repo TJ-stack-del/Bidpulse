@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
 
 // Shared entrance-motion primitive for the marketing page -- one easing
@@ -33,6 +33,50 @@ export function Reveal({ children, as = "div", className, mode = "view", variant
   const prefersReducedMotion = useReducedMotion();
   const reduceMotion = mounted && prefersReducedMotion;
 
+  // Own IntersectionObserver rather than framer-motion's built-in
+  // whileInView -- a real, reproduced bug (confirmed via getComputedStyle
+  // inspection, not just a screenshot glitch) found elements could get
+  // permanently stuck at their hidden initial state under certain
+  // scroll-and-pause timing patterns, since whileInView's own internal
+  // viewport tracking has no fallback if its observer callback ever
+  // misses. A directly-owned observer plus a hard timeout safety net (in
+  // case the observer itself never fires at all) guarantees content is
+  // never left permanently invisible, which a purely decorative entrance
+  // animation must never risk.
+  const ref = useRef<HTMLElement | null>(null);
+  const [inView, setInView] = useState(mode === "mount");
+
+  useEffect(() => {
+    if (mode !== "view" || inView || reduceMotion) return;
+    const node = ref.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 }
+    );
+    observer.observe(node);
+
+    // Safety net: if the observer never fires (a real, if rare, browser/
+    // timing edge case) but the element is already on-screen, don't leave
+    // it invisible forever.
+    const fallback = window.setTimeout(() => {
+      const rect = node.getBoundingClientRect();
+      const visible = rect.top < window.innerHeight && rect.bottom > 0;
+      if (visible) setInView(true);
+    }, 2000);
+
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(fallback);
+    };
+  }, [mode, inView, reduceMotion]);
+
   if (reduceMotion) {
     if (as === "li") return <li className={className}>{children}</li>;
     if (as === "article") return <article className={className}>{children}</article>;
@@ -42,13 +86,15 @@ export function Reveal({ children, as = "div", className, mode = "view", variant
   const hidden = variant === "scale" ? { opacity: 0, scale: 0.92 } : { opacity: 0, y: 16 };
   const shown = { opacity: 1, y: 0, scale: 1 };
   const Component = as === "li" ? motion.li : as === "article" ? motion.article : motion.div;
-  const trigger =
-    mode === "mount"
-      ? { initial: hidden, animate: shown }
-      : { initial: hidden, whileInView: shown, viewport: { once: true, amount: 0.3 } };
 
   return (
-    <Component className={className} {...trigger} transition={{ duration: 0.5, delay, ease: EASE }}>
+    <Component
+      ref={ref as React.RefObject<never>}
+      className={className}
+      initial={hidden}
+      animate={inView ? shown : hidden}
+      transition={{ duration: 0.5, delay, ease: EASE }}
+    >
       {children}
     </Component>
   );
