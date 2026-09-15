@@ -47,6 +47,10 @@ export function PacketButtons({
   const [previewData, setPreviewData] = useState<{
     submission: any;
     deliverables: any[];
+    // False for admin (always full content) and for a paid/pilot client.
+    // True only when a client is looking at the sample -- drives the
+    // modal's banner copy below.
+    isSample: boolean;
   } | null>(null);
   // Set once a client's download has passed the payment gate and is
   // waiting on the attestation checkbox below — the actual file isn't
@@ -124,10 +128,28 @@ export function PacketButtons({
     setGenerating("preview");
     setError(null);
     try {
-      const { submission, deliverables } = await buildDoc();
-      setPreviewData({ submission, deliverables });
-      await logClientEvent("client_viewed_packet");
-      if (viewerRole === "client") await maybeAdvanceOnPreview();
+      if (viewerRole === "client") {
+        // Goes through a server route, not buildDoc()'s direct client-side
+        // query -- the whole point of a sample is that the full content
+        // never reaches an unpaid client's browser in the first place. See
+        // /api/preview-packet's own comment for why client-side truncation
+        // of an already-fetched result wouldn't actually accomplish that.
+        const res = await fetch("/api/preview-packet", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ submissionId }),
+        });
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data) {
+          throw new Error(data?.error || "Couldn't load the preview.");
+        }
+        setPreviewData({ submission: data.submission, deliverables: data.deliverables, isSample: !data.isPaidOrPilot });
+        await logClientEvent("client_viewed_packet");
+        await maybeAdvanceOnPreview();
+      } else {
+        const { submission, deliverables } = await buildDoc();
+        setPreviewData({ submission, deliverables, isSample: false });
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't load the preview.");
     } finally {
@@ -298,9 +320,14 @@ export function PacketButtons({
               >
                 Close
               </button>
-              <p className="text-label-md text-error font-bold mb-4 uppercase tracking-wide">
-                Preview only, not for distribution
+              <p className={`text-label-md text-error font-bold uppercase tracking-wide ${previewData.isSample ? "mb-1" : "mb-4"}`}>
+                {previewData.isSample ? "Sample preview, not for distribution" : "Preview only, not for distribution"}
               </p>
+              {previewData.isSample && (
+                <p className="text-body-sm text-on-surface-variant mb-4">
+                  This shows a real excerpt of each deliverable. The full package unlocks once payment is confirmed.
+                </p>
+              )}
               <h2 className="text-headline-md text-on-surface mb-1">
                 {previewData.submission.clients?.company_name}
               </h2>
