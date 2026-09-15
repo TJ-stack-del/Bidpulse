@@ -109,7 +109,18 @@ export function getDailyDigestEmail(
     daysSinceUpdate: number;
     daysUntilDue: number | null;
     breachedTurnaround: boolean;
-  }[]
+  }[],
+  // Accounts created via intake's "About you" step that never reached
+  // "About the bid" -- see app/api/daily-digest/route.ts's own comment on
+  // why this can't be derived from `submissions` at all. Optional/defaulted
+  // so this stays a no-op for any other caller of this template.
+  ghostSignups: {
+    companyName: string;
+    contactName: string;
+    email: string | null;
+    phone: string | null;
+    daysSinceSignup: number;
+  }[] = []
 ) {
   // Sort the most deadline-critical items to the top — a submission due
   // in 2 days matters far more than one due in 6 weeks, even if both
@@ -138,16 +149,39 @@ export function getDailyDigestEmail(
   const breachCount = sorted.filter((i) => i.breachedTurnaround).length;
   const urgentCount = sorted.filter((i) => i.daysUntilDue !== null && i.daysUntilDue <= 5).length;
 
+  // Oldest-first -- a signup from a week ago is more likely a genuine
+  // abandonment worth a follow-up call than one from this morning who may
+  // still come back and finish the bid themselves.
+  const sortedGhosts = [...ghostSignups].sort((a, b) => b.daysSinceSignup - a.daysSinceSignup);
+  const ghostRows = sortedGhosts
+    .map((g) => {
+      const contact = g.email ?? g.phone ?? "no contact on file";
+      return `<li>${g.companyName} (${g.contactName}) — signed up ${g.daysSinceSignup} day${
+        g.daysSinceSignup === 1 ? "" : "s"
+      } ago, never started a bid. Contact: ${contact}</li>`;
+    })
+    .join("");
+  const ghostSection =
+    sortedGhosts.length > 0
+      ? `<p>These accounts signed up but never started a bid -- worth a follow-up:</p><ul>${ghostRows}</ul>`
+      : "";
+
+  const staleSubjectPart =
+    breachCount > 0
+      ? `${breachCount} submission${breachCount === 1 ? "" : "s"} PAST our 48-hour promise`
+      : urgentCount > 0
+      ? `${urgentCount} submission${urgentCount === 1 ? "" : "s"} due soon and stalled`
+      : staleItems.length > 0
+      ? `${staleItems.length} submission${staleItems.length === 1 ? "" : "s"} need attention`
+      : null;
+  const ghostSubjectPart =
+    sortedGhosts.length > 0 ? `${sortedGhosts.length} signup${sortedGhosts.length === 1 ? "" : "s"} with no bid yet` : null;
+
   return {
-    subject:
-      breachCount > 0
-        ? `BidPulse: ${breachCount} submission${breachCount === 1 ? "" : "s"} PAST our 48-hour promise`
-        : urgentCount > 0
-        ? `BidPulse: ${urgentCount} submission${urgentCount === 1 ? "" : "s"} due soon and stalled`
-        : `BidPulse: ${staleItems.length} submission${staleItems.length === 1 ? "" : "s"} need attention`,
+    subject: `BidPulse: ${[staleSubjectPart, ghostSubjectPart].filter(Boolean).join(" · ")}`,
     html: `
-      <p>These submissions haven't been updated in a few days, sorted by urgency:</p>
-      <ul>${rows}</ul>
+      ${staleItems.length > 0 ? `<p>These submissions haven't been updated in a few days, sorted by urgency:</p><ul>${rows}</ul>` : ""}
+      ${ghostSection}
     `,
   };
 }

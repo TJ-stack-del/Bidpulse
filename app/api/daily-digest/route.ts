@@ -58,16 +58,51 @@ export async function GET(request: NextRequest) {
     .neq("stage", "closed")
     .eq("clients.org_id", org.id);
 
-  if (!submissions || submissions.length === 0) {
+  // "Ghost signups": a clients row (a real account -- see IntakeWizard.tsx's
+  // handleAboutYouNext) with zero submissions rows at all, draft or
+  // otherwise. Nothing else in the app surfaces these -- the admin inbox
+  // and this digest's own stale-items query above both start from
+  // `submissions`, so an account that never got past "About you" is
+  // invisible everywhere else. Checked independently of the stale-items
+  // logic below (not gated behind "only if there are open submissions")
+  // so a quiet day with zero active bids doesn't also hide a real signup
+  // sitting unnoticed. `clients` has no `is_test` column of its own (only
+  // `submissions` does), so this can't filter out test client rows the
+  // same way -- acceptable for now since test data is normally created
+  // together with a test submission, which would disqualify it here anyway.
+  const { data: allClientsInOrg } = await supabase
+    .from("clients")
+    .select("id, company_name, contact_name, email, phone, created_at")
+    .eq("org_id", org.id);
+  const { data: allSubmissionClientIds } = await supabase.from("submissions").select("client_id");
+  const clientIdsWithAnySubmission = new Set((allSubmissionClientIds ?? []).map((r) => r.client_id));
+  const signupCheckNow = Date.now();
+  const ghostSignups = (allClientsInOrg ?? [])
+    .filter((c) => !clientIdsWithAnySubmission.has(c.id))
+    .map((c) => ({
+      companyName: c.company_name,
+      contactName: c.contact_name,
+      email: c.email as string | null,
+      phone: c.phone as string | null,
+      daysSinceSignup: Math.floor((signupCheckNow - new Date(c.created_at).getTime()) / DAY_MS),
+    }));
+
+  if ((!submissions || submissions.length === 0) && ghostSignups.length === 0) {
     return NextResponse.json({ sent: false, reason: "nothing_open" });
   }
 
-  const submissionIds = submissions.map((s) => s.id);
-  const { data: activity } = await supabase
-    .from("audit_log")
-    .select("submission_id, created_at")
-    .in("submission_id", submissionIds)
-    .order("created_at", { ascending: false });
+  const submissionIds = (submissions ?? []).map((s) => s.id);
+  // .in() with an empty array is invalid SQL ("IN ()") -- guard rather
+  // than let a ghost-signups-only day (no open submissions at all) throw
+  // here instead of just skipping straight to an empty activity map.
+  const { data: activity } =
+    submissionIds.length > 0
+      ? await supabase
+          .from("audit_log")
+          .select("submission_id, created_at")
+          .in("submission_id", submissionIds)
+          .order("created_at", { ascending: false })
+      : { data: [] };
 
   const lastActivityBySubmission = new Map<string, string>();
   for (const row of activity ?? []) {
@@ -77,7 +112,7 @@ export async function GET(request: NextRequest) {
   }
 
   const now = Date.now();
-  const staleItems = submissions
+  const staleItems = (submissions ?? [])
     .map((s) => {
       const client = s.clients as unknown as { company_name: string };
       const lastActivity = lastActivityBySubmission.get(s.id) ?? s.created_at;
@@ -108,11 +143,11 @@ export async function GET(request: NextRequest) {
         item.daysSinceUpdate * DAY_MS >= TWO_DAYS_MS
     );
 
-  if (staleItems.length === 0) {
+  if (staleItems.length === 0 && ghostSignups.length === 0) {
     return NextResponse.json({ sent: false, reason: "nothing_stale" });
   }
 
-  const email = getDailyDigestEmail(staleItems);
+  const email = getDailyDigestEmail(staleItems, ghostSignups);
 
   const results = await Promise.allSettled(
     admins.map((a) => sendEmail({ to: a.email, subject: email.subject, html: email.html }))
@@ -125,6 +160,7 @@ export async function GET(request: NextRequest) {
     sent: failures.length < admins.length,
     recipients: admins.length,
     staleCount: staleItems.length,
+    ghostSignupCount: ghostSignups.length,
     ...(failures.length > 0 ? { failures } : {}),
   });
 }
