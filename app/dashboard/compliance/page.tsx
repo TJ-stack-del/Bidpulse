@@ -5,6 +5,10 @@ import { InsuranceBondingSection } from "../profile/InsuranceBondingSection";
 import { DocumentLibrarySection } from "../profile/DocumentLibrarySection";
 import { PastPerformanceSection } from "../profile/PastPerformanceSection";
 import { signRfpDocumentUrls, signRfpDocumentUrl } from "@/lib/storage";
+import { computeReadinessScore } from "@/lib/compliance/readiness-score";
+import { getExpiringSoon } from "@/lib/compliance/expiring-soon";
+import { ComplianceReadinessGauge } from "@/components/ui/ComplianceReadinessGauge";
+import { ExpiringSoonBanner } from "@/components/ui/ExpiringSoonBanner";
 
 // Split out of app/dashboard/profile/page.tsx per explicit user direction:
 // the target mockup (a Stitch-designed "Compliance Vault" screen) has this
@@ -14,6 +18,17 @@ import { signRfpDocumentUrls, signRfpDocumentUrl } from "@/lib/storage";
 // build initially landed them) was cramming four substantial sections onto
 // one page instead of matching that structure.
 export const dynamic = "force-dynamic";
+
+// Mirrors InsuranceBondingSection.tsx's own POLICY_TYPES labels -- kept as a
+// plain lookup here rather than importing that "use client" module's array,
+// since this file only needs the label strings, not the form component.
+const POLICY_TYPE_LABELS: Record<string, string> = {
+  general_liability: "General Liability",
+  workers_comp: "Workers' Comp",
+  commercial_auto: "Commercial Auto",
+  professional_liability: "Professional Liability",
+  umbrella: "Umbrella",
+};
 
 export default async function ComplianceVaultPage() {
   const supabase = await createClient();
@@ -82,12 +97,42 @@ export default async function ComplianceVaultPage() {
     }))
   );
 
+  // Readiness score spans every verifiable record type (certifications,
+  // insurance, bonding) -- past performance and document-library rows are
+  // deliberately excluded, since neither carries a `verified` column (see
+  // the Compliance Vault plan: past performance uses a separate, hybrid
+  // federal-award check instead, and the document library was built with
+  // no admin-verification workflow at all).
+  const readiness = computeReadinessScore([...certifications, ...insurancePolicies, ...bondingRecords]);
+
+  const certLabel = (c: (typeof certifications)[number]) =>
+    c.record_type === "small_business_cert" && c.cert_type === "Other" ? c.other_label || "Other" : c.cert_type;
+  const policyLabel = (p: (typeof insurancePolicies)[number]) =>
+    POLICY_TYPE_LABELS[p.policy_type] ?? p.policy_type;
+  const bondingLabel = (b: (typeof bondingRecords)[number]) => `Bond${b.surety_name ? ` — ${b.surety_name}` : ""}`;
+
+  const expiringSoon = [
+    ...getExpiringSoon(certifications, certLabel),
+    ...getExpiringSoon(insurancePolicies, policyLabel),
+    ...getExpiringSoon(bondingRecords, bondingLabel),
+  ].sort((a, b) => new Date(a.expiration_date).getTime() - new Date(b.expiration_date).getTime());
+
   return (
     <>
       <div className="mt-6">
         <h1 className="text-headline-lg text-primary mb-1">Compliance Vault</h1>
         <p className="text-body-md text-on-surface-variant">{client.company_name}</p>
       </div>
+
+      <div className="mt-4">
+        <ComplianceReadinessGauge percent={readiness.percent} verifiedCount={readiness.verifiedCount} total={readiness.total} />
+      </div>
+
+      {expiringSoon.length > 0 && (
+        <div className="mt-4">
+          <ExpiringSoonBanner records={expiringSoon} />
+        </div>
+      )}
 
       <div className="bg-surface-container-lowest dark:bg-surface-container-low border border-outline-variant rounded-xl p-6 mt-4">
         <h2 className="text-title-lg text-primary mb-4 flex items-center gap-2">
