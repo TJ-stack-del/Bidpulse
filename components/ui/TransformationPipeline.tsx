@@ -43,8 +43,14 @@ const DELIVERABLES = [
 // abstracted away.
 export function TransformationPipeline() {
   return (
-    <div className="relative w-full max-w-5xl rounded-2xl p-space-base sm:p-10 shadow-2xl shadow-primary/5 mt-8 bg-surface-container-low border border-outline-variant">
-      <div className="flex flex-wrap items-center justify-between gap-4 pb-5 mb-8 border-b border-outline-variant">
+    <div className="relative w-full max-w-5xl px-4 sm:px-6 mt-8">
+      {/* No card chrome here on purpose -- background, border, and shadow
+          all removed at the founder's direction so this reads as part of
+          the page itself (same bg-surface the rest of the hero sits on),
+          not a bolted-on widget. Spacing alone separates it from the hero
+          content above; no divider rule under the label either, for the
+          same reason. */}
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <span className="flex items-center gap-2.5 text-title-sm font-bold text-primary">
           <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
             compare_arrows
@@ -65,8 +71,14 @@ export function TransformationPipeline() {
             desk tilt) rather than a bordered dashboard card -- a stamped
             tag instead of a boxed header row, real illustrative prose
             directly on the page with the flagged phrases highlighted like
-            real highlighter marks, not boxed off in its own sub-card. */}
-        <Reveal className="relative mt-4">
+            real highlighter marks, not boxed off in its own sub-card.
+            Portrait, not landscape -- a narrow max-width column lets real
+            content wrap the way an actual printed page does, rather than a
+            wide dashboard-card silhouette. min-h + flex column (content
+            block grows, the tag row anchors to the bottom) keeps the page
+            reading as composed even if the real prose is short, instead of
+            a strict aspect-ratio box risking dead space at the bottom. */}
+        <Reveal className="relative mt-4 mx-auto w-full max-w-[300px]">
           <div
             className="absolute inset-0 rotate-[4deg] translate-x-2 translate-y-2 rounded-sm bg-surface-container-high border border-outline-variant"
             aria-hidden="true"
@@ -75,7 +87,7 @@ export function TransformationPipeline() {
             className="absolute inset-0 rotate-[2deg] translate-x-1 translate-y-1 rounded-sm bg-surface-container border border-outline-variant"
             aria-hidden="true"
           />
-          <div className="relative rotate-[-1.5deg] rounded-sm p-space-base sm:p-6 shadow-xl shadow-error/10 bg-surface border border-outline-variant">
+          <div className="relative flex flex-col aspect-[8.5/11] rotate-[-1.5deg] rounded-sm p-6 shadow-xl shadow-error/10 bg-surface border border-outline-variant">
             <span className="absolute -top-3 -left-3 z-10 inline-flex items-center gap-1 rounded px-2 py-1 text-[10px] font-bold tracking-wide -rotate-3 bg-error text-on-error shadow-md">
               <span className="material-symbols-outlined text-[12px]" aria-hidden="true">
                 description
@@ -83,11 +95,11 @@ export function TransformationPipeline() {
               Incoming raw RFP
             </span>
             <div className="flex items-start justify-between gap-2 mb-1">
-              <h3 className="text-base sm:text-lg font-bold text-primary">Sample Solicitation</h3>
+              <h3 className="text-base font-bold text-primary">Sample Solicitation</h3>
               <span className="shrink-0 text-[10px] text-on-surface-variant">Sample PDF</span>
             </div>
             <div className="h-px w-full bg-outline-variant mb-3" aria-hidden="true" />
-            <p className="text-xs leading-relaxed mb-4 text-on-surface-variant">
+            <p className="text-xs leading-relaxed text-on-surface-variant">
               Contractor shall maintain commercial general liability coverage of not less than
               $2,000,000 per occurrence. All work performed under this agreement is subject to{" "}
               <mark className="rounded-sm bg-error/20 px-1 py-0.5 text-error font-semibold">
@@ -97,9 +109,10 @@ export function TransformationPipeline() {
               <mark className="rounded-sm bg-primary/20 px-1 py-0.5 text-primary font-semibold">
                 100% performance and payment bond
               </mark>{" "}
-              prior to notice to proceed.
+              prior to notice to proceed. Bidders shall submit all forms listed in Section 4 no
+              later than the closing date stated on the cover page.
             </p>
-            <div className="flex items-center flex-wrap gap-2 text-[11px] font-bold">
+            <div className="flex items-center flex-wrap gap-2 text-[11px] font-bold mt-auto pt-4">
               <span className="inline-flex items-center gap-1 rounded px-2 py-1 bg-surface-container-high text-on-surface-variant">
                 <span className="material-symbols-outlined text-[13px]" aria-hidden="true">
                   visibility
@@ -127,8 +140,10 @@ export function TransformationPipeline() {
         </Reveal>
 
         {/* Right: the finished package, same sheet-of-paper treatment,
-            tilted the opposite way -- reads as "landed," not "in transit." */}
-        <Reveal delay={0.3} className="relative mt-4">
+            tilted the opposite way -- reads as "landed," not "in transit."
+            Same portrait max-width + min-h + flex-column anchoring as the
+            left page. */}
+        <Reveal delay={0.3} className="relative mt-4 mx-auto w-full max-w-[300px]">
           <div
             className="absolute inset-0 rotate-[-3deg] translate-x-2 translate-y-2 rounded-sm bg-surface-container-high border border-outline-variant"
             aria-hidden="true"
@@ -137,7 +152,7 @@ export function TransformationPipeline() {
             className="absolute inset-0 rotate-[-1.5deg] translate-x-1 translate-y-1 rounded-sm bg-surface-container border border-outline-variant"
             aria-hidden="true"
           />
-          <div className="relative rotate-[1deg] rounded-sm p-space-base sm:p-6 shadow-xl shadow-secondary/10 bg-surface border border-outline-variant">
+          <div className="relative flex flex-col aspect-[8.5/11] rotate-[1deg] rounded-sm p-6 shadow-xl shadow-secondary/10 bg-surface border border-outline-variant">
             <span className="absolute -top-3 -left-3 z-10 inline-flex items-center gap-1 rounded px-2 py-1 text-[10px] font-bold tracking-wide rotate-3 bg-secondary text-on-secondary shadow-md">
               <span className="material-symbols-outlined text-[12px]" aria-hidden="true">
                 check_circle
@@ -145,23 +160,23 @@ export function TransformationPipeline() {
               Ready to submit
             </span>
             <div className="flex items-start justify-between gap-2 mb-1">
-              <h3 className="text-base sm:text-lg font-bold text-primary">Tailored Bid Submission Package</h3>
+              <h3 className="text-base font-bold text-primary">Tailored Bid Submission Package</h3>
               <span className="shrink-0 text-[10px] text-on-surface-variant">3 clean files</span>
             </div>
             <div className="h-px w-full bg-outline-variant mb-3" aria-hidden="true" />
             {/* Hairline-divided rows, not separately boxed ones -- matches
                 the same manifest/ledger convention the Trades and Pricing
                 sections use elsewhere on this page. */}
-            <div className="flex flex-col divide-y divide-outline-variant mb-4">
+            <div className="flex flex-col divide-y divide-outline-variant">
               {DELIVERABLES.map((d) => (
                 <div key={d.label} className="flex items-center justify-between py-2.5 text-xs">
-                  <span className="flex items-center gap-2.5 text-on-surface">
+                  <span className="flex items-center gap-2 text-on-surface">
                     <span className="material-symbols-outlined text-primary text-[16px]" aria-hidden="true">
                       {d.icon}
                     </span>
                     <span className="font-medium">{d.label}</span>
                   </span>
-                  <span className="inline-flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-bold bg-secondary-container text-on-secondary-container">
+                  <span className="inline-flex shrink-0 items-center gap-1 rounded px-2 py-0.5 text-[10px] font-bold bg-secondary-container text-on-secondary-container">
                     <span className="material-symbols-outlined text-[12px]" aria-hidden="true">
                       check
                     </span>
@@ -170,7 +185,7 @@ export function TransformationPipeline() {
                 </div>
               ))}
             </div>
-            <div className="flex items-center justify-between text-[11px] font-bold">
+            <div className="flex items-center justify-between text-[11px] font-bold mt-auto pt-4">
               <span className="inline-flex items-center gap-1 text-secondary">
                 <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
                   task_alt
