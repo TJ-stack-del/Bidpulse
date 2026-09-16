@@ -8,6 +8,7 @@ import { signRfpDocumentUrls } from "@/lib/storage";
 import { BidProcessNotices } from "@/components/ui/BidProcessNotices";
 import { isKnownTrade } from "@/lib/compliance/known-trades";
 import { computeProfileCompleteness } from "@/lib/compliance/profile-completeness";
+import { RETAINER_PLACEHOLDER_AGENCY } from "@/lib/submissions";
 
 // Reads cookies (via lib/supabase/server) which already opts this page out
 // of static rendering — confirmed via `Cache-Control: no-store` on the
@@ -212,23 +213,72 @@ export default async function DashboardPage() {
   // review, nothing pending) is neither -- it only shows under "All",
   // which is correct: not done, but nothing to act on yet either.
   const bidListItems: BidListItem[] = [
-    ...draftSubmissions.map((sub) => ({
-      id: sub.id,
-      needsAction: true,
-      completed: false,
-      node: (
-        <div className="bg-surface-container-low rounded-xl shadow-md p-space-base flex flex-col gap-space-base">
-          <div>
-            <p className="text-label-sm text-on-surface-variant uppercase tracking-wider">
-              {sub.solicitation_number ?? "No solicitation #"}
-            </p>
-            <h3 className="text-title-lg font-headline text-on-surface font-bold">{sub.agency}</h3>
-          </div>
-          <CompleteBidFile submissionId={sub.id} clientId={client.id} />
-          {sub.scope && <p className="text-body-md text-on-surface-variant">{sub.scope}</p>}
-        </div>
-      ),
-    })),
+    // A Retainer placeholder (IntakeWizard.tsx's handleRetainerProfileNext)
+    // is a real `submissions` row with no actual bid behind it -- rendering
+    // it through the normal draft card would show "No solicitation #" next
+    // to a "complete your bid file" prompt for an RFP that was never meant
+    // to exist. A persona-test + onboarding-skill review both flagged the
+    // alternative (nothing on the dashboard reflecting a Retainer signup at
+    // all) as a real trust gap, so this needed *some* distinct card, not
+    // just suppression -- reuses the same completeness score already
+    // computed above rather than introducing a second one.
+    ...draftSubmissions.map((sub) =>
+      sub.agency === RETAINER_PLACEHOLDER_AGENCY
+        ? {
+            id: sub.id,
+            needsAction: true,
+            completed: false,
+            node: (
+              <div className="bg-surface-container-low rounded-xl shadow-md p-space-base flex flex-col gap-space-base">
+                <div>
+                  <p className="text-label-sm text-on-surface-variant uppercase tracking-wider">Retainer</p>
+                  <h3 className="text-title-lg font-headline text-on-surface font-bold">
+                    Watching for a good fit
+                  </h3>
+                </div>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span
+                    className={`inline-flex px-3 py-1 rounded-full text-label-md font-bold ${
+                      completeness.percent === 100
+                        ? "bg-secondary-container text-on-secondary-container"
+                        : "bg-tertiary-container text-on-tertiary-container"
+                    }`}
+                  >
+                    Profile {completeness.percent}% complete
+                  </span>
+                  {completeness.percent < 100 && (
+                    <Link
+                      href="/dashboard/profile"
+                      className="text-label-md text-primary font-bold hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm"
+                    >
+                      Complete your profile →
+                    </Link>
+                  )}
+                </div>
+                <p className="text-body-md text-on-surface-variant">
+                  We&apos;re watching for opportunities that fit and will reach out when we find one.
+                </p>
+              </div>
+            ),
+          }
+        : {
+            id: sub.id,
+            needsAction: true,
+            completed: false,
+            node: (
+              <div className="bg-surface-container-low rounded-xl shadow-md p-space-base flex flex-col gap-space-base">
+                <div>
+                  <p className="text-label-sm text-on-surface-variant uppercase tracking-wider">
+                    {sub.solicitation_number ?? "No solicitation #"}
+                  </p>
+                  <h3 className="text-title-lg font-headline text-on-surface font-bold">{sub.agency}</h3>
+                </div>
+                <CompleteBidFile submissionId={sub.id} clientId={client.id} />
+                {sub.scope && <p className="text-body-md text-on-surface-variant">{sub.scope}</p>}
+              </div>
+            ),
+          }
+    ),
     ...activeSubmissions.map((sub) => {
       const checklist = checklistBySubmission.get(sub.id) ?? [];
       const pendingCount = checklist.filter((c) => c.status !== "done" && c.status !== "waived").length;

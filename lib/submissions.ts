@@ -1,5 +1,14 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+// A Retainer signup has no specific bid yet, but every other admin-facing
+// surface (the inbox, staleness rules, the 48-hour promise clock) assumes a
+// real `submissions` row exists -- see IntakeWizard.tsx's
+// handleRetainerProfileNext. `agency` is NOT NULL at the DB level, so this
+// placeholder needs a real, honestly-labeled value. Shared as a constant
+// (not duplicated as a literal in both IntakeWizard.tsx and
+// dashboard/page.tsx) so the two can't silently drift apart.
+export const RETAINER_PLACEHOLDER_AGENCY = "General inquiry — Retainer";
+
 // Shared by the intake wizard's own "Your bid file" step and the
 // dashboard's "complete your bid" card (components/ui/BidFileStep.tsx) —
 // both lock a submission the same way, so the draft/stage flip and the

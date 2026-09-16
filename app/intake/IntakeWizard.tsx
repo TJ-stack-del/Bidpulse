@@ -9,8 +9,10 @@ import { BidFileStep } from "@/components/ui/BidFileStep";
 import { BidProcessNotices } from "@/components/ui/BidProcessNotices";
 import { CompanyProfileUpload, type ExtractedCompanyProfile } from "@/components/ui/CompanyProfileUpload";
 import { RfpDocumentUpload, type ExtractedBidFields } from "@/components/ui/RfpDocumentUpload";
+import { CheckboxGroup } from "@/components/ui/CheckboxGroup";
+import { COMMON_NAICS_CODES } from "@/lib/business-options";
 import { isEmail, normalizePhone } from "@/lib/phone";
-import type { FitCheckResult } from "@/lib/submissions";
+import { RETAINER_PLACEHOLDER_AGENCY, type FitCheckResult } from "@/lib/submissions";
 import { computeProfileCompleteness } from "@/lib/compliance/profile-completeness";
 import { uploadRfpDocument } from "@/lib/storage";
 
@@ -32,17 +34,39 @@ type FormState = {
 };
 
 const STEPS = ["About you", "About the bid", "Your bid file"];
+// Retainer has no specific bid to ask about -- see the 2026-09-16 shape/Plan
+// review that settled this as a structural branch, not conditional fields
+// on one flow. Two steps, not three.
+const RETAINER_STEPS = ["About you", "Your business"];
 
 // Set on every pricing-tier CTA (pricing/page.tsx and the homepage's
-// PRICING_PREVIEW) as ?package=pilot|one_off|retainer -- read here so the
-// admin isn't left with LESS signal than the old Retainer mailto: link
-// gave them (a real email at least carried intent in its subject line).
-// Not persisted as its own DB column; logged to audit_log once a real
-// submission exists (see handleAboutBidNext) since that's the one place
-// this app already surfaces "what happened with this lead" to an admin
-// (app/admin/inbox/[id]/page.tsx's activity table).
+// PRICING_PREVIEW) as ?package=pilot|one_off|retainer, OR inferred below
+// when a visitor arrives with no explicit tier: a brand-new visitor
+// defaults to "pilot" (it's explicitly a low-commitment FIRST bid, so a
+// first-timer is a Pilot candidate by definition); a visitor who already
+// has a live session + clients row is deliberately left unset rather than
+// guessed as "one_off" -- "has an account" and "has already used their one
+// free Pilot" are different facts this check can't distinguish (Pilot
+// usage lives on the `packages` table, assigned manually by an admin, not
+// on `clients`), and this tag doesn't gate anything today, so a
+// confidently-wrong guess is worse than leaving it for an admin to resolve
+// manually, same as every other package assignment already works. See the
+// 2026-09-16 Plan-agent architecture review.
+//
+// Not persisted as its own DB column beyond `clients.requested_package`
+// (set at signup, see handleAboutYouNext); also logged to audit_log once a
+// real submission exists (handleAboutBidNext / handleRetainerProfileNext)
+// since that's the one place this app already surfaces "what happened with
+// this lead" to an admin (app/admin/inbox/[id]/page.tsx's activity table).
 const KNOWN_PACKAGE_PARAMS = ["pilot", "one_off", "retainer"] as const;
 type PackageParam = (typeof KNOWN_PACKAGE_PARAMS)[number];
+
+function parseCommaList(text: string): string[] {
+  return text
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
 
 // Small backoff retry for the two RLS-gated calls right after signup — org
 // lookup and the client insert. Not a fix for a session race (signUp()
@@ -77,12 +101,6 @@ export function IntakeWizard() {
   // boundary to avoid opting the whole route out of static rendering, which
   // isn't worth it for one optional, non-critical query param.
   const [packageParam, setPackageParam] = useState<PackageParam | null>(null);
-  useEffect(() => {
-    const raw = new URLSearchParams(window.location.search).get("package");
-    if ((KNOWN_PACKAGE_PARAMS as readonly string[]).includes(raw ?? "")) {
-      setPackageParam(raw as PackageParam);
-    }
-  }, []);
   const [submissionId, setSubmissionId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -118,6 +136,38 @@ export function IntakeWizard() {
   // gated on step === 1 in the render below regardless of this value.
   const [showBidUpload, setShowBidUpload] = useState(true);
   const [bidUploadDone, setBidUploadDone] = useState(false);
+  // Retainer's step 1 replacement for "About the bid" -- there's no
+  // specific bid to ask about, so this captures the same fields
+  // computeProfileCompleteness() already scores (and, via naics_codes, the
+  // same field app/admin/matches already uses to find a fit), kept as
+  // local state (rather than writing straight to `clients` per keystroke
+  // like handleProfileExtracted does) specifically so the live completeness
+  // percentage below can update immediately regardless of whether a field
+  // came from typing or from the optional document-upload accelerator.
+  const [retainerProfile, setRetainerProfile] = useState({
+    naicsCodes: [] as string[],
+    naicsOther: "",
+    licenseNumber: "",
+    businessRegistrationNumber: "",
+    yearsInBusiness: "",
+    businessAddress: "",
+    businessPhone: "",
+    insuranceProvider: "",
+    generalLiabilityCoverage: "",
+    workersCompCoverage: "",
+  });
+  const [retainerHasCertification, setRetainerHasCertification] = useState(false);
+  const retainerCompleteness = computeProfileCompleteness({
+    naicsCodes: [...retainerProfile.naicsCodes, ...parseCommaList(retainerProfile.naicsOther)],
+    licenseNumber: retainerProfile.licenseNumber || null,
+    businessRegistrationNumber: retainerProfile.businessRegistrationNumber || null,
+    insuranceProvider: retainerProfile.insuranceProvider || null,
+    generalLiabilityCoverage: retainerProfile.generalLiabilityCoverage || null,
+    workersCompCoverage: retainerProfile.workersCompCoverage || null,
+    businessAddress: retainerProfile.businessAddress || null,
+    businessPhone: retainerProfile.businessPhone || null,
+    hasCertification: retainerHasCertification,
+  });
   const supabase = createClient();
 
   // A client who's already logged in (starting a second bid, or just
@@ -147,6 +197,12 @@ export function IntakeWizard() {
   // immediate answer and must not be delayed by retrying it.
   useEffect(() => {
     let cancelled = false;
+    const raw = new URLSearchParams(window.location.search).get("package");
+    const explicitPackage = (KNOWN_PACKAGE_PARAMS as readonly string[]).includes(raw ?? "")
+      ? (raw as PackageParam)
+      : null;
+    if (explicitPackage) setPackageParam(explicitPackage);
+
     (async () => {
       let user: { id: string } | null = null;
       for (let attempt = 0; attempt < 3; attempt++) {
@@ -159,7 +215,12 @@ export function IntakeWizard() {
         if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 400 * (attempt + 1)));
       }
 
-      if (!user) return;
+      if (!user) {
+        // No live session -- nothing suggests this is a returning client,
+        // so default to Pilot when no explicit tier was picked.
+        if (!cancelled && !explicitPackage) setPackageParam("pilot");
+        return;
+      }
 
       let client: { id: string } | null = null;
       for (let attempt = 0; attempt < 3; attempt++) {
@@ -177,6 +238,12 @@ export function IntakeWizard() {
       if (client) {
         setClientId(client.id);
         setStep(1);
+        // Deliberately not defaulting to "one_off" here -- see the const
+        // KNOWN_PACKAGE_PARAMS comment above for why guessing is worse
+        // than leaving this unset for an existing session with no
+        // explicit tier chosen.
+      } else if (!explicitPackage) {
+        setPackageParam("pilot");
       }
     })();
     return () => {
@@ -401,6 +468,121 @@ export function IntakeWizard() {
     setBidUploadDone(true);
   }
 
+  // Retainer's optional upload accelerator -- unlike handleProfileExtracted
+  // (which writes straight to `clients` per field), this merges into local
+  // retainerProfile state so the live completeness percentage on screen
+  // updates immediately regardless of whether a value came from typing or
+  // from a document, and only reaches the database once at
+  // handleRetainerProfileNext. Certifications are the one exception: they
+  // go straight to storage + client_certifications here, same as
+  // handleProfileExtracted, since there's no local-state equivalent to
+  // stage them in and the completeness score only needs the boolean flag.
+  async function handleRetainerProfileExtracted(data: ExtractedCompanyProfile, file: File) {
+    setRetainerProfile((p) => ({
+      ...p,
+      naicsCodes: data.naicsCodes.length > 0 ? data.naicsCodes : p.naicsCodes,
+      licenseNumber: data.licenseNumber ?? p.licenseNumber,
+      businessRegistrationNumber: data.businessRegistrationNumber ?? p.businessRegistrationNumber,
+      yearsInBusiness: data.yearsInBusiness != null ? String(data.yearsInBusiness) : p.yearsInBusiness,
+      businessAddress: data.businessAddress ?? p.businessAddress,
+      businessPhone: data.businessPhone ?? p.businessPhone,
+      insuranceProvider: data.insuranceProvider ?? p.insuranceProvider,
+      generalLiabilityCoverage: data.generalLiabilityCoverage ?? p.generalLiabilityCoverage,
+      workersCompCoverage: data.workersCompCoverage ?? p.workersCompCoverage,
+    }));
+
+    if (data.certifications.length > 0 && clientId) {
+      setRetainerHasCertification(true);
+      const { path, error: uploadError } = await uploadRfpDocument(
+        supabase,
+        `${clientId}/certifications/${Date.now()}-${file.name}`,
+        file
+      );
+      if (!uploadError) {
+        await supabase.from("client_certifications").insert(
+          data.certifications.map((c) => ({
+            client_id: clientId,
+            record_type: c.recordType,
+            cert_type: c.certType,
+            other_label: c.recordType === "small_business_cert" && c.certType === "Other" ? c.otherLabel : null,
+            certification_number: c.certificationNumber,
+            jurisdiction_state: c.jurisdictionState,
+            licensing_board: c.licensingBoard,
+            expiration_date: c.expirationDate,
+            file_url: path,
+            file_name: file.name,
+          }))
+        );
+      }
+    }
+  }
+
+  // Retainer's terminal step -- saves the profile fields to `clients`, then
+  // creates a placeholder submission (draft: true, no real agency) rather
+  // than staying fully submission-less. Going submission-less made a
+  // Retainer signup invisible in app/admin/inbox (submissions-only) with up
+  // to a 24-hour gap before the daily digest's ghost-signups section (the
+  // only other surface, and cron-only) caught it -- see the 2026-09-16
+  // Plan-agent architecture review. `submissions.agency` is NOT NULL at the
+  // DB level regardless, so this needs a real, honestly-labeled value.
+  async function handleRetainerProfileNext(e: React.FormEvent) {
+    e.preventDefault();
+    if (!clientId) return;
+    setSaving(true);
+    setError(null);
+
+    const naicsCodes = [...retainerProfile.naicsCodes, ...parseCommaList(retainerProfile.naicsOther)];
+
+    const { error: updateError } = await supabase
+      .from("clients")
+      .update({
+        naics_codes: naicsCodes,
+        license_number: retainerProfile.licenseNumber || null,
+        business_registration_number: retainerProfile.businessRegistrationNumber || null,
+        years_in_business: retainerProfile.yearsInBusiness ? Number(retainerProfile.yearsInBusiness) : null,
+        business_address: retainerProfile.businessAddress || null,
+        business_phone: retainerProfile.businessPhone || null,
+        insurance_provider: retainerProfile.insuranceProvider || null,
+        general_liability_coverage: retainerProfile.generalLiabilityCoverage || null,
+        workers_comp_coverage: retainerProfile.workersCompCoverage || null,
+      })
+      .eq("id", clientId);
+
+    if (updateError) {
+      setSaving(false);
+      setError(updateError.message);
+      return;
+    }
+
+    const { data: submission, error: subError } = await supabase
+      .from("submissions")
+      .insert({
+        client_id: clientId,
+        agency: RETAINER_PLACEHOLDER_AGENCY,
+        draft: true,
+      })
+      .select()
+      .single();
+
+    setSaving(false);
+
+    if (subError || !submission) {
+      setError(subError?.message ?? "Couldn't save your info. Please try again.");
+      return;
+    }
+
+    if (orgId) {
+      await supabase
+        .from("audit_log")
+        .insert({ submission_id: submission.id, org_id: orgId, event_type: "requested_retainer_package" })
+        .then(() => {}, () => {});
+    }
+
+    setSubmissionId(submission.id);
+    setCompletenessPercent(retainerCompleteness.percent);
+    setSubmitted(true);
+  }
+
   // Step 2 -> 3: creates the draft submission.
   async function handleAboutBidNext(e: React.FormEvent) {
     e.preventDefault();
@@ -449,10 +631,13 @@ export function IntakeWizard() {
         <div className="w-16 h-16 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center mx-auto mb-4">
           <span className="material-symbols-outlined text-[32px]">task_alt</span>
         </div>
-        <h1 className="text-headline-md text-primary mb-2">We've got it.</h1>
+        <h1 className="text-headline-md text-primary mb-2">
+          {packageParam === "retainer" ? "We've got your info." : "We've got it."}
+        </h1>
         <p className="text-body-lg text-on-surface-variant">
-          Thanks. We'll review your bid and be in touch. You can check on
-          progress any time by logging in.
+          {packageParam === "retainer"
+            ? "We're watching for a good fit and will reach out when we find one. You can check on progress any time by logging in."
+            : "Thanks. We'll review your bid and be in touch. You can check on progress any time by logging in."}
         </p>
 
         {fitCheckLoading && (
@@ -473,8 +658,9 @@ export function IntakeWizard() {
             </span>
             {completenessPercent < 100 && (
               <p className="text-body-md text-on-surface-variant mt-2">
-                A more complete Company Profile means less back-and-forth
-                before your bid is ready to go out.
+                {packageParam === "retainer"
+                  ? "A more complete profile means a faster match — you can keep adding to it any time from your dashboard."
+                  : "A more complete Company Profile means less back-and-forth before your bid is ready to go out."}
               </p>
             )}
           </div>
@@ -509,15 +695,21 @@ export function IntakeWizard() {
           </Link>
         </div>
 
-        <div className="mt-8 max-w-md md:max-w-lg mx-auto bg-surface-container-low border border-outline-variant rounded-xl p-5 text-left">
-          <p className="text-label-md text-on-surface-variant uppercase tracking-wide mb-3">
-            A couple things to know
-          </p>
-          <BidProcessNotices />
-        </div>
+        {packageParam !== "retainer" && (
+          <div className="mt-8 max-w-md md:max-w-lg mx-auto bg-surface-container-low border border-outline-variant rounded-xl p-5 text-left">
+            <p className="text-label-md text-on-surface-variant uppercase tracking-wide mb-3">
+              A couple things to know
+            </p>
+            <BidProcessNotices />
+          </div>
+        )}
       </div>
     );
   }
+
+  const isRetainer = packageParam === "retainer";
+  const steps = isRetainer ? RETAINER_STEPS : STEPS;
+  const gridColsClass = steps.length === 2 ? "grid-cols-2" : "grid-cols-3";
 
   return (
     <div className="flex flex-col gap-space-lg">
@@ -525,23 +717,27 @@ export function IntakeWizard() {
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-1.5">
           <span className="inline-flex w-2 h-2 rounded-full bg-primary" />
-          <span className="text-label-sm text-primary uppercase tracking-wider font-semibold">New Bid</span>
+          <span className="text-label-sm text-primary uppercase tracking-wider font-semibold">
+            {isRetainer ? "Retainer request" : "New Bid"}
+          </span>
         </div>
         <h1 className="font-headline text-headline-lg-mobile md:text-headline-lg text-on-surface font-bold tracking-tight">
           Client Intake
         </h1>
         <p className="text-body-md text-on-surface-variant">
-          Tell us about the bid. We handle the technical paperwork from here.
+          {isRetainer
+            ? "Tell us about your business. We'll watch for the right opportunities."
+            : "Tell us about the bid. We handle the technical paperwork from here."}
         </p>
       </div>
 
       {/* Step progress */}
       <div className="bg-surface-container p-space-base rounded-xl flex flex-col gap-space-md shadow-sm">
         <span className="text-label-md font-bold text-primary">
-          Step {step + 1} of {STEPS.length}: {STEPS[step]}
+          Step {step + 1} of {steps.length}: {steps[step]}
         </span>
-        <div className="grid grid-cols-3 gap-space-xs w-full">
-          {STEPS.map((label, i) => (
+        <div className={`grid ${gridColsClass} gap-space-xs w-full`}>
+          {steps.map((label, i) => (
             <div
               key={label}
               className={`h-2 rounded-full transition-all duration-300 ${
@@ -550,8 +746,8 @@ export function IntakeWizard() {
             />
           ))}
         </div>
-        <div className="grid grid-cols-3 text-center">
-          {STEPS.map((label, i) => (
+        <div className={`grid ${gridColsClass} text-center`}>
+          {steps.map((label, i) => (
             <span
               key={label}
               className={`text-label-sm ${
@@ -623,7 +819,7 @@ export function IntakeWizard() {
         </form>
       )}
 
-      {step === 1 && showBidUpload && (
+      {step === 1 && !isRetainer && showBidUpload && (
         <section className="bg-surface-container p-space-base rounded-xl space-y-space-base shadow-sm">
           <div className="flex items-center gap-space-xs">
             <span className="material-symbols-outlined text-primary text-[20px]">bolt</span>
@@ -656,7 +852,7 @@ export function IntakeWizard() {
         </section>
       )}
 
-      {step === 1 && !showBidUpload && (
+      {step === 1 && !isRetainer && !showBidUpload && (
         <form onSubmit={handleAboutBidNext} className="flex flex-col gap-space-lg">
           <section className="bg-surface-container p-space-base rounded-xl space-y-space-base shadow-sm">
             <div className="flex items-center gap-space-xs">
@@ -665,23 +861,13 @@ export function IntakeWizard() {
             </div>
             {/* Only `agency` is actually `required` below -- everything else
                 on this step is optional at both the form and DB level (see
-                handleAboutBidNext). Without saying so explicitly, a
-                prospect with no specific bid in hand yet (e.g. someone
-                interested in the Retainer package, routed here from
-                pricing/page.tsx) has no way to know that -- the form reads
-                like it expects a real, specific RFP already in progress.
-                An impeccable critique pass (2026-09-16) found this still
-                left `agency` itself as a hard wall for exactly that
-                persona -- the fix decided on was to keep it required (no
-                schema/logic branch) but make clear a real value isn't
-                required, only when ?package=retainer is actually the
-                reason someone's here. Pilot/One-off visitors by definition
-                already have a specific bid, so this note would just be
-                noise for them. */}
+                handleAboutBidNext). A prospect with no specific bid in hand
+                yet (someone interested in Retainer) no longer reaches this
+                form at all -- they get their own step (see isRetainer
+                below) -- so this note is purely for Pilot/One-off visitors,
+                who by definition already have a specific bid. */}
             <p className="text-body-sm text-on-surface-variant -mt-1">
-              {packageParam === "retainer"
-                ? "No specific agency yet? Just write \"General inquiry\" below — we'll follow up to figure out the right fit. Everything else on this step is optional."
-                : "Just the agency name is required to move on — add the rest now if you have it, or later."}
+              Just the agency name is required to move on — add the rest now if you have it, or later.
             </p>
             <Input
               label="Who is asking for this? (the agency or department)"
@@ -716,6 +902,102 @@ export function IntakeWizard() {
                 className="w-full border-0 bg-surface-container-low text-on-surface text-body-md px-space-md py-space-sm rounded-lg placeholder:text-outline outline-none focus:bg-surface-container-highest focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
               />
             </div>
+          </section>
+          <button
+            type="submit"
+            disabled={saving}
+            className="w-full min-h-[52px] bg-primary-container hover:bg-primary text-on-primary-container font-headline text-[16px] font-bold uppercase tracking-wider rounded-xl shadow-lg flex items-center justify-center gap-space-sm active:scale-[0.99] transition-all disabled:opacity-40 disabled:active:scale-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >
+            {saving && <Spinner />}
+            {saving ? "Saving…" : "Next"}
+            {!saving && <span className="material-symbols-outlined font-bold">arrow_forward</span>}
+          </button>
+        </form>
+      )}
+
+      {/* Retainer's replacement for "About the bid" + "Your bid file" --
+          there's no specific bid yet, so this captures the same fields
+          computeProfileCompleteness() scores instead, with a live
+          percentage as a soft nudge (never a hard gate -- "Next" is never
+          disabled on completeness). Terminates the wizard directly
+          (handleRetainerProfileNext sets `submitted` itself); step index 2
+          is never reached on this path. */}
+      {step === 1 && isRetainer && (
+        <form onSubmit={handleRetainerProfileNext} className="flex flex-col gap-space-lg">
+          <section className="bg-surface-container p-space-base rounded-xl space-y-space-base shadow-sm">
+            <div className="flex items-center gap-space-xs">
+              <span className="material-symbols-outlined text-primary text-[20px]">business_center</span>
+              <h2 className="font-headline text-[18px] text-on-surface font-bold">Tell us about your business</h2>
+            </div>
+            <p className="text-body-sm text-on-surface-variant -mt-1">
+              There's no specific bid yet — we'll watch for opportunities that fit. Nothing below is
+              required, but the more complete this is, the faster we can find a good match.
+            </p>
+
+            <span
+              className={`inline-flex w-fit px-3 py-1 rounded-full text-label-md font-bold ${
+                retainerCompleteness.percent === 100
+                  ? "bg-secondary-container text-on-secondary-container"
+                  : "bg-tertiary-container text-on-tertiary-container"
+              }`}
+            >
+              Profile {retainerCompleteness.percent}% complete
+            </span>
+
+            <CompanyProfileUpload onExtracted={handleRetainerProfileExtracted} />
+
+            <CheckboxGroup
+              legend="NAICS codes that apply"
+              options={COMMON_NAICS_CODES.map((n) => ({ value: n.code, label: `${n.code}: ${n.label}` }))}
+              selected={retainerProfile.naicsCodes}
+              onChange={(v) => setRetainerProfile((p) => ({ ...p, naicsCodes: v }))}
+            />
+            <Input
+              label="Other NAICS code"
+              value={retainerProfile.naicsOther}
+              onChange={(v) => setRetainerProfile((p) => ({ ...p, naicsOther: v }))}
+            />
+            <Input
+              label="Trade/occupational license number"
+              value={retainerProfile.licenseNumber}
+              onChange={(v) => setRetainerProfile((p) => ({ ...p, licenseNumber: v }))}
+            />
+            <Input
+              label="Business registration number (e.g. Sunbiz Doc#)"
+              value={retainerProfile.businessRegistrationNumber}
+              onChange={(v) => setRetainerProfile((p) => ({ ...p, businessRegistrationNumber: v }))}
+            />
+            <Input
+              label="Years in business"
+              type="number"
+              value={retainerProfile.yearsInBusiness}
+              onChange={(v) => setRetainerProfile((p) => ({ ...p, yearsInBusiness: v }))}
+            />
+            <Input
+              label="Business address"
+              value={retainerProfile.businessAddress}
+              onChange={(v) => setRetainerProfile((p) => ({ ...p, businessAddress: v }))}
+            />
+            <Input
+              label="Business phone"
+              value={retainerProfile.businessPhone}
+              onChange={(v) => setRetainerProfile((p) => ({ ...p, businessPhone: v }))}
+            />
+            <Input
+              label="Insurance provider"
+              value={retainerProfile.insuranceProvider}
+              onChange={(v) => setRetainerProfile((p) => ({ ...p, insuranceProvider: v }))}
+            />
+            <Input
+              label="General liability coverage (e.g. $1M/$2M)"
+              value={retainerProfile.generalLiabilityCoverage}
+              onChange={(v) => setRetainerProfile((p) => ({ ...p, generalLiabilityCoverage: v }))}
+            />
+            <Input
+              label="Workers' comp coverage"
+              value={retainerProfile.workersCompCoverage}
+              onChange={(v) => setRetainerProfile((p) => ({ ...p, workersCompCoverage: v }))}
+            />
           </section>
           <button
             type="submit"
