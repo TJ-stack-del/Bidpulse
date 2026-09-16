@@ -110,7 +110,15 @@ const config: Config = {
         "metric-xl": ["36px", { lineHeight: "44px", letterSpacing: "-0.03em", fontWeight: "700" }],
         "metric-lg": ["24px", { lineHeight: "32px", letterSpacing: "-0.02em", fontWeight: "700" }],
         "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.04em", fontWeight: "500" }],
-        "label-sm": ["10px", { lineHeight: "14px", letterSpacing: "0.06em", fontWeight: "600" }],
+        // Was 10px -- an impeccable critique pass (2026-09-16) found this
+        // sitewide token (used in 20+ files: nav/footer links, badges,
+        // step-trackers, eyebrows) sits below the 11px functional-text
+        // readability floor, mechanically confirmed via live detector
+        // injection and visually confirmed as actual overlapping/truncated
+        // text on the intake wizard's mobile step-tracker. A single-token
+        // fix rather than patching each usage site, since every instance
+        // shares the same underlying problem.
+        "label-sm": ["11px", { lineHeight: "15px", letterSpacing: "0.06em", fontWeight: "600" }],
         "label-md-mobile": ["11px", { lineHeight: "14px", letterSpacing: "0.04em", fontWeight: "500" }],
         "code-sm": ["12px", { lineHeight: "16px", fontWeight: "400" }],
       },
