@@ -51,6 +51,18 @@ jobs:
             echo "::error::DB URL secret for ${{ matrix.project }} is not set yet -- see setup instructions at the top of this workflow file."
             exit 1
           fi
+          # Diagnostics only -- never print the secret itself, just shape
+          # checks, so a bad paste (wrong tab copied, literal placeholder
+          # left in, stray quotes/prompt text) is diagnosable without ever
+          # exposing the real connection string or password in a log.
+          echo "DB_URL length: ${#DB_URL}"
+          case "$DB_URL" in
+            postgresql://*|postgres://*) echo "Starts with postgres(ql):// -- OK" ;;
+            *) echo "::warning::DB_URL does NOT start with postgresql:// or postgres:// -- this is why pg_dump falls back to a local socket. Re-copy from Supabase's Connection string 'URI' tab with no surrounding quotes/prompt text." ;;
+          esac
+          case "$DB_URL" in
+            *"[YOUR-PASSWORD]"*) echo "::warning::DB_URL still contains the literal placeholder [YOUR-PASSWORD] -- replace it with the real database password." ;;
+          esac
           pg_dump "$DB_URL" -Fc --no-owner --no-acl -f "${{ matrix.project }}.dump"
 
       - name: Encrypt dump
