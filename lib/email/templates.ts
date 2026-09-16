@@ -119,6 +119,9 @@ export function getDailyDigestEmail(
     contactName: string;
     email: string | null;
     phone: string | null;
+    // Set at signup itself via the ?package= pricing-tier link, if any --
+    // null for a direct/organic signup with no pricing-page referral.
+    requestedPackage: string | null;
     daysSinceSignup: number;
   }[] = []
 ) {
@@ -152,13 +155,17 @@ export function getDailyDigestEmail(
   // Oldest-first -- a signup from a week ago is more likely a genuine
   // abandonment worth a follow-up call than one from this morning who may
   // still come back and finish the bid themselves.
+  const PACKAGE_LABELS: Record<string, string> = { pilot: "Pilot", one_off: "One-off", retainer: "Retainer" };
   const sortedGhosts = [...ghostSignups].sort((a, b) => b.daysSinceSignup - a.daysSinceSignup);
   const ghostRows = sortedGhosts
     .map((g) => {
       const contact = g.email ?? g.phone ?? "no contact on file";
+      const wanted = g.requestedPackage
+        ? ` — wanted: <strong>${PACKAGE_LABELS[g.requestedPackage] ?? g.requestedPackage}</strong>`
+        : "";
       return `<li>${g.companyName} (${g.contactName}) — signed up ${g.daysSinceSignup} day${
         g.daysSinceSignup === 1 ? "" : "s"
-      } ago, never started a bid. Contact: ${contact}</li>`;
+      } ago, never started a bid${wanted}. Contact: ${contact}</li>`;
     })
     .join("");
   const ghostSection =

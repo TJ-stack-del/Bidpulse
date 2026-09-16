@@ -100,7 +100,10 @@ export async function GET(request: NextRequest) {
   // Independent of each other -- run concurrently rather than paying two
   // sequential round trips on every cron invocation.
   const [{ data: allClientsInOrg }, { data: nonDraftSubmissionClientIds }] = await Promise.all([
-    supabase.from("clients").select("id, company_name, contact_name, email, phone, created_at").eq("org_id", org.id),
+    supabase
+      .from("clients")
+      .select("id, company_name, contact_name, email, phone, created_at, requested_package")
+      .eq("org_id", org.id),
     supabase.from("submissions").select("client_id").eq("draft", false),
   ]);
   const clientIdsWithNonDraftSubmission = new Set((nonDraftSubmissionClientIds ?? []).map((r) => r.client_id));
@@ -112,6 +115,11 @@ export async function GET(request: NextRequest) {
       contactName: c.contact_name,
       email: c.email as string | null,
       phone: c.phone as string | null,
+      // Set at signup itself (IntakeWizard.tsx's handleAboutYouNext) --
+      // this is specifically what survives a client quitting before ever
+      // creating a submission, unlike the requested_${package}_package
+      // audit_log entries (only exist once a submission does).
+      requestedPackage: c.requested_package as string | null,
       daysSinceSignup: Math.floor((signupCheckNow - new Date(c.created_at).getTime()) / DAY_MS),
     }));
 

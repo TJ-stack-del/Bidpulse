@@ -295,6 +295,15 @@ export function IntakeWizard() {
           contact_name: form.contactName,
           email: usingEmail ? contact : null,
           phone: usingEmail ? null : normalizePhone(contact),
+          // Captured here (signup itself), not only via the
+          // requested_${package}_package audit_log write in
+          // handleAboutBidNext below -- that write only fires once a
+          // submission exists, so it loses the signal entirely for
+          // anyone who signs up and quits before "About the bid." This
+          // column survives that case, which is what actually lets the
+          // daily digest's ghost-signups section show which package a
+          // never-submitted client wanted.
+          requested_package: packageParam,
         })
         .select()
         .single();
