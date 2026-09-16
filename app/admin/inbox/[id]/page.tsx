@@ -208,6 +208,14 @@ export default async function AdminSubmissionDetailPage({
     certification_unverified: "Certification marked unverified",
     submission_deleted: "Submission deleted",
     matched_opportunity_deleted: "Matched opportunity deleted",
+    // Logged by IntakeWizard.tsx when the client arrived via a
+    // ?package=... pricing-tier link -- see that file's own comment for
+    // why this exists (an admin following up needs to know which tier was
+    // actually clicked, since package_type itself isn't set until the
+    // admin assigns it manually via PaymentStatus.tsx below).
+    requested_pilot_package: "Clicked \"Get started\" from the Pilot pricing tier",
+    requested_one_off_package: "Clicked \"Get started\" from the One-off pricing tier",
+    requested_retainer_package: "Clicked \"Get started\" from the Retainer pricing tier",
   };
 
   // Most recent of either type — a download implies a view, so either one

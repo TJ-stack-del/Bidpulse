@@ -18,7 +18,7 @@ const PACKAGES = [
     name: "Pilot",
     tagline: "A low-commitment first bid, on us to prove the process.",
     features: ["One full bid, done for you", "See how the process works", "No commitment after"],
-    cta: { label: "Get started", href: "/intake" },
+    cta: { label: "Get started", href: "/intake?package=pilot" },
     highlight: false,
   },
   {
@@ -26,7 +26,7 @@ const PACKAGES = [
     name: "One-off",
     tagline: "A single bid, fully prepared.",
     features: ["The write-up about your company", "A checklist matching the agency's rules", "The technical write-up"],
-    cta: { label: "Get started", href: "/intake" },
+    cta: { label: "Get started", href: "/intake?package=one_off" },
     highlight: true,
   },
   {
@@ -42,7 +42,15 @@ const PACKAGES = [
     // actual package_type (already supported -- see
     // app/admin/inbox/[id]/PaymentStatus.tsx's package selector) once they
     // follow up, exactly like every Pilot/One-off client today.
-    cta: { label: "Get started", href: "/intake" },
+    //
+    // ?package=retainer (same on every tier's href here) is read by
+    // IntakeWizard.tsx and logged to audit_log once the submission is
+    // created, so an admin following up sees which tier was actually
+    // clicked -- an impeccable critique pass (2026-09-16) found the old
+    // /intake-for-everyone version gave admins strictly LESS signal than
+    // the mailto it replaced (a real email at least carried intent in its
+    // subject line).
+    cta: { label: "Get started", href: "/intake?package=retainer" },
     highlight: false,
   },
 ];

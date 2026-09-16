@@ -138,7 +138,7 @@ const PRICING_PREVIEW = [
     tagline: "A low-commitment first bid, on us to prove the process.",
     terms: "No commitment after",
     features: ["One full bid, done for you", "See how the process works"],
-    cta: { label: "Get started", href: "/intake" },
+    cta: { label: "Get started", href: "/intake?package=pilot" },
     highlight: false,
   },
   {
@@ -146,7 +146,7 @@ const PRICING_PREVIEW = [
     tagline: "A single bid, fully prepared.",
     terms: "Confirmed with you before work starts",
     features: ["The write-up about your company", "A checklist matching the agency's rules", "The technical write-up"],
-    cta: { label: "Get started", href: "/intake" },
+    cta: { label: "Get started", href: "/intake?package=one_off" },
     highlight: true,
   },
   {
@@ -155,8 +155,9 @@ const PRICING_PREVIEW = [
     terms: "Up to 2 full bids a month",
     features: ["We watch for new bids every month", "One person who knows your file"],
     // Kept in sync with pricing/page.tsx's own retainer CTA -- see that
-    // file's comment for why this is /intake now, not a mailto: dead end.
-    cta: { label: "Get started", href: "/intake" },
+    // file's comment for why this is /intake now, not a mailto: dead end,
+    // and for why the ?package= param matters.
+    cta: { label: "Get started", href: "/intake?package=retainer" },
     highlight: false,
   },
 ];

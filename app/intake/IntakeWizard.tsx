@@ -33,6 +33,17 @@ type FormState = {
 
 const STEPS = ["About you", "About the bid", "Your bid file"];
 
+// Set on every pricing-tier CTA (pricing/page.tsx and the homepage's
+// PRICING_PREVIEW) as ?package=pilot|one_off|retainer -- read here so the
+// admin isn't left with LESS signal than the old Retainer mailto: link
+// gave them (a real email at least carried intent in its subject line).
+// Not persisted as its own DB column; logged to audit_log once a real
+// submission exists (see handleAboutBidNext) since that's the one place
+// this app already surfaces "what happened with this lead" to an admin
+// (app/admin/inbox/[id]/page.tsx's activity table).
+const KNOWN_PACKAGE_PARAMS = ["pilot", "one_off", "retainer"] as const;
+type PackageParam = (typeof KNOWN_PACKAGE_PARAMS)[number];
+
 // Small backoff retry for the two RLS-gated calls right after signup — org
 // lookup and the client insert. Not a fix for a session race (signUp()
 // already awaits saving its session into this client instance before it
@@ -57,6 +68,21 @@ async function withRetry<T>(
 export function IntakeWizard() {
   const [step, setStep] = useState(0);
   const [clientId, setClientId] = useState<string | null>(null);
+  // Set once in handleAboutYouNext (which already looks up the org for the
+  // clients insert) and reused in handleAboutBidNext's audit_log write --
+  // avoids a second org lookup for a value already fetched once per visit.
+  const [orgId, setOrgId] = useState<string | null>(null);
+  // Plain window.location.search read on mount rather than next/navigation's
+  // useSearchParams() -- that hook requires wrapping the page in a Suspense
+  // boundary to avoid opting the whole route out of static rendering, which
+  // isn't worth it for one optional, non-critical query param.
+  const [packageParam, setPackageParam] = useState<PackageParam | null>(null);
+  useEffect(() => {
+    const raw = new URLSearchParams(window.location.search).get("package");
+    if ((KNOWN_PACKAGE_PARAMS as readonly string[]).includes(raw ?? "")) {
+      setPackageParam(raw as PackageParam);
+    }
+  }, []);
   const [submissionId, setSubmissionId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -286,6 +312,7 @@ export function IntakeWizard() {
     }
 
     setClientId(client.id as string);
+    setOrgId(org.id);
     setShowProfileUpload(true);
   }
 
@@ -390,6 +417,17 @@ export function IntakeWizard() {
     if (subError || !submission) {
       setError(subError?.message ?? "Couldn't save the bid details.");
       return;
+    }
+
+    // Best-effort, same as every other client-side audit_log write in this
+    // app (e.g. PacketButtons.tsx's logClientEvent) — a failure here would
+    // only mean an admin doesn't see which tier was clicked, not that the
+    // submission itself is lost, so it never blocks moving to step 2.
+    if (packageParam && orgId) {
+      await supabase
+        .from("audit_log")
+        .insert({ submission_id: submission.id, org_id: orgId, event_type: `requested_${packageParam}_package` })
+        .then(() => {}, () => {});
     }
 
     setSubmissionId(submission.id);
@@ -622,9 +660,19 @@ export function IntakeWizard() {
                 prospect with no specific bid in hand yet (e.g. someone
                 interested in the Retainer package, routed here from
                 pricing/page.tsx) has no way to know that -- the form reads
-                like it expects a real, specific RFP already in progress. */}
+                like it expects a real, specific RFP already in progress.
+                An impeccable critique pass (2026-09-16) found this still
+                left `agency` itself as a hard wall for exactly that
+                persona -- the fix decided on was to keep it required (no
+                schema/logic branch) but make clear a real value isn't
+                required, only when ?package=retainer is actually the
+                reason someone's here. Pilot/One-off visitors by definition
+                already have a specific bid, so this note would just be
+                noise for them. */}
             <p className="text-body-sm text-on-surface-variant -mt-1">
-              Just the agency name is required to move on — add the rest now if you have it, or later.
+              {packageParam === "retainer"
+                ? "No specific agency yet? Just write \"General inquiry\" below — we'll follow up to figure out the right fit. Everything else on this step is optional."
+                : "Just the agency name is required to move on — add the rest now if you have it, or later."}
             </p>
             <Input
               label="Who is asking for this? (the agency or department)"
