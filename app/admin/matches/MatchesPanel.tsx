@@ -6,6 +6,7 @@ import { Spinner } from "@/components/ui/Spinner";
 import { Combobox } from "@/components/ui/Combobox";
 import { ConfirmDeleteDialog } from "@/components/ui/ConfirmDeleteDialog";
 import { RfpDocumentUpload, type ExtractedBidFields } from "@/components/ui/RfpDocumentUpload";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { opportunityTradeTag } from "@/lib/opportunity-trade-tag";
 import { clientTradeLabel } from "@/lib/business-options";
 import { useToast } from "@/components/Toast";
@@ -66,6 +67,13 @@ export function MatchesPanel({
   const [busyId, setBusyId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Match | null>(null);
   const [deleting, setDeleting] = useState(false);
+  // A real ops test (Carlos Mendez persona, 2026-09-16) assigned a
+  // Construction/Renovation opportunity to a janitorial-only client with
+  // zero warning -- the trade tags were already computed and shown on
+  // screen (TradeTagBadge, clientOptionLabel) but never actually checked
+  // against each other before the write went through. Non-blocking: only
+  // interrupts when both trades are known AND they disagree.
+  const [mismatchTarget, setMismatchTarget] = useState<{ matchId: string; opportunityTrade: string; clientTrade: string } | null>(null);
 
   const [logging, setLogging] = useState(false);
   const [title, setTitle] = useState("");
@@ -140,12 +148,30 @@ export function MatchesPanel({
     setDueDate("");
   }
 
-  async function handleAssign(matchId: string) {
+  function handleAssignClick(matchId: string) {
     const clientId = assignSelections[matchId];
     if (!clientId) {
       showToast("Pick a client to assign this to first.", "error");
       return;
     }
+
+    const match = matches.find((m) => m.id === matchId);
+    const client = clients.find((c) => c.id === clientId);
+    if (!match || !client) return;
+
+    const opportunityTrade = opportunityTradeTag({ title: match.source_title, scope: match.scope });
+    const clientTrade = clientTradeLabel(client.naics_codes);
+    if (opportunityTrade && clientTrade && opportunityTrade !== clientTrade) {
+      setMismatchTarget({ matchId, opportunityTrade, clientTrade });
+      return;
+    }
+
+    performAssign(matchId);
+  }
+
+  async function performAssign(matchId: string) {
+    const clientId = assignSelections[matchId];
+    if (!clientId) return;
 
     const match = matches.find((m) => m.id === matchId);
     if (!match) return;
@@ -225,6 +251,12 @@ export function MatchesPanel({
       m.map((x) => (x.id === matchId ? { ...x, status: "assigned", assigned_client_id: clientId } : x))
     );
     setBusyId(null);
+    // The only prior feedback was the row's own status pill flipping to
+    // "Assigned to X" -- easy to miss, and gave no indication a real
+    // submission (not just a label change) had just been created. A real
+    // ops test (Carlos Mendez persona, 2026-09-16) assigned an opportunity
+    // and couldn't tell whether anything had actually happened.
+    showToast(`Assigned — a new draft submission was created for ${clientName(clientId)}, now waiting on their bid file.`, "success");
   }
 
   async function handleDismiss(matchId: string) {
@@ -415,7 +447,7 @@ export function MatchesPanel({
                           clients={clients}
                           selected={assignSelections[m.id] ?? ""}
                           onSelect={(v) => setAssignSelections((s) => ({ ...s, [m.id]: v }))}
-                          onAssign={() => handleAssign(m.id)}
+                          onAssign={() => handleAssignClick(m.id)}
                           onDismiss={() => handleDismiss(m.id)}
                           onDelete={() => setDeleteTarget(m)}
                           busy={busyId === m.id}
@@ -477,7 +509,7 @@ export function MatchesPanel({
                   clients={clients}
                   selected={assignSelections[m.id] ?? ""}
                   onSelect={(v) => setAssignSelections((s) => ({ ...s, [m.id]: v }))}
-                  onAssign={() => handleAssign(m.id)}
+                  onAssign={() => handleAssignClick(m.id)}
                   onDismiss={() => handleDismiss(m.id)}
                   onDelete={() => setDeleteTarget(m)}
                   busy={busyId === m.id}
@@ -510,6 +542,22 @@ export function MatchesPanel({
             : `This permanently deletes the "${deleteTarget?.source_title}" opportunity record. This cannot be undone.`
         }
         busy={deleting}
+      />
+
+      <ConfirmDialog
+        open={mismatchTarget !== null}
+        onClose={() => setMismatchTarget(null)}
+        onConfirm={() => {
+          if (mismatchTarget) performAssign(mismatchTarget.matchId);
+          setMismatchTarget(null);
+        }}
+        title="Trade doesn't match this client"
+        description={
+          mismatchTarget
+            ? `This opportunity looks like ${mismatchTarget.opportunityTrade} work, but the selected client is tagged ${mismatchTarget.clientTrade}. Assign it anyway?`
+            : ""
+        }
+        confirmLabel="Assign anyway"
       />
     </div>
   );

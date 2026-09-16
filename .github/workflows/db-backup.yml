@@ -1,0 +1,93 @@
+name: Database backup (dev + production)
+
+# Free-tier Supabase projects get no Point-in-Time Recovery and no built-in
+# scheduled backups (that's a Pro-plan feature) -- this workflow is the only
+# real backup coverage bidpulse-dev and bidpulse-production have. It dumps
+# both, encrypts the dump, and pushes it to a SEPARATE PRIVATE repo
+# (TJ-stack-del/bidpulse-backups) -- never into this repo, which is public,
+# since a dump contains real client PII (names, contact info, company data).
+#
+# One-time setup required (see PR/commit description or ask Claude):
+#   1. Create a private repo TJ-stack-del/bidpulse-backups
+#   2. Add these secrets to *this* repo (Settings -> Secrets and variables -> Actions):
+#      - SUPABASE_DEV_DB_URL         (Supabase dashboard -> bidpulse-dev -> Project Settings -> Database -> Connection string, "URI" tab, direct connection not pooled)
+#      - SUPABASE_PROD_DB_URL        (same, for bidpulse-production)
+#      - BACKUP_ENCRYPTION_PASSPHRASE (a strong passphrase you generate and store in a password manager -- not derived from anything else, never reused)
+#      - BACKUP_REPO_PUSH_TOKEN     (a fine-grained GitHub PAT scoped ONLY to bidpulse-backups, Contents: Read and write)
+#
+# To restore: gpg --batch --passphrase "$BACKUP_ENCRYPTION_PASSPHRASE" --decrypt backup.dump.gpg > backup.dump
+#             pg_restore --clean --if-exists --no-owner --no-acl -d "$TARGET_DB_URL" backup.dump
+
+on:
+  schedule:
+    - cron: "0 9 * * *" # 09:00 UTC daily
+  workflow_dispatch: {}
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project: [dev, production]
+    steps:
+      - name: Install postgresql-client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client gnupg
+
+      - name: Select DB URL for this project
+        id: pick
+        run: |
+          if [ "${{ matrix.project }}" = "dev" ]; then
+            echo "db_url_secret_name=SUPABASE_DEV_DB_URL" >> "$GITHUB_OUTPUT"
+          else
+            echo "db_url_secret_name=SUPABASE_PROD_DB_URL" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Dump database
+        env:
+          DB_URL: ${{ matrix.project == 'dev' && secrets.SUPABASE_DEV_DB_URL || secrets.SUPABASE_PROD_DB_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "${DB_URL:-}" ]; then
+            echo "::error::DB URL secret for ${{ matrix.project }} is not set yet -- see setup instructions at the top of this workflow file."
+            exit 1
+          fi
+          pg_dump "$DB_URL" -Fc --no-owner --no-acl -f "${{ matrix.project }}.dump"
+
+      - name: Encrypt dump
+        env:
+          PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          if [ -z "${PASSPHRASE:-}" ]; then
+            echo "::error::BACKUP_ENCRYPTION_PASSPHRASE secret is not set yet -- see setup instructions at the top of this workflow file."
+            exit 1
+          fi
+          gpg --batch --yes --symmetric --cipher-algo AES256 --passphrase "$PASSPHRASE" \
+            -o "${{ matrix.project }}.dump.gpg" "${{ matrix.project }}.dump"
+          rm -f "${{ matrix.project }}.dump"
+
+      - name: Push encrypted dump to private backups repo
+        env:
+          PUSH_TOKEN: ${{ secrets.BACKUP_REPO_PUSH_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${PUSH_TOKEN:-}" ]; then
+            echo "::error::BACKUP_REPO_PUSH_TOKEN secret is not set yet -- see setup instructions at the top of this workflow file."
+            exit 1
+          fi
+          git clone "https://x-access-token:${PUSH_TOKEN}@github.com/TJ-stack-del/bidpulse-backups.git" backups-repo
+          mkdir -p "backups-repo/${{ matrix.project }}"
+          DATE=$(date -u +%Y-%m-%d)
+          cp "${{ matrix.project }}.dump.gpg" "backups-repo/${{ matrix.project }}/${DATE}.dump.gpg"
+
+          cd "backups-repo/${{ matrix.project }}"
+          # Keep the most recent 30 days per project; older dumps are pruned
+          # so the repo doesn't grow unbounded.
+          ls -1 *.dump.gpg | sort | head -n -30 | xargs -r rm --
+
+          cd ../..
+          git -C backups-repo config user.name "bidpulse-backup-bot"
+          git -C backups-repo config user.email "actions@users.noreply.github.com"
+          git -C backups-repo add -A
+          git -C backups-repo diff --cached --quiet || git -C backups-repo commit -m "Backup ${{ matrix.project }} ${DATE}"
+          git -C backups-repo push

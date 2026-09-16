@@ -1073,6 +1073,8 @@ export function IntakeWizard() {
   );
 }
 
+let inputIdCounter = 0;
+
 function Input({
   label,
   value,
@@ -1086,10 +1088,17 @@ function Input({
   type?: string;
   required?: boolean;
 }) {
+  // Label and input weren't programmatically associated -- visually
+  // adjacent but not linked via htmlFor/id, so screen readers couldn't
+  // announce the label and clicking the label text didn't focus the
+  // field. useState keeps this stable across re-renders without needing
+  // a prop threaded in from every one of this component's ~20 call sites.
+  const [id] = useState(() => `intake-input-${++inputIdCounter}`);
   return (
     <div className="flex flex-col gap-space-2xs">
-      <label className="text-label-sm text-on-surface-variant font-bold uppercase tracking-wider">{label}</label>
+      <label htmlFor={id} className="text-label-sm text-on-surface-variant font-bold uppercase tracking-wider">{label}</label>
       <input
+        id={id}
         type={type}
         required={required}
         value={value}

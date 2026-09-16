@@ -198,6 +198,67 @@ real settings (rate limits, JWT expiry, other providers, all
 potentially just as stale); don't trust it as a source of truth for
 either project without diffing it first.
 
+## Never write a script that deletes more than one row without printing and confirming the count first — and never improvise a "cleanup" script when something unexpected happens
+
+**What happened (2026-09-16):** an agent doing routine QA testing (creating a
+throwaway test signup, retrying it) hit "User already registered" on a
+retry — account creation happens at intake step 1, not at final submit, so
+a second attempt with the same email fails this way by design, not by bug.
+Rather than using a fresh email for the retry or stopping to ask, the agent
+decided to delete the one stale test account first, and wrote a Node script
+against Supabase's GoTrue Admin API to do it: look the user up by
+`GET /auth/v1/admin/users?email=<address>`, then delete the id it got back.
+
+**The `email=` query param is not a supported filter on that endpoint.**
+GoTrue silently ignores unrecognized query params instead of erroring —
+the request returned the *entire* user list, unfiltered, with a `200 OK`
+that looked like a normal successful response. The script then looped a
+`DELETE` over every user in that list, because it never checked how many
+results came back before proceeding — it assumed "the response to my
+by-email lookup" meant "one user, the one I asked for." It didn't.
+
+**Result: 46 of 50 real accounts in `bidpulse-dev`'s `auth.users` were
+deleted** (4 more got a `500`, left in an unknown state) before anyone
+caught it — including several real dev/test client records that predated
+that session entirely, not just that session's own throwaway data. Caught
+only because a second, unrelated agent working in parallel happened to go
+looking for some of the now-missing records and found nothing. This was
+`bidpulse-dev`, not production — but nothing about the script itself
+would have behaved any differently against a production service-role key,
+and this class of destructive-loop bug is exactly as capable of running
+there. It happened to be dev only because that's the key sitting in
+`.env.local`, easily reachable for routine work — not because anything
+about the incident was dev-specific.
+
+**The rules going forward, both non-negotiable:**
+
+1. **Never write or run any script that deletes, or otherwise
+   bulk-modifies, more than one row without first printing what it's
+   about to act on and getting explicit human confirmation that the count
+   and identity of the affected rows match what's actually intended.** A
+   "look up by X, then act on the result" script must print the *count*
+   of what it got back before doing anything destructive with it — not
+   assume the filter worked, verify it. If a lookup that should return
+   one row can plausibly return more, treat that as the normal case to
+   defend against, not an edge case to ignore.
+2. **When something unexpected happens mid-task — an error, a conflict, a
+   duplicate, anything — stop and report it or ask, rather than
+   improvising a fix that touches data beyond the one thing that's
+   actually broken.** A stale test account from a failed retry is solved
+   by using a different email for the next attempt, or asking a human to
+   clean it up — never by an agent reaching for `DELETE` against
+   production-shaped auth infrastructure on its own initiative. This
+   applies even (especially) when the fix "should" be narrowly scoped;
+   the scope of what a script *actually* does is only as narrow as its
+   least-tested assumption, exactly as it wasn't here.
+3. Anyone (agent or human) needing to look up a Supabase auth user by
+   email via the Admin API should use the SDK's own `listUsers()` (which
+   supports real pagination/filter parameters) rather than hand-rolling a
+   query string against the REST endpoint, and should always check the
+   result count before treating it as "the one match" — this specific
+   endpoint's silent-ignore-unknown-params behavior is a real platform
+   footgun, not something that will error loudly if gotten wrong.
+
 ## When verifying a fix, test the exact query the real code runs — not a simplified proxy
 
 Directly related to the same incident: partway through debugging the

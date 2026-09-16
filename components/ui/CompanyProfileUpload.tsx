@@ -117,7 +117,16 @@ export function CompanyProfileUpload({
         <span className="text-label-md font-bold text-on-surface">
           {uploading ? "Reading document…" : "Upload a document to autofill"}
         </span>
-        {!uploading && (
+        {/* A real user (Melissa Torres persona test, 2026-09-16) reported a
+            ~22s extraction nearly reading as "hung" with only a spinner and
+            no time expectation set. This doesn't speed up the actual OCR/
+            extraction call -- it just tells the person waiting that this is
+            normal, so they don't bail or refresh mid-request. */}
+        {uploading ? (
+          <p className="text-body-sm text-on-surface-variant max-w-sm">
+            This usually takes 15–25 seconds for a typical document.
+          </p>
+        ) : (
           <p className="text-body-sm text-on-surface-variant max-w-sm">
             Drag and drop a capability statement, license packet, or insurance certificates here, or
             click to browse. We&apos;ll fill in what we can find below.
