@@ -59,13 +59,17 @@ export async function GET(request: NextRequest) {
     .eq("clients.org_id", org.id);
 
   // "Ghost signups": a clients row (a real account -- see IntakeWizard.tsx's
-  // handleAboutYouNext) with zero submissions rows at all, draft or
-  // otherwise. Nothing else in the app surfaces these -- the admin inbox
-  // and this digest's own stale-items query above both start from
-  // `submissions`, so an account that never got past "About you" is
-  // invisible everywhere else. Checked independently of the stale-items
-  // logic below (not gated behind "only if there are open submissions")
-  // so a quiet day with zero active bids doesn't also hide a real signup
+  // handleAboutYouNext) with zero NON-DRAFT submissions. Deliberately not
+  // "zero submissions at all" -- handleAboutBidNext inserts a submission
+  // row with draft: true the moment "About the bid" is filled in, before
+  // the client ever finishes intake, so "any submission disqualifies" would
+  // silently exclude someone who abandoned one step later than step 0 and
+  // never actually submitted anything. app/admin/inbox/page.tsx already
+  // treats draft rows as "not yet actionable" (its own .eq("draft", false)
+  // filter) -- mirroring that same cutoff here is what actually closes the
+  // gap instead of just moving it. Checked independently of the stale-items
+  // logic below (not gated behind "only if there are open submissions") so
+  // a quiet day with zero active bids doesn't also hide a real signup
   // sitting unnoticed. `clients` has no `is_test` column of its own (only
   // `submissions` does), so this can't filter out test client rows the
   // same way -- acceptable for now since test data is normally created
@@ -74,11 +78,14 @@ export async function GET(request: NextRequest) {
     .from("clients")
     .select("id, company_name, contact_name, email, phone, created_at")
     .eq("org_id", org.id);
-  const { data: allSubmissionClientIds } = await supabase.from("submissions").select("client_id");
-  const clientIdsWithAnySubmission = new Set((allSubmissionClientIds ?? []).map((r) => r.client_id));
+  const { data: nonDraftSubmissionClientIds } = await supabase
+    .from("submissions")
+    .select("client_id")
+    .eq("draft", false);
+  const clientIdsWithNonDraftSubmission = new Set((nonDraftSubmissionClientIds ?? []).map((r) => r.client_id));
   const signupCheckNow = Date.now();
   const ghostSignups = (allClientsInOrg ?? [])
-    .filter((c) => !clientIdsWithAnySubmission.has(c.id))
+    .filter((c) => !clientIdsWithNonDraftSubmission.has(c.id))
     .map((c) => ({
       companyName: c.company_name,
       contactName: c.contact_name,
