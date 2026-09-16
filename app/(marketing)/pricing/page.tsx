@@ -12,27 +12,74 @@ export const metadata: Metadata = {
 // (the intake wizard) or a mailto, not a payment button. Mirrors
 // packages.package_type: 'one_off' | 'retainer' | 'pilot'.
 
+// Real starting-at figures, published 2026-09-16 -- a persona-based
+// research pass (a skeptical first-time-bidder test walking the actual
+// intake flow) found the previous fully-opaque pricing ("we confirm
+// pricing with you directly," no number anywhere on the page or FAQ) was
+// the single biggest trust gap in an otherwise well-built flow: a
+// prospect filled in their entire business profile without ever learning
+// what this costs. These are the founder's real internal target numbers
+// (already used to quote real clients) published as "starting at" rather
+// than fixed, since actual price is still confirmed per-job -- that
+// framing keeps the manual-invoicing model intact while closing the
+// opacity gap. Update alongside the internal pricing memory if these
+// change.
+const ONE_OFF_STARTING_PRICE = "Starting at $399";
+const RETAINER_STARTING_PRICE = "Starting at $649/mo";
+
+// Manual "flip" for the Pilot free cohort -- unlimited free Pilots is an
+// open-ended labor/API-cost liability (each one is a real bid a real
+// person prepares), so the free offer is capped to the first N clients
+// rather than a standing one. Deliberately NOT an automated DB
+// counter/admin toggle: pre-revenue with zero real signups yet, so
+// building real-time cap enforcement now would mean sizing a threshold
+// with no actual demand data behind it. Flip PILOT_FREE_COHORT_OPEN to
+// false by hand (ask Claude, or edit directly) once PILOT_COHORT_SIZE
+// free Pilots have gone out, and redeploy. What Pilot costs after that
+// point is deliberately undecided -- real cost-per-bid and conversion
+// data from this first cohort is what should set that number, not a
+// guess made before a single real bid has been completed (see
+// project_bidpulse_package_pricing.md) -- so post-cap Pilot falls back
+// to the same "confirmed with you directly" pattern already used
+// elsewhere on this page, not a fabricated number.
+const PILOT_FREE_COHORT_OPEN = true;
+const PILOT_COHORT_SIZE = 10;
+const PILOT_PRICE_LINE = PILOT_FREE_COHORT_OPEN
+  ? `Free — first ${PILOT_COHORT_SIZE} clients`
+  : "Pricing confirmed with you directly";
+
 const PACKAGES = [
   {
     type: "pilot",
     name: "Pilot",
     tagline: "A low-commitment first bid, on us to prove the process.",
+    priceLine: PILOT_PRICE_LINE,
     features: ["One full bid, done for you", "See how the process works", "No commitment after"],
     cta: { label: "Get started", href: "/intake?package=pilot" },
-    highlight: false,
+    // Moved here from One-off -- the badge previously read "Most popular"
+    // with zero real usage data to back that claim on a pre-revenue
+    // product (a direct fabricated-social-proof problem the same research
+    // pass flagged), on the one tier that contradicts the site's own
+    // stated funnel strategy of starting prospects on the free Pilot.
+    // "Start here" is an honest recommendation, not a usage stat.
+    highlight: true,
+    badgeLabel: "Start here",
   },
   {
     type: "one_off",
     name: "One-off",
     tagline: "A single bid, fully prepared.",
+    priceLine: ONE_OFF_STARTING_PRICE,
     features: ["The write-up about your company", "A checklist matching the agency's rules", "The technical write-up"],
     cta: { label: "Get started", href: "/intake?package=one_off" },
-    highlight: true,
+    highlight: false,
+    badgeLabel: null,
   },
   {
     type: "retainer",
     name: "Retainer",
     tagline: "Ongoing coverage for teams bidding regularly.",
+    priceLine: RETAINER_STARTING_PRICE,
     features: ["We watch for new bids every month", "Up to 2 full bids a month", "One person who knows your file"],
     // Used to be a mailto: dead end -- a retainer prospect who clicked it
     // never became a clients/submissions row at all, and was invisible to
@@ -52,6 +99,7 @@ const PACKAGES = [
     // subject line).
     cta: { label: "Get started", href: "/intake?package=retainer" },
     highlight: false,
+    badgeLabel: null,
   },
 ];
 
@@ -64,8 +112,8 @@ export default function PricingPage() {
         </Reveal>
         <Reveal mode="mount" delay={0.08}>
           <p className="text-body-md text-on-surface-variant">
-            We confirm exact pricing with you directly before any work starts. No card
-            required today.
+            Starting prices below — we confirm the exact number with you directly before any
+            work starts. No card required today.
           </p>
         </Reveal>
       </section>
@@ -84,13 +132,14 @@ export default function PricingPage() {
             <header className="flex flex-col gap-2">
               <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-headline-md text-primary">{pkg.name}</h2>
-                {pkg.highlight && (
+                {pkg.badgeLabel && (
                   <span className="px-2 py-0.5 rounded bg-primary-container text-on-primary-container text-label-sm font-bold uppercase tracking-wider">
-                    Most popular
+                    {pkg.badgeLabel}
                   </span>
                 )}
               </div>
               <p className="text-body-sm text-on-surface-variant">{pkg.tagline}</p>
+              <p className="text-body-lg font-bold text-primary">{pkg.priceLine}</p>
             </header>
             <ul className="flex flex-col gap-3 flex-grow">
               {pkg.features.map((f) => (

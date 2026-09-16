@@ -132,26 +132,41 @@ assertNoMissingTradeCards(
 // tier) — keep these two in sync by hand if pricing copy changes. Duplicated
 // rather than imported because pricing/page.tsx doesn't export PACKAGES, and
 // this preview intentionally shows fewer features per tier than the full page.
+//
+// Price lines and the Pilot free-cohort flip are kept in sync with
+// pricing/page.tsx's own constants -- see that file's comments for the
+// full reasoning (2026-09-16 pricing-transparency + Pilot-cap decisions).
+const PILOT_FREE_COHORT_OPEN = true;
+const PILOT_COHORT_SIZE = 10;
+const PILOT_PRICE_LINE = PILOT_FREE_COHORT_OPEN
+  ? `Free — first ${PILOT_COHORT_SIZE} clients`
+  : "Pricing confirmed with you directly";
+
 const PRICING_PREVIEW = [
   {
     name: "Pilot",
     tagline: "A low-commitment first bid, on us to prove the process.",
+    priceLine: PILOT_PRICE_LINE,
     terms: "No commitment after",
     features: ["One full bid, done for you", "See how the process works"],
     cta: { label: "Get started", href: "/intake?package=pilot" },
-    highlight: false,
+    highlight: true,
+    badgeLabel: "Start here",
   },
   {
     name: "One-off",
     tagline: "A single bid, fully prepared.",
+    priceLine: "Starting at $399",
     terms: "Confirmed with you before work starts",
     features: ["The write-up about your company", "A checklist matching the agency's rules", "The technical write-up"],
     cta: { label: "Get started", href: "/intake?package=one_off" },
-    highlight: true,
+    highlight: false,
+    badgeLabel: null,
   },
   {
     name: "Retainer",
     tagline: "Ongoing coverage for teams bidding regularly.",
+    priceLine: "Starting at $649/mo",
     terms: "Up to 2 full bids a month",
     features: ["We watch for new bids every month", "One person who knows your file"],
     // Kept in sync with pricing/page.tsx's own retainer CTA -- see that
@@ -159,6 +174,7 @@ const PRICING_PREVIEW = [
     // and for why the ?package= param matters.
     cta: { label: "Get started", href: "/intake?package=retainer" },
     highlight: false,
+    badgeLabel: null,
   },
 ];
 
@@ -179,7 +195,7 @@ const FAQ_PREVIEW = [
   },
   {
     q: "How does pricing work?",
-    a: "We confirm pricing with you directly before any work starts: one-off, retainer, and pilot options are on the Pricing page. No card is required to get started. Every deliverable is free to preview before anything's due.",
+    a: "One-off starts at $399, Retainer starts at $649/mo, and Pilot is free for our first 10 clients — see the Pricing page for the full breakdown. We confirm the exact number with you directly before any work starts. No card is required to get started, and every deliverable is free to preview before anything's due.",
   },
 ];
 
@@ -374,8 +390,8 @@ function Home() {
           <h2 className="text-headline-lg text-primary">No subscriptions. We invoice after the work&apos;s done.</h2>
           <p className="text-body-md text-on-surface-variant">
             Every deliverable is free to preview before anything&apos;s due — real
-            excerpts from your actual bid, not a mockup. We confirm exact pricing
-            with you directly before any work starts.
+            excerpts from your actual bid, not a mockup. Starting prices below;
+            we confirm the exact number with you directly before any work starts.
           </p>
         </div>
         {/* One bordered ledger, not three floating cards: tiers are columns
@@ -393,13 +409,14 @@ function Home() {
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <h3 className="text-headline-md text-primary">{tier.name}</h3>
-                  {tier.highlight && (
+                  {tier.badgeLabel && (
                     <span className="px-2 py-0.5 rounded bg-primary-container text-on-primary-container text-label-sm font-bold uppercase tracking-wider">
-                      Most popular
+                      {tier.badgeLabel}
                     </span>
                   )}
                 </div>
                 <p className="text-body-md text-on-surface-variant mt-1">{tier.tagline}</p>
+                <p className="text-body-md font-bold text-primary mt-1">{tier.priceLine}</p>
               </div>
               <ul className="flex flex-col gap-2 flex-grow">
                 {tier.features.map((f) => (
