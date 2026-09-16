@@ -58,6 +58,17 @@ export function BidFileStep({
     <div className="flex flex-col gap-4">
       <SubmissionDocuments submissionId={submissionId} />
 
+      {/* Nothing here actually requires a file -- handleFinalSubmit below
+          is only ever gated on the two checkboxes (see its disabled prop),
+          never on doc count. Without saying so, though, there's no visible
+          difference between "still working on step 3" and "genuinely done
+          with nothing to attach," so a client with no file yet (e.g. a
+          Retainer prospect with no specific RFP in hand) has no way to
+          tell they can already finish. */}
+      <p className="text-body-sm text-on-surface-variant">
+        No file yet? That's fine — you can send this now and add it later from your dashboard.
+      </p>
+
       {error && <p className="text-body-md text-error">{error}</p>}
 
       <label className="flex items-start gap-3 text-body-md text-on-surface-variant">

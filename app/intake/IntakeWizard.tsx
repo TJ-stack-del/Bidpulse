@@ -616,6 +616,16 @@ export function IntakeWizard() {
               <span className="material-symbols-outlined text-primary text-[20px]">account_balance</span>
               <h2 className="font-headline text-[18px] text-on-surface font-bold">Tell us about the job</h2>
             </div>
+            {/* Only `agency` is actually `required` below -- everything else
+                on this step is optional at both the form and DB level (see
+                handleAboutBidNext). Without saying so explicitly, a
+                prospect with no specific bid in hand yet (e.g. someone
+                interested in the Retainer package, routed here from
+                pricing/page.tsx) has no way to know that -- the form reads
+                like it expects a real, specific RFP already in progress. */}
+            <p className="text-body-sm text-on-surface-variant -mt-1">
+              Just the agency name is required to move on — add the rest now if you have it, or later.
+            </p>
             <Input
               label="Who is asking for this? (the agency or department)"
               value={form.agency}
@@ -632,10 +642,15 @@ export function IntakeWizard() {
                 This is the number the agency put on the job posting, if there is one.
               </p>
             </div>
-            <Input label="Due date" type="date" value={form.dueDate} onChange={(v) => update("dueDate", v)} />
+            <Input
+              label="Due date (optional)"
+              type="date"
+              value={form.dueDate}
+              onChange={(v) => update("dueDate", v)}
+            />
             <div className="flex flex-col gap-space-2xs">
               <label className="text-label-sm text-on-surface-variant font-bold uppercase tracking-wider">
-                What does the job involve?
+                What does the job involve? (optional)
               </label>
               <textarea
                 value={form.scope}
