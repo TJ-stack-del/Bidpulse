@@ -51,12 +51,35 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ sent: false, reason: "no_admins" });
   }
 
-  const { data: submissions } = await supabase
+  // clients!inner(...) here is ambiguous and silently returns
+  // { data: null, error: PGRST201 } -- submissions has carried a second FK
+  // to clients (info_attested_by, since the 2026-09-04 attestation
+  // migration) alongside client_id, and this destructure never checked
+  // `error`. Verified live against the real dev DB: this exact query has
+  // been returning null since that migration, meaning EVERY stale-
+  // submission/48-hour-breach digest since then silently had nothing to
+  // report. Disambiguating via the named FK constraint (same pattern
+  // app/admin/inbox/page.tsx already uses) is the actual fix -- see this
+  // repo's own CLAUDE.md ("PostgREST embeds break silently when a table
+  // gains a second FK") for why this class of bug is easy to reintroduce.
+  // Also excludes draft submissions now, matching ghostSignups' own
+  // definition below and the admin inbox's .eq("draft", false) convention
+  // -- without this, a client who abandoned mid-intake (a real submissions
+  // row exists, draft: true, stage defaults to "submitted") would get
+  // flagged here as a breached 48-hour promise on a bid that was never
+  // actually submitted, while ALSO appearing in ghostSignups for having no
+  // non-draft submission -- the same client reported two contradictory
+  // ways in one email.
+  const { data: submissions, error: submissionsError } = await supabase
     .from("submissions")
-    .select("id, agency, stage, due_date, submitted_at, created_at, clients!inner(company_name, org_id)")
+    .select("id, agency, stage, due_date, submitted_at, created_at, clients!submissions_client_id_fkey!inner(company_name, org_id)")
     .eq("is_test", false)
+    .eq("draft", false)
     .neq("stage", "closed")
     .eq("clients.org_id", org.id);
+  if (submissionsError) {
+    return NextResponse.json({ error: submissionsError.message }, { status: 500 });
+  }
 
   // "Ghost signups": a clients row (a real account -- see IntakeWizard.tsx's
   // handleAboutYouNext) with zero NON-DRAFT submissions. Deliberately not
@@ -74,14 +97,12 @@ export async function GET(request: NextRequest) {
   // `submissions` does), so this can't filter out test client rows the
   // same way -- acceptable for now since test data is normally created
   // together with a test submission, which would disqualify it here anyway.
-  const { data: allClientsInOrg } = await supabase
-    .from("clients")
-    .select("id, company_name, contact_name, email, phone, created_at")
-    .eq("org_id", org.id);
-  const { data: nonDraftSubmissionClientIds } = await supabase
-    .from("submissions")
-    .select("client_id")
-    .eq("draft", false);
+  // Independent of each other -- run concurrently rather than paying two
+  // sequential round trips on every cron invocation.
+  const [{ data: allClientsInOrg }, { data: nonDraftSubmissionClientIds }] = await Promise.all([
+    supabase.from("clients").select("id, company_name, contact_name, email, phone, created_at").eq("org_id", org.id),
+    supabase.from("submissions").select("client_id").eq("draft", false),
+  ]);
   const clientIdsWithNonDraftSubmission = new Set((nonDraftSubmissionClientIds ?? []).map((r) => r.client_id));
   const signupCheckNow = Date.now();
   const ghostSignups = (allClientsInOrg ?? [])
