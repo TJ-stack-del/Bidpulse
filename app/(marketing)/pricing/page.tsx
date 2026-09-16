@@ -34,7 +34,15 @@ const PACKAGES = [
     name: "Retainer",
     tagline: "Ongoing coverage for teams bidding regularly.",
     features: ["We watch for new bids every month", "Up to 2 full bids a month", "One person who knows your file"],
-    cta: { label: "Email us", href: "mailto:hello@bidpulse.com" },
+    // Used to be a mailto: dead end -- a retainer prospect who clicked it
+    // never became a clients/submissions row at all, and was invisible to
+    // the admin inbox and daily digest alike (no account exists to show
+    // up anywhere). Routing through /intake like the other two tiers means
+    // a real account gets created immediately; the admin assigns the
+    // actual package_type (already supported -- see
+    // app/admin/inbox/[id]/PaymentStatus.tsx's package selector) once they
+    // follow up, exactly like every Pilot/One-off client today.
+    cta: { label: "Get started", href: "/intake" },
     highlight: false,
   },
 ];

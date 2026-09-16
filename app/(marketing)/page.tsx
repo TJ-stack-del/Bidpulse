@@ -154,7 +154,9 @@ const PRICING_PREVIEW = [
     tagline: "Ongoing coverage for teams bidding regularly.",
     terms: "Up to 2 full bids a month",
     features: ["We watch for new bids every month", "One person who knows your file"],
-    cta: { label: "Email us", href: "mailto:hello@bidpulse.com" },
+    // Kept in sync with pricing/page.tsx's own retainer CTA -- see that
+    // file's comment for why this is /intake now, not a mailto: dead end.
+    cta: { label: "Get started", href: "/intake" },
     highlight: false,
   },
 ];
