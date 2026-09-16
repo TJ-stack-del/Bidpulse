@@ -74,7 +74,12 @@ jobs:
           case "$DB_URL" in
             *"[YOUR-PASSWORD]"*) echo "::warning::DB_URL still contains the literal placeholder [YOUR-PASSWORD] -- replace it with the real database password." ;;
           esac
-          pg_dump "$DB_URL" -Fc --no-owner --no-acl -f "${{ matrix.project }}.dump"
+          # A real run confirmed installing postgresql-client-17 alongside
+          # the runner image's preinstalled PG16 does NOT make `pg_dump`
+          # resolve to 17 -- it kept running 16.15 and erroring on the
+          # server-version mismatch. Calling the versioned binary directly
+          # sidesteps whatever picks the default on this runner image.
+          /usr/lib/postgresql/17/bin/pg_dump "$DB_URL" -Fc --no-owner --no-acl -f "${{ matrix.project }}.dump"
 
       - name: Encrypt dump
         env:
